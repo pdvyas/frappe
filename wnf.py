@@ -271,8 +271,10 @@ def run():
 	elif options.install:
 		from webnotes.install_lib.install import Installer
 		inst = Installer('root', options.install[0])
-		inst.import_from_db(options.install[1], source_path=options.install[2], \
-			password='admin', verbose = 1)
+		#inst.import_from_db(options.install[1], source_path=options.install[2], \
+		#	password='admin', verbose = 1)
+			
+		inst.import_from_db(options.install[1], verbose = 1)
 	
 	elif options.diff_ref_file is not None:
 		import webnotes.modules.diff

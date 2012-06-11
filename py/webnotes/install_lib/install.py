@@ -44,6 +44,7 @@ class Installer:
 		a very simplified version, just for the time being..will eventually be deprecated once the framework stabilizes.
 		"""
 		import conf
+		import webnotes
 		
 		# delete user (if exists)
 		self.dbman.delete_user(target)
@@ -74,31 +75,36 @@ class Installer:
 		source_given = True
 		if not source_path:
 			source_given = False
-			source_path = os.path.join(os.path.sep.join(os.path.abspath(webnotes.__file__).split(os.path.sep)[:-3]), 'data', 'Framework.sql')
+			source_path = os.path.join(os.path.sep.join(os.path.abspath(webnotes.__file__).split(os.path.sep)[:-3]), 'conf', 'Framework.sql')
 
 		self.dbman.restore_database(target, source_path, self.root_password)
 		if verbose: print "Imported from database %s" % source_path
 
+
+		# framework cleanups
+		self.framework_cleanups(target)
+		if verbose: print "Ran framework startups on %s" % target
+		
 		# fresh app
 		if 'Framework.sql' in source_path:
 			from webnotes.model.sync import sync_install
 			print "Building tables from all module..."
 			sync_install()
 
-		# framework cleanups
-		self.framework_cleanups(target)
-		if verbose: print "Ran framework startups on %s" % target
+		# set administrator password
+		self.set_admin_password()
 		
 		return target	
 
 	def framework_cleanups(self, target):
 		"""create framework internal tables"""
-		import webnotes
 		self.create_sessions_table()
 		self.create_scheduler_log()
 		self.create_session_cache()
 		self.create_cache_item()
 
+	def set_admin_password(self):
+		import webnotes
 		# set the basic passwords
 		webnotes.conn.begin()
 		webnotes.conn.sql("""update tabProfile set password = password('admin') 
