@@ -87,9 +87,9 @@ class Installer:
 		
 		# fresh app
 		if 'Framework.sql' in source_path:
-			from webnotes.model.sync import sync_install
+			from webnotes.model.sync import sync_all
 			print "Building tables from all module..."
-			sync_install()
+			sync_all(force=1)
 
 		# set administrator password
 		self.set_admin_password()

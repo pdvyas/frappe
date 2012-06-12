@@ -129,40 +129,6 @@ def save_perms_if_none_exist(doclist):
 		if d.get('doctype') != 'DocPerm': continue
 		Document(fielddata=d).save(1, check_links=0, ignore_fields=1)
 
-def sync_install(force=1):
-	# sync all doctypes
-	modules = sync_all(force)
-	
-	# load install docs
-	load_install_docs(modules)
-
-def load_install_docs(modules):
-	import os
-	if isinstance(modules, basestring): modules = [modules]
-	
-	for module_name in modules:
-		module = __import__(module_name)
-		if hasattr(module, 'install_docs'):
-			webnotes.conn.begin()
-
-			for data in module.install_docs:
-				if data.get('name'):
-					if not webnotes.conn.exists(data['doctype'], data.get('name')):
-						create_doc(data)
-				elif not webnotes.conn.exists(data):
-					create_doc(data)
-			
-			webnotes.conn.commit()
-			
-		if hasattr(module, 'module_init'):
-			module.module_init()
-
-def create_doc(data):
-	from webnotes.model.doc import Document
-	d = Document(data['doctype'])
-	d.fields.update(data)
-	d.save()
-	print 'Created %(doctype)s %(name)s' % d.fields
 
 import unittest
 class TestSync(unittest.TestCase):
