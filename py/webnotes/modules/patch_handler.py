@@ -33,16 +33,20 @@
 	where patch1, patch2 is module name
 """
 import webnotes
+		
 
 def run_all(patch_list=None):
 	"""run all pending patches"""
 	executed = [p[0] for p in webnotes.conn.sql("""select patch from __PatchLog""")]
 	import patches.patch_list
-	for patch in (patch_list or patches.patch_list.patch_list):
-		pn = patch['patch_module'] + '.' + patch['patch_file']
-		if pn not in executed:
-			if not run_single(patchmodule = pn):
-				return log(pn + ': failed: STOPPED')
+	patch_list = patch_list or patches.patch_list.patch_list
+	for version in patch_list:
+		if version >= get_defaults('patch_version'):
+			for p in patch_list['version']:
+				pn = 'patches.' + version + '.' + p
+				if pn not in executed:
+					if not run_single(patchmodule = pn):
+						return log(pn + ': failed: STOPPED')
 
 def reload_doc(args):
 	"""relaod a doc args {module, doctype, docname}"""	

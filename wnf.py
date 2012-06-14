@@ -34,14 +34,13 @@ def replace_code(start, txt1, txt2, extn, search=None):
 		for fn in wt[2]:
 			if fn.split('.')[-1]==extn:
 				fpath = os.path.join(wt[0], fn)
-				if fpath != '/var/www/erpnext/erpnext/patches/jan_mar_2012/rename_dt.py': # temporary
-					with open(fpath, 'r') as f:
-						content = f.read()
-				
-					if re.search(search, content):
-						res = search_replace_with_prompt(fpath, txt1, txt2)
-						if res == 'skip':
-							return 'skip'
+				with open(fpath, 'r') as f:
+					content = f.read()
+			
+				if re.search(search, content):
+					res = search_replace_with_prompt(fpath, txt1, txt2)
+					if res == 'skip':
+						return 'skip'
 
 
 
@@ -175,8 +174,8 @@ def setup_options():
 						help="Run scheduler event")
 
 	# misc
-	parser.add_option("--replace", nargs=3, default=False, 
-						metavar = "search replace_by extension",
+	parser.add_option("--replace", nargs=4, default=False, 
+						metavar = "start_path search_txt replace_by_txt extension",
 						help="file search-replace")
 	
 	parser.add_option("--sync_all", help="Synchronize all DocTypes using txt files",
@@ -187,7 +186,7 @@ def setup_options():
 			
 	parser.add_option("--update", help="Pull, run latest patches and sync all",
 			nargs=2, metavar="ORIGIN BRANCH")
-
+			
 	return parser.parse_args()
 	
 def run():
@@ -219,7 +218,7 @@ def run():
 
 	# code replace
 	elif options.replace:
-		replace_code('.', options.replace[0], options.replace[1], options.replace[2])
+		replace_code(options.replace[0], options.replace[1], options.replace[2], options.replace[3])
 	
 	# git
 	elif options.status:
