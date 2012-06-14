@@ -37,7 +37,7 @@ import webnotes
 
 def run_all(patch_list=None):
 	"""run all pending patches"""
-	executed = [p[0] for p in webnotes.conn.sql("""select patch from __PatchLog""")]
+	executed = [p[0] for p in webnotes.conn.sql("""select distinct patch from __PatchLog""")]
 	import patches.patch_list
 	patch_list = patch_list or patches.patch_list.patch_list
 	for version in patch_list:
