@@ -35,19 +35,31 @@
 import webnotes
 		
 
-def run_all(patch_list=None):
+def run_all(patch_dict=None):
 	"""run all pending patches"""
-	executed = [p[0] for p in webnotes.conn.sql("""select distinct patch from __PatchLog""")]
-	import patches.patch_list
-	patch_list = patch_list or patches.patch_list.patch_list
-	for version in patch_list:
-		if version >= get_defaults('patch_version'):
-			for p in patch_list['version']:
-				pn = 'patches.' + version + '.' + p
-				if pn not in executed:
-					if not run_single(patchmodule = pn):
-						return log(pn + ': failed: STOPPED')
-
+	import patches.patch_dict
+	patch_dict = patch_dict or patches.patch_list.patch_dict
+	
+	# special patch: version 00_00 executed first
+	if patch_dict.get('00_00'):
+		executed = get_executed_patches()
+		run_single_version('00_00', patch_dict['00_00'], executed)
+		
+	# execute pending patches
+	executed = get_executed_patches()
+	for version in sorted(patch_dict):
+		if version >= webnotes.conn.get_default('patch_version'):
+			run_single_version(version, patch_dict[version], executed)
+			
+	
+def run_single_version(version, patch_list, executed):
+	for p in patch_list:
+		pn = 'patches.' + version + '.' + p
+		if pn not in executed:
+			if not run_single(patchmodule = pn):
+				return log(pn + ': failed: STOPPED')
+	webnotes.conn.set_default('patch_version', version)	
+	
 def reload_doc(args):
 	"""relaod a doc args {module, doctype, docname}"""	
 	import webnotes.modules
@@ -60,7 +72,7 @@ def run_single(patchmodule=None, method=None, methodargs=None, force=False):
 	# don't write txt files
 	conf.developer_mode = 0
 	
-	if force or method or not executed(patchmodule):
+	if force or method or not get_executed_patches(patchmodule):
 		return execute_patch(patchmodule, method, methodargs)
 	else:
 		return True
@@ -106,12 +118,15 @@ def update_patch_log(patchmodule):
 	webnotes.conn.sql("""INSERT INTO `__PatchLog` VALUES (%s, now())""", \
 		patchmodule)
 
-def executed(patchmodule):
+def get_executed_patches(patchmodule=None):
 	"""return True if is executed"""
-	done = webnotes.conn.sql("""select patch from __PatchLog where patch=%s""", patchmodule)
-	if done:
-		print "Patch %s executed in %s" % (patchmodule, webnotes.conn.cur_db_name)
-	return done
+	if patchmodule:
+		p = webnotes.conn.sql("""select patch from __PatchLog where patch=%s""", patchmodule)
+		if p:
+			print "Patch %s already executed in %s" % (patchmodule, webnotes.conn.cur_db_name)
+		return p
+	else:
+		return [p[0] for p in webnotes.conn.sql("""select distinct patch from __PatchLog""")]
 	
 def block_user(block):
 	"""stop/start execution till patch is run"""
