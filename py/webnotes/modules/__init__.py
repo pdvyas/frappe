@@ -52,14 +52,18 @@ def get_module_path(module):
 
 def reload_doc(module, dt=None, dn=None):
 	"""reload single / list of records"""
+
 	if type(module) is list:
 		for m in module:
 			reload_single_doc(m[0], m[1], m[2])
 	else:
 		reload_single_doc(module, dt, dn)
 		
-def reload_single_doc(module, dt, dn):
-	"""Sync a file from txt"""
+def reload_single_doc(module, dt, dn, force=False):
+	"""Sync a file from txt if modifed, return false if not updated"""
+	if dt.lower() == 'doctype':
+		return
+		
 	import os
 	dt, dn = scrub_dt_dn(dt, dn)
 
@@ -72,22 +76,30 @@ def reload_single_doc(module, dt, dn):
 		with open(path, 'r') as f:
 			doclist = peval_doclist(f.read())
 			
-		if doclist:					
+		if doclist:
+			doc = doclist[0]
+			if not force:
+				# check if timestamps match
+				if doc['modified']== str(webnotes.conn.get_value(doc['doctype'], doc['name'], 'modified')):
+					return False
+			
 			from webnotes.utils.transfer import set_doc
 			set_doc(doclist, 1, 1, 1)
 
 			# since there is a new timestamp on the file, update timestamp in
-			webnotes.conn.sql("update `tab%s` set modified=now() where name=%s" \
-				% (doclist[0]['doctype'], '%s'), doclist[0]['name'])		
+			webnotes.conn.sql("update `tab%s` set modified=%s where name=%s" % \
+				(doc['doctype'], '%s', '%s'), 
+				(doc['modified'],doc['name']))
+			return True
 	else:
 		raise Exception, '%s missing' % path
 
 
-def export_doc(doctype, name):
+def export_doc(doctype, name, module=None):
 	"""write out a doc"""
 	from webnotes.modules.export_module import write_document_file
 	import webnotes.model.doc
-	module = webnotes.conn.get_value(doctype, name, 'module')
+	if not module: module = webnotes.conn.get_value(doctype, name, 'module')
 	doclist = [d.fields for d in webnotes.model.doc.get(doctype, name)]
 	write_document_file(doclist, module)
 
