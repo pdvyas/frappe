@@ -143,7 +143,9 @@ def run_startup_install():
 	print "executing startup install"
 	from startup import install
 	if hasattr(install, 'execute'):
+		webnotes.conn.begin()
 		install.execute()
+		webnotes.conn.commit()
 	
 
 def load_install_docs(modules):
