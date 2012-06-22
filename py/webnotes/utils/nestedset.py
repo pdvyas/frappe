@@ -35,6 +35,7 @@ import webnotes, unittest
 class TestNSM(unittest.TestCase):
 	
 	def setUp(self):
+		webnotes.connect()
 		from webnotes.model.doc import Document
 		self.root = Document(fielddata={'doctype':'nsmtest', 'name':'T001', 'parent':None})
 		self.first_child = Document(fielddata={'doctype':'nsmtest', 'name':'C001', 'parent_node':'T001'})
