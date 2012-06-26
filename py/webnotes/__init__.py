@@ -90,12 +90,16 @@ def msgprint(msg, small=0, raise_exception=0, as_table=False):
 	   Append to the :data:`message_log`
 	"""	
 	from utils import cstr
+	import inspect
 	if as_table and type(msg) in (list, tuple):
 		msg = '<table border="1px" style="border-collapse: collapse" cellpadding="2px">' + ''.join(['<tr>'+''.join(['<td>%s</td>' % c for c in r])+'</tr>' for r in msg]) + '</table>'
 	
 	message_log.append((small and '__small:' or '')+cstr(msg or ''))
 	if raise_exception:
-		raise ValidationError, msg
+		if inspect.isclass(raise_exception) and issubclass(raise_exception, Exception):
+			raise raise_exception, msg
+		else:
+			raise ValidationError, msg
 
 def get_index_path():
 	import os
