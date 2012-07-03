@@ -167,7 +167,7 @@ _f.Frm.prototype.setup_std_layout = function() {
 	}
 		
 	// footer
-	this.setup_footer();		
+	this.setup_footer();
 	
 		
 	// header - no headers for tables and guests
@@ -1078,7 +1078,7 @@ _f.Frm.prototype.savetrash = function() {
 				if(wn.ui.toolbar.recent) wn.ui.toolbar.recent.remove(me.doctype, me.docname);
 				
 				// "close"
-				window.back();
+				window.history.back();
 			}
 		})
 	} 
