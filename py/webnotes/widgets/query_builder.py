@@ -115,7 +115,7 @@ def add_match_conditions(q, tl, ur, ud):
 			q = q[0] + condition_st + '(' + ' OR '.join(sl) + ') ' + condition_end + q[1]
 		else:
 			q = q + condition_st + '(' + ' OR '.join(sl) + ')'
-
+	
 	return q
 
 # execute server-side script from Search Criteria
@@ -254,9 +254,9 @@ def runquery(q='', ret=0, from_export=0):
 		meta = get_sql_meta(tl)
 
 		q = add_match_conditions(q, tl, webnotes.user.roles, webnotes.user.get_defaults())
-
+		webnotes
 		# replace special variables
-		q = q.replace('__user', session['user'])
+		q = q.replace('__user', session['user'].encode('utf-8'))
 		q = q.replace('__today', webnotes.utils.nowdate())
 
 		res = sql(q, as_list=1, formatted=formatted)
@@ -346,3 +346,17 @@ def runquery_csv():
 	out['type'] = 'csv'
 	out['doctype'] = rep_name
 
+def add_limit_to_query(query, args):
+	"""
+		Add limit condition to query
+		can be used by methods called in listing to add limit condition
+	"""
+	if args.get('limit_page_length'):
+		query += """
+			limit %(limit_start)s, %(limit_page_length)s"""
+			
+		import webnotes.utils
+		args['limit_start'] = webnotes.utils.cint(args.get('limit_start'))
+		args['limit_page_length'] = webnotes.utils.cint(args.get('limit_page_length'))
+	
+	return query, args
