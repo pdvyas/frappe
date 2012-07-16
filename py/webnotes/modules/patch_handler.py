@@ -37,7 +37,7 @@ import webnotes
 
 def run_all(patch_dict=None):
 	"""run all pending patches"""
-	import patches.patch_dict
+	import patches.patch_list
 	patch_dict = patch_dict or patches.patch_list.patch_dict
 	
 	# special patch: version 00_00 executed first
@@ -49,7 +49,8 @@ def run_all(patch_dict=None):
 	executed = get_executed_patches()
 	for version in sorted(patch_dict):
 		if version >= webnotes.conn.get_default('patch_version'):
-			run_single_version(version, patch_dict[version], executed)
+			ret = run_single_version(version, patch_dict[version], executed)
+			if ret == 'error': return
 			
 	
 def run_single_version(version, patch_list, executed):
@@ -57,8 +58,10 @@ def run_single_version(version, patch_list, executed):
 		pn = 'patches.' + version + '.' + p
 		if pn not in executed:
 			if not run_single(patchmodule = pn):
-				return log(pn + ': failed: STOPPED')
-	webnotes.conn.set_default('patch_version', version)	
+				log(pn + ': failed: STOPPED')
+				return 'error'
+	if version != '00_00':
+		webnotes.conn.set_default('patch_version', version)	
 	
 def reload_doc(args):
 	"""relaod a doc args {module, doctype, docname}"""	
@@ -85,6 +88,7 @@ def execute_patch(patchmodule, method=None, methodargs=None):
 	log('Executing %s in %s' % (patchmodule or str(methodargs), webnotes.conn.cur_db_name))
 	try:
 		if patchmodule:
+			print patchmodule
 			patch = __import__(patchmodule, fromlist=True)
 			getattr(patch, 'execute')()
 			update_patch_log(patchmodule)
