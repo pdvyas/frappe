@@ -136,7 +136,7 @@ class Profile:
 		"""
 		roles = self.get_roles() + [self.name]
 		res = webnotes.conn.sql("""select defkey, defvalue 
-		from `tabDefaultValue` where parent in ("%s")""" % '", "'.join(roles))
+		from `tabDefaultValue` where parent in ("%s") order by idx""" % '", "'.join(roles))
 	
 		self.defaults = {'owner': [self.name,]}
 
@@ -235,6 +235,7 @@ class Profile:
 		self.can_read = d['can_read']
 		self.can_write = d['can_write']
 		self.can_search = d['can_search']
+		self.can_cancel = d['can_cancel']
 		self.can_get_report = d['can_get_report']
 		self.allow_modules = d['allow_modules']
 		self.all_read = d['all_read']

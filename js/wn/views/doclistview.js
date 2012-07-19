@@ -74,8 +74,7 @@ wn.views.DocListView = wn.ui.Listing.extend({
 		</div>');
 		
 		this.appframe = new wn.ui.AppFrame(this.$page.find('.appframe-area'));
-		wn.views.breadcrumbs($('<span class="breadcrumb-area">').appendTo(this.appframe.$titlebar), 
-			locals.DocType[this.doctype].module, this.doctype);
+		wn.views.breadcrumbs(this.appframe, locals.DocType[this.doctype].module, this.doctype);
 	},
 
 	setup: function() {
@@ -89,6 +88,7 @@ wn.views.DocListView = wn.ui.Listing.extend({
 		me.init_stats();
 		me.make_report_button();
 		me.add_delete_option();
+		me.make_help();
 	},
 	make_report_button: function() {
 		var me = this;
@@ -96,6 +96,13 @@ wn.views.DocListView = wn.ui.Listing.extend({
 			this.appframe.add_button('Build Report', function() {
 				wn.set_route('Report2', me.doctype);
 			}, 'icon-th')
+		}
+	},
+	make_help: function() {
+		// Help
+		if(this.meta.description) {
+			this.appframe.add_help_button(wn.markdown('## ' + this.meta.name + '\n\n'
+				+ this.meta.description));
 		}
 	},
 	setup_docstatus_filter: function() {
@@ -152,14 +159,12 @@ wn.views.DocListView = wn.ui.Listing.extend({
 	make_no_result: function() {
 		var no_result_message = repl('<div class="well">\
 		<p>No %(doctype_label)s found</p>\
-		%(description)s\
 		<hr>\
 		<p><button class="btn btn-info btn-small" list_view_doc="%(doctype)s">\
 			Make a new %(doctype_label)s</button>\
 		</p></div>', {
 			doctype_label: get_doctype_label(this.doctype),
-			doctype: this.doctype,
-			description: wn.markdown(locals.DocType[this.doctype].description || ''),
+			doctype: this.doctype
 		});
 		
 		return no_result_message;
@@ -179,12 +184,18 @@ wn.views.DocListView = wn.ui.Listing.extend({
 			docstatus: this.can_submit ? $.map(this.$page.find('.show-docstatus :checked'), 
 				function(inp) { return $(inp).attr('data-docstatus') }) : [],
 			order_by: this.listview.order_by || undefined,
+			group_by: this.listview.group_by || undefined,
 		}
 	},
 	add_delete_option: function() {
 		var me = this;
 		if(this.can_delete) {
-			this.add_button('Delete', function() { me.delete_items(); }, 'icon-remove')
+			this.add_button('Delete', function() { me.delete_items(); }, 'icon-remove');
+			$('<div style="padding: 4px"><input type="checkbox" name="select-all" />\
+			 	Select all</div>').insertBefore(this.$page.find('.result-list'));
+			this.$page.find('[name="select-all"]').click(function() {
+				me.$page.find('.list-delete').attr('checked', $(this).attr('checked') || false);
+			})
 		}
 	},
 	delete_items: function() {
@@ -374,7 +385,7 @@ wn.views.ListView = Class.extend({
 		
 		// content
 		if(typeof opts.content=='function') {
-			opts.content(parent, data);
+			opts.content(parent, data, me);
 		}
 		else if(opts.content=='name') {
 			$(parent).append(repl('<a href="#!Form/%(doctype)s/%(name)s">%(name)s</a>', data));
@@ -399,16 +410,7 @@ wn.views.ListView = Class.extend({
 			$(parent).append(data.when);			
 		}
 		else if(opts.type=='bar-graph') {
-			args = {
-				percent: data[opts.content],
-				fully_delivered: (data[opts.content] > 99 ? 'bar-complete' : ''),
-				label: opts.label
-			}
-			$(parent).append(repl('<span class="bar-outer" style="width: 30px; float: right" \
-				title="%(percent)s% %(label)s">\
-				<span class="bar-inner %(fully_delivered)s" \
-					style="width: %(percent)s%;"></span>\
-			</span>', args));
+			this.render_bar_graph(parent, data, opts.content, opts.label);
 		}
 		else if(opts.type=='link' && opts.doctype) {
 			$(parent).append(repl('<a href="#!Form/'+opts.doctype+'/'
@@ -502,6 +504,22 @@ wn.views.ListView = Class.extend({
 		if(!this.doclistview.can_delete) {
 			this.columns = $.map(this.columns, function(v, i) { if(v.content!='check') return v });
 		}
+	},
+	render_bar_graph: function(parent, data, field, label) {
+		var args = {
+			percent: data[field],
+			fully_delivered: (data[field] > 99 ? 'bar-complete' : ''),
+			label: label
+		}
+		$(parent).append(repl('<span class="bar-outer" style="width: 30px; float: right" \
+			title="%(percent)s% %(label)s">\
+			<span class="bar-inner %(fully_delivered)s" \
+				style="width: %(percent)s%;"></span>\
+		</span>', args));
+	},
+	render_icon: function(parent, icon_class, label) {
+		var icon_html = "<i class='%(icon_class)s' title='%(label)s'></i>";
+		$(parent).append(repl(icon_html, {icon_class: icon_class, label: label || ''}));
 	}
 });
 

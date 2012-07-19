@@ -102,6 +102,7 @@ class Installer:
 		self.create_scheduler_log()
 		self.create_session_cache()
 		self.create_cache_item()
+		self.create_auth_table()
 
 	def set_admin_password(self):
 		import webnotes
@@ -140,7 +141,7 @@ class Installer:
 		webnotes.conn.sql("""create table `__SessionCache` ( 
 			user VARCHAR(120), 
 			country VARCHAR(120), 
-			cache LONGTEXT)""")
+			cache LONGTEXT) ENGINE=InnoDB""")
 
 	def create_cache_item(self):
 		import webnotes
@@ -149,7 +150,12 @@ class Installer:
 			`key` VARCHAR(180) NOT NULL PRIMARY KEY,
 			`value` LONGTEXT,
 			`expires_on` DATETIME
-			) ENGINE=MyISAM DEFAULT CHARSET=utf8""")
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8""")
 			
-
-		
+	def create_auth_table(self):
+		import webnotes
+		self.dbman.drop_table('__Auth')
+		webnotes.conn.sql("""create table __Auth(
+			`user` VARCHAR(180) NOT NULL PRIMARY KEY,
+			`password` VARCHAR(180) NOT NULL
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8""")

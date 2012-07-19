@@ -42,6 +42,22 @@ _f.FormGrid.prototype.setup = function() {
 	this.make_columns();
 }
 
+_f.FormGrid.prototype.make_buttons = function() {
+	var me = this;
+	this.tbar_btns = {};
+	this.tbar_btns['Del'] = this.make_tbar_link($td(this.tbar_tab,0,0),'Del', 
+		function() { me.delete_row(); }, 'icon-remove-sign');
+	this.tbar_btns['Ins'] = this.make_tbar_link($td(this.tbar_tab,0,1),'Ins', 
+		function() { me.insert_row(); }, 'icon-plus');
+	this.tbar_btns['Up'] = this.make_tbar_link($td(this.tbar_tab,0,2),'Up', 
+		function() { me.move_row(true); }, 'icon-arrow-up');
+	this.tbar_btns['Dn'] = this.make_tbar_link($td(this.tbar_tab,0,3),'Dn', 
+		function() { me.move_row(false); }, 'icon-arrow-down');
+		
+	for(var i in this.btns)
+		this.btns[i].isactive = true;
+}
+
 _f.FormGrid.prototype.make_tbar_link = function(parent, label, fn, icon) {
 
 	var div = $a(parent,'div','',{cursor:'pointer'});
@@ -64,22 +80,6 @@ _f.FormGrid.prototype.make_tbar_link = function(parent, label, fn, icon) {
 	img.isactive = 1;
 
 	return div;
-}
-
-_f.FormGrid.prototype.make_buttons = function() {
-	var me = this;
-	this.tbar_btns = {};
-	this.tbar_btns['Del'] = this.make_tbar_link($td(this.tbar_tab,0,0),'Del', 
-		function() { me.delete_row(); }, 'icon-remove-sign');
-	this.tbar_btns['Ins'] = this.make_tbar_link($td(this.tbar_tab,0,1),'Ins', 
-		function() { me.insert_row(); }, 'icon-plus');
-	this.tbar_btns['Up'] = this.make_tbar_link($td(this.tbar_tab,0,2),'Up', 
-		function() { me.move_row(true); }, 'icon-arrow-up');
-	this.tbar_btns['Dn'] = this.make_tbar_link($td(this.tbar_tab,0,3),'Dn', 
-		function() { me.move_row(false); }, 'icon-arrow-down');
-		
-	for(var i in this.btns)
-		this.btns[i].isactive = true;
 }
 
 _f.FormGrid.prototype.make_columns = function() {
@@ -138,8 +138,7 @@ _f.FormGrid.prototype.refresh = function() {
 
 _f.FormGrid.prototype.set_unsaved = function() {
 	// set unsaved
-	locals[cur_frm.doctype][cur_frm.docname].__unsaved=1;
-	cur_frm.frm_head && cur_frm.frm_head.refresh_labels();
+	cur_frm.set_unsaved();
 }
 
 _f.FormGrid.prototype.insert_row = function() {
@@ -155,7 +154,6 @@ _f.FormGrid.prototype.insert_row = function() {
 	// refresh
 	this.refresh();
 	this.cell_select('', row_idx, ci);
-	this.set_unsaved();
 }
 
 _f.FormGrid.prototype.new_row_doc = function() {
@@ -165,6 +163,7 @@ _f.FormGrid.prototype.new_row_doc = function() {
 	d.parent = this.field.frm.docname;
 	d.parentfield = this.field.df.fieldname;
 	d.parenttype = this.field.frm.doctype;
+	this.set_unsaved();
 	return d;
 }
 _f.FormGrid.prototype.add_newrow = function() {
@@ -234,7 +233,7 @@ _f.FormGrid.prototype.delete_row = function(dt, dn) {
 		LocalDB.delete_record(this.doctype, r.docname);	
 		
 		this.refresh();
-		if(ri < (this.tab.rows.length-2))
+		if(ri < (this.tab.rows.length-1))
 			this.cell_select(null, ri, ci);
 		else _f.cur_grid_cell = null;	
 	}
