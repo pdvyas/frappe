@@ -117,6 +117,7 @@
 			"lib/js/lib/jquery/jquery.ui.datepicker.js:concat",
 			"lib/js/lib/jquery/jquery.ui.autocomplete.js:concat",
 			"lib/js/lib/tiny_mce_33/jquery.tinymce.js:concat",
+			"lib/js/lib/mousetrap.min.js:concat",
 			"lib/js/lib/bootstrap.min.js:concat",
 			"lib/js/lib/sprintf.js",
 			"lib/js/core.min.js:concat",

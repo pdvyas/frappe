@@ -132,13 +132,6 @@ def get_search_criteria(dt):
 	except Exception, e:
 		pass # no search criteria
 	return dl
-
-
-# Rename Doc
-#=================================================================================
-def rename(doctype, old, new, is_doctype=0, debug=1):
-	import webnotes.model.rename_doc
-	webnotes.model.rename_doc.rename_doc(doctype, old, new, is_doctype, debug)
 	
 def get_link_fields(dt):
 	"""

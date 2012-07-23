@@ -71,6 +71,26 @@ _f.Frm = function(doctype, parent, in_form) {
 		if(dt==me.doctype)
 			me.rename_notify(dt, old_name, new_name)
 	});
+	
+	// bind short cuts 
+	Mousetrap.bind(['ctrl+s', 'command+s'], function(e) {
+		if(cur_frm) {
+			cur_frm.save(); 
+			return false;
+		}
+	});
+	Mousetrap.bind(['ctrl+n', 'command+n'], function() {
+		if(cur_frm) {
+			new_doc(cur_frm.doctype);
+			return false;
+		}
+	});
+	Mousetrap.bind(['ctrl+l', 'command+l'], function() {
+		if(cur_frm) {
+			wn.set_route('List', cur_frm.doctype);
+			return false;
+		}
+	});
 }
 
 // ======================================================================================
@@ -1106,7 +1126,7 @@ _f.Frm.prototype.set_value_in_locals = function(dt, dn, fn, v) {
 		changed = false;
 
 	if(changed) {
-		console.log(fn + ' changed from ' + d[fn] + ' to ' + v);
+		//console.log(fn + ' changed from ' + d[fn] + ' to ' + v);
 		d[fn] = v;
 		if(d.parenttype)
 			d.__unsaved = 1;

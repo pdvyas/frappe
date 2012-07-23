@@ -39,7 +39,7 @@ cur_frm.cscript.validate = function(doc) {
 
 cur_frm.show_update_password = function() {
 	if(!in_list(['Administrator', 'System Manager'], user)) return;
-	cur_frm.add_custom_button('Update Password', function() {
+	cur_frm.add_custom_button('Set New Password', function() {
 		var d = new wn.ui.Dialog({
 			title: "Update Password",
 			fields: [

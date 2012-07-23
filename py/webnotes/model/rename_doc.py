@@ -7,7 +7,13 @@ def rename_doc(doctype, old, new, is_doctype=0, debug=0):
 	"""
 	import webnotes.utils
 	import webnotes.model.doctype
+	from webnotes.model.code import get_obj
 	
+	# call on_rename method if exists
+	obj = get_obj(doctype, old)
+	if hasattr(obj, 'on_rename'):
+		obj.on_rename(new, old)
+
 	# get doclist of given doctype
 	# without child fields of table type fields (form=0)
 	doclist = webnotes.model.doctype.get(doctype, form=0)

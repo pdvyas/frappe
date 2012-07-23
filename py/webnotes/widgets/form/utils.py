@@ -70,3 +70,12 @@ def validate_link():
 					% (fetch, options, '%s'), value)[0]]
 	
 		webnotes.response['message'] = 'Ok'
+		
+@webnotes.whitelist()
+def rename():
+	"""rename item"""
+	from webnotes.model.rename_doc import rename_doc
+	rename_doc(webnotes.form_dict['doctype'], webnotes.form_dict['old_name'], 
+		webnotes.form_dict['new_name'])
+		
+	return webnotes.form_dict['new_name']

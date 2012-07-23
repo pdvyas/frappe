@@ -192,7 +192,11 @@ Thank you,<br>
 		}
 		sendmail_md(self.doc.email, subject="Welcome to " + startup.product_name, msg=txt % args)
 	
-	def on_rename(self,newdn,olddn):
+	def on_rename(self, new_name, old_name):
+		from webnotes.utils import validate_email_add
+		if not validate_email_add(new_name):
+			webnotes.msgprint("New name must be a valid email id", raise_exception=1)
+		
 		tables = webnotes.conn.sql("show tables")
 		for tab in tables:
 			desc = webnotes.conn.sql("desc `%s`" % tab[0], as_dict=1)
@@ -204,10 +208,12 @@ Thank you,<br>
 				webnotes.conn.sql("""\
 					update `%s` set `%s`=%s
 					where `%s`=%s""" % \
-					(tab[0], field, '%s', field, '%s'), (newdn, olddn))
+					(tab[0], field, '%s', field, '%s'), (new_name, old_name))
 		webnotes.conn.sql("""\
 			update `tabProfile` set email=%s
-			where name=%s""", (newdn, newdn))
+			where name=%s""", (new_name, new_name))
+			
+			
 			
 	def on_trash(self):
 		"""do not delete standard users, delete from auth"""
