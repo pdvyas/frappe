@@ -193,11 +193,9 @@ Field.prototype.refresh_mandatory = function() {
 	} else {
 		if(this.label_area) this.label_area.style.color= "#222";
 		this.set_style_mandatory(0);
-
 	}
 	
 	this.refresh_label_icon()
-	this.set_reqd = this.df.reqd;
 }
 
 Field.prototype.refresh_display = function() {

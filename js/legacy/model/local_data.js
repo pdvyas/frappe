@@ -139,8 +139,16 @@ LocalDB.set_default_values = function(doc) {
 		var f = docfields[fid];
 		if(!in_list(no_value_fields, f.fieldtype) && doc[f.fieldname]==null) {
 			var v = LocalDB.get_default_value(f.fieldname, f.fieldtype, f['default']);
+			
+			// set default in correct datatype
 			if(v) {
-				doc[f.fieldname] = v;
+				if(in_list(["Int", "Check"], f.fieldtype)) {
+					doc[f.fieldname] = cint(v);
+				} else if(in_list(["Currency", "Float"], f.fieldtype)) {
+					doc[f.fieldname] = flt(v);					
+				} else {
+					doc[f.fieldname] = v;					
+				}
 				fields_to_refresh.push(f.fieldname);
 			}
 		}

@@ -7,13 +7,18 @@ cur_frm.cscript.onload = function(doc) {
 }
 
 cur_frm.cscript.refresh = function(doc) {
+	cur_frm.toggle_display(['new_password', 'send_welcome_mail'], doc.__islocal);
 	cur_frm.toggle_reqd('new_password', doc.__islocal);
+	
+	cur_frm.set_intro(doc.enabled ? '' : 'This user is diabled.');
 
 	if(doc.__islocal) {
 		cur_frm.toggle_display(['sb1', 'sb2', 'sb3'], false);
 	} else {
 		cur_frm.cscript.enabled(doc);
-		cur_frm.roles_editor.show(doc.name)
+		cur_frm.roles_editor.show(doc.name);
+		if(doc.enabled)
+			cur_frm.show_update_password();
 	}
 }
 
@@ -30,6 +35,42 @@ cur_frm.cscript.validate = function(doc) {
 	doc.__temp = JSON.stringify({
 		roles:cur_frm.roles_editor.get_roles()
 	});
+}
+
+cur_frm.show_update_password = function() {
+	if(!in_list(['Administrator', 'System Manager'], user)) return;
+	cur_frm.add_custom_button('Update Password', function() {
+		var d = new wn.ui.Dialog({
+			title: "Update Password",
+			fields: [
+				{label: "New Password", fieldname: "new_password", fieldtype:"Password",
+					reqd: 1},
+				{label: "Send email to the user with the new password", fieldtype:"Check",
+					fieldname: "send_mail", "default": 1},
+				{label: "Update", fieldtype: "Button", fieldname:"update"}
+			]
+		});
+		d.show();
+		$(d.fields_dict.update.input).click(function() {
+			var v = d.get_values();
+			if(!v) return;
+			
+			wn.call({
+				method: 'core.doctype.profile.profile.update_password',
+				args: {
+					user: cur_frm.docname,
+					new_password: v.new_password,
+					send_mail: v.send_mail
+				},
+				callback: function(r) {
+					if(r.message) msgprint(r.message);
+					d.hide();
+				},
+				btn: this
+			});
+		});
+		cur_frm.update_dialog = d;
+	})
 }
 
 wn.RoleEditor = Class.extend({

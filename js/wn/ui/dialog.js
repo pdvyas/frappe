@@ -41,6 +41,10 @@ wn.widgets.FieldGroup = function() {
 			this.fields_dict[df.fieldname] = f
 			f.refresh();
 			
+			if(df["default"]) {
+				f.set_input(df["default"]);
+			}
+			
 			// first button primary ?
 			if(df.fieldtype=='Button' && !this.first_button) {
 				$(f.input).addClass('btn-info');
