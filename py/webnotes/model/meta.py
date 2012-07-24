@@ -66,7 +66,7 @@ def get_link_fields(doctype):
 		and d.fields.get('fieldname')!='owner'
 		and (d.fields.get('fieldtype') == 'Link' or
 			(	d.fields.get('fieldtype') == 'Select'
-				and (d.fields.get('options') or '').startswith('link:'))
+				and (d.options or '').startswith('link:'))
 			)
 	]
 

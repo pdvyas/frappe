@@ -150,9 +150,8 @@ def save_uploaded():
 	else: 
 		return None, fname
 
-# -------------------------------------------------------
-
 def save_file(fname, content, module=None):
+	"""create `tabFile Data` record and write to disk"""
 	from webnotes.model.doc import Document
 
 	# some browsers return the full path
@@ -171,8 +170,6 @@ def save_file(fname, content, module=None):
 	write_file(f.name, content)
 
 	return f.name
-
-# -------------------------------------------------------
 
 def write_file(fid, content):
 	import os, conf
