@@ -121,21 +121,11 @@ set_field_permlevel = function(n, level) {
 }
 
 hide_field = function(n) {
-	function _hide_field(n,hidden) {
-		cur_frm.set_df_property(n, 'hidden', hidden)
-	}	
-	if(cur_frm) {
-		if(typeof n == 'string') _hide_field(n,1);
-		else { for(var i in n)_hide_field(n[i],1) }
-	}
+	if(typeof n == 'string') n = [n];
+	for(var i in n) cur_frm.set_df_property(n, 'hidden', 1);
 }
 
 unhide_field = function(n) {
-	function _hide_field(n,hidden) {
-		cur_frm.set_df_property(n, 'hidden', hidden)
-	}	
-	if(cur_frm) {
-		if(typeof n == 'string') _hide_field(n,0);
-		else { for(var i in n)_hide_field(n[i],0) }
-	}
+	if(typeof n == 'string') n = [n];
+	for(var i in n) cur_frm.set_df_property(n, 'hidden', 0);
 }

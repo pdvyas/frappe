@@ -48,7 +48,7 @@ function msgprint(msg, title) {
 		msg = replace_newlines(msg);
 
 	msg_dialog.set_title(title || 'Message')
-	msg_dialog.msg_area.append(msg);
+	msg_dialog.msg_area.append('<p>'+msg+'</p>');
 	msg_dialog.show();
 	
 }

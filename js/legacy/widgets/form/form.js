@@ -71,6 +71,26 @@ _f.Frm = function(doctype, parent, in_form) {
 		if(dt==me.doctype)
 			me.rename_notify(dt, old_name, new_name)
 	});
+	
+	// bind short cuts 
+	Mousetrap.bind(['ctrl+s', 'command+s'], function(e) {
+		if(cur_frm) {
+			cur_frm.save(); 
+			return false;
+		}
+	});
+	Mousetrap.bind(['ctrl+n', 'command+n'], function() {
+		if(cur_frm) {
+			new_doc(cur_frm.doctype);
+			return false;
+		}
+	});
+	Mousetrap.bind(['ctrl+l', 'command+l'], function() {
+		if(cur_frm) {
+			wn.set_route('List', cur_frm.doctype);
+			return false;
+		}
+	});
 }
 
 // ======================================================================================
@@ -1095,15 +1115,22 @@ _f.get_value = function(dt, dn, fn) {
 
 _f.Frm.prototype.set_value_in_locals = function(dt, dn, fn, v) {
 	var d = locals[dt][dn];
+	if(!d) {
+		console.log("No " + dt + ": " + dn);
+		return;
+	}
 	var changed = d[fn] != v;
-	if(changed && (d[fn]==null || v==null) && (cstr(d[fn])==cstr(v))) 
+	
+	// nulls and empty strings are same
+	if(changed && ((d[fn]==null && v=='') || (d[fn]=='' && v==null))) 
 		changed = false;
 
 	if(changed) {
+		//console.log(fn + ' changed from ' + d[fn] + ' to ' + v);
 		d[fn] = v;
 		if(d.parenttype)
-			d.__unsaved = 1;		
-		this.set_unsaved();			
+			d.__unsaved = 1;
+		this.set_unsaved();	
 	}
 }
 
@@ -1162,15 +1189,15 @@ _f.Frm.prototype.set_df_property = function(fieldname, property, value) {
 }
 
 _f.Frm.prototype.toggle_enable = function(fnames, enable) {
-	cur_frm.field_map(fnames, function(field) { field.disabled = enable ? false : true; });
+	cur_frm.field_map(fnames, function(field) { field.disabled = enable ? 0 : 1; });
 }
 
 _f.Frm.prototype.toggle_reqd = function(fnames, mandatory) {
-	cur_frm.field_map(fnames, function(field) { field.reqd = mandatory ? true : false; });
+	cur_frm.field_map(fnames, function(field) { field.reqd = mandatory ? 1 : 0; });
 }
 
 _f.Frm.prototype.toggle_display = function(fnames, show) {
-	cur_frm.field_map(fnames, function(field) { field.hidden = show ? false : true; });
+	cur_frm.field_map(fnames, function(field) { field.hidden = show ? 0 : 1; });
 }
 
 _f.Frm.prototype.call_server = function(method, args, callback) {

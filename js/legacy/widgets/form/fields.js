@@ -56,7 +56,8 @@ Field.prototype.make_body = function() {
 	
 	// label
 	if(this.with_label) {	
-		this.label_span = $a(this.label_area, 'span', 'small', {cssFloat:'left'})
+		this.label_span = $a(this.label_area, 'span', 'small')
+		if(!ischk) $(this.label_span).css('float', 'left');
 	
 		// error icon
 		this.label_icon = $('<i class="icon icon-warning-sign">').toggle(false)
@@ -193,11 +194,9 @@ Field.prototype.refresh_mandatory = function() {
 	} else {
 		if(this.label_area) this.label_area.style.color= "#222";
 		this.set_style_mandatory(0);
-
 	}
 	
 	this.refresh_label_icon()
-	this.set_reqd = this.df.reqd;
 }
 
 Field.prototype.refresh_display = function() {
@@ -381,6 +380,7 @@ function DataField() { } DataField.prototype = new Field();
 DataField.prototype.make_input = function() {
 	var me = this;
 	this.input = $a_input(this.input_area, this.df.fieldtype=='Password' ? 'password' : 'text');
+	$(this.input).addClass('mousetrap') // catch ctrl + s
 
 	this.get_value= function() {
 		var v = this.input.value;

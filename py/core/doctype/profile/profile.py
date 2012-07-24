@@ -110,18 +110,20 @@ class DocType:
 		webnotes.conn.set(self.doc, 'owner' ,self.doc.name)
 		self.update_new_password()
 
-	def update_new_password(self):
-		"""update new password if set"""
-		if self.doc.new_password:
-			webnotes.conn.sql("""insert into __Auth (user, `password`) values (%s, password(%s)) 
-				on duplicate key update `password`=password(%s)""", (self.doc.name, 
-				self.doc.new_password, self.doc.new_password))
-			
-			if not self.doc.fields.get('__islocal'):
-				self.password_reset_mail(self.doc.new_password)
+	def set_password(self, new_password):
+		"""set password in __Auth table"""
+		webnotes.conn.sql("""insert into __Auth (user, `password`) values (%s, password(%s)) 
+			on duplicate key update `password`=password(%s)""", (self.doc.name, 
+			new_password, new_password))
 
-			webnotes.conn.set(self.doc, 'new_password', '')
-			webnotes.msgprint("Password updated.")
+	def update_new_password(self):
+		"""update new password if set"""	
+		if self.doc.localname and self.doc.new_password:
+			self.set_password(self.doc.new_password)
+			if self.doc.send_welcome_mail:
+				self.send_welcome_mail(self.doc.new_password)
+				webnotes.conn.set(self.doc, 'new_password', '')
+				webnotes.msgprint("Welcome Email Sent")
 
 	def get_fullname(self):
 		"""get first_name space last_name"""
@@ -190,7 +192,11 @@ Thank you,<br>
 		}
 		sendmail_md(self.doc.email, subject="Welcome to " + startup.product_name, msg=txt % args)
 	
-	def on_rename(self,newdn,olddn):
+	def on_rename(self, new_name, old_name):
+		from webnotes.utils import validate_email_add
+		if not validate_email_add(new_name):
+			webnotes.msgprint("New name must be a valid email id", raise_exception=1)
+		
 		tables = webnotes.conn.sql("show tables")
 		for tab in tables:
 			desc = webnotes.conn.sql("desc `%s`" % tab[0], as_dict=1)
@@ -202,10 +208,21 @@ Thank you,<br>
 				webnotes.conn.sql("""\
 					update `%s` set `%s`=%s
 					where `%s`=%s""" % \
-					(tab[0], field, '%s', field, '%s'), (newdn, olddn))
+					(tab[0], field, '%s', field, '%s'), (new_name, old_name))
 		webnotes.conn.sql("""\
 			update `tabProfile` set email=%s
-			where name=%s""", (newdn, newdn))
+			where name=%s""", (new_name, new_name))
+			
+			
+			
+	def on_trash(self):
+		"""do not delete standard users, delete from auth"""
+		if self.doc.name in ('Administrator', 'Guest'):
+			webnotes.msgprint("Cannot delete system user '%s'" % self.doc.name, 
+				raise_exception=1)
+				
+		# delete from auth table
+		webnotes.conn.sql("""delete from __Auth where user=%s""", self.doc.name)
 						
 @webnotes.whitelist()
 def get_all_roles(arg=None):
@@ -231,8 +248,16 @@ def get_defaults(arg=None):
 	return webnotes.conn.sql("""select defkey, defvalue from tabDefaultValue where 
 		parent=%s and parenttype = 'Profile'""", webnotes.form_dict['profile'])
 
-
-	
+@webnotes.whitelist(allow_roles=['System Manager', 'Administrator'])
+def update_password(arg=None):
+	"""update password"""
+	from webnotes.model.code import get_obj
+	profile = get_obj('Profile', webnotes.form_dict['user'])
+	profile.set_password(webnotes.form_dict["new_password"])
+	if webnotes.form_dict.get('send_mail'):
+		profile.password_reset_mail(webnotes.form_dict["new_password"])
+		
+	return 'Password Updated'
 	
 @webnotes.whitelist()
 def delete(arg=None):
@@ -241,5 +266,3 @@ def delete(arg=None):
 		webnotes.form_dict['uid'])
 	webnotes.login_manager.logout(user=webnotes.form_dict['uid'])
 	
-
-

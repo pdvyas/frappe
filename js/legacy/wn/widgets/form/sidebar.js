@@ -94,7 +94,58 @@ wn.widgets.form.sidebar = { Sidebar: function(form) {
 						},
 						icon: 'icon-remove-sign',
 						onclick: function() { me.form.savetrash() }
-					}
+					},
+					
+					{
+						type: 'link',
+						label: 'Rename',
+						display: function() { 
+							return (cint(me.form.doc.docstatus) != 1) && !me.form.doc.__islocal
+								&& me.form.meta.allow_rename;
+						},
+						icon: 'icon-hand-right',
+						onclick: function() {
+							if(me.form.doc.__unsaved) {
+								msgprint("Please save before renaming");
+								return;
+							}
+							var d = new wn.ui.Dialog({
+								title: "Rename " + me.form.docname,
+								fields: [
+									{label:"New Name", fieldname:"new_name", fieldtype: "Data",
+									reqd: 1},
+									{label: "Rename", fieldname: "rename", fieldtype: "Button"}
+								]
+							});
+							
+							$(d.fields_dict.rename.input).click(function() {
+								var v = d.get_values();
+								if(!v) return;
+								
+								wn.call({
+									method:'webnotes.widgets.form.utils.rename',
+									args: {
+										doctype: me.form.doctype,
+										old_name: me.form.docname,
+										new_name: v.new_name
+									},
+									callback: function(r) {
+										if(r.exc) {
+											msgprint("Did not rename.")
+										} else {
+											wn.set_route('Form', me.form.doctype, r.message);
+											LocalDB.delete_record(me.form.doctype, me.form.docname);
+											d.hide();
+										}
+									},
+									btn: this
+								});
+								
+							})
+							d.show();
+							
+						}
+					}					
 				],
 				display: function() {
 					return me.form.meta.hide_toolbar ? false : true;
