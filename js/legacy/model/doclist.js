@@ -33,8 +33,7 @@ function compress_doclist(list) {
 			
 			for(key in wn.meta.docfield_map[o.doctype]) { // all other values
 				if(!in_list(fl, key) 
-					&& !in_list(no_value_fields, wn.meta.docfield_map[o.doctype][key].fieldtype)
-					&& !wn.meta.docfield_map[o.doctype][key].no_column) {
+					&& !in_list(no_value_fields, wn.meta.docfield_map[o.doctype][key].fieldtype)) {
 						fl[fl.length] = key; // save value list
 						tfl[tfl.length] = key //.replace(/'/g, "\\'").replace(/\n/g, "\\n");
 					}
