@@ -100,9 +100,6 @@ def random_string(length):
 	from random import choice
 	return ''.join([choice(string.letters + string.digits) for i in range(length)])
 
-def db_exists(dt, dn):
-	return webnotes.conn.sql('select name from `tab%s` where name="%s"' % (dt, dn))
-
 def load_json(arg):
 	# already a dictionary?
 	if not isinstance(arg, basestring):
