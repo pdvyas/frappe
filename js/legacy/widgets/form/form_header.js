@@ -48,6 +48,11 @@ _f.FrmHeader = Class.extend({
 		
 	},
 	refresh_labels: function() {
+		if(cur_frm.meta.hide_toolbar) {
+			// hide label with toolbar
+			return;
+		}
+		
 		var labinfo = {
 			0: ['Saved', 'label-success'],
 			1: ['Submitted', 'label-info'],

@@ -26,8 +26,6 @@ import webnotes
 no_value_fields = ['Section Break', 'Column Break', 'HTML', 'Table', 'FlexTable', 'Button', 'Image', 'Graph']
 default_fields = ['doctype','name','owner','creation','modified','modified_by','parent','parentfield','parenttype','idx','docstatus']
 
-#=================================================================================
-
 def check_if_doc_is_linked(dt, dn):
 	"""
 		Raises excption if the given doc(dt, dn) is linked in another record.
@@ -142,8 +140,6 @@ def get_link_fields(dt):
 	link_fields = [[lf['parent'], lf['fieldname']] for lf in link_fields]
 	return link_fields
 	
-#=================================================================================
-
 def clear_recycle_bin():
 	"""
 		Clears temporary records that have been deleted
@@ -170,34 +166,6 @@ def clear_recycle_bin():
 			sql("delete from `%s` where parent like 'old_parent:%%'" % t[0])
 
 	webnotes.msgprint("%s records deleted" % str(int(total_deleted)))
-	
-	
-# Make Table Copy
-#=================================================================================
-
-def copytables(srctype, src, srcfield, tartype, tar, tarfield, srcfields, tarfields=[]):
-	import webnotes.model.doc
-
-	if not tarfields: 
-		tarfields = srcfields
-	l = []
-	data = webnotes.model.doc.getchildren(src.name, srctype, srcfield)
-	for d in data:
-		newrow = webnotes.model.doc.addchild(tar, tarfield, tartype, local = 1)
-		newrow.idx = d.idx
-	
-		for i in range(len(srcfields)):
-			newrow.fields[tarfields[i]] = d.fields[srcfields[i]]
-			
-		l.append(newrow)
-	return l
-
-# DB Exists
-#=================================================================================
-
-def db_exists(dt, dn):
-	import webnotes
-	return webnotes.conn.exists(dt, dn)
 
 
 def delete_fields(args_dict, delete=0):
