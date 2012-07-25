@@ -23,11 +23,145 @@
 # TODO:
 # Patch: Remove DocFormat
 
+"""
+Get metadata (main doctype with fields and permissions with all table doctypes)
+
+- if exists in cache, get it from cache
+- add custom fields
+- override properties from PropertySetter
+- sort based on prev_field
+- optionally, post process (add js, css, select fields), or without
+
+"""
 # imports
 import webnotes
 import webnotes.model
 import webnotes.model.doc
 from webnotes.utils.cache import CacheItem
+
+docfield_types = None
+
+def get(doctype, processed=True):
+	"""return doclist"""	
+	doclist = from_cache(doctype, processed)
+	if doclist: return doclist
+	
+	load_docfield_types()
+	
+	doclist = get_doctype_doclist(doctype)
+		
+	# add doctypes of table field
+	table_types = [d.options for d in doclist \
+		if d.doctype=='DocField' and d.fieldtype=='Table']
+		
+	for table_doctype in table_types:
+		doclist += get_doctype_doclist(table_doctype)
+		
+	if processed: process(doctype, doclist)
+		
+	to_cache(doctype, processed, doclist)
+	
+	return doclist
+
+def load_docfield_types():
+	global docfield_types
+	docfield_types = dict(webnotes.conn.sql("""select fieldname, fieldtype from tabDocField
+		where parent='DocField'"""))
+
+def get_doctype_doclist(doctype):
+	"""get doclist of single doctype"""
+	doclist = webnotes.model.doc.get('DocType', doctype)
+	add_custom_fields(doctype, doclist)
+	apply_property_setters(doctype, doclist)
+	doclist = sort_fields(doclist)
+	return doclist
+
+def sort_fields(doclist):
+	"""sort on basis of previous_field"""
+	newlist = []
+	pending = filter(lambda d: d.doctype=='DocField', doclist)
+	
+	maxloops = 20
+	while (pending and maxloops>0):
+		maxloops -= 1
+		for d in pending[:]:
+			if d.previous_field:
+				# field already added
+				for n in newlist:
+					if n.fieldname==d.previous_field:						
+						newlist.insert(newlist.index(n)+1, d)
+						pending.remove(d)
+						break
+			else:
+				newlist.append(d)
+				pending.remove(d)
+			
+	# recurring at end	
+	if pending:
+		newlist += pending
+		
+	# renum
+	idx = 1
+	for d in newlist:
+		d.idx = idx
+		idx += 1
+		
+	return filter(lambda d: d.doctype!='DocField', doclist) + newlist
+			
+def apply_property_setters(doctype, doclist):		
+	from webnotes.utils import cint, flt
+	for ps in webnotes.conn.sql("""select * from `tabProperty Setter` where
+		doc_type=%s""", doctype, as_dict=1):
+		if ps['doctype_or_field']=='DocType':
+			doclist[0].fields[ps['property']] = ps['value']
+		else:
+			docfield = filter(lambda d: d.doctype=="DocField" and d.fieldname==ps['field_name'], 
+				doclist)[0]
+			if docfield_types.get(ps['property'], None) in ('Int', 'Check'):
+				ps['value'] = cint(ps['value'])
+				
+			docfield.fields[ps['property']] = ps['value']
+
+def add_custom_fields(doctype, doclist):
+	res = webnotes.conn.sql("""SELECT * FROM `tabCustom Field`
+		WHERE dt = %s AND docstatus < 2""", doctype, as_dict=1)
+
+	for r in res:
+		custom_field = webnotes.model.doc.Document(fielddata=r)
+		
+		# convert to DocField
+		custom_field.fields.update({
+			'doctype': 'DocField',
+			'parent': doctype,
+			'parentfield': 'fields',
+			'parenttype': 'DocType',
+		})
+		doclist.append(custom_field)
+
+	return doclist
+	
+def from_cache(doctype, processed):
+	""" load doclist from cache.
+		sets flag __from_cache in first doc of doclist if loaded from cache"""
+	json_doclist = CacheItem(cache_name(doctype, processed)).get()
+	if json_doclist:
+		import json
+		doclist = [webnotes.model.doc.Document(fielddata=d)
+				for d in json.loads(json_doclist)]
+		doclist[0].__from_cache = True
+		return doclist
+
+def to_cache(doctype, processed, doclist):
+	import json
+	json_doclist = json.dumps([d.fields for d in doclist])
+	CacheItem(cache_name(doctype, processed)).set(json_doclist)
+
+def cache_name(doctype, processed):
+	"""returns cache key"""
+	return doctype + (not processed and ":Raw" or "")
+
+def process(doctype, doclist):
+	
 
 class _DocType:
 	"""
@@ -370,14 +504,6 @@ class _DocType:
 		json_doclist = json.dumps([d.fields for d in doclist])
 		CacheItem(self.name).set(json_doclist)
 
-def get(dt, form=1):
-	"""
-	Load "DocType" - called by form builder, report buider and from code.py (when there is no cache)
-	"""
-	if not dt: return []
-
-	doclist = _DocType(dt).make_doclist(form)	
-	return doclist
 
 # Deprecate after import_docs rewrite
 def get_field_property(dt, fieldname, property):
@@ -427,30 +553,3 @@ def get_property(dt, property, fieldname=None):
 		else:
 			return webnotes.conn.get_value('DocType', dt, property)
 
-# Test Cases
-import unittest
-
-class DocTypeTest(unittest.TestCase):
-	def setUp(self):
-		self.name = 'Sales Order'
-		self.dt = _DocType(self.name)
-
-	def tearDown(self):
-		webnotes.conn.rollback()
-
-	def test_make_doclist(self):
-		doclist = self.dt.make_doclist()
-		for d in doclist:
-			print d.idx, d.doctype, d.name, d.parent
-			if not d.doctype: print d.fields
-			#print "--", d.name, "--"
-			#print d.doctype
-		self.assertTrue(doclist)
-
-	def test_get_custom_fields(self):
-		return
-		doclist = self.dt.get_custom_fields(self.name)
-		for d in doclist:
-			print "--", d.name, "--"
-			print d.fields
-		self.assertTrue(doclist)

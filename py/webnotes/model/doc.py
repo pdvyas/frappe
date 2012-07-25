@@ -29,7 +29,7 @@ import webnotes.model.meta
 
 from webnotes.utils import *
 
-class Document:
+class Document(object):
 	"""
 	   The wn(meta-data)framework equivalent of a Database Record.
 	   Stores,Retrieves,Updates the record in the corresponding table.
@@ -98,9 +98,6 @@ class Document:
 	def __nonzero__(self):
 		return True
 
-	def __str__(self):
-		return str(self.fields)
-
 	# Load Document
 	# ---------------------------------------------------------------------------
 
@@ -166,9 +163,14 @@ class Document:
 		if self.__dict__.has_key(name):
 			return self.__dict__[name]
 		elif self.fields.has_key(name):
-			return self.fields[name]	
-		else:
+			return self.fields[name]
+		try:
+			return object.__getattr__(name)
+		except AttributeError, e:
 			return ''
+			
+	def __str__(self):
+		return unicode(self.fields)
 
 	# Get Amendement number
 	# ---------------------------------------------------------------------------
@@ -318,9 +320,12 @@ class Document:
 
 	def make_link_list(self):
 		res = webnotes.model.meta.get_link_fields(self.doctype)
+		webnotes.msgprint(res)
 
 		link_list = {}
-		for i in res: link_list[i[0]] = (i[1], i[2]) # options, label
+		for i in res: 
+			link_list[i[0]] = (i[1], i[2]) # options, label
+					
 		return link_list
 	
 	def _validate_link(self, dt, dn):
@@ -399,7 +404,9 @@ class Document:
 				return r
 				
 		# save the values
-		self._update_values(res.get('issingle'), check_links and self.make_link_list() or {}, ignore_fields)
+		self._update_values(res.get('issingle'), 
+			check_links and self.make_link_list() or {}, 
+			ignore_fields)
 		self._clear_temp_fields()
 
 	def update_parentinfo(self):
@@ -630,15 +637,9 @@ def getchildren(name, childtype, field='', parenttype='', from_doctype=0, prefix
 	if parenttype:
 		tmp = ' and parenttype="%s" ' % parenttype
 
-	try:
-		dataset = webnotes.conn.sql("select * from `%s%s` where parent='%s' %s order by idx" \
-			% (prefix, childtype, name, tmp))
-		desc = webnotes.conn.get_description()
-	except Exception, e:
-		if prefix=='arc' and e.args[0]==1146:
-			return []
-		else:
-			raise e
+	dataset = webnotes.conn.sql("select * from `%s%s` where parent='%s' %s order by idx" \
+		% (prefix, childtype, name, tmp))
+	desc = webnotes.conn.get_description()
 
 	l = []
 	

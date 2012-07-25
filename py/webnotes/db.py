@@ -78,7 +78,8 @@ class Database:
 		"""
 		      Update *in_transaction* and check if "START TRANSACTION" is not called twice
 		"""
-		if self.in_transaction and query and query.strip().split()[0].lower() in ['start', 'alter', 'drop', 'create']:
+		if self.in_transaction and query and query.strip().split()[0].lower() in \
+			['start', 'alter', 'drop', 'create', 'rename']:
 			raise Exception, 'This statement can cause implicit commit'
 
 		if query and query.strip().lower()=='start transaction':
@@ -122,7 +123,8 @@ class Database:
 
 	# ======================================================================================
 	
-	def sql(self, query, values=(), as_dict = 0, as_list = 0, formatted = 0, ignore_no_table = 1, debug=0, ignore_ddl=0, as_utf8=0):
+	def sql(self, query, values=(), as_dict = 0, as_list = 0, formatted = 0, ignore_no_table = 1, 
+		debug=0, ignore_ddl=0, as_utf8=0):
 		"""
 		      * Execute a `query`, with given `values`
 		      * returns as a dictionary if as_dict = 1
@@ -132,20 +134,28 @@ class Database:
 		self.check_transaction_status(query)
 			
 		# execute
-		try:
-			if values!=():
-				if debug: webnotes.errprint(query % values)
-				self._cursor.execute(query, values)
+		import warnings
+		with warnings.catch_warnings(record=True) as w:		
+			try:
+				if values!=():
+					if debug: webnotes.errprint(query % values)
+					self._cursor.execute(query, values)
 				
-			else:
-				if debug: webnotes.errprint(query)
-				self._cursor.execute(query)	
-		except Exception, e:
-			# ignore data definition errors
-			if ignore_ddl and e.args[0] in (1146,1054,1091):
-				pass
-			else:
-				raise e
+				else:
+					if debug: webnotes.errprint(query)
+					self._cursor.execute(query)	
+			except Exception, e:
+				# ignore data definition errors
+				if ignore_ddl and e.args[0] in (1146,1054,1091):
+					pass
+				else:
+					raise e
+					
+			if webnotes.catch_warning and w:
+				print "Warning Exception:"
+				print w[0].message
+				print query % values
+				raise Exception, 'MySQL Warning'
 
 		# scrub output if required
 		if as_dict:
