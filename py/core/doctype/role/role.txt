@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:35:38',
+		'creation': '2012-07-03 13:30:35',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:35:38',
+		'modified': '2012-07-25 17:32:52',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -28,7 +28,7 @@
 		'section_style': u'Simple',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 1
+		'version': 11
 	},
 
 	# These values are common for all DocField
@@ -50,6 +50,7 @@
 		'parent': u'Role',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
+		'permlevel': 0,
 		'read': 1,
 		'submit': 0,
 		'write': 1
@@ -64,7 +65,7 @@
 	# DocPerm
 	{
 		'doctype': u'DocPerm',
-		'permlevel': 0,
+		'execute': 0,
 		'role': u'Administrator'
 	},
 

@@ -26,6 +26,34 @@ import webnotes
 no_value_fields = ['Section Break', 'Column Break', 'HTML', 'Table', 'FlexTable', 'Button', 'Image', 'Graph']
 default_fields = ['doctype','name','owner','creation','modified','modified_by','parent','parentfield','parenttype','idx','docstatus']
 
+def get(doctype, name):
+	import webnotes.model.doc
+	return webnotes.model.doc.get(doctype, name)
+	
+def get_doctype(doctype, processed=False):
+	import webnotes.model.doc
+	return webnotes.model.doctype.get(doctype, processed)
+
+def insert(doclist):
+	"""insert a new doclist"""
+	from webnotes.model.doclist import DocList
+	if doclist and not isinstance(doclist, list):
+		doclist = [doclist]
+	doclistobj = DocList(doclist)
+	doclistobj.doc.fields['__islocal'] = 1
+	doclistobj.save()
+	
+def insert_child(fields):
+	"""insert a child, must specify parent, parenttype and doctype"""
+	import webnotes.model.doc
+	from webnotes.model.doclist import DocList
+
+	doclistobj = webnotes.model.doc.get(fields['parenttype'], fields['parent'])
+	new = webnotes.model.doc.Document(fielddata = fields)
+	new.fields['__islocal'] = 1
+	doclistobj.append(new)
+	DocList(doclistobj).save()
+	
 def check_if_doc_is_linked(dt, dn):
 	"""
 		Raises excption if the given doc(dt, dn) is linked in another record.
@@ -167,42 +195,3 @@ def clear_recycle_bin():
 
 	webnotes.msgprint("%s records deleted" % str(int(total_deleted)))
 
-
-def delete_fields(args_dict, delete=0):
-	"""
-		Delete a field.
-		* Deletes record from `tabDocField`
-		* If not single doctype: Drops column from table
-		* If single, deletes record from `tabSingles`
-
-		args_dict = { dt: [field names] }
-	"""
-	import webnotes.utils
-	for dt in args_dict.keys():
-		fields = args_dict[dt]
-		if not fields: continue
-		
-		webnotes.conn.sql("""\
-			DELETE FROM `tabDocField`
-			WHERE parent=%s AND fieldname IN (%s)
-		""" % ('%s', ", ".join(['"' + f + '"' for f in fields])), dt)
-		
-		# Delete the data / column only if delete is specified
-		if not delete: continue
-		
-		is_single = webnotes.conn.sql("select issingle from tabDocType where name = '%s'" % dt)
-		is_single = is_single and webnotes.utils.cint(is_single[0][0]) or 0
-		if is_single:
-			webnotes.conn.sql("""\
-				DELETE FROM `tabSingles`
-				WHERE doctype=%s AND field IN (%s)
-			""" % ('%s', ", ".join(['"' + f + '"' for f in fields])), dt)
-		else:
-			existing_fields = webnotes.conn.sql("desc `tab%s`" % dt)
-			existing_fields = existing_fields and [e[0] for e in existing_fields] or []
-			query = "ALTER TABLE `tab%s` " % dt + \
-				", ".join(["DROP COLUMN `%s`" % f for f in fields if f in existing_fields])
-			webnotes.conn.commit()
-			webnotes.conn.sql(query)
-				
-			
