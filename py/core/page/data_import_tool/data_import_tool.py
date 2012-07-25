@@ -12,7 +12,7 @@ def get_doctype_options():
 	import webnotes.model.doctype
 	return [doctype] + filter(None, map(lambda d: \
 		d.doctype=='DocField' and d.fieldtype=='Table' and d.options or None, 
-		webnotes.model.doctype.get(doctype, form=0)))
+		webnotes.model.doctype.get(doctype)))
 
 data_separator = '----Start entering data below this line----'
 
@@ -152,7 +152,7 @@ def upload():
 	
 	# doctype
 	doctype = rows[0][0].split(':')[1].strip()
-	doctype_dl = webnotes.model.doctype.get(doctype, form=0)
+	doctype_dl = webnotes.model.doctype.get(doctype, processed=False)
 	
 	if doctype in ['Customer', 'Supplier'] and len(rows[8:]) > 100:
 		webnotes.msgprint("Please upload only upto 100 %ss at a time" % doctype)

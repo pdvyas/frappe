@@ -57,7 +57,7 @@ class DocType:
 		self.set_fieldname()
 		
 		from webnotes.model.doctype import get
-		temp_doclist = get(self.doc.dt, form=0)
+		temp_doclist = get(self.doc.dt, processed=False)
 		
 		self.validate_field(temp_doclist)
 		
@@ -128,7 +128,7 @@ def get_fields_label(dt=None, form=1):
 		fieldname = webnotes.form_dict.get('fieldname')
 	if not dt: return ""
 	
-	doclist = webnotes.model.doctype.get(dt, form=0)
+	doclist = webnotes.model.doctype.get(dt, processed=False)
 	docfields = sorted((d for d in doclist if d.doctype=='DocField'),
 			key=lambda d: d.idx)
 	if fieldname:

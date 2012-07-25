@@ -26,6 +26,16 @@ cur_frm.cscript.doc_type = function(doc, dt, dn) {
 	});
 }
 
+cur_frm.fields_dict.doc_type.get_query = function() {
+	return 'select name from tabDocType where\
+		(module IN  ("Accounts", "Buying", "HR", "Knowledge Base", "Production", "Projects", \
+			"Selling", "Stock", "Support") \
+		OR name IN ("Contact", "Address")) \
+		AND IFNULL(issingle, 0)=0 \
+		AND IFNULL(in_create, 0)=0 \
+		and %(key)s like "%s" order by name limit 50';
+}
+
 cur_frm.cscript.onload = function(doc, dt, dn) {
 	$('div.grid_tbarlinks').parent().toggle(false);
 	cur_frm.add_fields_help();

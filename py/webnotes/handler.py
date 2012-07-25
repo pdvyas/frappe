@@ -48,9 +48,6 @@ def cleanup_docs():
 	if webnotes.response.get('docs') and type(webnotes.response['docs'])!=dict:
 		webnotes.response['docs'] = webnotes.model.utils.compress(webnotes.response['docs'])
 
-# server calls
-# ------------------------------------------------------------------------------------
-
 @webnotes.whitelist()
 def runserverobj(arg=None):
 	import webnotes.widgets.form.run_method
@@ -59,10 +56,6 @@ def runserverobj(arg=None):
 @webnotes.whitelist(allow_guest=True)
 def logout():
 	webnotes.login_manager.logout()
-
-
-# DocType Mapper
-# ------------------------------------------------------------------------------------
 
 @webnotes.whitelist()
 def dt_map():
@@ -84,9 +77,6 @@ def dt_map():
 	
 	webnotes.response['docs'] = dl
 
-# Load Month Events
-# ------------------------------------------------------------------------------------
-
 @webnotes.whitelist()
 def load_month_events():
 	import webnotes
@@ -99,31 +89,6 @@ def load_month_events():
 
 	import webnotes.widgets.event
 	webnotes.response['docs'] = webnotes.widgets.event.get_cal_events(m_st, m_end)
-
-# Data import
-# ------------------------------------------------------------------------------------
-
-@webnotes.whitelist()
-def import_csv():
-	import webnotes.model.import_docs
-	form = webnotes.form
-	from webnotes.utils import cint
-	
-	i = webnotes.model.import_docs.CSVImport()
-	r = i.import_csv(form.getvalue('csv_file'), form.getvalue('dateformat'), form_dict.get('overwrite', 0) and 1)
-	
-	webnotes.response['type']='iframe'
-	rhead = '''<style>body, html {font-family: Arial; font-size: 12px;}</style>'''
-	webnotes.response['result']= rhead + r
-
-@webnotes.whitelist()
-def get_template():
-	import webnotes.model.import_docs
-	webnotes.model.import_docs.get_template()
-	
-
-# File Upload
-# ------------------------------------------------------------------------------------
 
 @webnotes.whitelist()
 def uploadfile():

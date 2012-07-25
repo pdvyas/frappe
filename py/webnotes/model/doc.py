@@ -320,7 +320,6 @@ class Document(object):
 
 	def make_link_list(self):
 		res = webnotes.model.meta.get_link_fields(self.doctype)
-		webnotes.msgprint(res)
 
 		link_list = {}
 		for i in res: 
@@ -714,10 +713,43 @@ def get(dt, dn='', with_children = 1, from_get_obj = 0, prefix = 'tab'):
 	if not from_get_obj:
 		get_report_builder_code(doc)
 
-	return doclist
+	return DocList(doclist)
 
 def getsingle(doctype):
 	"""get single doc as dict"""
 	dataset = webnotes.conn.sql("select field, value from tabSingles where doctype=%s", doctype)
 	return dict(dataset)
+
+class DocList(list):
+	def get(self, filters, max=0):
+		"""pass filters as:
+			{"key":"val", "key":"!val", "key": "^val"}"""
+		out = []
+		for d in self:
+			add = True
+			for f in filters:
+				fval = filters[f]
+				if fval.startswith('!'): 
+					if d.fields.get(f) == fval[1:]:
+						add = False
+						break
+				if fval.startswith('^'): 
+					if not (d.fields.get(f) or '').startswith(fval[1:]):
+						add = False
+						break
+				elif d.fields.get(f)!=fval:
+					add = False
+					break
+
+			if add: 
+				out.append(d)
+				if max and len(out)-1==max:
+					break
+		return DocList(out)
 	
+	def getone(self, filters):
+		return self.get(filters, max=1)[0]
+		
+	def extend(self, n):
+		list.extend(self, n)
+		return self
