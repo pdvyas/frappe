@@ -27,7 +27,7 @@ Stores key-value pairs in database and enables simple caching
 
 CacheItem(key).get() returns the cached value if not expired (else returns null)
 CacheItem(key).set(interval = 60000) sets a value to cache, expiring after x seconds
-CahceItem(key).clear() clears an old value
+CacheItem(key).clear() clears an old value
 setup() sets up cache
 """
 

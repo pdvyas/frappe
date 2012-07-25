@@ -36,18 +36,22 @@ import webnotes.model
 import webnotes.model.doc
 from webnotes.utils.cache import CacheItem
 
+doctype_cache = {}
 docfield_types = None
 
 def get(doctype, processed=False):
 	"""return doclist"""
+
+	# from database cache __CacheItem
 	doclist = from_cache(doctype, processed)
 	if doclist: return doclist
 	
 	load_docfield_types()
 	
+	# main doctype doclist
 	doclist = get_doctype_doclist(doctype)
 		
-	# add doctypes of table field
+	# add doctypes of table fields
 	table_types = [d.options for d in doclist \
 		if d.doctype=='DocField' and d.fieldtype=='Table']
 		
@@ -60,7 +64,7 @@ def get(doctype, processed=False):
 		add_print_formats(doclist)
 
 	to_cache(doctype, processed, doclist)
-	
+		
 	return doclist
 
 def load_docfield_types():
@@ -144,6 +148,13 @@ def add_custom_fields(doctype, doclist):
 def from_cache(doctype, processed):
 	""" load doclist from cache.
 		sets flag __from_cache in first doc of doclist if loaded from cache"""
+	global doctype_cache
+
+	# from memory
+	if not processed and doctype in doctype_cache:
+		return doctype_cache[doctype]
+
+
 	json_doclist = CacheItem(cache_name(doctype, processed)).get()
 	if json_doclist:
 		import json
@@ -153,13 +164,27 @@ def from_cache(doctype, processed):
 		return doclist
 
 def to_cache(doctype, processed, doclist):
+	global doctype_cache
 	import json
+	
 	json_doclist = json.dumps([d.fields for d in doclist])
 	CacheItem(cache_name(doctype, processed)).set(json_doclist)
+
+	if not processed:
+		doctype_cache[doctype] = doclist
+	
 
 def cache_name(doctype, processed):
 	"""returns cache key"""
 	return doctype + (not processed and ":Raw" or "")
+
+def clear_cache(doctype):
+	global doctype_cache
+	CacheItem(cache_name(doctype, False)).clear()
+	CacheItem(cache_name(doctype, True)).clear()
+	if doctype in doctype_cache:
+		del doctype_cache[doctype]
+	
 
 def add_code(doctype, doclist):
 	import os, conf

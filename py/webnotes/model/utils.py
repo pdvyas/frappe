@@ -29,6 +29,8 @@ def rename(doctype, old, new):
 	import webnotes.model.doctype
 	from webnotes.model.code import get_obj
 	
+	doctypelist = webnotes.model.doctype.get(doctype)
+
 	# call on_rename method if exists
 	obj = get_obj(doctype, old)
 	hasattr(obj, 'on_rename') and obj.on_rename(new, old)
@@ -38,7 +40,6 @@ def rename(doctype, old, new):
 		(new, old))
 	
 	# rename children
-	doctypelist = webnotes.model.doctype.get(doctype)
 	for d in doctypelist.get({"fieldtype":"Table"}):
 		webnotes.conn.sql("""update `tab%s` set parent=%s where parent=%s""" % (d.options, '%s', '%s'),
 			(new, old))
@@ -53,10 +54,16 @@ def rename_links(doctype, old, new):
 		link_fields = webnotes.model.doctype.get_link_fields(dt[0])
 		for df in link_fields.get({"options":doctype}).extend(\
 			link_fields.get({"options":"link:" + doctype})):
-			webnotes.conn.sql("""update `tab%s` set `%s`=%s where `%s`=%s""" % \
-				(df.parent, df.fieldname, '%s', df.fieldname, '%s'),
-				(new, old))
-		
+			
+			if webnotes.model.doctype.get_property(dt[0], 'issingle'):
+				webnotes.conn.sql("""update `tabSingles` set `value`=%s 
+					where doctype=%s and field=%s and `value`=%s""",
+					(new, dt[0], df.fieldname, old))
+			else:
+				webnotes.conn.sql("""update `tab%s` set `%s`=%s where `%s`=%s""" % \
+					(df.parent, df.fieldname, '%s', df.fieldname, '%s'),
+					(new, old))
+				
 		
 
 def expand(docs):
