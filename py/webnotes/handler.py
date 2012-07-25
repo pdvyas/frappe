@@ -199,16 +199,10 @@ def execute_cmd(cmd):
 	validate_cmd(cmd)
 	method = get_method(cmd)
 
-	# check if whitelisted
-	if webnotes.session['user'] == 'Guest':
-		if (method not in webnotes.guest_methods):
-			webnotes.response['403'] = 1
-			raise Exception, 'Not Allowed, %s' % str(method)
-	else:
-		if not method in webnotes.whitelisted:
-			webnotes.response['403'] = 1
-			webnotes.msgprint('Not Allowed, %s' % str(method))
-			raise Exception, 'Not Allowed, %s' % str(method)
+	if not method in webnotes.whitelisted:
+		webnotes.response['403'] = 1
+		webnotes.msgprint('Not Allowed, %s' % str(method))
+		raise Exception, 'Not Allowed, %s' % str(method)
 		
 	if not webnotes.conn.in_transaction:
 		webnotes.conn.begin()

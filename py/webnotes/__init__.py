@@ -184,8 +184,10 @@ def get_db_password(db_name):
 		return db_name
 
 
+# this will be updated when the related module is imported
+# and will be used by handler to allow
 whitelisted = []
-guest_methods = []
+
 def whitelist(allow_guest=False, allow_roles=[]):
 	"""
 	decorator for whitelisting a function
@@ -196,22 +198,25 @@ def whitelist(allow_guest=False, allow_roles=[]):
 	for specific roles, set allow_roles = ['Administrator'] etc.
 	"""
 	def innerfn(fn):
-		global whitelisted, guest_methods
-		whitelisted.append(fn)
-
-		if allow_guest:
-			guest_methods.append(fn)
-
-		if allow_roles:
-			roles = get_roles()
-			allowed = False
-			for role in allow_roles:
-				if role in roles:
-					allowed = True
-					break
-			
-			if not allowed:
-				raise PermissionError, "Method not allowed"
+		global whitelisted
+		import webnotes
+		if webnotes.session:
+		 	if webnotes.session['user']=='Guest':
+				# only methods explicitly flagged as "allow_guest"
+				# to be added if user is "Guest"
+				if allow_guest:
+					whitelisted.append(fn)		
+			else:
+				if allow_roles:
+					# if specific roles are mentioned,
+					# add to whitelist only if user has that role
+					roles = get_roles()
+					for role in allow_roles:
+						if role in roles:
+							whitelisted.append(fn)
+							break
+				else:
+					whitelisted.append(fn)
 
 		return fn
 
