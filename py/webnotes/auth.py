@@ -56,7 +56,7 @@ class HTTPRequest:
 		# start session
 		webnotes.session_obj = Session()
 		webnotes.session = webnotes.session_obj.data
-
+		
 		# check status
 		if webnotes.conn.get_global("__session_status")=='stop':
 			webnotes.msgprint(webnotes.conn.get_global("__session_status_message"))
@@ -145,7 +145,7 @@ class LoginManager:
 	def check_password(self, user, pwd):
 		"""check password"""
 		user = webnotes.conn.sql("""select `user` from __Auth where `user`=%s 
-			and `password`=password(%s)""", (user, pwd))
+			and `password`=password(%s)""", (user, pwd), debug=1)
 		if not user:
 			self.fail('Incorrect password')
 		else:

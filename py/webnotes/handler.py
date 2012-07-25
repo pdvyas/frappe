@@ -163,7 +163,6 @@ def execute_cmd(cmd):
 	"""execute a request as python module"""
 	validate_cmd(cmd)
 	method = get_method(cmd)
-
 	if not method in webnotes.whitelisted:
 		webnotes.response['403'] = 1
 		webnotes.msgprint('Not Allowed, %s' % str(method))

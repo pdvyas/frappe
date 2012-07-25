@@ -108,8 +108,8 @@ class Installer:
 		import webnotes
 		# set the basic passwords
 		webnotes.conn.begin()
-		webnotes.conn.sql("""update `__Auth` set `password` = password('admin) \
-			where user = 'Administrator'""")
+		webnotes.conn.sql("""insert into __Auth (user, `password`) values ('Administrator', password('admin')) \
+			on duplicate key update `password`=password('admin')""")
 		webnotes.conn.commit()
 
 	def create_sessions_table(self):

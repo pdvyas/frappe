@@ -198,6 +198,7 @@ def whitelist(allow_guest=False, allow_roles=[]):
 	def innerfn(fn):
 		global whitelisted
 		import webnotes
+				
 		if webnotes.session:
 		 	if webnotes.session['user']=='Guest':
 				# only methods explicitly flagged as "allow_guest"
