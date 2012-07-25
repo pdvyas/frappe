@@ -12,16 +12,34 @@ class DocTypeTest(unittest.TestCase):
 		webnotes.conn.rollback()
 
 	def test_profile(self):
-		doclist = webnotes.model.doctype.get('Profile')
+		doclist = webnotes.model.doctype.get('Profile', processed=True)
 		self.assertEquals(len(filter(lambda d: d.fieldname=='first_name' and d.doctype=='DocField', 
 			doclist)), 1)
 		self.assertEquals(len(filter(lambda d: d.name=='DefaultValue' and d.doctype=='DocType', 
 			doclist)), 1)
 		self.assertEquals(len(filter(lambda d: d.parent=='DefaultValue' and d.doctype=='DocField'
 			and d.fieldname=='defkey', doclist)), 1)
+		
+		# js code added
+		self.assertTrue(doclist[0].fields.get('__js'))
+		self.assertTrue(doclist[0].fields.get('__listjs'))
+		self.assertTrue(doclist[0].fields.get('__css'))
+		
+		# test embedded js code
+		self.assertTrue('wn.RoleEditor = Class.extend({' in doclist[0].fields.get('__js'))
+		
+		# check if exists in cache
 		self.assertTrue(webnotes.conn.sql("""select `key` from __CacheItem 
 			where `key`='Profile'"""))
 		return doclist
+		
+	def test_select_options(self):
+		doctypelist = webnotes.model.doctype.get('Role', processed=True)
+		self.assertTrue('System' in doctypelist.getone({"fieldname":"module"}).options.split())
+		
+	def test_print_format(self):
+		doctypelist = webnotes.model.doctype.get("Sales Order", processed=True)
+		self.assertEquals(len(doctypelist.get({"doctype":"Print Format"})), 3)
 
 	def test_with_cache(self):
 		self.assertFalse(getattr(self.test_profile()[0], '__from_cache', False))
@@ -31,14 +49,15 @@ class DocTypeTest(unittest.TestCase):
 
 	def test_doctype_doctype(self):
 		doclist = webnotes.model.doctype.get('DocType')
-		self.assertEquals(len(filter(lambda d: d.fieldname=='issingle' and d.doctype=='DocField', 
-			doclist)), 1)
-		self.assertEquals(len(filter(lambda d: d.name=='DocField' and d.doctype=='DocType', 
-			doclist)), 1)
-		self.assertEquals(len(filter(lambda d: d.parent=='DocField' and d.doctype=='DocField'
-			and d.fieldname=='fieldname', doclist)), 1)
+		
+		self.assertEquals(len(doclist.get({"fieldname":'issingle', "doctype":'DocField'})), 1) 
+		self.assertEquals(len(doclist.get({"name":'DocField', "doctype":'DocType'})), 1) 
+		self.assertEquals(len(doclist.get({"parent":'DocField', "doctype":'DocField', 
+			"fieldname":"fieldname"})), 1) 
+
+		# test raw cache
 		self.assertTrue(webnotes.conn.sql("""select `key` from __CacheItem 
-			where `key`='DocType'"""))
+			where `key`='DocType:Raw'"""))
 			
 	def test_property_setter(self):
 		doclist = webnotes.model.doctype.get('Profile')
@@ -63,13 +82,10 @@ class DocTypeTest(unittest.TestCase):
 		self.assertEquals(len(filter(lambda d: d.fieldname=='first_name' 
 			and (d.hidden or 0)==1, doclist)), 1)
 
-	def get_docfield(self, doclist, fieldname):
-		return filter(lambda d: d.fieldname==fieldname, doclist)[0]
-
 	def test_previous_field(self):
 		doclist = webnotes.model.doctype.get('Profile')
-		first_name_idx = self.get_docfield(doclist, 'first_name').idx
-		last_name_idx = self.get_docfield(doclist, 'last_name').idx
+		first_name_idx = doclist.getone({"fieldname":"first_name"}).idx
+		last_name_idx = doclist.getone({"fieldname":"last_name"}).idx
 		
 		self.assertTrue(first_name_idx < last_name_idx)
 
@@ -88,6 +104,15 @@ class DocTypeTest(unittest.TestCase):
 		ps.save()
 
 		doclist = webnotes.model.doctype.get('Profile')
-		first_name_idx = self.get_docfield(doclist, 'first_name').idx
-		last_name_idx = self.get_docfield(doclist, 'last_name').idx
+		first_name_idx = doclist.getone({"fieldname":"first_name"}).idx
+		last_name_idx = doclist.getone({"fieldname":"last_name"}).idx
 		self.assertEquals(last_name_idx+1, first_name_idx)
+		
+	def test_get_link_fields(self):
+		# link type
+		doctypelist = webnotes.model.doctype.get_link_fields("DocType")
+		self.assertTrue(len(doctypelist.get({"fieldname":"module", "fieldtype":"Link"})), 1)
+
+		# link: type selects
+		doctypelist = webnotes.model.doctype.get_link_fields("Role")
+		self.assertTrue(len(doctypelist.get({"fieldname":"module", "fieldtype":"Select"})), 1)

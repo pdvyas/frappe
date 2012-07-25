@@ -35,7 +35,7 @@ code_fields_dict = {
 	'Control Panel':[('startup_code', 'js'), ('startup_css', 'css')]
 }
 
-version = 'v170'
+auto_cache_clear = False
 form_dict = {}
 auth_obj = None
 conn = None
@@ -46,8 +46,6 @@ catch_warning = False
 incoming_cookies = {}
 add_cookies = {} # append these to outgoing request
 cookies = {}
-auto_masters = {}
-tenant_id = None
 response = {'message':'', 'exc':''}
 debug_log = []
 message_log = []

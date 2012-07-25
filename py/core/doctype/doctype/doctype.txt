@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-07-03 13:30:34',
 		'docstatus': 0,
-		'modified': '2012-07-11 16:15:21',
+		'modified': '2012-07-25 13:49:14',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -103,11 +103,11 @@
 	{
 		'doctype': u'DocField',
 		'fieldname': u'module',
-		'fieldtype': u'Data',
+		'fieldtype': u'Link',
 		'label': u'Module',
 		'oldfieldname': u'module',
 		'oldfieldtype': u'Link',
-		'options': u'Suggest',
+		'options': u'Module Def',
 		'reqd': 1
 	},
 

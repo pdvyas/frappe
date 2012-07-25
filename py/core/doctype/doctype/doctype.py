@@ -139,7 +139,7 @@ class DocType:
 		"""
 		if self.doc.allow_attach:
 			import webnotes.model.doctype
-			temp_doclist = webnotes.model.doctype.get(self.doc.name, form=0)
+			temp_doclist = webnotes.model.doctype.get(self.doc.name)
 			if 'file_list' not in [d.fieldname for d in temp_doclist if \
 					d.doctype=='DocField']:
 				new = self.doc.addchild('fields', 'DocField', 1, self.doclist)
@@ -162,7 +162,7 @@ class DocType:
 		"""
 		if self.doc.is_submittable:
 			import webnotes.model.doctype
-			temp_doclist = webnotes.model.doctype.get(self.doc.name, form=0)
+			temp_doclist = webnotes.model.doctype.get(self.doc.name)
 			max_idx = max([d.idx for d in temp_doclist if d.idx])
 			max_idx = max_idx and max_idx or 0
 			if 'amendment_date' not in [d.fieldname for d in temp_doclist if \

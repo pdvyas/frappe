@@ -12,7 +12,7 @@ def get_doctype_options():
 	import webnotes.model.doctype
 	return [doctype] + filter(None, map(lambda d: \
 		d.doctype=='DocField' and d.fieldtype=='Table' and d.options or None, 
-		webnotes.model.doctype.get(doctype, form=0)))
+		webnotes.model.doctype.get(doctype)))
 
 data_separator = '----Start entering data below this line----'
 
@@ -152,7 +152,7 @@ def upload():
 	
 	# doctype
 	doctype = rows[0][0].split(':')[1].strip()
-	doctype_dl = webnotes.model.doctype.get(doctype, form=0)
+	doctype_dl = webnotes.model.doctype.get(doctype, processed=False)
 	
 	if doctype in ['Customer', 'Supplier'] and len(rows[8:]) > 100:
 		webnotes.msgprint("Please upload only upto 100 %ss at a time" % doctype)
@@ -248,18 +248,18 @@ def delete_child_rows(rows, doctype):
 def import_doc(d, doctype, overwrite):
 	"""import main (non child) document"""
 	import webnotes
-	from webnotes.model.doc import Document
+	import webnotes.model.doc
 	from webnotes.model.doclist import DocList
 
 	if webnotes.conn.exists(doctype, d['name']):
 		if overwrite:
-			doc = Document(doctype, d['name'])
-			doc.fields.update(d)
-			DocList([doc]).save()
+			doclist = webnotes.model.doc.get(doctype, d['name'])
+			doclist[0].fields.update(d)
+			DocList(doclist).save()
 			return 'Updated ' + getlink(doctype, d['name'])
 		else:
 			return 'Ignored ' + getlink(doctype, d['name']) + ' (exists)'
 	else:
 		d['__islocal'] = 1
-		DocList([Document(fielddata = d)]).save()
+		DocList([webnotes.model.doc.Document(fielddata = d)]).save()
 		return 'Inserted ' + getlink(doctype, d['name'])

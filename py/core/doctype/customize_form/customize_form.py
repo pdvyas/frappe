@@ -97,7 +97,7 @@ class DocType:
 		"""
 		from webnotes.model.doctype import get
 
-		ref_doclist = get(self.doc.doc_type, form=0)
+		ref_doclist = get(self.doc.doc_type, processed=False)
 
 		return ref_doclist
 
