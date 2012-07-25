@@ -107,49 +107,6 @@ def getlist(doclist, field):
 
 	return l
 
-# Copy doclist
-# ------------
-
-def copy_doclist(doclist, no_copy = []):
-	"""
-      Save & return a copy of the given doclist
-      Pass fields that are not to be copied in `no_copy`
-	"""
-	from webnotes.model.doc import Document
-
-	cl = []
-
-	# main doc
-	c = Document(fielddata = doclist[0].fields.copy())
-
-	# clear no_copy fields
-	for f in no_copy:
-		if c.fields.has_key(f):
-			c.fields[f] = None
-
-	c.name = None
-	c.save(1)
-	cl.append(c)
-
-	# new parent name
-	parent = c.name
-
-	# children
-	for d in doclist[1:]:
-		c = Document(fielddata = d.fields.copy())
-		c.name = None
-
-		# clear no_copy fields
-		for f in no_copy:
-			if c.fields.has_key(f):
-				c.fields[f] = None
-
-		c.parent = parent
-		c.save(1)
-		cl.append(c)
-
-	return cl
-
 def getvaluelist(doclist, fieldname):
 	"""
 		Returns a list of values of a particualr fieldname from all Document object in a doclist

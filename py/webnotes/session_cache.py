@@ -62,10 +62,11 @@ def get():
 	country = webnotes.session['data'].get('ipinfo', {}).get('countryName', 'Unknown Country')
 
 	# check if cache exists
-	if not webnotes.auto_cache_clear:
-		cache = load(country)
-		if cache:
-			return cache
+	if webnotes.auto_cache_clear:
+		clear_cache()
+
+	cache = load(country)
+	if cache: return cache
 	
 	# if not create it
 	import webnotes.boot

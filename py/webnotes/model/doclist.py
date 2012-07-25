@@ -342,10 +342,3 @@ def getlist(doclist, parentfield):
 	import webnotes.model.utils
 	return webnotes.model.utils.getlist(doclist, parentfield)
 
-def copy_doclist(doclist, no_copy = []):
-	"""
-		Make a copy of the doclist
-	"""
-	import webnotes.model.utils
-	return webnotes.model.utils.copy_doclist(doclist, no_copy)
-

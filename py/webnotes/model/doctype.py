@@ -40,7 +40,7 @@ docfield_types = None
 
 def get(doctype, processed=False):
 	"""return doclist"""
-	doclist = not webnotes.auto_cache_clear and from_cache(doctype, processed)
+	doclist = from_cache(doctype, processed)
 	if doclist: return doclist
 	
 	load_docfield_types()
