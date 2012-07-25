@@ -26,7 +26,7 @@ import webnotes
 from webnotes.utils import cint, flt
 from webnotes.model.doc import Document
 from webnotes.model.code import get_obj
-from webnotes import session, form, is_testing, msgprint, errprint
+from webnotes import session, form, msgprint, errprint
 
 get_value = webnotes.conn.get_value
 	

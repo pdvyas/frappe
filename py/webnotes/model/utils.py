@@ -24,6 +24,48 @@
 Model utilities, unclassified functions
 """
 
+def rename(doctype, old, new):
+	import webnotes.utils
+	import webnotes.model.doctype
+	from webnotes.model.code import get_obj
+	
+	doctypelist = webnotes.model.doctype.get(doctype)
+
+	# call on_rename method if exists
+	obj = get_obj(doctype, old)
+	hasattr(obj, 'on_rename') and obj.on_rename(new, old)
+	
+	# rename main doc
+	webnotes.conn.sql("""update `tab%s` set name=%s where name=%s""" % (doctype, '%s', '%s'),
+		(new, old))
+	
+	# rename children
+	for d in doctypelist.get({"fieldtype":"Table"}):
+		webnotes.conn.sql("""update `tab%s` set parent=%s where parent=%s""" % (d.options, '%s', '%s'),
+			(new, old))
+	
+	# renamed linked
+	rename_links(doctype, old, new)
+	
+def rename_links(doctype, old, new):
+	import webnotes.model.doctype
+	
+	for dt in webnotes.conn.sql("""select name from tabDocType"""):
+		link_fields = webnotes.model.doctype.get_link_fields(dt[0])
+		for df in link_fields.get({"options":doctype}).extend(\
+			link_fields.get({"options":"link:" + doctype})):
+			
+			if webnotes.model.doctype.get_property(dt[0], 'issingle'):
+				webnotes.conn.sql("""update `tabSingles` set `value`=%s 
+					where doctype=%s and field=%s and `value`=%s""",
+					(new, dt[0], df.fieldname, old))
+			else:
+				webnotes.conn.sql("""update `tab%s` set `%s`=%s where `%s`=%s""" % \
+					(df.parent, df.fieldname, '%s', df.fieldname, '%s'),
+					(new, old))
+				
+		
+
 def expand(docs):
 	"""
 		Expand a doclist sent from the client side. (Internally used by the request handler)
@@ -106,50 +148,6 @@ def getlist(doclist, field):
 	l.sort(lambda a, b: cint(a.idx) - cint(b.idx))
 
 	return l
-
-def getvaluelist(doclist, fieldname):
-	"""
-		Returns a list of values of a particualr fieldname from all Document object in a doclist
-	"""
-	l = []
-	for d in doclist:
-		l.append(d.fields[fieldname])
-	return l
-
-def _make_html(doc, link_list):
-
-	from webnotes.utils import cstr
-	out = '<table class="simpletable">'
-	for k in doc.fields.keys():
-		if k!='server_code_compiled':
-			v = cstr(doc.fields[k])
-
-			# link field
-			if v and (k in link_list.keys()):
-				dt = link_list[k]
-				if isinstance(dt, basestring) and dt.startswith('link:'):
-					dt = dt[5:]
-				v = '<a href="index.cgi?page=Form/%s/%s">%s</a>' % (dt, v, v)
-
-			out += '\t<tr><td>%s</td><td>%s</td></tr>\n' % (cstr(k), v)
-
-	out += '</table>'
-	return out
-
-def to_html(doclist):
-	"""
-	Return a simple HTML format of the doclist
-	"""
-	out = ''
-	link_lists = {}
-
-	for d in doclist:
-		if not link_lists.get(d.doctype):
-			link_lists[d.doctype] = d.make_link_list()
-
-		out += _make_html(d, link_lists[d.doctype])
-
-	return out
 
 def commonify_doclist(doclist, with_comments=1):
 	"""

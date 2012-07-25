@@ -75,8 +75,8 @@ class DocType:
 		# create property setter to emulate insert after
 		self.create_property_setter()
 
-		from webnotes.utils.cache import CacheItem
-		CacheItem(self.doc.dt).clear()
+		from webnotes.model.doctype import clear_cache
+		clear_cache(self.doc.dt)
 
 	def on_trash(self):
 		# delete property setter entries
@@ -87,8 +87,9 @@ class DocType:
 			OR (property = 'previous_field' AND value = %s))""",
 				(self.doc.dt, self.doc.name, self.doc.name))
 
-		from webnotes.utils.cache import CacheItem
-		CacheItem(self.doc.dt).clear()
+		from webnotes.model.doctype import clear_cache
+		clear_cache(self.doc.dt)
+
 
 	def create_property_setter(self):
 		idx_label_list, field_list = get_fields_label(self.doc.dt, 0)

@@ -120,9 +120,8 @@ class DocType:
 		if (not in_transfer) and getattr(conf,'developer_mode', 0):
 			self.export_doc()
 
-		from webnotes.utils.cache import CacheItem
-		CacheItem(self.doc.name).clear()
-
+		from webnotes.model.doctype import clear_cache
+		clear_cache(self.doc.name)
 		
 	def export_doc(self):
 		from webnotes.modules.export_module import export_to_files
