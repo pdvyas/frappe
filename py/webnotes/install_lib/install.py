@@ -108,8 +108,8 @@ class Installer:
 		import webnotes
 		# set the basic passwords
 		webnotes.conn.begin()
-		webnotes.conn.sql("""update tabProfile set password = password('admin') 
-			where name='Administrator'""")
+		webnotes.conn.sql("""update `__Auth` set `password` = password('admin) \
+			where user = 'Administrator'""")
 		webnotes.conn.commit()
 
 	def create_sessions_table(self):
