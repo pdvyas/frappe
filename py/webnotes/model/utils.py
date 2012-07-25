@@ -24,6 +24,41 @@
 Model utilities, unclassified functions
 """
 
+def rename(doctype, old, new):
+	import webnotes.utils
+	import webnotes.model.doctype
+	from webnotes.model.code import get_obj
+	
+	# call on_rename method if exists
+	obj = get_obj(doctype, old)
+	hasattr(obj, 'on_rename') and obj.on_rename(new, old)
+	
+	# rename main doc
+	webnotes.conn.sql("""update `tab%s` set name=%s where name=%s""" % (doctype, '%s', '%s'),
+		(new, old))
+	
+	# rename children
+	doctypelist = webnotes.model.doctype.get(doctype)
+	for d in doctypelist.get({"fieldtype":"Table"}):
+		webnotes.conn.sql("""update `tab%s` set parent=%s where parent=%s""" % (d.options, '%s', '%s'),
+			(new, old))
+	
+	# renamed linked
+	rename_links(doctype, old, new)
+	
+def rename_links(doctype, old, new):
+	import webnotes.model.doctype
+	
+	for dt in webnotes.conn.sql("""select name from tabDocType"""):
+		link_fields = webnotes.model.doctype.get_link_fields(dt[0])
+		for df in link_fields.get({"options":doctype}).extend(\
+			link_fields.get({"options":"link:" + doctype})):
+			webnotes.conn.sql("""update `tab%s` set `%s`=%s where `%s`=%s""" % \
+				(df.parent, df.fieldname, '%s', df.fieldname, '%s'),
+				(new, old))
+		
+		
+
 def expand(docs):
 	"""
 		Expand a doclist sent from the client side. (Internally used by the request handler)

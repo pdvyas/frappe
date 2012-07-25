@@ -43,7 +43,6 @@ class Database:
 		if use_default:
 			self.user = conf.db_name
 
-		self.is_testing = 0
 		self.in_transaction = 0
 		self.transaction_writes = 0
 		self.testing_tables = []
@@ -242,27 +241,6 @@ class Database:
 					nr.append(self.convert_to_simple_type(c, formatted))
 			nres.append(nr)
 		return nres
-
-	# ======================================================================================
-
-	def replace_tab_by_test(self, query):
-		"""
-		      Relace all ``tab`` + doctype to ``test`` + doctype
-		"""
-		if self.is_testing:
-			tl = self.get_testing_tables()
-			for t in tl:
-				query = query.replace(t, 'test' + t[3:])
-		return query
-		
-	def get_testing_tables(self):
-		"""
-		      Get list of all tables for which `tab` is to be replaced by `test` before a query is executed
-		"""
-		if not self.testing_tables:
-			testing_tables = ['tab'+r[0] for r in self.sql('SELECT name from tabDocType where docstatus<2 and (issingle=0 or issingle is null)', allow_testing = 0)]
-			testing_tables+=['tabSeries','tabSingles'] # tabSessions is not included here
-		return self.testing_tables
 
 	# ======================================================================================
 	# get a single value from a record

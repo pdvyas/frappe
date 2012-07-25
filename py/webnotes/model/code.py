@@ -42,7 +42,7 @@ from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_dif
 from webnotes.model.doc import Document, addchild, getchildren, make_autoname
 from webnotes.model.utils import getlist
 from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updatedb, check_syntax
-from webnotes import session, form, is_testing, msgprint, errprint
+from webnotes import session, form, msgprint, errprint
 
 set = webnotes.conn.set
 sql = webnotes.conn.sql
@@ -129,13 +129,15 @@ def get_server_obj(doc, doclist = [], basedoctype = ''):
 	module = scrub(module)
 	dt = scrub(doc.doctype)
 
-	try:
-		module = __import__('%s.doctype.%s.%s' % (module, dt, dt), fromlist=[''])
-		DocType = getattr(module, 'DocType')
-	except ImportError, e:
-		class DocType:
-			def __init__(self, d, dl):
-				self.doc, self.doclist = d, dl
+	module = __import__('%s.doctype.%s.%s' % (module, dt, dt), fromlist=[''])
+	DocType = getattr(module, 'DocType')
+	# try:
+	# 	module = __import__('%s.doctype.%s.%s' % (module, dt, dt), fromlist=[''])
+	# 	DocType = getattr(module, 'DocType')
+	# except ImportError, e:
+	# 	class DocType:
+	# 		def __init__(self, d, dl):
+	# 			self.doc, self.doclist = d, dl
 
 	# custom?
 	custom_script = get_custom_script(doc.doctype, 'Server')

@@ -288,7 +288,7 @@ class DocList:
 # clone
 
 def clone(source_doclist):
-	""" Copy previous invoice and change dates"""
+	"""make a copy of the doclist"""
 	from webnotes.model.doc import Document
 	new_doclist = []
 	new_parent = Document(fielddata = source_doclist.doc.fields.copy())
