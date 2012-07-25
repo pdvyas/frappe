@@ -30,7 +30,7 @@ Group actions like save, etc are performed on doclists
 import webnotes
 from webnotes.utils import cint
 
-class DocList:
+class DocList(object):
 	"""
 	Collection of Documents with one parent and multiple children
 	"""
@@ -40,79 +40,39 @@ class DocList:
 		self.to_docstatus = 0
 		if dt and dn:
 			self.load_from_db(dt, dn)
-		if type(dt) is list:
-			self.docs = dt
-			self.doc = dt[0]
-			self.children = dt[1:]
+		if isinstance(dt, list):
+			self.set_doclist(dt)
 
 	def load_from_db(self, dt, dn, prefix='tab'):
-		"""
-			Load doclist from dt
-		"""
-		from webnotes.model.doc import Document, getchildren
-
-		doc = Document(dt, dn, prefix=prefix)
-
-		# get all children types
-		tablefields = webnotes.model.meta.get_table_fields(dt)
-
-		# load chilren
-		doclist = [doc,]
-		for t in tablefields:
-			doclist += getchildren(doc.name, t[0], t[1], dt, prefix=prefix)
-
-		self.docs = doclist
-		self.doc = doc
-		self.children = doclist[1:]
-
-	def __iter__(self):
-		"""
-			Make this iterable
-		"""
-		return self.docs.__iter__()
+		"""Load doclist from database"""
+		import webnotes.model.doc
+		self.set_doclist(webnotes.model.doc.get(dt, dn))
 
 	def from_compressed(self, data, docname):
-		"""
-			Expand called from client
-		"""
+		"""Expand called from client"""
 		from webnotes.model.utils import expand
-		self.docs = expand(data)
-		self.objectify(docname)
+		self.set_doclist(expand(data))
 		
 	def set_doclist(self, docs):
-		self.doclist = docs
-		self.doc, self.children = docs[0], docs[1:]
+		"""convert dicts to Document if necessary and set doc and children"""
+		import webnotes.model.doc
 
-	def objectify(self, docname=None):
-		"""
-			Converts self.docs from a list of dicts to list of Documents
-		"""
-		from webnotes.model.doc import Document
-
-		self.docs = [Document(fielddata=d) for d in self.docs]
-		self.set_doclist(self.docs)
+		self.doclist = webnotes.model.doc.DocList([])
+		for d in docs:
+			if not isinstance(d, webnotes.model.doc.Document):
+				self.doclist.append(webnotes.model.doc.Document(fielddata = d))
+			else:
+				self.doclist.append(d)
+			
+		self.doc, self.children = self.doclist[0], self.doclist[1:]
 
 	def make_obj(self):
-		"""
-			Create a DocType object
-		"""
+		"""Create a DocType object"""
 		if self.obj: return self.obj
 
 		from webnotes.model.code import get_obj
 		self.obj = get_obj(doc=self.doc, doclist=self.children)
 		return self.obj
-
-	def next(self):
-		"""
-			Next doc
-		"""
-		return self.docs.next()
-
-	def to_dict(self):
-		"""
-			return as a list of dictionaries
-		"""
-		return [d.fields for d in self.docs]
 
 	def check_if_latest(self):
 		"""
