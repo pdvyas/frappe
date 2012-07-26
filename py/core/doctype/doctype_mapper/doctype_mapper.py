@@ -298,13 +298,3 @@ class DocType:
 				msgprint("%s: %s does not exists in the system" % (self.doc.from_doctype, self.ref_doc), raise_exception=1)
 			elif self.doc.ref_doc_submitted and det[0][1] != 1:
 				msgprint("%s: %s is not submitted document." % (self.doc.from_doctype, self.ref_doc), raise_exception=1)
-
-
-	def on_update(self):
-		"""
-			If developer_mode = 1, mapper will be written to files
-		"""
-		import conf
-		if hasattr(conf, 'developer_mode') and conf.developer_mode:
-			from webnotes.modules.export_module import export_to_files
-			export_to_files(record_list=[[self.doc.doctype, self.doc.name]])		
