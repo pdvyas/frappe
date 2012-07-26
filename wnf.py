@@ -47,28 +47,35 @@ def replace_code(start, txt1, txt2, extn, search=None):
 
 def search_replace_with_prompt(fpath, txt1, txt2):
 	""" Search and replace all txt1 by txt2 in the file with confirmation"""
+	import re
 
 	from termcolor import colored
 	with open(fpath, 'r') as f:
 		content = f.readlines()
 
 	tmp = []
+	changed = False
 	for c in content:
-		if c.find(txt1) != -1:
+		match = re.search(txt1, c)
+		if match:
 			print fpath
-			print  colored(txt1, 'red').join(c[:-1].split(txt1))
+			print colored(match.group(), 'red').join(c[:-1].split(match.group()))
 			a = ''
 			while a.lower() not in ['y', 'n', 'skip']:
 				a = raw_input('Do you want to Change [y/n/skip]?')
 			if a.lower() == 'y':
-				c = c.replace(txt1, txt2)
+				c = re.sub(txt1, txt2, c)
+				changed = True
 			elif a.lower() == 'skip':
 				return 'skip'
+			else:
+				continue
 		tmp.append(c)
 
-	with open(fpath, 'w') as f:
-		f.write(''.join(tmp))
-	print colored('Updated', 'green')
+	if changed:
+		with open(fpath, 'w') as f:
+			f.write(''.join(tmp))
+		print colored('Updated', 'green')
 	
 def pull(remote, branch):
 	os.system('git pull %s %s' % (remote, branch))
