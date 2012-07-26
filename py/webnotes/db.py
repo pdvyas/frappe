@@ -259,7 +259,6 @@ class Database:
 				fl = '`, `'.join(fieldname)
 			try:
 				import json
-				from webnotes.utils import cstr
 				r = self.sql("select `%s` from `tab%s` where name='%s'" % (fl, doctype, docname))
 			except Exception, e:
 				if e.args[0]==1054 and ignore:

@@ -20,16 +20,14 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
 
-# Please edit this list and import only required elements
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cint, cstr, flt, formatdate, now
+from webnotes.utils import cint, cstr
 from webnotes.model.doc import Document
-from webnotes import msgprint, errprint
+from webnotes import msgprint
 
 
-# -----------------------------------------------------------------------------------------
 class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl

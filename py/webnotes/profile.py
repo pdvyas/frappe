@@ -160,7 +160,6 @@ class Profile:
 		Update the user's `Recent` list with the given `dt` and `dn`
 		"""
 		conn = webnotes.conn
-		from webnotes.utils import cstr
 		import json
 
 	
@@ -247,6 +246,7 @@ class Profile:
 	
 	def reset_password(self):
 		"""reset password"""
+		
 		from webnotes.utils import random_string, now
 		pwd = random_string(8)
 		

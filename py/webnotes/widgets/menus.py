@@ -28,7 +28,7 @@ Needs to be refactored
 """
 
 import webnotes
-from webnotes.utils import cint, cstr
+from webnotes.utils import cint
 
 sql = webnotes.conn.sql
 

@@ -115,7 +115,7 @@ def sort_fields(doclist):
 
 			
 def apply_property_setters(doctype, doclist):		
-	from webnotes.utils import cint, flt
+	from webnotes.utils import cint
 	for ps in webnotes.conn.sql("""select * from `tabProperty Setter` where
 		doc_type=%s""", doctype, as_dict=1):
 		if ps['doctype_or_field']=='DocType':
