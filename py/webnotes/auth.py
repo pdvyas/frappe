@@ -146,7 +146,7 @@ class LoginManager:
 	def check_password(self, user, pwd):
 		"""check password"""
 		user = webnotes.conn.sql("""select `user` from __Auth where `user`=%s 
-			and `password`=password(%s)""", (user, pwd), debug=1)
+			and `password`=password(%s)""", (user, pwd))
 		if not user:
 			self.fail('Incorrect password')
 		else:
