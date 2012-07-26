@@ -260,17 +260,17 @@ def import_doc(d, doctype, overwrite):
 	"""import main (non child) document"""
 	import webnotes
 	import webnotes.model.doc
-	from webnotes.model.doclist import DocList
+	from webnotes.model.doclist import DocListController
 
 	if webnotes.conn.exists(doctype, d['name']):
 		if overwrite:
 			doclist = webnotes.model.doc.get(doctype, d['name'])
 			doclist[0].fields.update(d)
-			DocList(doclist).save()
+			DocListController(doclist).save()
 			return 'Updated ' + getlink(doctype, d['name'])
 		else:
 			return 'Ignored ' + getlink(doctype, d['name']) + ' (exists)'
 	else:
 		d['__islocal'] = 1
-		DocList([webnotes.model.doc.Document(fielddata = d)]).save()
+		DocListController([webnotes.model.doc.Document(fielddata = d)]).save()
 		return 'Inserted ' + getlink(doctype, d['name'])

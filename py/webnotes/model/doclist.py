@@ -31,7 +31,7 @@ Group actions like save, etc are performed on doclists
 import webnotes
 from webnotes.utils import cint
 
-class DocList(object):
+class DocListController(object):
 	"""
 	Collection of Documents with one parent and multiple children
 	"""
@@ -273,7 +273,7 @@ def clone(source_doclist):
 		newd.parent = new_parent.name
 		new_doclist.append(newd)
 	
-	doclistobj = DocList()
+	doclistobj = DocListController()
 	doclistobj.docs = new_doclist
 	doclistobj.doc = new_doclist[0]
 	doclistobj.doclist = new_doclist

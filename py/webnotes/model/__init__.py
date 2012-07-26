@@ -37,12 +37,19 @@ def get_doctype(doctype, processed=False):
 
 def insert(doclist):
 	"""insert a new doclist"""
-	from webnotes.model.doclist import DocList
+	from webnotes.model.doclist import DocListController
 	if doclist and not isinstance(doclist, list):
 		doclist = [doclist]
-	doclistobj = DocList(doclist)
+	
+	doclistobj = DocListController(doclist)
 	doclistobj.doc.fields['__islocal'] = 1
 	doclistobj.save()
+	
+def insert_variants(base, variants):
+	for v in variants:
+		base_copy = base.copy()
+		base_copy.update(v)
+		insert(base_copy)
 	
 def insert_child(fields):
 	"""insert a child, must specify parent, parenttype and doctype"""

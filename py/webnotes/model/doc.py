@@ -198,17 +198,20 @@ class Document(object):
 		# amendments
 		if self.amended_from: 
 			self._get_amended_name()
+
 		# by method
 		elif so and hasattr(so, 'autoname'):
-			r = webnotes.model.code.run_server_obj(so, 'autoname')
-			if r: return r
+			if not self.name or self.name.startswith('New ' + self.doctype):
+				r = webnotes.model.code.run_server_obj(so, 'autoname')
+				if r: return r
 			
 		# based on a field
 		elif autoname and autoname.startswith('field:'):
-			n = self.fields[autoname[6:]]
-			if not n:
-				raise Exception, 'Name is required'
-			self.name = n.strip()
+			if not self.name or self.name.startswith('New ' + self.doctype):
+				n = self.fields.get(autoname[6:])
+				if not n:
+					raise Exception, 'Name is required'
+				self.name = n.strip()
 		
 		# based on expression
 		elif autoname and autoname.startswith('eval:'):
@@ -230,10 +233,7 @@ class Document(object):
 		# unable to determine a name, use a serial number!
 		if not self.name:
 			self.name = make_autoname('#########', self.doctype)
-					
-	# Validate Name
-	# ---------------------------------------------------------------------------
-	
+						
 	def _validate_name(self, case):
 
 		if webnotes.conn.sql('select name from `tab%s` where name=%s' % (self.doctype,'%s'), self.name):

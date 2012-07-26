@@ -28,18 +28,6 @@ class BaseDocType:
 	def __init__(self, doc, doclist):
 		self.doc, self.doclist = doc, doclist
 		
-	def get(self, filters={}):
-		"""get list of records by filter from doclist"""
-		out = []
-		for d in self.doclist:
-			add = True
-			for f in filters:
-				if d.fields.get(f) != filters[f]:
-					add = False
-					
-			if add: out.append(d)
-		return out
-		
 	def get_csv_from_attachment(self):
 		"""get csv from attachment"""
 		if not self.doc.file_list:
