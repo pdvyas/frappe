@@ -179,8 +179,17 @@ def setup_options():
 	parser.add_option("--cleanup_data", help="Cleanup test data", default=False, 	
 			action="store_true")
 
+	# testing
 	parser.add_option("--test", help="Run test", metavar="MODULE", 	
 			nargs=1)
+
+	parser.add_option("--setup_test_stage", help="""Reset test database and commit data 
+		upto a stage. See tests/stages.py for list of stages""", 
+		metavar="STAGE", nargs=1)
+
+	parser.add_option("--test_stage", help="""Run test modules specified in the stage. 
+		See tests/stages.py for list of stages""", 
+		metavar="STAGE", nargs=1)
 
 	return parser.parse_args()
 	
@@ -316,7 +325,15 @@ def run():
 		# is there a better way?
 		exec ('from %s import *' % module_name) in globals()		
 		unittest.main()
-			
+
+	elif options.setup_test_stage is not None:
+		import tests.stages
+		tests.stages.upto(options.setup_test_stage)
+
+	elif options.test_stage is not None:
+		import tests.stages
+		del sys.argv[1:]
+		tests.stages.run_stage(options.test_stage)
 
 	# print messages
 	if webnotes.message_log:

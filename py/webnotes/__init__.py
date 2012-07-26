@@ -152,6 +152,8 @@ def connect(db_name=None, password=None):
 	"""
 	import webnotes.db
 	global conn
+	if conn:
+		conn.close()
 	conn = webnotes.db.Database(user=db_name, password=password)
 	
 	global session
