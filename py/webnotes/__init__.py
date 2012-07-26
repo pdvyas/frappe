@@ -20,6 +20,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
 
+from __future__ import unicode_literals
 """
 globals attached to webnotes module
 + some utility functions that should probably be moved
@@ -244,3 +245,18 @@ def get_roles(user=None, with_standard=True):
 		roles = filter(lambda x: x not in ['All', 'Guest', 'Administrator'], roles)
 	
 	return roles
+
+def get_cgi_fields():
+	"""make webnotes.form_dict from cgi field storage"""
+	global auto_cache_clear, form, form_dict
+
+	import conf
+	auto_cache_clear = getattr(conf, 'auto_cache_clear', False)
+	
+	# make the form_dict
+	import cgi
+	form = cgi.FieldStorage(keep_blank_values=True)
+	
+	from webnotes.utils import cstr
+	for key in form.keys():
+		form_dict[key] = cstr(form.getvalue(key))

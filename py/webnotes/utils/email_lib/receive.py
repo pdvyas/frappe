@@ -20,6 +20,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
 
+from __future__ import unicode_literals
 """
 	This module contains classes for managing incoming emails
 """
@@ -35,6 +36,7 @@ class IncomingMail:
 		import email
 		
 		self.mail = email.message_from_string(content)
+		
 		self.text_content = ''
 		self.html_content = ''
 		self.attachments = []
@@ -62,7 +64,7 @@ class IncomingMail:
 			get utf-8 encoded part content
 		"""
 		try:
-			return unicode(part.get_payload(decode=True),str(charset),"ignore").encode('utf8','replace')
+			return unicode(part.get_payload(decode=True),str(charset),"ignore")
 		except LookupError, e:
 			return part.get_payload()		
 
@@ -98,8 +100,9 @@ class IncomingMail:
 		"""
 			Process a single part of an email
 		"""
-		charset = self.get_charset(part)
 		content_type = part.get_content_type()
+		charset = part.get_content_charset()
+		if not charset: charset = self.get_charset(part)
 
 		if content_type == 'text/plain':
 			self.text_content += self.get_payload(part, charset)
@@ -153,15 +156,19 @@ class POP3Mailbox:
 		
 		self.connect()
 		num = num_copy = len(self.pop.list()[1])
-		
+
 		# WARNING: Hard coded max no. of messages to be popped
 		if num > 20: num = 20
 		for m in xrange(1, num+1):
 			msg = self.pop.retr(m)
+			
 			try:
-				self.process_message(IncomingMail('\n'.join(msg[1])))
-			except:
+				self.process_message(IncomingMail(b'\n'.join(msg[1])))
+			except Exception, e:
 				pass
+				# import webnotes
+				# webnotes.errprint(e)
+
 			self.pop.dele(m)
 		
 		# WARNING: Delete message number 101 onwards from the pop list

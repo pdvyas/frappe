@@ -22,6 +22,7 @@
 
 # util __init__.py
 
+from __future__ import unicode_literals
 import webnotes
 
 user_time_zone = None
@@ -54,6 +55,16 @@ def get_fullname(profile):
 		return full_name or profile
 	else:
 		return profile
+		
+def decode_email_header(s):
+	import email.header
+	decoded_header_tuple = email.header.decode_header(s)
+	
+	decoded_list = []
+	for header in decoded_header_tuple:
+		decoded_list.append(cstr(header[0], encoding = header[1] or 'utf-8'))
+			
+	return " ".join(decoded_list)
 		
 def extract_email_id(s):
 	"""
@@ -328,16 +339,49 @@ def cint(s):
 	except: tmp = 0
 	return tmp
 
-def cstr(s):
-	"""	
-	Convert to string
-	"""
-	if isinstance(s, basestring):
-		return s
-	elif s==None: 
-		return ''
+def get_encoded_string(content, encoding='utf-8'):
+	content = convert_to_unicode(content)
+	
+	if isinstance(content, str):
+		return content
+		
 	else:
-		return str(s)
+		return content.encode('utf-8')
+	
+def get_string(content, encoding='utf-8', errors='ignore'):
+	content = convert_to_unicode(content)
+
+	if isinstance(content, unicode):
+		return content
+		
+	else:
+		return unicode(content, encoding, errors)
+
+	
+def convert_to_unicode(content):
+	"""
+		converts types other than basestring to unicode
+		(like int, float, list, dict, etc.)
+	"""
+	if content == None:
+		return ''
+	elif not isinstance(content, basestring):
+		return unicode(content)
+	else:
+		return content
+		
+cstr = get_string
+
+# def cstr(s):
+# 	"""	
+# 	Convert to string
+# 	"""
+# 	if isinstance(s, basestring):
+# 		return s
+# 	elif s==None: 
+# 		return ''
+# 	else:
+# 		return str(s)
 		
 def str_esc_quote(s):
 	"""

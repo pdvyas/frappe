@@ -20,6 +20,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
+from __future__ import unicode_literals
 """build query for doclistview and return results"""
 
 import webnotes, json
@@ -237,14 +238,14 @@ def export_query():
 
 	f = StringIO()
 	writer = csv.writer(f)
+	from webnotes.utils import get_encoded_string, cstr
 	for r in data:
 		for i in xrange(len(r)):
-			if type(r[i]) is unicode:
-				r[i] = r[i].encode('utf-8')
+			r[i] = get_encoded_string(r[i])
 		writer.writerow(r)
 
 	f.seek(0)
-	webnotes.response['result'] = f.read()
+	webnotes.response['result'] = cstr(f.read())
 	webnotes.response['type'] = 'csv'
 	webnotes.response['doctype'] = [t[4:-1] for t in tables][0]
 
