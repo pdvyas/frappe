@@ -333,7 +333,7 @@ def run():
 	elif options.test_stage is not None:
 		import tests.stages
 		del sys.argv[1:]
-		tests.stages.run_stage(options.test_stage)
+		tests.stages.test_stage(options.test_stage)
 
 	# print messages
 	if webnotes.message_log:
