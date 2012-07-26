@@ -20,6 +20,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
 
+from __future__ import unicode_literals
 import webnotes
 import webnotes.model.doc
 import webnotes.model.code
@@ -95,7 +96,7 @@ def getpage():
 	"""
 	   Load the page from `webnotes.form` and send it via `webnotes.response`
 	"""
-	doclist = get(webnotes.form.getvalue('name'))
+	doclist = get(webnotes.form_dict.get('name'))
 		
 	# send
 	webnotes.response['docs'] = doclist

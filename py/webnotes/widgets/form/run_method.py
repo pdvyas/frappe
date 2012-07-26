@@ -20,6 +20,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
 
+from __future__ import unicode_literals
 import webnotes
 
 @webnotes.whitelist()
@@ -31,13 +32,11 @@ def runserverobj():
 	from webnotes.model.doclist import DocList
 	from webnotes.utils import cint
 
-	form = webnotes.form
-
 	doclist = None
-	method = form.getvalue('method')
-	arg = form.getvalue('arg')
-	dt = form.getvalue('doctype')
-	dn = form.getvalue('docname')
+	method = webnotes.form_dict.get('method')
+	arg = webnotes.form_dict.get('arg')
+	dt = webnotes.form_dict.get('doctype')
+	dn = webnotes.form_dict.get('docname')
 
 	if dt: # not called from a doctype (from a page)
 		if not dn: dn = dt # single
@@ -45,7 +44,7 @@ def runserverobj():
 
 	else:
 		doclist = DocList()
-		doclist.from_compressed(form.getvalue('docs'), dn)
+		doclist.from_compressed(webnotes.form_dict.get('docs'), dn)
 		so = doclist.make_obj()
 		doclist.check_if_latest()
 
@@ -55,7 +54,7 @@ def runserverobj():
 		r = webnotes.model.code.run_server_obj(so, method, arg)
 		if r:
 			#build output as csv
-			if cint(webnotes.form.getvalue('as_csv')):
+			if cint(webnotes.form_dict.get('as_csv')):
 				make_csv_output(r, so.doc.doctype)
 			else:
 				webnotes.response['message'] = r
@@ -74,13 +73,18 @@ def make_csv_output(res, dt):
 	from cStringIO import StringIO
 	import csv
 	
+	from webnotes.utils import get_encoded_string, cstr
+	
 	f = StringIO()
 	writer = csv.writer(f)
 	for r in res:
-		writer.writerow(r)
+		row = []
+		for col in r:
+			row.append(get_encoded_string(col))
+		writer.writerow(row)
 	
 	f.seek(0)
 						
-	webnotes.response['result'] = f.read()
+	webnotes.response['result'] = cstr(f.read())
 	webnotes.response['type'] = 'csv'
 	webnotes.response['doctype'] = dt.replace(' ','')		

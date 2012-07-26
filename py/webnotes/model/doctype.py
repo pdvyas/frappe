@@ -31,6 +31,7 @@ Get metadata (main doctype with fields and permissions with all table doctypes)
 
 """
 # imports
+from __future__ import unicode_literals
 import webnotes
 import webnotes.model
 import webnotes.model.doc

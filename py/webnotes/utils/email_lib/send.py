@@ -20,6 +20,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
 
+from __future__ import unicode_literals
 """
 Sends email via outgoing server specified in "Control Panel"
 Allows easy adding of Attachments of "File" objects
@@ -42,7 +43,7 @@ class EMail:
 		Charset.add_charset('utf-8', Charset.QP, Charset.QP, 'utf-8')
 
 		if isinstance(recipients, basestring):
-			recipients = recipients.replace(';', ',').replace(' ', '').replace('\n', '')
+			recipients = recipients.replace(';', ',').replace('\n', '')
 			recipients = recipients.split(',')
 			
 		# remove null
@@ -64,9 +65,8 @@ class EMail:
 			Attach message in the text portion of multipart/alternative
 		"""
 		from email.mime.text import MIMEText
-		if isinstance(message, unicode):
-			message = message.encode('utf-8')
-		part = MIMEText(message, 'plain', 'utf-8')		
+		from webnotes.utils import get_encoded_string
+		part = MIMEText(get_encoded_string(message), 'plain', 'utf-8')		
 		self.msg_multipart.attach(part)
 		
 	def set_html(self, message):
@@ -74,9 +74,8 @@ class EMail:
 			Attach message in the html portion of multipart/alternative
 		"""
 		from email.mime.text import MIMEText		
-		if isinstance(message, unicode):
-			message = message.encode('utf-8')
-		part = MIMEText(message, 'html', 'utf-8')
+		from webnotes.utils import get_encoded_string
+		part = MIMEText(get_encoded_string(message), 'html', 'utf-8')
 		self.msg_multipart.attach(part)
 	
 	def set_message(self, message, mime_type='text/html', as_attachment=0, filename='attachment.html'):
@@ -112,6 +111,8 @@ class EMail:
 		from email.mime.text import MIMEText
 					
 		import mimetypes
+		
+		from webnotes.utils import get_encoded_string
 
 		if not content_type:
 			content_type, encoding = mimetypes.guess_type(fname)
@@ -124,7 +125,7 @@ class EMail:
 		maintype, subtype = content_type.split('/', 1)
 		if maintype == 'text':
 			# Note: we should handle calculating the charset
-			part = MIMEText(fcontent, _subtype=subtype)
+			part = MIMEText(fcontent, _subtype=subtype, _charset='utf-8')
 		elif maintype == 'image':
 			part = MIMEImage(fcontent, _subtype=subtype)
 		elif maintype == 'audio':
@@ -138,7 +139,8 @@ class EMail:
 			
 		# Set the filename parameter
 		if fname:
-			part.add_header('Content-Disposition', 'attachment', filename=fname)
+			part.add_header(b'Content-Disposition',
+				get_encoded_string("attachment; filename=%s" % fname))
 
 		self.msg_root.attach(part)
 	
@@ -176,24 +178,29 @@ class EMail:
 
 		else:	
 			import webnotes.model.doc
-			from webnotes.utils import cint
+			from webnotes.utils import cint, get_encoded_string
 
 			# get defaults from control panel
 			es = webnotes.model.doc.Document('Email Settings','Email Settings')
-			self.server = es.outgoing_mail_server.encode('utf-8') or getattr(conf,'mail_server','')
-			self.login = es.mail_login.encode('utf-8') or getattr(conf,'mail_login','')
+			self.server = get_encoded_string(es.outgoing_mail_server or getattr(conf,'mail_server',''))
+			self.login = get_encoded_string(es.mail_login or getattr(conf,'mail_login',''))
 			self.port = cint(es.mail_port) or getattr(conf,'mail_port',None)
-			self.password = es.mail_password.encode('utf-8') or getattr(conf,'mail_password','')
+			self.password = get_encoded_string(es.mail_password or getattr(conf,'mail_password',''))
 			self.use_ssl = cint(es.use_ssl) or cint(getattr(conf, 'use_ssl', ''))
 
 	def make_msg(self):
-		self.msg_root['Subject'] = self.subject
-		self.msg_root['From'] = self.sender
-		self.msg_root['To'] = ', '.join([r.strip() for r in self.recipients])
+		from email.header import Header
+		charset = 'utf-8'
+		
+		self.msg_root['Subject'] = Header(self.subject, charset)
+		self.msg_root['From'] = Header(self.sender, charset)
+		self.msg_root['To'] = Header(', '.join([r.strip() for r in self.recipients]), charset)
+		
 		if self.reply_to and self.reply_to != self.sender:
-			self.msg_root['Reply-To'] = self.reply_to
+			self.msg_root['Reply-To'] = Header(self.reply_to, charset)
+		
 		if self.cc:
-			self.msg_root['CC'] = ', '.join([r.strip() for r in self.cc])
+			self.msg_root['CC'] = Header(', '.join([r.strip() for r in self.cc]), charset)
 	
 	def add_to_queue(self):
 		# write to a file called "email_queue" or as specified in email
@@ -222,7 +229,12 @@ class EMail:
 		
 		sess = self.smtp_connect()
 
-		sess.sendmail(self.sender, self.recipients, self.msg_root.as_string())
+		from webnotes.utils import get_encoded_string
+		sess.sendmail(
+			get_encoded_string(self.sender),
+			[get_encoded_string(r) for r in self.recipients],
+			get_encoded_string(self.msg_root.as_string())
+		)
 		
 		try:
 			sess.quit()
