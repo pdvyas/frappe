@@ -1,0 +1,111 @@
+# DocType, DocType Conditional Property
+[
+
+	# These values are common in all dictionaries
+	{
+		u'creation': '2012-07-27 15:08:50',
+		u'docstatus': 0,
+		u'modified': '2012-07-27 16:52:26',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'description': u'Set condition based property rules',
+		u'doctype': u'DocType',
+		'document_type': u'System',
+		'istable': 1,
+		'module': u'Core',
+		u'name': u'__common__',
+		'version': 1
+	},
+
+	# These values are common for all DocField
+	{
+		u'doctype': u'DocField',
+		u'name': u'__common__',
+		'parent': u'DocType Conditional Property',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
+		'permlevel': 0
+	},
+
+	# DocType, DocType Conditional Property
+	{
+		u'doctype': u'DocType',
+		u'name': u'DocType Conditional Property'
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'if_table_field',
+		'fieldtype': u'Select',
+		'label': u'If Table Field'
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'if_field',
+		'fieldtype': u'Select',
+		'label': u'If Field',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'if_condition',
+		'fieldtype': u'Select',
+		'label': u'If Condition',
+		'options': u'=\nin\n>\n<\n!=\n>=\n<=\nBegins With',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'if_value',
+		'fieldtype': u'Data',
+		'label': u'If Value',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'then_table_field',
+		'fieldtype': u'Select',
+		'label': u'Then Table Field'
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'then_field',
+		'fieldtype': u'Select',
+		'label': u'Then Field',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'then_condition',
+		'fieldtype': u'Select',
+		'label': u'Then Condition',
+		'options': u'=\nin\n>\n<\n!=\n>=\n<=\nBegins With',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'then_value',
+		'fieldtype': u'Data',
+		'label': u'Then Value',
+		'reqd': 1
+	}
+]

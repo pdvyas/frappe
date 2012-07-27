@@ -45,6 +45,9 @@ class DocType:
 		for d in self.doclist:
 			if d.parent and d.fieldtype:
 				if (not d.fieldname):
+					if not d.label:
+						webnotes.msgprint("Must specify Fieldname or Label for row %s" % d.idx,
+							raise_exception=1)
 					d.fieldname = d.label.strip().lower().replace(' ','_')
 					if d.fieldname in restricted:
 						d.fieldname = d.fieldname + '1'

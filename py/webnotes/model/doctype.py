@@ -64,6 +64,9 @@ def get(doctype, processed=False):
 		expand_selects(doclist)
 		add_print_formats(doclist)
 
+	# add validators
+	add_validators(doctype, doclist)
+
 	to_cache(doctype, processed, doclist)
 		
 	return doclist
@@ -75,7 +78,7 @@ def load_docfield_types():
 
 def get_doctype_doclist(doctype):
 	"""get doclist of single doctype"""
-	doclist = webnotes.model.doc.get('DocType', doctype)
+	doclist = webnotes.model.get('DocType', doctype)
 	add_custom_fields(doctype, doclist)
 	apply_property_setters(doctype, doclist)
 	sort_fields(doclist)
@@ -257,3 +260,8 @@ def get_link_fields(doctype):
 	
 	return doctypelist.get({"fieldtype":"Link"}).extend(doctypelist.get({"fieldtype":"Select", 
 		"options":"^link:"}))
+		
+def add_validators(doctype, doclist):
+	for validator in webnotes.conn.sql("""select name from `tabDocType Validator` where
+		for_doctype=%s""", doctype):
+		doclist.extend(webnotes.model.get('DocType Validator', validator))

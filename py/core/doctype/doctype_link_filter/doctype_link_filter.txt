@@ -1,0 +1,84 @@
+# DocType, DocType Link Filter
+[
+
+	# These values are common in all dictionaries
+	{
+		u'creation': '2012-07-27 15:05:22',
+		u'docstatus': 0,
+		u'modified': '2012-07-27 16:42:46',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'description': u'Filters for Link Fields',
+		u'doctype': u'DocType',
+		'document_type': u'System',
+		'istable': 1,
+		'module': u'Core',
+		u'name': u'__common__',
+		'version': 1
+	},
+
+	# These values are common for all DocField
+	{
+		u'doctype': u'DocField',
+		u'name': u'__common__',
+		'parent': u'DocType Link Filter',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
+		'permlevel': 0
+	},
+
+	# DocType, DocType Link Filter
+	{
+		u'doctype': u'DocType',
+		u'name': u'DocType Link Filter'
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'table_field',
+		'fieldtype': u'Select',
+		'label': u'Table Field'
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'link_field',
+		'fieldtype': u'Select',
+		'label': u'Link Field',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'fieldname',
+		'fieldtype': u'Select',
+		'label': u'Fieldname',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'condition',
+		'fieldtype': u'Select',
+		'label': u'Condition',
+		'options': u'=\nin\n>\n<\n!=\n>=\n<=\nBegins With',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'value',
+		'fieldtype': u'Data',
+		'label': u'Value',
+		'reqd': 1
+	}
+]

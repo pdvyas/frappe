@@ -67,16 +67,12 @@ def execute(code, doc=None, doclist=[]):
 	from webnotes.model.doc import Document, addchild, getchildren
 	from webnotes.model.utils import getlist
 	from webnotes import msgprint
-
 	import webnotes
-
 	sql = webnotes.conn.sql
-	get_value = webnotes.conn.get_value
-	convert_to_lists = webnotes.conn.convert_to_lists
 	
 	if webnotes.user:
 		get_roles = webnotes.user.get_roles
-	locals().update({'get_obj':get_obj, 'get_server_obj':get_server_obj, 'run_server_obj':run_server_obj, 'updatedb':updatedb, 'check_syntax':check_syntax})
+	locals().update({'get_obj':get_obj, 'run_server_obj':run_server_obj, 'updatedb':updatedb, 'check_syntax':check_syntax})
 
 	exec code in locals()
 	
@@ -105,7 +101,7 @@ def get_custom_script(doctype, script_type):
 	if custom_script and custom_script[0][0]:
 		return custom_script[0][0]
 		
-def get_server_obj(doc, doclist = [], basedoctype = ''):
+def get_server_obj(doclist):
 	"""
 	Returns the instantiated `DocType` object. Will also manage caching & compiling
 	"""
@@ -114,6 +110,7 @@ def get_server_obj(doc, doclist = [], basedoctype = ''):
 	from webnotes.modules import scrub
 
 	# get doctype details
+	doc = doclist[0]
 	module = webnotes.conn.get_value('DocType', doc.doctype, 'module')
 	
 	# no module specified (must be really old), can't get code so quit
@@ -160,9 +157,9 @@ def get_obj(dt = None, dn = None, doc=None, doclist=[], with_children = 0):
 			doclist = webnotes.model.doc.get(dt, dn, from_get_obj=1)
 		else:
 			doclist = webnotes.model.doc.get(dt, dn, with_children = 0, from_get_obj=1)
-		return get_server_obj(doclist[0], doclist)
+		return get_server_obj(doclist)
 	else:
-		return get_server_obj(doc, doclist)
+		return get_server_obj(doclist)
 		
 #=================================================================================
 # get object and run method

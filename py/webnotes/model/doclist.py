@@ -55,7 +55,7 @@ class DocListController(object):
 		self.set_doclist(expand(data))
 		
 	def set_doclist(self, docs):
-		"""convert dicts to Document if necessary and set doc and children"""
+		"""convert dicts to Document if necessary and set doc"""
 		import webnotes.model.doc
 
 		self.doclist = webnotes.model.doc.DocList([])
@@ -65,14 +65,14 @@ class DocListController(object):
 			else:
 				self.doclist.append(d)
 			
-		self.doc, self.children = self.doclist[0], webnotes.model.doc.DocList(self.doclist[1:])
+		self.doc = self.doclist[0]
 
 	def make_obj(self):
 		"""Create a DocType object"""
 		if self.obj: return self.obj
 
 		from webnotes.model.code import get_obj
-		self.obj = get_obj(doc=self.doc, doclist=self.children)
+		self.obj = get_obj(doclist=self.doclist)
 		return self.obj
 
 	def check_if_latest(self):
@@ -93,16 +93,12 @@ class DocListController(object):
 				Please refresh this document. [%s/%s]""" % (tmp[0][0], self.doc.modified), raise_exception=1)
 
 	def check_permission(self):
-		"""
-			Raises exception if permission is not valid
-		"""
+		"""Raises exception if permission is not valid"""
 		if not self.doc.check_perm(verbose=1):
 			webnotes.msgprint("Not enough permission to save %s" % self.doc.doctype, raise_exception=1)
 
 	def check_links(self):
-		"""
-			Checks integrity of links (throws exception if links are invalid)
-		"""
+		"""Checks integrity of links (throws exception if links are invalid)"""
 		ref, err_list = {}, []
 		for d in self.docs:
 			if not ref.get(d.doctype):
@@ -115,9 +111,7 @@ class DocListController(object):
 			Please correct and resave. Document Not Saved.""" % ', '.join(err_list), raise_exception=1)
 
 	def update_timestamps_and_docstatus(self):
-		"""
-			Update owner, creation, modified_by, modified, docstatus
-		"""
+		"""Update owner, creation, modified_by, modified, docstatus"""
 		from webnotes.utils import now
 		ts = now()
 		user = webnotes.__dict__.get('session', {}).get('user') or 'Administrator'
@@ -133,9 +127,7 @@ class DocListController(object):
 				d.docstatus = self.to_docstatus
 
 	def prepare_for_save(self, check_links):
-		"""
-			Set owner, modified etc before saving
-		"""
+		"""Set owner, modified etc before saving"""
 		self.check_if_latest()
 		self.check_permission()
 		if check_links:
@@ -143,9 +135,7 @@ class DocListController(object):
 		self.update_timestamps_and_docstatus()
 
 	def run_method(self, method):
-		"""
-		Run a method and custom_method
-		"""
+		"""Run a method and custom_method"""
 		self.make_obj()
 		if hasattr(self.obj, method):
 			getattr(self.obj, method)()
@@ -157,9 +147,7 @@ class DocListController(object):
 		self.set_doclist([self.obj.doc] + self.obj.doclist)
 
 	def save_main(self):
-		"""
-			Save the main doc
-		"""
+		"""Save the main doc"""
 		try:
 			self.doc.save(cint(self.doc.fields.get('__islocal')))
 		except NameError, e:
@@ -172,12 +160,10 @@ class DocListController(object):
 			raise e
 
 	def save_children(self):
-		"""
-			Save Children, with the new parent name
-		"""
+		"""Save Children, with the new parent name"""
 		child_map = {}
 		
-		for d in self.children:
+		for d in self.doclist[1:]:
 			if d.fields.has_key('parent'):
 				if d.parent and (not d.parent.startswith('old_parent:')):
 					d.parent = self.doc.name # rename if reqd
@@ -277,7 +263,6 @@ def clone(source_doclist):
 	doclistobj.docs = new_doclist
 	doclistobj.doc = new_doclist[0]
 	doclistobj.doclist = new_doclist
-	doclistobj.children = new_doclist[1:]
 	doclistobj.save()
 	return doclistobj
 

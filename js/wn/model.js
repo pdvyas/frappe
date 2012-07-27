@@ -29,6 +29,9 @@ wn.model = {
 	new_names: {},
 
 	with_doctype: function(doctype, callback) {
+		if(!doctype) {
+			console.log("DocType not set");
+		}
 		if(locals.DocType[doctype]) {
 			callback();
 		} else {
@@ -79,5 +82,19 @@ wn.model = {
 			var ret = !is_null(val);			
 		}
 		return ret ? true : false;
-	}
+	},
+	
+	get: function(filters) {
+		var doclist = locals[filters.doctype];
+		return $.map(doclist, function(d) { return wn.model.match(filters, d) });
+	},
+	
+	match: function(filters, doc) {
+		for(key in filters) {
+			if(doc[key]!=filters[key]) {
+				return null;
+			}
+		}
+		return doc;
+	},
 }

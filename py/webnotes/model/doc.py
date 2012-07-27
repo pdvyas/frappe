@@ -192,8 +192,8 @@ class Document(object):
 		self.localname = self.name
 
 		# get my object
-		import webnotes.model.code
-		so = webnotes.model.code.get_server_obj(self, [])
+		from webnotes.model.code import get_obj
+		so = get_obj(doclist = [self])
 
 		# amendments
 		if self.amended_from: 

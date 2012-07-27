@@ -1,0 +1,57 @@
+# DocType, DocType Unique Row
+[
+
+	# These values are common in all dictionaries
+	{
+		u'creation': '2012-07-27 15:10:24',
+		u'docstatus': 0,
+		u'modified': '2012-07-27 16:50:15',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'description': u'Define a rule for a unique row based on selected columns',
+		u'doctype': u'DocType',
+		'document_type': u'System',
+		'istable': 1,
+		'module': u'Core',
+		u'name': u'__common__',
+		'version': 1
+	},
+
+	# These values are common for all DocField
+	{
+		u'doctype': u'DocField',
+		u'name': u'__common__',
+		'parent': u'DocType Unique Row',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
+		'permlevel': 0
+	},
+
+	# DocType, DocType Unique Row
+	{
+		u'doctype': u'DocType',
+		u'name': u'DocType Unique Row'
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'unique_table_field',
+		'fieldtype': u'Select',
+		'label': u'Table'
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'description': u'Each column key in a new line',
+		u'doctype': u'DocField',
+		'fieldname': u'keys',
+		'fieldtype': u'Text',
+		'label': u'Keys'
+	}
+]

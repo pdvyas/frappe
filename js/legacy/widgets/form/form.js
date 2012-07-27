@@ -362,7 +362,7 @@ _f.Frm.prototype.setup_fields_std = function() {
 
 	fl.sort(function(a,b) { return a.idx - b.idx});
 
-	if(fl[0]&&fl[0].fieldtype!="Section Break" || get_url_arg('embed')) {
+	if(fl[0] && fl[0].fieldtype!="Section Break" || get_url_arg('embed')) {
 		this.layout.addrow(); // default section break
 		if(fl[0].fieldtype!="Column Break") {// without column too
 			var c = this.layout.addcell();
@@ -1186,6 +1186,11 @@ _f.Frm.prototype.set_df_property = function(fieldname, property, value) {
 		field[property] = value;
 		cur_frm.refresh_field(fieldname);
 	};
+}
+
+_f.Frm.prototype.set_child_df_property = function(parent_type, fieldname, property, value) {
+	var field = wn.meta.get_docfield(parent_type, fieldname)
+	field[property] = value;
 }
 
 _f.Frm.prototype.toggle_enable = function(fnames, enable) {

@@ -48,7 +48,7 @@ def savedocs():
 		webnotes.response['main_doc_name'] = doclist.doc.name
 		webnotes.response['doctype'] = doclist.doc.doctype
 		webnotes.response['docname'] = doclist.doc.name
-		webnotes.response['docs'] = [doclist.doc] + doclist.children
+		webnotes.response['docs'] = doclist.doclist
 
 	except Exception, e:
 		webnotes.msgprint('Did not save')

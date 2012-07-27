@@ -95,13 +95,14 @@ def load_single_doc(dt, dn, user, prefix):
 		return dl
 
 	try:
-		so, r = webnotes.model.code.get_server_obj(dl[0], dl), None
+		so, r = webnotes.model.code.get_obj(doclist =dl), None
 		if hasattr(so, 'onload'):
-			r = webnotes.model.code.run_server_obj(so, 'onload')
+			r = so.onload()
 		if hasattr(so, 'custom_onload'):
-			r = webnotes.model.code.run_server_obj(so, 'custom_onload')
+			r = so.custom_onload()
 		if r: 
 			webnotes.msgprint(r)
+			
 	except Exception, e:
 		webnotes.errprint(webnotes.utils.getTraceback())
 		webnotes.msgprint('Error in script while loading')
