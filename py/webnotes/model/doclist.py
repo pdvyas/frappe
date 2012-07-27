@@ -65,7 +65,7 @@ class DocListController(object):
 			else:
 				self.doclist.append(d)
 			
-		self.doc, self.children = self.doclist[0], self.doclist[1:]
+		self.doc, self.children = self.doclist[0], webnotes.model.doc.DocList(self.doclist[1:])
 
 	def make_obj(self):
 		"""Create a DocType object"""

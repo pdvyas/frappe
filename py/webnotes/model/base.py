@@ -22,11 +22,30 @@
 
 from __future__ import unicode_literals
 import webnotes
+import webnotes.model
 
 class BaseDocType:
 	"""Base doctype, common functions can be added here"""
 	def __init__(self, doc, doclist):
 		self.doc, self.doclist = doc, doclist
+		
+	def no_duplicate(self, parentfield, keys):
+		"""raise exception if duplicate entries are found"""
+		
+		all_values = []
+		for d in self.doclist.get({"parentfield":parentfield}):
+			values = []
+			for key in keys:
+				values.append(d.fields.get(key))
+			
+			if values in all_values:
+				doctypelist = webnotes.model.get_doctype(d.doctype)
+				labels = map(lambda key: doctypelist.getone({"fieldname":key}).label, keys)
+				webnotes.msgprint("""Duplicate rows found in table %s 
+					having same values for colums %s""" % (d.doctype, webnotes.comma_and(labels)),
+					raise_exception=webnotes.DuplicateEntryError)
+			
+			all_values.append(values)
 		
 	def get_csv_from_attachment(self):
 		"""get csv from attachment"""

@@ -52,29 +52,13 @@ debug_log = []
 message_log = []
 
 
-class ValidationError(Exception):
-	pass
-	
-class AuthenticationError(Exception):
-	pass
-
-class PermissionError(Exception):
-	pass
-	
-class OutgoingEmailError(ValidationError):
-	pass
-
-class UnknownDomainError(Exception):
-	def __init__(self, value):
-		self.value = value
-	def __str__(self):
-		return repr(self.value)	
-
-class SessionStopped(Exception):
-	def __init__(self, value):
-		self.value = value
-	def __str__(self):
-		return repr(self.value)	
+class ValidationError(Exception): pass
+class AuthenticationError(Exception): pass
+class PermissionError(Exception): pass
+class OutgoingEmailError(ValidationError): pass
+class UnknownDomainError(Exception): pass
+class SessionStopped(Exception): pass
+class DuplicateEntryError(Exception): pass
 		
 def getTraceback():
 	import utils
@@ -87,7 +71,7 @@ def errprint(msg):
 	from utils import cstr
 	debug_log.append(cstr(msg or ''))
 
-def msgprint(msg, small=0, raise_exception=0, as_table=False):
+def msgprint(msg, small=0, raise_exception=0, as_table=False, debug=0):
 	"""
 	   Append to the :data:`message_log`
 	"""	
@@ -97,6 +81,10 @@ def msgprint(msg, small=0, raise_exception=0, as_table=False):
 		msg = '<table border="1px" style="border-collapse: collapse" cellpadding="2px">' + ''.join(['<tr>'+''.join(['<td>%s</td>' % c for c in r])+'</tr>' for r in msg]) + '</table>'
 	
 	message_log.append((small and '__small:' or '')+cstr(msg or ''))
+	
+	if debug:
+		print msg
+	
 	if raise_exception:
 		if inspect.isclass(raise_exception) and issubclass(raise_exception, Exception):
 			raise raise_exception, msg
@@ -260,3 +248,8 @@ def get_cgi_fields():
 	from webnotes.utils import cstr
 	for key in form.keys():
 		form_dict[key] = cstr(form.getvalue(key))
+
+def comma_and(lst):
+	if len(lst)==1: return lst[0]
+	return ', '.join(lst[:-1]) + ' and ' + lst[-1]
+	

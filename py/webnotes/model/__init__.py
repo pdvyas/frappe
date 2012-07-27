@@ -32,7 +32,7 @@ def get(doctype, name):
 	return webnotes.model.doc.get(doctype, name)
 	
 def get_doctype(doctype, processed=False):
-	import webnotes.model.doc
+	import webnotes.model.doctype
 	return webnotes.model.doctype.get(doctype, processed)
 
 def insert(doclist):
