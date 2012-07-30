@@ -18,6 +18,23 @@ cur_frm.cscript.refresh = function(doc) {
 	if(doc.for_doctype) {
 		cur_frm.cscript.for_doctype(doc);
 	}
+	if(!doc.__islocal) {
+		cur_frm.add_custom_button('Export', function() {
+			var module = wn.model.getone({"doctype":"DocType", "name":doc.for_doctype}).module;
+			if(!module) {
+				msgprint("Module missing");
+				return;
+			}
+			wn.call({
+				method:'webnotes.modules.export_doc',
+				args: {
+					doctype:'DocType Validator',
+					name: cur_frm.docname,
+					module: module
+				}
+			})
+		})
+	}
 }
 
 cur_frm.cscript.for_doctype = function(doc) {
@@ -65,7 +82,6 @@ cur_frm.cscript.table_field = function(doc, cdt, cdn) {
 		cur_frm.row_doctype[d.table_field || doc.name] = doc.for_doctype;
 	}
 
-	
 	var link_fields = $.map(wn.model.get({"doctype":"DocField", "parent":doctype, 
 		"fieldtype":"Link"}), function(d) { return d.fieldname; } );
 	

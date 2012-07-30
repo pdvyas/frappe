@@ -33,11 +33,7 @@ def scrub(txt):
 
 def scrub_dt_dn(dt, dn):
 	"""Returns in lowercase and code friendly names of doctype and name for certain types"""
-	ndt, ndn = dt, dn
-	if dt.lower() in ('doctype', 'search criteria', 'page', 'report'):
-		ndt, ndn = scrub(dt), scrub(dn)
-
-	return ndt, ndn
+	return scrub(dt), scrub(dn)
 			
 def get_module_path(module):
 	"""Returns path of the given module"""
@@ -95,14 +91,25 @@ def reload_single_doc(module, dt, dn, force=False):
 	else:
 		raise Exception, '%s missing' % path
 
-
-def export_doc(doctype, name, module=None):
+@webnotes.whitelist(allow_roles=['Administrator'])
+def export_doc(doctype=None, name=None, module=None):
 	"""write out a doc"""
+	import webnotes
+	if not (doctype and name):
+		doctype = webnotes.form_dict['doctype']
+		name = webnotes.form_dict['name']
+		if 'module' in webnotes.form_dict:
+			module = webnotes.form_dict['module']
+		
 	from webnotes.modules.export_module import write_document_file
 	import webnotes.model.doc
-	if not module: module = webnotes.conn.get_value(doctype, name, 'module')
+	if not module: 
+		module = webnotes.conn.get_value(doctype, name, 'module')
+
 	doclist = [d.fields for d in webnotes.model.doc.get(doctype, name)]
+
 	write_document_file(doclist, module)
+	webnotes.msgprint("Exported")
 
 def get_all_modules():
 	"""Return list of all modules"""

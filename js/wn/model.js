@@ -89,6 +89,10 @@ wn.model = {
 		return $.map(doclist, function(d) { return wn.model.match(filters, d) });
 	},
 	
+	getone: function(filters) {
+		return wn.model.get(filters)[0];
+	},
+	
 	match: function(filters, doc) {
 		for(key in filters) {
 			if(doc[key]!=filters[key]) {

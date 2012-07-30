@@ -115,7 +115,8 @@ class Document(object):
 		if is_single:
 			self._loadsingle()
 		else:
-			dataset = webnotes.conn.sql('select * from `%s%s` where name="%s"' % (self._prefix, self.doctype, self.name.replace('"', '\"')))
+			dataset = webnotes.conn.sql('select * from `tab%s` where name=%s' % (self.doctype, '%s'),
+				self.name)
 			if not dataset:
 				raise Exception, '[WNF] %s %s does not exist' % (self.doctype, self.name)
 			self._load_values(dataset[0], webnotes.conn.get_description())

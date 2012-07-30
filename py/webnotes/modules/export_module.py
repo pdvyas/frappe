@@ -61,15 +61,13 @@ def create_folder(module, dt, dn):
 	# get module path by importing the module
 	modules_path = get_module_path(module)
 			
-	code_type = dt in ['DocType', 'Page', 'Search Criteria', 'Report']
-	
 	# create folder
-	folder = os.path.join(modules_path, code_type and scrub(dt) or dt, code_type and scrub(dn) or dn)
+	folder = os.path.join(modules_path, scrub(dt), scrub(dn))
 	
 	webnotes.create_folder(folder)
 	
 	# create init_py_files
-	if code_type:
+	if scrub(dt) in ('doctype', 'page'):
 		create_init_py(modules_path, scrub(dt), scrub(dn))
 	
 	return folder
@@ -98,25 +96,20 @@ def write_document_file(doclist, record_module=None):
 	from webnotes.model.utils import pprint_doclist
 
 	module = get_module_name(doclist, record_module)
-
-	# create the folder
-	code_type = doclist[0]['doctype'] in ['DocType','Page','Search Criteria', 'Report']
 	
 	# create folder
 	folder = create_folder(module, doclist[0]['doctype'], doclist[0]['name'])
 	
 	# separate code files
-	clear_code_fields(doclist, folder, code_type)
+	clear_code_fields(doclist, folder)
 		
 	# write the data file	
-	fname = (code_type and scrub(doclist[0]['name'])) or doclist[0]['name']
+	fname = scrub(doclist[0]['name'])
 	txtfile = open(os.path.join(folder, fname +'.txt'),'w+')
 	txtfile.write(pprint_doclist(doclist))
-	#dict_list = [pprint_dict(d) for d in doclist]	
-	#txtfile.write('[\n' + ',\n'.join(dict_list) + '\n]')
 	txtfile.close()
 
-def clear_code_fields(doclist, folder, code_type):
+def clear_code_fields(doclist, folder):
 	"""
 		Removes code from the doc
 	"""

@@ -37,13 +37,12 @@ def get_doctype(doctype, processed=False):
 
 def insert(doclist):
 	"""insert a new doclist"""
-	from webnotes.model.doclist import DocListController
 	if doclist and not isinstance(doclist, list):
 		doclist = [doclist]
 	
-	doclistobj = DocListController(doclist)
-	doclistobj.doc.fields['__islocal'] = 1
-	doclistobj.save()
+	doclistcon = controller(doclist)	
+	doclistcon.doc.fields['__islocal'] = 1
+	doclistcon.save()
 	
 def insert_variants(base, variants):
 	for v in variants:
@@ -53,14 +52,63 @@ def insert_variants(base, variants):
 	
 def insert_child(fields):
 	"""insert a child, must specify parent, parenttype and doctype"""
-	import webnotes.model.doc
-	from webnotes.model.doclist import DocList
 
-	doclistobj = webnotes.model.doc.get(fields['parenttype'], fields['parent'])
+	# load parent
+	parent = controller(fields['parenttype'], fields['parent'])
+
+	# make child
 	new = webnotes.model.doc.Document(fielddata = fields)
 	new.fields['__islocal'] = 1
-	doclistobj.append(new)
-	DocList(doclistobj).save()
+
+	# add to doclist
+	parent.doclist.append(new)
+	
+	# save
+	parent.save()
+
+controllers = {}
+def controller(doctype, name=None):
+	"""return controller object"""
+	global controllers
+	from webnotes.model.doc import Document
+	
+	if isinstance(doctype, list):
+		doclist = doctype
+		if isinstance(doclist[0], Document):
+			doctype = doclist[0].doctype
+		else:
+			doctype = doclist[0]['doctype']
+	else:
+		doclist = get(doctype, name)
+	
+	# return if already loaded	
+	if doctype in controllers:
+		return controllers[doctype](doclist)
+
+	import os
+	from webnotes.modules import get_module_path
+	from webnotes.model.doclist import DocListController		
+		
+	doctypeobj = get_doctype(doctype)
+	module_path = os.path.join(get_module_path(doctypeobj[0].module), 'doctype', doctype, doctype+'.py')
+	
+	# check if path exists
+	if os.path.exists(module_path):
+		module = __import__(module_path, fromlist = True)
+		
+		# find controller in module
+		for attr in dir(module):
+			obj = getattr(module, attr)
+			
+			if issubclass(obj, DocListController):
+				controllers[doctype] = obj
+				return obj(doclist)
+				
+	else:
+		# vanilla controller
+		return DocListController(doclist)
+	
+	
 	
 def check_if_doc_is_linked(dt, dn):
 	"""
