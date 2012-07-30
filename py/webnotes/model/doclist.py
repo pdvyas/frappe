@@ -75,56 +75,66 @@ class DocListController(object):
 		self.obj = get_obj(doclist=self.doclist)
 		return self.obj
 
-	def check_if_latest(self):
+	def run_method(self, method):
+		"""Run a method and custom_method"""
+		if getattr(self, 'new_style', None):
+			if hasattr(self, method):
+				getattr(self, method)()
+		else:
+			self.make_obj()
+			if hasattr(self.obj, method):
+				getattr(self.obj, method)()
+			if hasattr(self.obj, 'custom_' + method):
+				getattr(self.obj, 'custom_' + method)()
+		
+			self.set_doclist([self.doc] + self.obj.doclist)
+
+		trigger(method, self.doc)
+
+	def save(self, check_links=1):
 		"""
-			Raises exception if the modified time is not the same as in the database
+			Save the list
 		"""
-		from webnotes.model.meta import is_single
+		self.prepare_for_save(check_links)
+		self.run_method('validate')
+		self.doctype_validate()
+		self.save_main()
+		self.save_children()
+		self.run_method('on_update')
 
-		if (not is_single(self.doc.doctype)) and (not cint(self.doc.fields.get('__islocal'))):
-			tmp = webnotes.conn.sql("""
-				SELECT modified FROM `tab%s` WHERE name="%s" for update"""
-				% (self.doc.doctype, self.doc.name))
+	def submit(self):
+		"""
+			Save & Submit - set docstatus = 1, run "on_submit"
+		"""
+		if self.doc.docstatus != 0:
+			msgprint("Only draft can be submitted", raise_exception=1)
+		self.to_docstatus = 1
+		self.save()
+		self.run_method('on_submit')
 
-			if tmp and str(tmp[0][0]) != str(self.doc.modified):
-				webnotes.msgprint("""
-				Document has been modified after you have opened it.
-				To maintain the integrity of the data, you will not be able to save your changes.
-				Please refresh this document. [%s/%s]""" % (tmp[0][0], self.doc.modified), raise_exception=1)
+	def cancel(self):
+		"""
+			Cancel - set docstatus 2, run "on_cancel"
+		"""
+		if self.doc.docstatus != 1:
+			msgprint("Only submitted can be cancelled", raise_exception=1)
+		self.to_docstatus = 2
+		self.prepare_for_save(1)
+		self.save_main()
+		self.save_children()
+		self.run_method('on_cancel')
 
-	def check_permission(self):
-		"""Raises exception if permission is not valid"""
-		if not self.doc.check_perm(verbose=1):
-			webnotes.msgprint("Not enough permission to save %s" % self.doc.doctype, raise_exception=1)
-
-	def check_links(self):
-		"""Checks integrity of links (throws exception if links are invalid)"""
-		ref, err_list = {}, []
-		for d in self.docs:
-			if not ref.get(d.doctype):
-				ref[d.doctype] = d.make_link_list()
-
-			err_list += d.validate_links(ref[d.doctype])
-
-		if err_list:
-			webnotes.msgprint("""[Link Validation] Could not find the following values: %s.
-			Please correct and resave. Document Not Saved.""" % ', '.join(err_list), raise_exception=1)
-
-	def update_timestamps_and_docstatus(self):
-		"""Update owner, creation, modified_by, modified, docstatus"""
-		from webnotes.utils import now
-		ts = now()
-		user = webnotes.__dict__.get('session', {}).get('user') or 'Administrator'
-
-		for d in self.docs:
-			if self.doc.fields.get('__islocal'):
-				d.owner = user
-				d.creation = ts
-
-			d.modified_by = user
-			d.modified = ts
-			if d.docstatus != 2: # don't update deleted
-				d.docstatus = self.to_docstatus
+	def update_after_submit(self):
+		"""
+			Update after submit - some values changed after submit
+		"""
+		if self.doc.docstatus != 1:
+			msgprint("Only to called after submit", raise_exception=1)
+		self.to_docstatus = 1
+		self.prepare_for_save(1)
+		self.save_main()
+		self.save_children()
+		self.run_method('on_update_after_submit')
 
 	def prepare_for_save(self, check_links):
 		"""Set owner, modified etc before saving"""
@@ -133,18 +143,6 @@ class DocListController(object):
 		if check_links:
 			self.check_links()
 		self.update_timestamps_and_docstatus()
-
-	def run_method(self, method):
-		"""Run a method and custom_method"""
-		self.make_obj()
-		if hasattr(self.obj, method):
-			getattr(self.obj, method)()
-		if hasattr(self.obj, 'custom_' + method):
-			getattr(self.obj, 'custom_' + method)()
-
-		trigger(method, self.obj.doc)
-		
-		self.set_doclist([self.obj.doc] + self.obj.doclist)
 
 	def save_main(self):
 		"""Save the main doc"""
@@ -188,49 +186,62 @@ class DocListController(object):
 				webnotes.conn.sql("""delete from `tab%s` where parent=%s and parenttype=%s""" \
 					% (dt[0], '%s', '%s'), (self.doc.name, self.doc.doctype))
 
-	def save(self, check_links=1):
+	def check_if_latest(self):
 		"""
-			Save the list
+			Raises exception if the modified time is not the same as in the database
 		"""
-		self.prepare_for_save(check_links)
-		self.run_method('validate')
-		self.save_main()
-		self.save_children()
-		self.run_method('on_update')
+		from webnotes.model.meta import is_single
 
-	def submit(self):
-		"""
-			Save & Submit - set docstatus = 1, run "on_submit"
-		"""
-		if self.doc.docstatus != 0:
-			msgprint("Only draft can be submitted", raise_exception=1)
-		self.to_docstatus = 1
-		self.save()
-		self.run_method('on_submit')
+		if (not is_single(self.doc.doctype)) and (not cint(self.doc.fields.get('__islocal'))):
+			tmp = webnotes.conn.sql("""
+				SELECT modified FROM `tab%s` WHERE name="%s" for update"""
+				% (self.doc.doctype, self.doc.name))
 
-	def cancel(self):
-		"""
-			Cancel - set docstatus 2, run "on_cancel"
-		"""
-		if self.doc.docstatus != 1:
-			msgprint("Only submitted can be cancelled", raise_exception=1)
-		self.to_docstatus = 2
-		self.prepare_for_save(1)
-		self.save_main()
-		self.save_children()
-		self.run_method('on_cancel')
+			if tmp and str(tmp[0][0]) != str(self.doc.modified):
+				webnotes.msgprint("""
+				Document has been modified after you have opened it.
+				To maintain the integrity of the data, you will not be able to save your changes.
+				Please refresh this document. [%s/%s]""" % (tmp[0][0], self.doc.modified), raise_exception=1)
 
-	def update_after_submit(self):
-		"""
-			Update after submit - some values changed after submit
-		"""
-		if self.doc.docstatus != 1:
-			msgprint("Only to called after submit", raise_exception=1)
-		self.to_docstatus = 1
-		self.prepare_for_save(1)
-		self.save_main()
-		self.save_children()
-		self.run_method('on_update_after_submit')
+	def check_permission(self):
+		"""Raises exception if permission is not valid"""
+		if not self.doc.check_perm(verbose=1):
+			webnotes.msgprint("Not enough permission to save %s" % self.doc.doctype, raise_exception=1)
+
+	def check_links(self):
+		"""Checks integrity of links (throws exception if links are invalid)"""
+		ref, err_list = {}, []
+		for d in self.docs:
+			if not ref.get(d.doctype):
+				ref[d.doctype] = d.make_link_list()
+
+			err_list += d.validate_links(ref[d.doctype])
+
+		if err_list:
+			webnotes.msgprint("""[Link Validation] Could not find the following values: %s.
+			Please correct and resave. Document Not Saved.""" % ', '.join(err_list), raise_exception=1)
+
+	def doctype_validate(self):
+		"""run DocType Validator"""
+		from core.doctype.doctype_validator.doctype_validator import validate
+		validate(self)
+
+	def update_timestamps_and_docstatus(self):
+		"""Update owner, creation, modified_by, modified, docstatus"""
+		from webnotes.utils import now
+		ts = now()
+		user = webnotes.__dict__.get('session', {}).get('user') or 'Administrator'
+
+		for d in self.docs:
+			if self.doc.fields.get('__islocal'):
+				d.owner = user
+				d.creation = ts
+
+			d.modified_by = user
+			d.modified = ts
+			if d.docstatus != 2: # don't update deleted
+				d.docstatus = self.to_docstatus
+
 
 # clone
 

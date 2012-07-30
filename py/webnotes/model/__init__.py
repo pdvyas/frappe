@@ -86,27 +86,29 @@ def controller(doctype, name=None):
 		return controllers[doctype](doclist)
 
 	import os
-	from webnotes.modules import get_module_path
+	from webnotes.modules import get_module_path, scrub
 	from webnotes.model.doclist import DocListController		
 		
 	doctypeobj = get_doctype(doctype)
-	module_path = os.path.join(get_module_path(doctypeobj[0].module), 'doctype', doctype, doctype+'.py')
+	module_path = os.path.join(get_module_path(doctypeobj[0].module), 'doctype', doctype, 
+		doctype+'.py')
 	
 	# check if path exists
 	if os.path.exists(module_path):
-		module = __import__(module_path, fromlist = True)
+		module = __import__(scrub(doctypeobj[0].module) + '.doctype.' + scrub(doctype) + '.' \
+			+ scrub(doctype), fromlist = True)
 		
 		# find controller in module
 		for attr in dir(module):
-			obj = getattr(module, attr)
+			attrobj = getattr(module, attr)
 			
-			if issubclass(obj, DocListController):
-				controllers[doctype] = obj
-				return obj(doclist)
+			if not isinstance(attrobj, object):
+				if issubclass(DocListController, attrobj):
+					controllers[doctype] = attrobj
+					return attrobj(doclist)
 				
-	else:
-		# vanilla controller
-		return DocListController(doclist)
+	# vanilla controller
+	return DocListController(doclist)
 	
 	
 	

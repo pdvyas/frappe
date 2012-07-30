@@ -119,10 +119,15 @@ def get_server_obj(doclist):
 		
 	module = scrub(module)
 	dt = scrub(doc.doctype)
+	DocType = None
 
 	try:
 		module = __import__('%s.doctype.%s.%s' % (module, dt, dt), fromlist=[''])
-		DocType = getattr(module, 'DocType')
+		if hasattr(module, 'DocType'):
+			DocType = getattr(module, 'DocType', None)
+		else:
+			import webnotes.model
+			return webnotes.model.controller(doclist)
 	except ImportError, e:
 		class DocType:
 			def __init__(self, d, dl):
@@ -158,8 +163,12 @@ def get_obj(dt = None, dn = None, doc=None, doclist=[], with_children = 0):
 		else:
 			doclist = webnotes.model.doc.get(dt, dn, with_children = 0, from_get_obj=1)
 		return get_server_obj(doclist)
-	else:
+	elif doclist:
 		return get_server_obj(doclist)
+	elif doc:
+		return get_server_obj([doc])
+	else:
+		raise Exception, "must specify doctype, name or doclist"
 		
 #=================================================================================
 # get object and run method

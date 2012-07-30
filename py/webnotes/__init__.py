@@ -58,8 +58,10 @@ class PermissionError(Exception): pass
 class OutgoingEmailError(ValidationError): pass
 class UnknownDomainError(Exception): pass
 class SessionStopped(Exception): pass
-class DuplicateEntryError(Exception): pass
-		
+class DuplicateEntryError(ValidationError): pass
+class InvalidLinkError(ValidationError): pass
+class LinkFilterError(ValidationError): pass
+
 def getTraceback():
 	import utils
 	return utils.getTraceback()
