@@ -69,7 +69,7 @@ def get(doctype, processed=False):
 
 	to_cache(doctype, processed, doclist)
 		
-	return doclist
+	return DocTypeDocList(doclist)
 
 def load_docfield_types():
 	global docfield_types
@@ -265,3 +265,16 @@ def add_validators(doctype, doclist):
 	for validator in webnotes.conn.sql("""select name from `tabDocType Validator` where
 		for_doctype=%s""", doctype):
 		doclist.extend(webnotes.model.get('DocType Validator', validator))
+
+class DocTypeDocList(webnotes.model.doc.DocList):
+	def get_field(self, fieldname, parent=None):
+		filters = {"doctype":"DocField", "fieldname":fieldname}
+		if parent:
+			filters["parent"] = parent
+		return self.getone(filters)
+	
+	def get_options(self, fieldname, parent=None):
+		return self.get_field(fieldname, parent).options
+		
+	def get_label(self, fieldname, parent=None):
+		return self.get_field(fieldname, parent).label

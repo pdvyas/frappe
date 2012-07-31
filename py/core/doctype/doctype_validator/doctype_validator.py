@@ -52,8 +52,7 @@ def filter_link(doclist, link_filter, doctypelist):
 
 		# if table field, get the name of the parent table
 		if link_filter.table_field:
-			df_filter["parent"] = doctypelist.getone({"doctype":"DocField",
-				"fieldname":link_filter.table_field}).options
+			df_filter["parent"] = doctypelist.get_options(link_filter.table_field)
 		
 		# docfield object of the link_field so we know the doctype
 		link_df = doctypelist.getone(df_filter)
@@ -73,9 +72,8 @@ def filter_link(doclist, link_filter, doctypelist):
 				linkdoctypelist = webnotes.model.get_doctype(link_df.options)
 				
 				webnotes.msgprint("""%s: "%s" must have "%s" %s "%s" """ % \
-					(link_df.label, val, linkdoctypelist.getone({"doctype":"DocField", 
-						"fieldname":link_filter.fieldname}).label, link_filter.condition, 
-						link_filter.value),
+					(link_df.label, val, linkdoctypelist.get_label(link_filter.fieldname), 
+						link_filter.condition, link_filter.value),
 					raise_exception = webnotes.LinkFilterError, debug=1) 
 	
 	if link_filter.table_field:
@@ -117,7 +115,7 @@ def no_duplicate(doclist, parentfield, keys):
 				
 		if values in all_values:
 			doctypelist = webnotes.model.get_doctype(d.doctype)
-			labels = map(lambda key: doctypelist.getone({"fieldname":key}).label, keys)
+			labels = map(doctypelist.get_label, keys)
 			webnotes.msgprint("""Duplicate rows found in table %s 
 				having same values for colums %s""" % (d.doctype, webnotes.comma_and(labels)),
 				raise_exception=webnotes.DuplicateEntryError)
