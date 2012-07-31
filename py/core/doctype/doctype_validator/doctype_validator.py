@@ -48,15 +48,15 @@ def filter_link(doclist, link_filter, doctypelist):
 				where name=%s""" % (doctype, '%s'), name, as_dict=1))
 			
 	def _check(doc):
-		df_filter = {"doctype":"DocField", "fieldname":link_filter.link_field}
-
 		# if table field, get the name of the parent table
+		table_parent = None
 		if link_filter.table_field:
-			df_filter["parent"] = doctypelist.get_options(link_filter.table_field)
+			table_parent = doctypelist.get_options(link_filter.table_field)
 		
 		# docfield object of the link_field so we know the doctype
-		link_df = doctypelist.getone(df_filter)
+		link_df = doctypelist.get_field(link_filter.link_field, table_parent)
 
+		# value set
 		val = doc.fields.get(link_filter.link_field)
 		if val:
 			valdoc = _get(link_df.options, val)
