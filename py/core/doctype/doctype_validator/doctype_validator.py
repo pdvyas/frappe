@@ -33,6 +33,10 @@ def validate(controller):
 	for d in doctypelist.get({"doctype":"DocType Link Filter"}):
 		filter_link(controller.doclist, d, doctypelist)
 	
+	# if-then validators
+	for d in doctypelist.get({"doctype":"DocType Conditional Value"}):
+		check_condition(controller.doclist, d, doctypelist)
+	
 	# duplicate validators
 	for d in doctypelist.get({"doctype":"DocType Unique Row"}):
 		no_duplicate(controller.doclist, d.unique_table_field, d.keys.split('\n'))

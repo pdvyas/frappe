@@ -629,7 +629,7 @@ LinkField.prototype.setup_validators = function() {
 	if(this.grid) {
 		filters["table_field"] = this.grid.field.df.fieldname;
 	}
-	this.filters = $.map(wn.model.get(filters), function(d) {
+	this.filters = $.map(wn.model.get(filters) || [], function(d) {
 		return [[me.df.options, d.fieldname, d.condition, d.value]]
 	});
 }
