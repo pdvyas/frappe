@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		u'creation': '2012-07-27 15:08:50',
+		u'creation': '2012-07-31 11:10:43',
 		u'docstatus': 0,
-		u'modified': '2012-07-27 16:52:26',
+		u'modified': '2012-07-31 18:24:43',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -60,7 +60,7 @@
 		'fieldname': u'if_condition',
 		'fieldtype': u'Select',
 		'label': u'If Condition',
-		'options': u'=\nin\n>\n<\n!=\n>=\n<=\nBegins With',
+		'options': u'=\nin\n>\n<\n!=\n>=\n<=\nBegins With\nFilled',
 		'reqd': 1
 	},
 
@@ -96,7 +96,7 @@
 		'fieldname': u'then_condition',
 		'fieldtype': u'Select',
 		'label': u'Then Condition',
-		'options': u'=\nin\n>\n<\n!=\n>=\n<=\nBegins With',
+		'options': u'=\nin\n>\n<\n!=\n>=\n<=\nBegins With\nFilled',
 		'reqd': 1
 	},
 

@@ -86,7 +86,7 @@ wn.model = {
 	
 	get: function(filters) {
 		var doclist = locals[filters.doctype];
-		return $.map(doclist, function(d) { return wn.model.match(filters, d) });
+		return $.map(doclist || [], function(d) { return wn.model.match(filters, d) });
 	},
 	
 	getone: function(filters) {

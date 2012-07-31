@@ -726,16 +726,17 @@ class DocList(list):
 	def get(self, filters, max=0):
 		"""pass filters as:
 			{"key":"val", "key":"!val", "key": "^val"}"""
+		from webnotes.utils import cstr
 		out = []
 		for d in self:
 			add = True
 			for f in filters:
 				fval = filters[f]
-				if fval.startswith('!'): 
+				if cstr(fval).startswith('!'): 
 					if d.fields.get(f) == fval[1:]:
 						add = False
 						break
-				if fval.startswith('^'): 
+				if cstr(fval).startswith('^'): 
 					if not (d.fields.get(f) or '').startswith(fval[1:]):
 						add = False
 						break

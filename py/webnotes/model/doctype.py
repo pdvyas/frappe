@@ -267,8 +267,13 @@ def add_validators(doctype, doclist):
 		doclist.extend(webnotes.model.get('DocType Validator', validator))
 
 class DocTypeDocList(webnotes.model.doc.DocList):
-	def get_field(self, fieldname, parent=None):
+	def get_field(self, fieldname, parent=None, parentfield=None):
 		filters = {"doctype":"DocField", "fieldname":fieldname}
+		
+		# if parentfield, get the name of the parent table
+		if parentfield:
+			parent = self.get_options(parentfield)
+
 		if parent:
 			filters["parent"] = parent
 		return self.getone(filters)

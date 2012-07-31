@@ -61,6 +61,7 @@ class SessionStopped(Exception): pass
 class DuplicateEntryError(ValidationError): pass
 class InvalidLinkError(ValidationError): pass
 class LinkFilterError(ValidationError): pass
+class ConditionalPropertyError(ValidationError): pass
 
 def getTraceback():
 	import utils

@@ -18,7 +18,7 @@ wn.ui.Search = Class.extend({
 			width: 500
 		});
 		
-		if(this.with_filters.length) {
+		if(this.with_filters && this.with_filters.length) {
 			this.msg_area = $('<div class="help-box">\
 				<div><b>Results containing: </b></div>\
 				</div>').appendTo(this.dialog.body);			
