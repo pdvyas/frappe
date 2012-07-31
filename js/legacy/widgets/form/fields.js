@@ -622,9 +622,14 @@ LinkField.prototype.make_input = function() {
 }
 LinkField.prototype.setup_validators = function() {
 	var me = this;
+	
+	var validators = wn.model.get({"doctype":"DocType Validator", 
+		"for_doctype": cur_frm.doc.doctype});
+	
 	var filters = {
 		"doctype":"DocType Link Filter", 
-		"link_field": this.df.fieldname
+		"link_field": this.df.fieldname,
+		"parent": $.map(validators, function(d) { return d.name })
 	}
 	if(this.grid) {
 		filters["table_field"] = this.grid.field.df.fieldname;

@@ -33,8 +33,5 @@ wn.ui.toolbar.Search = wn.ui.toolbar.SelectorDialog.extend({
 		
 		// get new types
 		this.set_values(wn.boot.profile.can_search.join(',').split(','));
-		
-		// global search selector
-		// makeselector(); // not able to find this function
 	}
 });

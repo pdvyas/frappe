@@ -33,13 +33,13 @@ def validate(controller):
 	for d in doctypelist.get({"doctype":"DocType Link Filter"}):
 		filter_link(controller.doclist, d, doctypelist)
 	
+	# if-then validators
+	for d in doctypelist.get({"doctype":"DocType Conditional Property"}):
+		check_condition(controller.doclist, d, doctypelist)
+	
 	# duplicate validators
 	for d in doctypelist.get({"doctype":"DocType Unique Row"}):
 		no_duplicate(controller.doclist, d.unique_table_field, d.keys.split('\n'))
-		
-	# conditional validators
-	for d in doctypelist.get({"doctype":"DocType Conditional Property"}):
-		validate_if_then(controller.doclist, d, doctypelist)
 
 _cached_link_docs = {}
 def filter_link(doclist, link_filter, doctypelist):
@@ -127,33 +127,45 @@ def no_duplicate(doclist, parentfield, keys):
 				raise_exception=webnotes.DuplicateEntryError)
 				
 		all_values.append(values)
-		
-def validate_if_then(doclist, if_then, doctypelist):
-	"""validate if then conditions"""
+
+def check_condition(doclist, condition, doctypelist):
+	"""check if-then type of conditions"""
 	import webnotes
 	
-	def _get_field(fieldname, table_field):
-		return doctypelist.get_field(fieldname, parentfield=table_field or None)
+	def _get_doclist(ctype):
+		return doclist.get({"parentfield": condition.fields[_fname(ctype, "table_field")]})
+	
+	def _get_label(ctype):
+		return doctypelist.get_field(condition.fields[_fname(ctype, "field")],
+			parentfield=condition.fields[_fname(ctype, "table_field")] or None).label
+			
+	def _check(doc, ctype):
+		return check_filters(doc.fields.get(condition.fields[_fname(ctype, "field")]),
+			condition.fields[_fname(ctype, "condition")], condition.fields[_fname(ctype, "value")])
+	
+	def _fname(ctype, fname):
+		return ctype + "_" + fname
 		
-	if_doclist = doclist.get({"parentfield": if_then.if_table_field})
-	then_doclist = doclist.get({"parentfield": if_then.then_table_field})
+	if_doclist = _get_doclist('if')
+	then_doclist = _get_doclist('then')
 
+	# for each, check if "if" condition is true
 	for if_doc in if_doclist:
-		# check if "if" condition is true
-		if check_filters(if_doc.fields.get(if_then.if_field), if_then.if_condition, if_then.if_value):
+		if _check(if_doc, 'if'):
+			
+			# for each, check if "then" condition is false
 			for then_doc in then_doclist:
-				# check if "then" condition is false
-				if not check_filters(then_doc.fields.get(if_then.then_field), if_then.then_condition, 
-					if_then.then_value):
+				if not _check(then_doc, 'then'):
+					
 					# get labels for displaying error message
-					if_then.fields.update({
-						"if_label": _get_field(if_then.if_field, if_then.if_table_field).label,
-						"then_label": _get_field(if_then.then_field, if_then.then_table_field).label
+					condition.fields.update({
+						"if_label": _get_label("if"),
+						"then_label": _get_label("then")
 					})
 					
 					webnotes.msgprint("""If "%(if_label)s" %(if_condition)s "%(if_value)s", 
 						then "%(then_label)s" should be %(then_condition)s "%(then_value)s" """ \
-						% if_then.fields, raise_exception=webnotes.ConditionalPropertyError)
+						% condition.fields, raise_exception=webnotes.ConditionalPropertyError)
 
 class DocType:
 	def __init__(self, d, dl):

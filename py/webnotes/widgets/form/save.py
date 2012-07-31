@@ -27,28 +27,28 @@ import webnotes
 def savedocs():
 	"""save / submit / cancel / update doclist"""
 	try:
-		from webnotes.model.doclist import DocListController
+		import webnotes.model
 		form = webnotes.form_dict
 
-		doclist = DocListController()
-		doclist.from_compressed(form.get('docs'), form.get('docname'))
+		from webnotes.model.utils import expand
+		controller = webnotes.model.controller(expand(form.get('docs')))
 
 		# action
 		action = form.get('action')
 
 		if action=='Update': action='update_after_submit'
 
-		getattr(doclist, action.lower())()
+		getattr(controller, action.lower())()
 
 		# update recent documents
-		webnotes.user.update_recent(doclist.doc.doctype, doclist.doc.name)
+		webnotes.user.update_recent(controller.doc.doctype, controller.doc.name)
 
 		# send updated docs
 		webnotes.response['saved'] = '1'
-		webnotes.response['main_doc_name'] = doclist.doc.name
-		webnotes.response['doctype'] = doclist.doc.doctype
-		webnotes.response['docname'] = doclist.doc.name
-		webnotes.response['docs'] = doclist.doclist
+		webnotes.response['main_doc_name'] = controller.doc.name
+		webnotes.response['doctype'] = controller.doc.doctype
+		webnotes.response['docname'] = controller.doc.name
+		webnotes.response['docs'] = controller.doclist
 
 	except Exception, e:
 		webnotes.msgprint('Did not save')
