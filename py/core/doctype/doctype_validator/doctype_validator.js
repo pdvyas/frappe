@@ -76,7 +76,7 @@ cur_frm.cscript.table_field = function(doc, cdt, cdn) {
 		var table_df = wn.model.get({"doctype":"DocField", "fieldname":d.table_field, 
 			"parent": doc.for_doctype})[0];
 		var doctype = table_df.options;
-		cur_frm.row_doctype[d.table_field || doc.name] = table_df.parent;
+		cur_frm.row_doctype[d.table_field || doc.name] = table_df.options;
 	} else {
 		var doctype = doc.for_doctype;
 		cur_frm.row_doctype[d.table_field || doc.name] = doc.for_doctype;

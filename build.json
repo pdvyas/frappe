@@ -145,7 +145,6 @@
 			"lib/js/legacy/webpage/page_header.js",
 			"lib/js/legacy/widgets/tags.js",
 			"lib/js/legacy/widgets/export_query.js",
-			"lib/js/legacy/webpage/search.js",
 			"lib/js/legacy/webpage/spinner.js",
 			"lib/js/legacy/webpage/loaders.js",
 			"lib/js/legacy/wn/page_layout.js",

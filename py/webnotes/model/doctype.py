@@ -45,7 +45,7 @@ def get(doctype, processed=False):
 
 	# from database cache __CacheItem
 	doclist = from_cache(doctype, processed)
-	if doclist: return doclist
+	if doclist: return DocTypeDocList(doclist)
 	
 	load_docfield_types()
 	

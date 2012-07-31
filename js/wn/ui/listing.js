@@ -32,6 +32,7 @@
 //   get_args (method to return args as dict)
 
 //   show_filters [false]
+//   with_filters (default filters)
 //   doctype
 //   filter_fields (if given, this list is rendered, else built from doctype)
 

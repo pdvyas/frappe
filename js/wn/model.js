@@ -93,6 +93,16 @@ wn.model = {
 		return wn.model.get(filters)[0];
 	},
 	
+	get_field: function(fieldname, parent) {
+		var f = {"doctype":"DocField", "fieldname": fieldname};
+		if(parent) f.parent = parent;
+		return wn.model.getone(f);
+	},
+	
+	get_label: function(fieldname, parent) {
+		return wn.model.get_field(fieldname, parent).label
+	},
+	
 	match: function(filters, doc) {
 		for(key in filters) {
 			if(doc[key]!=filters[key]) {

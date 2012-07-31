@@ -212,12 +212,10 @@ def save_report():
 	webnotes.msgprint("%s saved." % d.name)
 	return d.name
 
-@webnotes.whitelist()
+@webnotes.whitelist(allow_roles=['Administrator', 'System Manager', 'Report Manager'])
 def export_query():
 	"""export from report builder"""
 	
-	# TODO: validate use is allowed to export
-	verify_export_allowed()
 	ret = get()
 
 	columns = [x[0] for x in webnotes.conn.get_description()]
@@ -248,13 +246,6 @@ def export_query():
 	webnotes.response['result'] = cstr(f.read())
 	webnotes.response['type'] = 'csv'
 	webnotes.response['doctype'] = [t[4:-1] for t in tables][0]
-
-def verify_export_allowed():
-	"""throw exception if user is not allowed to export"""
-	global roles
-	roles = webnotes.get_roles()
-	if not ('Administrator' in roles or 'System Manager' in roles or 'Report Manager' in roles):
-		raise webnotes.PermissionError
 
 def get_labels(columns):
 	"""get column labels based on column names"""

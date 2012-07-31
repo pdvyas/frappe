@@ -423,34 +423,6 @@ DataField.prototype.make_input = function() {
 		me.input.value = val; 
 		if(me.format_input)me.format_input();
 	}
-	
-	// autosuggest type fields
-	// -----------------------
-	
-	if(this.df.options=='Suggest') {
-		// add auto suggest
-		if(this.suggest_icon) this.suggest_icon.toggle(true);
-		$(me.input).autocomplete({
-			source: function(request, response) {
-				wn.call({
-					method:'webnotes.widgets.search.search_link',
-					args: {
-						'txt': request.term, 
-						'dt': me.df.options,
-						'query': repl('SELECT DISTINCT `%(fieldname)s` FROM \
-							`tab%(dt)s` WHERE `%(fieldname)s` LIKE "%s" LIMIT 50', 
-							{fieldname:me.df.fieldname, dt:me.df.parent})
-					},
-					callback: function(r) {
-						response(r.results);
-					}
-				});
-			},
-			select: function(event, ui) {
-				me.set(ui.item.value);
-			}
-		});
-	}
 }
 DataField.prototype.validate = function(v) {
 	if(this.df.options == 'Phone') {
@@ -601,16 +573,19 @@ LinkField.prototype.make_input = function() {
 
 	$(me.txt).autocomplete({
 		source: function(request, response) {
+			var tab_name = "`tab"+ me.df.options+"`"
+			var filters = [[me.df.options, "name", "like", request.term + '%']].concat(me.filters || []);
 			wn.call({
-				method:'webnotes.widgets.search.search_link',
+				method: 'webnotes.widgets.doclistview.get',
 				args: {
-					'txt': request.term, 
-					'dt': me.df.options,
-					'query': me.get_custom_query()
+					'docstatus': ["0", "1"],
+					"fields": [tab_name + ".name"],
+					"filters": filters,
+					'doctype': me.df.options
 				},
 				callback: function(r) {
-					response(r.results);
-				},
+					response($.map(r.message, function(v) { return {"label": v.name, "info":""} }));
+				}
 			});
 		},
 		select: function(event, ui) {
@@ -627,9 +602,10 @@ LinkField.prototype.make_input = function() {
 		var val = $(this).val();//me.get_value();
 
 		me.set_input_value_executed = false;
+		console.log('fired:' + me.dialog_fired)
 		
 		if(!val) {
-			if(selector && selector.display) 
+			if(me.dialog_fired) 
 				return;
 			me.set_input_value('');			
 		} else {
@@ -640,7 +616,22 @@ LinkField.prototype.make_input = function() {
 				}
 			}, 1000);
 		}
-	})
+	});
+	
+	this.setup_validators();
+}
+LinkField.prototype.setup_validators = function() {
+	var me = this;
+	var filters = {
+		"doctype":"DocType Link Filter", 
+		"link_field": this.df.fieldname
+	}
+	if(this.grid) {
+		filters["table_field"] = this.grid.field.df.fieldname;
+	}
+	this.filters = $.map(wn.model.get(filters), function(d) {
+		return [[me.df.options, d.fieldname, d.condition, d.value]]
+	});
 }
 
 LinkField.prototype.get_custom_query = function() {
@@ -657,14 +648,24 @@ LinkField.prototype.setup_buttons = function() {
 	
 	// magnifier - search
 	me.btn.onclick = function() {
-		selector.set(me, me.df.options, me.df.label);
-		selector.show(me.txt);
+		var txt = $(me.txt).val();
+		me.dialog_fired = true;
+		me.search_dialog = new wn.ui.Search({
+			doctype:me.df.options, 
+			txt: txt,
+			with_filters: me.filters,
+			df: me.df,
+			callback: function(val) {
+				me.set_input_value(val);
+				me.dialog_fired = false;
+			}});
 	}
 
 	// open
 	if(me.btn1)me.btn1.onclick = function() {
-		if(me.txt.value && me.df.options) { loaddoc(me.df.options, me.txt.value); }
-	}	
+		if(me.txt.value && me.df.options) { wn.set_route('Form', me.df.options, me.txt.value); }
+	}
+
 	// add button - for inline creation of records
 	me.can_create = 0;
 	if((!me.not_in_form) && in_list(profile.can_create, me.df.options)) {
@@ -696,9 +697,6 @@ LinkField.prototype.set_input_value = function(val) {
 	
 	// SetTimeout hack! if in put is set via autocomplete, do not validate twice
 	me.set_input_value_executed = true;
-
-	var from_selector = false;
-	if(selector && selector.display) from_selector = true;
 		
 	// refresh mandatory style
 	me.refresh_label_icon();
@@ -731,10 +729,10 @@ LinkField.prototype.set_input_value = function(val) {
 		return;
 	}
 
-	me.validate_link(val, from_selector);
+	me.validate_link(val);
 }
 
-LinkField.prototype.validate_link = function(val, from_selector) {
+LinkField.prototype.validate_link = function(val) {
 	// validate the value just entered
 	var me = this;
 	var fetch = '';
@@ -750,7 +748,7 @@ LinkField.prototype.validate_link = function(val, from_selector) {
 			if(r.message=='Ok') {
 				// set fetch values
 				if($(me.txt).val()!=val) {
-					if((me.grid && !from_selector) || (!me.grid)) {
+					if((me.grid && !me.dialog_fired) || (!me.grid)) {
 						$(me.txt).val(val);
 					}
 				}
@@ -806,7 +804,7 @@ LinkField.prototype.set_get_query = function() {
 
 LinkField.prototype.set_disp = function(val) {
 	var t = null; 
-	if(val)t = "<a href=\'javascript:loaddoc(\""+this.df.options+"\", \""+val+"\")\'>"+val+"</a>";
+	if(val)t = "<a href='#Form/"+this.df.options+"/"+val+"'>"+val+"</a>";
 	this.set_disp_html(t);
 }
 
@@ -1197,11 +1195,7 @@ function makeinput_popup(me, iconsrc, iconsrc1, iconsrc2) {
 	me.txt = $a($a($a(c0, 'div', '', {paddingRight:'8px'}), 'div'), 'input', '', {width:'100%'});
 
 	me.btn = $a(c1, 'i', iconsrc, icon_style)
-
-	if(iconsrc1) // link
-		me.btn.setAttribute('title','Search');
-	else // date
-		me.btn.setAttribute('title','Select Date');
+	me.btn.setAttribute('title','Search');
 
 	if(iconsrc1) {
 		var c2 = tab.rows[0].insertCell(2);

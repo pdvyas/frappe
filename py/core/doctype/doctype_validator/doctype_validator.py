@@ -74,7 +74,7 @@ def filter_link(doclist, link_filter, doctypelist):
 				webnotes.msgprint("""%s: "%s" must have "%s" %s "%s" """ % \
 					(link_df.label, val, linkdoctypelist.get_label(link_filter.fieldname), 
 						link_filter.condition, link_filter.value),
-					raise_exception = webnotes.LinkFilterError, debug=1) 
+					raise_exception = webnotes.LinkFilterError) 
 	
 	if link_filter.table_field:
 		for d in doclist.get({"parentfield":link_filter.table_field}):
