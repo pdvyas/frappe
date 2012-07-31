@@ -86,6 +86,7 @@ wn.model = {
 	
 	get: function(filters) {
 		var doclist = locals[filters.doctype];
+		if(!doclist) return [];
 		return $.map(doclist, function(d) { return wn.model.match(filters, d) });
 	},
 	
@@ -105,8 +106,15 @@ wn.model = {
 	
 	match: function(filters, doc) {
 		for(key in filters) {
-			if(doc[key]!=filters[key]) {
-				return null;
+			var fval = filters[key];
+			if(fval instanceof Array) {
+				// one of
+				if(!in_list(fval, doc[key])) return null;
+			} else {
+				// equal
+				if(doc[key]!=filters[key]) {
+					return null;
+				}				
 			}
 		}
 		return doc;

@@ -41,6 +41,16 @@ def validate(controller):
 	for d in doctypelist.get({"doctype":"DocType Unique Row"}):
 		no_duplicate(controller.doclist, d.unique_table_field, d.keys.split('\n'))
 
+def check_condition(doclist, condition, doctypelist):
+	"""check if-then type of conditions"""
+	def _get():
+	
+	def _check(doc):
+		
+	if condition.if_table_field:
+		for d in doclist.get({"parentfield":condition.if_table_field}):
+			if_true = check_filters()
+
 _cached_link_docs = {}
 def filter_link(doclist, link_filter, doctypelist):
 	"""check if all the rules are valid"""
