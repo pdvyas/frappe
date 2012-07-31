@@ -40,26 +40,27 @@ def runserverobj():
 
 	if dt: # not called from a doctype (from a page)
 		if not dn: dn = dt # single
-		so = webnotes.model.code.get_obj(dt, dn)
+		controller = webnotes.model.code.get_obj(dt, dn)
 
 	else:
-		doclist = DocListController()
-		doclist.from_compressed(webnotes.form_dict.get('docs'), dn)
-		so = doclist.make_obj()
-		doclist.check_if_latest()
+		import webnotes.model
+		from webnotes.model.utils import expand
+		
+		controller = webnotes.model.controller(expand(webnotes.form_dict.get('docs')))
+		controller.check_if_latest()
 
-	check_guest_access(so.doc)
+	check_guest_access(controller.doc)
 	
-	if so:
-		r = webnotes.model.code.run_server_obj(so, method, arg)
+	if controller:
+		r = controller.run_method(method, arg)
 		if r:
 			#build output as csv
 			if cint(webnotes.form_dict.get('as_csv')):
-				make_csv_output(r, so.doc.doctype)
+				make_csv_output(r, controller.doc.doctype)
 			else:
 				webnotes.response['message'] = r
 		
-		webnotes.response['docs'] =[so.doc] + so.doclist
+		webnotes.response['docs'] = controller.doclist
 
 def check_guest_access(doc):
 	if webnotes.session['user']=='Guest' and not webnotes.conn.sql("select name from tabDocPerm where role='Guest' and parent=%s and ifnull(`read`,0)=1", doc.doctype):

@@ -121,11 +121,6 @@ def no_duplicate(doclist, parentfield, keys):
 				raise_exception=webnotes.DuplicateEntryError)
 				
 		all_values.append(values)
-		
-
-class DocType:
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
 
 class DocTypeValidator(DocListController):
 	pass

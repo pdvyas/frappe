@@ -277,7 +277,7 @@ $(document).bind('click', function(e) {
 	
 	if(_f.cur_grid_cell && !is_target_input() && !is_target_toolbar()) {
 		if(!(text_dialog && text_dialog.display) 
-			&& !datepicker_active && !(selector && selector.display)) {
+			&& !datepicker_active && !(cur_dialog && cur_dialog.display)) {
 				setTimeout('_f.cur_grid_cell.grid.cell_deselect()', 500);
 				return false;
 		}

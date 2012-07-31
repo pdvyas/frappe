@@ -75,15 +75,21 @@ class DocListController(object):
 		self.obj = get_obj(doclist=self.doclist)
 		return self.obj
 
-	def run_method(self, method):
+	def run_method(self, method, arg=None):
 		"""Run a method and custom_method"""
 		if getattr(self, 'new_style', None):
 			if hasattr(self, method):
-				getattr(self, method)()
+				if arg:
+					getattr(self, method)(arg)
+				else:
+					getattr(self, method)()
 		else:
 			self.make_obj()
 			if hasattr(self.obj, method):
-				getattr(self.obj, method)()
+				if arg:
+					getattr(self.obj, method)(arg)
+				else:
+					getattr(self.obj, method)()
 			if hasattr(self.obj, 'custom_' + method):
 				getattr(self.obj, 'custom_' + method)()
 		
