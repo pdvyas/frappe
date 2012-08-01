@@ -247,7 +247,31 @@ class DocListController(object):
 			d.modified = ts
 			if d.docstatus != 2: # don't update deleted
 				d.docstatus = self.to_docstatus
+	
+	# TODO: should this method be here?
+	def get_csv_from_attachment(self):
+			"""get csv from attachment"""
+			if not self.doc.file_list:
+			  msgprint("File not attached!")
+			  raise Exception
 
+			# get file_id
+			fid = self.doc.file_list.split(',')[1]
+		  
+			# get file from file_manager
+			try:
+				from webnotes.utils import file_manager
+				fn, content = file_manager.get_file(fid)
+			except Exception, e:
+				webnotes.msgprint("Unable to open attached file. Please try again.")
+				raise e
+	
+			# convert char to string (?)
+			if not isinstance(content, basestring) and hasattr(content, 'tostring'):
+			  content = content.tostring()
+
+			import csv
+			return csv.reader(content.splitlines())
 
 # clone
 
