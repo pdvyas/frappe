@@ -117,7 +117,11 @@ set_field_options = function(n, txt) {
 }
 
 set_field_permlevel = function(n, level) {
-	cur_frm.set_df_property(n, 'permlevel', level)
+	if ($.isArray(n)) {
+		$.each(n, function(i, v) { cur_frm.set_df_property(v, 'permlevel', level); });
+	} else {
+		cur_frm.set_df_property(n, 'permlevel', level);
+	}
 }
 
 hide_field = function(n) {

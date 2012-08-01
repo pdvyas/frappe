@@ -246,26 +246,43 @@ class Database:
 	# ======================================================================================
 	# get a single value from a record
 
-	def get_value(self, doctype, docname, fieldname, ignore=None):
+	def get_value(self, doctype, filters, fieldname, ignore=None):
 		"""
 		      Get a single / multiple value from a record.
 
-		      For Single DocType, let docname be = None
+		      For Single DocType, let filters be = None
 		"""
+		if filters and (filters!=doctype or filters=='DocType'):
+			def _build_condition(key):
+				"""
+					filter's key is passed by map function
+					build conditions like:
+						* ifnull(`fieldname`, default_value) = %(fieldname)s
+						* `fieldname` = %(fieldname)s
+				"""
+				if "[" in key:
+					key = key.split("[")
+					return "ifnull(`" + key[0] + "`, " + key[1][:-1] + ") = %(" + key + ")s"
+				else:
+					return "`" + key + "` = %(" + key + ")s"
+
+			if isinstance(filters, basestring):
+				filters = { "name": filters }
+
+			conditions = map(_build_condition, filters)
 			
-		fl = fieldname
-		if docname and (docname!=doctype or docname=='DocType'):
-			if type(fieldname) in (list, tuple):
-				fl = '`, `'.join(fieldname)
+			fl = isinstance(fieldname, basestring) and fieldname or "`, `".join(fieldname)
+			
 			try:
-				import json
-				r = self.sql("select `%s` from `tab%s` where name='%s'" % (fl, doctype, docname))
+				r = self.sql("select `%s` from `tab%s` where %s" % (fl, doctype, " and ".join(conditions)), filters)
 			except Exception, e:
 				if e.args[0]==1054 and ignore:
 					return None
 				else:
 					raise e
+
 			return r and (len(r[0]) > 1 and r[0] or r[0][0]) or None
+
 		else:
 			if isinstance(fieldname, basestring):
 				fieldname = [fieldname]
