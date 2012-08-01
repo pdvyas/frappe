@@ -260,7 +260,7 @@ def import_doc(d, doctype, overwrite):
 	"""import main (non child) document"""
 	import webnotes
 	import webnotes.model.doc
-	from webnotes.model.doclist import DocListController
+	from webnotes.model.controller import DocListController
 
 	if webnotes.conn.exists(doctype, d['name']):
 		if overwrite:

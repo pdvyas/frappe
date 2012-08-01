@@ -29,7 +29,7 @@ def runserverobj():
 		Run server objects
 	"""
 	import webnotes.model.code
-	from webnotes.model.doclist import DocListController
+	from webnotes.model.controller import DocListController
 	from webnotes.utils import cint
 
 	doclist = None
@@ -46,7 +46,7 @@ def runserverobj():
 		import webnotes.model
 		from webnotes.model.utils import expand
 		
-		controller = webnotes.model.controller(expand(webnotes.form_dict.get('docs')))
+		controller = webnotes.model.get_controller(expand(webnotes.form_dict.get('docs')))
 		controller.check_if_latest()
 
 	check_guest_access(controller.doc)

@@ -40,7 +40,7 @@ def insert(doclist):
 	if doclist and not isinstance(doclist, list):
 		doclist = [doclist]
 	
-	doclistcon = controller(doclist)	
+	doclistcon = get_controller(doclist)	
 	doclistcon.doc.fields['__islocal'] = 1
 	doclistcon.save()
 	
@@ -54,7 +54,7 @@ def insert_child(fields):
 	"""insert a child, must specify parent, parenttype and doctype"""
 
 	# load parent
-	parent = controller(fields['parenttype'], fields['parent'])
+	parent = get_controller(fields['parenttype'], fields['parent'])
 
 	# make child
 	new = webnotes.model.doc.Document(fielddata = fields)
@@ -67,7 +67,7 @@ def insert_child(fields):
 	parent.save()
 
 controllers = {}
-def controller(doctype, name=None):
+def get_controller(doctype, name=None):
 	"""return controller object"""
 	global controllers
 	from webnotes.model.doc import Document
@@ -87,7 +87,7 @@ def controller(doctype, name=None):
 
 	import os
 	from webnotes.modules import get_module_path, scrub
-	from webnotes.model.doclist import DocListController		
+	from webnotes.model.controller import DocListController		
 		
 	doctypeobj = get_doctype(doctype)
 	module_path = os.path.join(get_module_path(doctypeobj[0].module), 'doctype', doctype, 

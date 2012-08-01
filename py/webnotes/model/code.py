@@ -32,7 +32,7 @@ methods in following modules are imported for backward compatibility
 	* webnotes.*
 	* webnotes.utils.*
 	* webnotes.model.doc.*
-	* webnotes.model.doclist.*
+	* webnotes.model.controller.*
 """
 custom_class = '''
 import webnotes
@@ -127,7 +127,7 @@ def get_server_obj(doclist):
 			DocType = getattr(module, 'DocType', None)
 		else:
 			import webnotes.model
-			return webnotes.model.controller(doclist)
+			return webnotes.model.get_controller(doclist)
 	except ImportError, e:
 		class DocType:
 			def __init__(self, d, dl):

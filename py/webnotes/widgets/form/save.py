@@ -31,7 +31,7 @@ def savedocs():
 		form = webnotes.form_dict
 
 		from webnotes.model.utils import expand
-		controller = webnotes.model.controller(expand(form.get('docs')))
+		controller = webnotes.model.get_controller(expand(form.get('docs')))
 
 		# action
 		action = form.get('action')

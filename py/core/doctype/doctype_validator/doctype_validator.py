@@ -20,7 +20,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-from webnotes.model.doclist import DocListController
+from webnotes.model.controller import DocListController
 
 def validate(controller):
 	"""validate doctype based on DocType Validator"""
