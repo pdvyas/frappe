@@ -45,6 +45,8 @@ _cached_link_docs = {}
 def filter_link(doclist, link_filter, doctypelist):
 	"""check if all the rules are valid"""
 	import webnotes
+	from webnotes.utils import convert_type
+	
 	def _get(doctype, name):
 		global _cached_link_docs
 		return _cached_link_docs.setdefault("%s:%s" % (doctype, name), 
@@ -54,6 +56,14 @@ def filter_link(doclist, link_filter, doctypelist):
 	def _check(doc):
 		# docfield object of the link_field so we know the doctype
 		link_df = doctypelist.get_field(link_filter.link_field, parentfield=link_filter.table_field or None)
+		
+		link_filter.value = convert_type(link_df, link_filter.value)
+		
+		if link_df.fieldtype == 'Int':
+			link_filter.value = cint(link_filter.value)
+		elif link_df.fieldtype in ('Float', 'Currency'):
+			link_filter.value = flt(link_filter.value)
+			
 
 		# value set
 		val = doc.fields.get(link_filter.link_field)
@@ -84,15 +94,15 @@ def filter_link(doclist, link_filter, doctypelist):
 def check_filters(val1, condition, val2):
 	"""
 		check based on condition
-		val1 is the actual value
-		val2 is the one saved in filter
+			* val1 is the actual value
+			* val2 is the one saved in filter
 	"""
 	if condition == 'in':
 		return val1 in [v.strip() for v in val2.split(",")]
 	elif condition == 'Begins With':
 		return (val1 or '').startswith(val2)
 	elif condition == 'Filled':
-		return val1 or False
+		return (val1 is not None and val1 != '') or False
 	elif condition=='=':
 		return val1 == val2
 	elif condition=='>':
@@ -131,24 +141,34 @@ def no_duplicate(doclist, parentfield, keys):
 def check_condition(doclist, condition, doctypelist):
 	"""check if-then type of conditions"""
 	import webnotes
+	from webnotes.utils import cint, flt
 	
-	def _get_doclist(ctype):
-		return doclist.get({"parentfield": condition.fields[_fname(ctype, "table_field")]})
+	def _get_doclist(if_then):
+		return doclist.get({"parentfield": _fvalue(if_then, "table_field")})
 	
-	def _get_label(ctype):
-		return doctypelist.get_field(condition.fields[_fname(ctype, "field")],
-			parentfield=condition.fields[_fname(ctype, "table_field")] or None).label
+	def _get_field(if_then):
+		return doctypelist.get_field(_fvalue(if_then, "field"),
+			parentfield=_fvalue(if_then, "table_field") or None)
 			
-	def _check(doc, ctype):
-		return check_filters(doc.fields.get(condition.fields[_fname(ctype, "field")]),
-			condition.fields[_fname(ctype, "condition")], condition.fields[_fname(ctype, "value")])
+	def _check(doc, if_then):
+		return check_filters(doc.fields.get(_fvalue(if_then, "field")), 
+			_fvalue(if_then, "condition"), _fvalue(if_then, "value"))
 	
-	def _fname(ctype, fname):
-		return ctype + "_" + fname
+	def _fvalue(if_then, fname):
+		return condition.fields.get(if_then + "_" + fname)
 		
+	# filter records from doclist
 	if_doclist = _get_doclist('if')
 	then_doclist = _get_doclist('then')
-
+	
+	# convert type if Int, Float, Currency
+	from webnotes.utils import convert_type
+	if_field = _get_field("if")
+	condition.if_value = convert_type(if_field, condition.if_value)
+	
+	then_field = _get_field("then")
+	condition.then_value = convert_type(then_field, condition.then_value)
+		
 	# for each, check if "if" condition is true
 	for if_doc in if_doclist:
 		if _check(if_doc, 'if'):
@@ -159,17 +179,13 @@ def check_condition(doclist, condition, doctypelist):
 					
 					# get labels for displaying error message
 					condition.fields.update({
-						"if_label": _get_label("if"),
-						"then_label": _get_label("then")
+						"if_label": if_field.label,
+						"then_label": then_field.label
 					})
 					
 					webnotes.msgprint("""If "%(if_label)s" %(if_condition)s "%(if_value)s", 
 						then "%(then_label)s" should be %(then_condition)s "%(then_value)s" """ \
 						% condition.fields, raise_exception=webnotes.ConditionalPropertyError)
-
-class DocType:
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
 
 class DocTypeValidator(DocListController):
 	pass

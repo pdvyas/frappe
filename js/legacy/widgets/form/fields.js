@@ -571,32 +571,43 @@ LinkField.prototype.make_input = function() {
 
 	me.get_value = function() { return me.txt.value; }
 
-	$(me.txt).autocomplete({
-		source: function(request, response) {
-			var tab_name = "`tab"+ me.df.options+"`"
-			var filters = [[me.df.options, "name", "like", request.term + '%']].concat(me.filters || []);
-			wn.call({
-				method: 'webnotes.widgets.doclistview.get',
-				args: {
-					'docstatus': ["0", "1"],
-					"fields": [tab_name + ".name"],
-					"filters": filters,
-					'doctype': me.df.options
-				},
-				callback: function(r) {
-					response($.map(r.message, function(v) { return {"label": v.name, "info":""} }));
-				}
-			});
-		},
-		select: function(event, ui) {
-			me.set_input_value(ui.item.value);
-		}
-	}).data('autocomplete')._renderItem = function(ul, item) {
-		return $('<li></li>')
-			.data('item.autocomplete', item)
-			.append(repl('<a>%(label)s<br><span style="font-size:10px">%(info)s</span></a>', item))
-			.appendTo(ul);
-	};
+	wn.model.with_doctype(me.df.options, function(r) {
+		$(me.txt).autocomplete({
+			source: function(request, response) {
+				var tab_name = "`tab"+ me.df.options+"`"
+				var filters = [[me.df.options, "name", "like", request.term + '%']].concat(me.filters || []);
+				var search_fields = cstr(wn.model.getone({
+					doctype: "DocType", name: me.df.options}).search_fields).split(",");
+				wn.call({
+					method: 'webnotes.widgets.doclistview.get',
+					args: {
+						'docstatus': ["0", "1"],
+						"fields": $.map(["name"].concat(search_fields), function(v) {
+							return "`tab" + me.df.options + "`." + strip(v);
+						}),
+						"filters": filters,
+						'doctype': me.df.options
+					},
+					callback: function(r) {
+						response($.map(r.message, function(v) {
+							return {
+								"label": v.name,
+								"info": $.map(search_fields, function(f) { return v[f]; }).join(", "),
+							}
+						}));
+					}
+				});
+			},
+			select: function(event, ui) {
+				me.set_input_value(ui.item.value);
+			}
+		}).data('autocomplete')._renderItem = function(ul, item) {
+			return $('<li></li>')
+				.data('item.autocomplete', item)
+				.append(repl('<a>%(label)s<br><span style="font-size:10px">%(info)s</span></a>', item))
+				.appendTo(ul);
+		};
+	});
 	
 	$(this.txt).change(function() {
 		var val = $(this).val();//me.get_value();

@@ -48,26 +48,38 @@ wn.ui.Search = Class.extend({
 						filters = filters.concat(me.with_filters);
 					}
 					
+					me.search_fields = cstr(wn.model.getone({
+						doctype: "DocType", name: me.doctype}).search_fields).split(",");
+					
 					return {
 						doctype: me.doctype,
-						fields: [ '`tab' + me.doctype + '`.name'],
+						fields: $.map(["name"].concat(me.search_fields), function(v) {
+							return "`tab" + me.doctype + "`." + strip(v);
+						}),
 						filters: filters,
 						docstatus: ['0','1']
 					}					
 				}
 			},
 			render_row: function(parent, data) {
-				$ln = $('<a style="cursor: pointer;" data-name="'+data.name+'">'
-					+ data.name +'</a>')
-					.appendTo(parent)
-					.click(function() {
-						var val = $(this).attr('data-name');
-						me.dialog.hide(); 
-						if(me.callback)
-							me.callback(val);
-						else 
-							wn.set_route('Form', me.doctype, val);
-					});
+				$(parent).append(
+					$(repl("<a style=\"cursor: pointer;\" data-name=\"%(name)s\">%(name)s</a>", data))
+						.click(function() {
+							var val = $(this).attr('data-name');
+							me.dialog.hide(); 
+							if(me.callback)
+								me.callback(val);
+							else 
+								wn.set_route('Form', me.doctype, val);
+						})
+				);
+				
+				// append search fields content
+				if (me.search_fields) {
+					$(parent).append(repl("<div class=\"help small\" style=\"margin-top: 5px;\">%(info)s</div>", {
+						"info": $.map(me.search_fields, function(v) { return data[v]; }).join(", ")
+					}));
+				}
 			}
 		});
 		this.list.filter_list.add_filter('name', 'like');

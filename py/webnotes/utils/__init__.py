@@ -372,16 +372,13 @@ def convert_to_unicode(content):
 		
 cstr = get_string
 
-# def cstr(s):
-# 	"""	
-# 	Convert to string
-# 	"""
-# 	if isinstance(s, basestring):
-# 		return s
-# 	elif s==None: 
-# 		return ''
-# 	else:
-# 		return str(s)
+def convert_type(df, val):
+	if df.fieldtype == 'Int':
+		return cint(val)
+	elif df.fieldtype in ('Float', 'Currency'):
+		return flt(val)
+	else:
+		return val
 		
 def str_esc_quote(s):
 	"""
