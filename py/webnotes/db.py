@@ -246,35 +246,19 @@ class Database:
 	# ======================================================================================
 	# get a single value from a record
 
-	def get_value(self, doctype, filters, fieldname, ignore=None):
+	def get_value(self, doctype, filters=None, fieldname="name", ignore=None):
 		"""
 		      Get a single / multiple value from a record.
 
 		      For Single DocType, let filters be = None
 		"""
 		if filters and (filters!=doctype or filters=='DocType'):
-			def _build_condition(key):
-				"""
-					filter's key is passed by map function
-					build conditions like:
-						* ifnull(`fieldname`, default_value) = %(fieldname)s
-						* `fieldname` = %(fieldname)s
-				"""
-				if "[" in key:
-					key = key.split("[")
-					return "ifnull(`" + key[0] + "`, " + key[1][:-1] + ") = %(" + key + ")s"
-				else:
-					return "`" + key + "` = %(" + key + ")s"
-
-			if isinstance(filters, basestring):
-				filters = { "name": filters }
-
-			conditions = map(_build_condition, filters)
-			
 			fl = isinstance(fieldname, basestring) and fieldname or "`, `".join(fieldname)
 			
+			conditions, filters = self.build_conditions(filters)
+			
 			try:
-				r = self.sql("select `%s` from `tab%s` where %s" % (fl, doctype, " and ".join(conditions)), filters)
+				r = self.sql("select `%s` from `tab%s` where %s" % (fl, doctype, conditions), filters)
 			except Exception, e:
 				if e.args[0]==1054 and ignore:
 					return None
@@ -284,8 +268,7 @@ class Database:
 			return r and (len(r[0]) > 1 and r[0] or r[0][0]) or None
 
 		else:
-			if isinstance(fieldname, basestring):
-				fieldname = [fieldname]
+			fieldname = isinstance(fieldname, basestring) and [fieldname] or fieldname
 
 			r = self.sql("select value from tabSingles where field in (%s) and \
 				doctype=%s" % (', '.join(['%s']*len(fieldname)), '%s'), tuple(fieldname) + (doctype,))
@@ -395,6 +378,27 @@ class Database:
 						(dt['doctype'], " and ".join(conditions)))
 			except:
 				return None
+				
+	def build_conditions(self, filters):
+		def _build_condition(key):
+			"""
+				filter's key is passed by map function
+				build conditions like:
+					* ifnull(`fieldname`, default_value) = %(fieldname)s
+					* `fieldname` = %(fieldname)s
+			"""
+			if "[" in key:
+				split_key = key.split("[")
+				return "ifnull(`" + split_key[0] + "`, " + split_key[1][:-1] + ") = %(" + key + ")s"
+			else:
+				return "`" + key + "` = %(" + key + ")s"
+
+		if isinstance(filters, basestring):
+			filters = { "name": filters }
+
+		conditions = map(_build_condition, filters)
+
+		return " and ".join(conditions), filters
 
 	# ======================================================================================
 	def close(self):

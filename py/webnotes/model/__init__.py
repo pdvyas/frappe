@@ -81,7 +81,7 @@ def get_controller(doctype, name=None):
 	else:
 		doclist = get(doctype, name)
 	
-	# return if already loaded	
+	# return if already loaded
 	if doctype in controllers:
 		return controllers[doctype](doclist)
 
@@ -99,11 +99,11 @@ def get_controller(doctype, name=None):
 			+ scrub(doctype), fromlist = True)
 		
 		# find controller in module
+		import inspect
 		for attr in dir(module):
 			attrobj = getattr(module, attr)
-			
-			if not isinstance(attrobj, object):
-				if issubclass(DocListController, attrobj):
+			if inspect.isclass(attrobj):
+				if issubclass(attrobj, DocListController):
 					controllers[doctype] = attrobj
 					return attrobj(doclist)
 				

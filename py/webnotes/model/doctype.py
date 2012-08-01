@@ -125,11 +125,12 @@ def apply_property_setters(doctype, doclist):
 			doclist[0].fields[ps['property']] = ps['value']
 		else:
 			docfield = filter(lambda d: d.doctype=="DocField" and d.fieldname==ps['field_name'], 
-				doclist)[0]
+				doclist)
+			if not docfield: continue
 			if docfield_types.get(ps['property'], None) in ('Int', 'Check'):
 				ps['value'] = cint(ps['value'])
 				
-			docfield.fields[ps['property']] = ps['value']
+			docfield[0].fields[ps['property']] = ps['value']
 
 def add_custom_fields(doctype, doclist):
 	res = webnotes.conn.sql("""SELECT * FROM `tabCustom Field`
