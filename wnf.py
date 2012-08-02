@@ -359,7 +359,15 @@ def run():
 		import website.web_cache
 		website.web_cache.refresh_cache(True)
 		
-	elif options.test is not None:
+	elif options.append_future_import:
+		append_future_import()
+
+	# print messages
+	if webnotes.message_log:
+		print '\n'.join(webnotes.message_log)
+		
+	# we do not want to print message log [logged by webnotes.msgprint] for tests
+	if options.test is not None:
 		module_name = options.test
 		import unittest
 		
@@ -376,13 +384,6 @@ def run():
 		import tests.stages
 		del sys.argv[1:]
 		tests.stages.test_stage(options.test_stage)
-
-	elif options.append_future_import:
-		append_future_import()
-
-	# print messages
-	if webnotes.message_log:
-		print '\n'.join(webnotes.message_log)
 
 if __name__=='__main__':
 	run()
