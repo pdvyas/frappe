@@ -62,6 +62,7 @@ class DuplicateEntryError(ValidationError): pass
 class InvalidLinkError(ValidationError): pass
 class LinkFilterError(ValidationError): pass
 class ConditionalPropertyError(ValidationError): pass
+class MandatoryError(ValidationError): pass
 
 def getTraceback():
 	import utils

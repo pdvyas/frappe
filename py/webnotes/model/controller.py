@@ -97,15 +97,15 @@ class DocListController(object):
 
 		trigger(method, self.doc)
 
-	def save(self, check_links=1):
+	def save(self, check_links=1, ignore_fields=0):
 		"""
 			Save the list
 		"""
 		self.prepare_for_save(check_links)
 		self.run_method('validate')
 		self.doctype_validate()
-		self.save_main()
-		self.save_children()
+		self.save_main(ignore_fields=ignore_fields)
+		self.save_children(ignore_fields=ignore_fields)
 		self.run_method('on_update')
 
 	def submit(self):
@@ -150,10 +150,10 @@ class DocListController(object):
 			self.check_links()
 		self.update_timestamps_and_docstatus()
 
-	def save_main(self):
+	def save_main(self, ignore_fields=0):
 		"""Save the main doc"""
 		try:
-			self.doc.save(cint(self.doc.fields.get('__islocal')))
+			self.doc.save(cint(self.doc.fields.get('__islocal')), ignore_fields=ignore_fields)
 		except NameError, e:
 			webnotes.msgprint('%s "%s" already exists' % (self.doc.doctype, self.doc.name))
 
@@ -163,7 +163,7 @@ class DocListController(object):
 			webnotes.errprint(webnotes.utils.getTraceback())
 			raise e
 
-	def save_children(self):
+	def save_children(self, ignore_fields=0):
 		"""Save Children, with the new parent name"""
 		child_map = {}
 		
@@ -173,7 +173,7 @@ class DocListController(object):
 					d.parent = self.doc.name # rename if reqd
 					d.parenttype = self.doc.doctype
 
-				d.save(new = cint(d.fields.get('__islocal')))
+				d.save(new = cint(d.fields.get('__islocal')), ignore_fields=ignore_fields)
 			
 			child_map.setdefault(d.doctype, []).append(d.name)
 		

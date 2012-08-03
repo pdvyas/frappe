@@ -51,7 +51,7 @@ def get(doctype, processed=False):
 	
 	# main doctype doclist
 	doclist = get_doctype_doclist(doctype)
-		
+
 	# add doctypes of table fields
 	table_types = [d.options for d in doclist \
 		if d.doctype=='DocField' and d.fieldtype=='Table']

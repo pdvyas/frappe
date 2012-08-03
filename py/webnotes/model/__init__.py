@@ -28,29 +28,31 @@ no_value_fields = ['Section Break', 'Column Break', 'HTML', 'Table', 'FlexTable'
 default_fields = ['doctype','name','owner','creation','modified','modified_by','parent','parentfield','parenttype','idx','docstatus']
 
 def get(doctype, name):
+	"""returns doclist identified by name from table indicated by doctype, with its children"""
 	import webnotes.model.doc
 	return webnotes.model.doc.get(doctype, name)
 	
 def get_doctype(doctype, processed=False):
+	"""returns doclist identified by doctype from tabDocType with its children"""
 	import webnotes.model.doctype
 	return webnotes.model.doctype.get(doctype, processed)
 
-def insert(doclist):
+def insert(doclist, ignore_fields=0):
 	"""insert a new doclist"""
 	if doclist and not isinstance(doclist, list):
 		doclist = [doclist]
 	
 	doclistcon = get_controller(doclist)	
 	doclistcon.doc.fields['__islocal'] = 1
-	doclistcon.save()
+	doclistcon.save(ignore_fields=ignore_fields)
 	
-def insert_variants(base, variants):
+def insert_variants(base, variants, ignore_fields=0):
 	for v in variants:
 		base_copy = base.copy()
 		base_copy.update(v)
-		insert(base_copy)
+		insert(base_copy, ignore_fields)
 	
-def insert_child(fields):
+def insert_child(fields, ignore_fields=0):
 	"""insert a child, must specify parent, parenttype and doctype"""
 
 	# load parent
@@ -64,7 +66,7 @@ def insert_child(fields):
 	parent.doclist.append(new)
 	
 	# save
-	parent.save()
+	parent.save(ignore_fields=ignore_fields)
 
 controllers = {}
 def get_controller(doctype, name=None):

@@ -351,29 +351,28 @@ class Document(object):
 			# set modified timestamp
 			self.modified = now()
 			self.modified_by = webnotes.session['user']
-			for f in self.fields.keys():
-				if (not (f in ('doctype', 'name', 'perm', 'localname', 'creation','_user_tags'))) \
-					and (not f.startswith('__')): # fields not saved
-					
+
+			valid_fields = filter(lambda f: f not in ('doctype', 'name', 'perm', \
+				'localname', 'creation','_user_tags') and not f.startswith('__'), self.fields.keys())
+			
+			if ignore_fields:
+				from webnotes.widgets.doclistview import get_table_columns
+				db_cols = get_table_columns(self.doctype)
+				valid_fields = filter(lambda f: f in db_cols, valid_fields)
+				
+			for f in valid_fields:
 					# validate links
 					if link_list and link_list.get(f):
 						self.fields[f] = self._validate_link(link_list[f][0], self.fields[f])
 
 					if self.fields[f]==None or self.fields[f]=='':
 						update_str.append("`%s`=NULL" % f)
-						if ignore_fields:
-							try: r = webnotes.conn.sql("update `tab%s` set `%s`=NULL where name=%s" % (self.doctype, f, '%s'), self.name)
-							except: pass
 					else:
 						values.append(self.fields[f])
 						update_str.append("`%s`=%s" % (f, '%s'))
-						if ignore_fields:
-							try: r = webnotes.conn.sql("update `tab%s` set `%s`=%s where name=%s" % (self.doctype, f, '%s', '%s'), (self.fields[f], self.name))
-							except: pass
 			if values:
-				if not ignore_fields:
-					# update all in one query
-					r = webnotes.conn.sql("update `tab%s` set %s where name='%s'" % (self.doctype, ', '.join(update_str), self.name), values)
+				# update all in one query
+				r = webnotes.conn.sql("update `tab%s` set %s where name='%s'" % (self.doctype, ', '.join(update_str), self.name), values)
 
 	# Save values
 	# ---------------------------------------------------------------------------
