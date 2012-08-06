@@ -351,6 +351,14 @@ def cstr(s):
 	else:
 		return unicode(s)
 
+def convert_type(df, val):
+	if df.fieldtype == 'Int':
+		return cint(val)
+	elif df.fieldtype in ('Float', 'Currency'):
+		return flt(val)
+	else:
+		return val
+		
 def str_esc_quote(s):
 	"""
 	Escape quotes
