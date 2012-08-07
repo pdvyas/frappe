@@ -280,7 +280,7 @@ def get_stats():
 	doctype = webnotes.form_dict['doctype']
 	stats = {}
 	
-	columns = get_table_columns(doctype)
+	columns = webnotes.conn.get_table_columns(doctype)
 	for tag in tags:
 		if not tag in columns: continue
 		tagcount = webnotes.conn.sql("""select %(tag)s, count(*) 
