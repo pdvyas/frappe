@@ -35,6 +35,9 @@ def walk_and_sync(start_path, force=0):
 	modules = []
 
 	for path, folders, files in os.walk(start_path):
+		if 'tests' in folders:
+			folders.remove('tests')
+		
 		for f in files:
 			if f.endswith(".txt"):
 				# great grand-parent folder is module_name

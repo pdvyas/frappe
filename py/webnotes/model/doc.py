@@ -362,8 +362,7 @@ class Document(object):
 				'localname', 'creation','_user_tags') and not f.startswith('__'), self.fields.keys())
 			
 			if ignore_fields:
-				from webnotes.widgets.doclistview import get_table_columns
-				db_cols = get_table_columns(self.doctype)
+				db_cols = webnotes.conn.get_table_columns(self.doctype)
 				valid_fields = filter(lambda f: f in db_cols, valid_fields)
 				
 			for f in valid_fields:
@@ -378,7 +377,8 @@ class Document(object):
 						update_str.append("`%s`=%s" % (f, '%s'))
 			if values:
 				# update all in one query
-				r = webnotes.conn.sql("update `tab%s` set %s where name='%s'" % (self.doctype, ', '.join(update_str), self.name), values)
+				r = webnotes.conn.sql("update `tab%s` set %s where name='%s'" % (self.doctype, 
+					', '.join(update_str), self.name), values)
 
 	# Save values
 	# ---------------------------------------------------------------------------

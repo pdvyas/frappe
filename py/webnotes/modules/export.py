@@ -26,6 +26,7 @@ from __future__ import unicode_literals
 """
 
 from webnotes.modules import scrub, get_module_path
+
 def export_to_files(record_list=[], record_module=None, verbose=0):
 	"""
 		Export record_list to files. record_list is a list of lists ([doctype],[docname] )  ,
@@ -73,9 +74,7 @@ def create_folder(module, dt, dn):
 	return folder
 
 def get_module_name(doclist, record_module=None):
-	"""
-		Returns the module-name of a doclist
-	"""
+	"""Returns the module-name of a doclist"""
 	# module name
 	if doclist[0]['doctype'] == 'Module Def':
 		module = doclist[0]['name']
@@ -89,11 +88,7 @@ def get_module_name(doclist, record_module=None):
 	return module
 	
 def write_document_file(doclist, record_module=None):
-	"""
-		Write a doclist to file, can optionally specify module name
-	"""
-	import os
-	from webnotes.model.utils import pprint_doclist
+	"""Write a doclist to file, at [module]/[doctype]/[name]/[name.txt]"""
 
 	module = get_module_name(doclist, record_module)
 	
@@ -102,18 +97,20 @@ def write_document_file(doclist, record_module=None):
 	
 	# separate code files
 	clear_code_fields(doclist, folder)
-		
-	# write the data file	
+	
+	write_txt(doclist, folder)
+	
+def write_txt(doclist, path):
+	"""write pretty txt at the given path"""
+	from webnotes.model.utils import pprint_doclist
+	import os
+
 	fname = scrub(doclist[0]['name'])
-	txtfile = open(os.path.join(folder, fname +'.txt'),'w+')
-	txtfile.write(pprint_doclist(doclist))
-	txtfile.close()
+	with open(os.path.join(path, fname +'.txt'),'w+') as txtfile:
+		txtfile.write(pprint_doclist(doclist))
 
 def clear_code_fields(doclist, folder):
-	"""
-		Removes code from the doc
-	"""
-	
+	"""Removes code from the doc"""
 	import os
 	import webnotes
 	# code will be in the parent only
@@ -124,3 +121,40 @@ def clear_code_fields(doclist, folder):
 
 			doclist[0][code_field[0]] = None
 
+def export_for_test(doclist):
+	"""create a folder for the doctype if exists and write txt"""
+	import os, conf, webnotes
+		
+	# convert to dicts if passed as Document objects
+	if hasattr(doclist[0], 'fields'):
+		doclist = [d.fields for d in doclist]
+
+	doctype = scrub(doclist[0]['doctype'])
+	doctype_path = os.path.join(conf.test_data_path, doctype)
+	if not os.path.exists(doctype_path):
+		webnotes.create_folder(doctype_path)
+	
+	write_txt(doclist, doctype_path)
+	
+def get_test_doclist(doctype, name=None):
+	"""get test doclist, collection of doclists"""
+	import os, conf, webnotes
+	from webnotes.model.utils import peval_doclist
+	from webnotes.model.doc import DocList
+
+	doctype = scrub(doctype)
+	doctype_path = os.path.join(conf.test_data_path, doctype)
+	
+	if name:
+		with open(os.path.join(doctype_path, scrub(name) + '.txt'), 'r') as txtfile:
+			doclist = DocList(peval_doclist(txtfile.read()))
+
+		return doclist
+		
+	else:
+		all_doclists = []
+		for fname in filter(lambda n: n.endswith('.txt'), os.listdir(doctype_path)):
+			with open(os.path.join(doctype_path, scrub(fname)), 'r') as txtfile:
+				all_doclists.append(DocList(peval_doclist(txtfile.read())))
+			
+		return all_doclists

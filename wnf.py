@@ -233,6 +233,10 @@ def setup_options():
 		See tests/stages.py for list of stages""", 
 		metavar="STAGE", nargs=1)
 
+	parser.add_option("--test_export", help="""Export data for tests at conf.test_data_path
+		If name is *, all records are exported""", 
+		metavar="DOCTYPE NAME", nargs=2)
+
 	return parser.parse_args()
 	
 def run():
@@ -384,6 +388,16 @@ def run():
 		import tests.stages
 		del sys.argv[1:]
 		tests.stages.test_stage(options.test_stage)
+
+	elif options.test_export is not None:
+		from webnotes.modules.export import export_for_test
+		import webnotes.model
+				
+		if options.test_export[1]=='*':
+			for d in webnotes.conn.sql("""select name from `tab%s`""" % options.test_export[0]):
+				export_for_test(webnotes.model.get(options.test_export[0], d[0]))
+		else:
+			export_for_test(webnotes.model.get(options.test_export[0], options.test_export[1]))
 
 if __name__=='__main__':
 	run()

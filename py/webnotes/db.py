@@ -175,6 +175,10 @@ class Database:
 	def get_description(self):
 		"""Get metadata of the last query"""
 		return self._cursor.description
+		
+	def get_table_columns(self, table):
+		"""get columns"""
+		return [r[0] for r in self.sql("DESC `tab%s`" % table)]
 
 	def convert_to_simple_type(self, v, formatted=0):
 		import datetime
@@ -210,12 +214,9 @@ class Database:
 		
 		return v
 
-	# ======================================================================================
-
 	def convert_to_lists(self, res, formatted=0, as_utf8=0):
-		"""
-		      Convert the given result set to a list of lists (with cleaned up dates and decimals)
-		"""
+		"""Convert the given result set to a list of lists 
+		(with cleaned up dates and decimals)"""
 		nres = []
 		for r in res:
 			nr = []
@@ -227,12 +228,9 @@ class Database:
 			nres.append(nr)
 		return nres
 		
-	# ======================================================================================
-
 	def convert_to_utf8(self, res, formatted=0):
-		"""
-		      Convert the given result set to a list of lists and as utf8 (with cleaned up dates and decimals)
-		"""
+		"""Convert the given result set to a list of lists and as utf8 
+		(with cleaned up dates and decimals)"""
 		nres = []
 		for r in res:
 			nr = []
@@ -243,15 +241,9 @@ class Database:
 			nres.append(nr)
 		return nres
 
-	# ======================================================================================
-	# get a single value from a record
-
 	def get_value(self, doctype, filters=None, fieldname="name", ignore=None):
-		"""
-		      Get a single / multiple value from a record.
-
-		      For Single DocType, let filters be = None
-		"""
+		"""Get a single / multiple value from a record. 
+		For Single DocType, let filters be = None"""
 		if filters and (filters!=doctype or filters=='DocType'):
 			fl = isinstance(fieldname, basestring) and fieldname or "`, `".join(fieldname)
 			

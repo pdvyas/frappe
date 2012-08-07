@@ -126,7 +126,7 @@ class DocType:
 		clear_cache(self.doc.name)
 		
 	def export_doc(self):
-		from webnotes.modules.export_module import export_to_files
+		from webnotes.modules.export import export_to_files
 		export_to_files(record_list=[['DocType', self.doc.name]])
 		
 	def import_doc(self):

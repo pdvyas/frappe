@@ -101,7 +101,7 @@ def export_doc(doctype=None, name=None, module=None):
 		if 'module' in webnotes.form_dict:
 			module = webnotes.form_dict['module']
 		
-	from webnotes.modules.export_module import write_document_file
+	from webnotes.modules.export import write_document_file
 	import webnotes.model.doc
 	if not module: 
 		module = webnotes.conn.get_value(doctype, name, 'module')
