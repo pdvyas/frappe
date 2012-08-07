@@ -113,7 +113,8 @@ class Installer:
 		import webnotes
 		# set the basic passwords
 		webnotes.conn.begin()
-		webnotes.conn.sql("""insert into __Auth (user, `password`) values ('Administrator', password('admin')) \
+		webnotes.conn.sql("""insert into __Auth (user, `password`)
+			values ('Administrator', password('admin'))
 			on duplicate key update `password`=password('admin')""")
 		webnotes.conn.commit()
 
@@ -138,7 +139,7 @@ class Installer:
 			`timestamp` timestamp,
 			method varchar(200),
 			error text
-		) engine=MyISAM""")
+		) ENGINE=MyISAM DEFAULT CHARSET=utf8""")
 	
 	def create_session_cache(self):
 		import webnotes
@@ -151,7 +152,7 @@ class Installer:
 	def create_cache_item(self):
 		import webnotes
 		self.dbman.drop_table('__CacheItem')
-		webnotes.conn.sql("""create table __CacheItem(
+		webnotes.conn.sql("""create table __CacheItem (
 			`key` VARCHAR(180) NOT NULL PRIMARY KEY,
 			`value` LONGTEXT,
 			`expires_on` DATETIME
@@ -159,8 +160,7 @@ class Installer:
 			
 	def create_auth_table(self):
 		import webnotes
-		self.dbman.drop_table('__Auth')
-		webnotes.conn.sql("""create table __Auth(
+		webnotes.conn.sql("""create table if not exists __Auth (
 			`user` VARCHAR(180) NOT NULL PRIMARY KEY,
 			`password` VARCHAR(180) NOT NULL
 			) ENGINE=InnoDB DEFAULT CHARSET=utf8""")

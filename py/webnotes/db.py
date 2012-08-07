@@ -264,7 +264,7 @@ class Database:
 
 			r = self.sql("select value from tabSingles where field in (%s) and \
 				doctype=%s" % (', '.join(['%s']*len(fieldname)), '%s'), tuple(fieldname) + (doctype,))
-			
+
 			return r and (len(r) > 1 and (i[0] for i in r) or r[0][0]) or None
 
 	def set_value(self, dt, dn, field, val, modified = None):
