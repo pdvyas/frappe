@@ -577,7 +577,9 @@ LinkField.prototype.make_input = function() {
 				var tab_name = "`tab"+ me.df.options+"`"
 				var filters = [[me.df.options, "name", "like", request.term + '%']].concat(me.filters || []);
 				var search_fields = cstr(wn.model.getone({
-					doctype: "DocType", name: me.df.options}).search_fields).split(",");
+					doctype: "DocType", name: me.df.options}).search_fields)
+				search_fields = search_fields && search_fields.split(",") || [];
+				
 				wn.call({
 					method: 'webnotes.widgets.doclistview.get',
 					args: {
