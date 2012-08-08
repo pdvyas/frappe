@@ -72,8 +72,9 @@ class Document(object):
 		self._user_defaults = {}
 		self._prefix = prefix
 		
-		if fielddata: 
-			self.fields = fielddata
+		if fielddata:
+			# since fielddata is a dict, it is mutable, hence using copy
+			self.fields = fielddata.copy()
 		else: 
 			self.fields = {}
 		
