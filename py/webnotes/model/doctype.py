@@ -173,7 +173,7 @@ def to_cache(doctype, processed, doclist):
 	global doctype_cache
 	import json
 	
-	json_doclist = json.dumps([d.fields for d in doclist])
+	json_doclist = json.dumps([d.fields for d in doclist], default=webnotes.json_handler)
 	CacheItem(cache_name(doctype, processed)).set(json_doclist)
 
 	if not processed:
