@@ -93,6 +93,26 @@ To subclass, use:
 		// Enforce the constructor to be what we expect
 		Class.prototype.constructor = Class;
 
+		// ----------------------------------
+		// add bindable events
+		// added for binding events on classes
+		Class.prototype._observers = {};
+		Class.prototype.on = function(event_name, handle) {
+			if(!this._observers[event_name]) {
+				this._observers[event_name] = [];
+			}
+			this._observers[event_name].push(handle);
+		}
+		Class.prototype.trigger = function(event_name) {
+			var args = [];
+			if(arguments.lengths > 1) args = arguments.splice(1);
+			var observer_list = this._observers[event_name] || [];
+			for(var i=0;i< observer_list.length; i++) {
+				observer_list[i].apply(this, args);
+			}
+		}
+		// ----------------------------------
+
 		// And make this class extendable
 		Class.extend = arguments.callee;
 		

@@ -5,3 +5,9 @@ wn.markdown = function(txt) {
 	}
 	return '<div class="markdown">' + wn.md2html.makeHtml(txt) + '</div>';
 }
+
+wn.get_or_set = function(obj, key, val) {
+	if(typeof obj[key] === 'undefined')
+		obj[key] = val;
+	return obj[key];
+}

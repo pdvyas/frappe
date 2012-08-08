@@ -58,9 +58,15 @@ def startup():
 	webnotes.response.update(webnotes.session_cache.get())
 
 def cleanup_docs():
-	import webnotes.model.utils
-	if webnotes.response.get('docs') and type(webnotes.response['docs'])!=dict:
-		webnotes.response['docs'] = webnotes.model.utils.compress(webnotes.response['docs'])
+	from webnotes.model.doc import Document
+	if webnotes.response.get('docs'):
+		clean = []
+		for d in webnotes.response['docs']:
+			if isinstance(d, Document):
+				clean.append(d.fields)
+			else:
+				clean.append(d)
+		webnotes.response['docs'] = clean
 
 @webnotes.whitelist()
 def runserverobj(arg=None):

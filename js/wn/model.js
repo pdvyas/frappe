@@ -20,7 +20,10 @@
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+
 wn.provide('wn.model');
+wn.provide('wn.docs');
+wn.provide('wn.doclists');
 
 wn.model = {
 	no_value_type: ['Section Break', 'Column Break', 'HTML', 'Table', 
@@ -29,94 +32,198 @@ wn.model = {
 	new_names: {},
 
 	with_doctype: function(doctype, callback) {
-		if(!doctype) {
-			console.log("DocType not set");
-		}
-		if(locals.DocType[doctype]) {
+		if(wn.model.has('DocType', doctype)) {
 			callback();
 		} else {
 			wn.call({
-				method:'webnotes.widgets.form.load.getdoctype',
+				method:'webnotes.model.doctype.get',
 				args: {
 					doctype: doctype
 				},
-				callback: callback
+				callback: function(r) {
+					wn.model.sync(r.docs);
+					callback(r);
+				}
 			});
 		}
 	},
-	
 	with_doc: function(doctype, name, callback) {
 		if(!name) name = doctype; // single type
-		if(locals[doctype] && locals[doctype][name]) {
+		if(wn.model.has(doctype, name)) {
 			callback(name);
 		} else {
 			wn.call({
-				method: 'webnotes.widgets.form.load.getdoc',
+				method:'webnotes.model.doclist.get',
 				args: {
 					doctype: doctype,
 					name: name
 				},
-				callback: function(r) { callback(name, r); }
-			});
-		}
-	},
-
-	can_delete: function(doctype) {
-		if(!doctype) return false;
-		return wn.boot.profile.can_cancel.indexOf(doctype)!=-1;
-	},
-	
-	has_value: function(dt, dn, fn) {
-		// return true if property has value
-		var val = locals[dt] && locals[dt][dn] && locals[dt][dn][fn];
-		var df = wn.meta.get_docfield(dt, fn, dn);
-		
-		if(df.fieldtype=='Table') {
-			var ret = false;
-			$.each(locals[df.options] || {}, function(k,d) {
-				if(d.parent==dn && d.parenttype==dt && d.parentfield==df.fieldname) {
-					ret = true;
+				callback: function(r) {
+					wn.model.sync(r.docs);
+					callback(name, r);
 				}
 			});
-		} else {
-			var ret = !is_null(val);			
 		}
-		return ret ? true : false;
 	},
-	
-	get: function(filters) {
-		var doclist = locals[filters.doctype];
-		if(!doclist) return [];
-		return $.map(doclist, function(d) { return wn.model.match(filters, d) });
+	can_delete: function(doctype) {
+		if(!doctype) return false;
+		return wn.model.get('DocType', doctype).get('allow_trash') && 
+			wn.boot.profile.can_cancel.indexOf(doctype)!=-1;
 	},
-	
-	getone: function(filters) {
-		return wn.model.get(filters)[0];
+	sync: function(doclist) {
+		for(var i=0, len=doclist.length; i<len; i++) {
+			var doc = doclist[i];
+			if(doc.parent) {
+				var doclistobj = wn.doclists[doc.parenttype][doc.parent];
+				doclistobj.add(doc);
+			} else {
+				new wn.model.DocList([doc]);
+			}
+		}
 	},
-	
-	get_field: function(fieldname, parent) {
-		var f = {"doctype":"DocField", "fieldname": fieldname};
-		if(parent) f.parent = parent;
-		return wn.model.getone(f);
+	// return doclist
+	get: function(dt, dn) {
+		return wn.doclists[dt] && wn.doclists[dt][dn];
 	},
-	
-	get_label: function(fieldname, parent) {
-		return wn.model.get_field(fieldname, parent).label
+	has: function(dt, dn) {
+		if(wn.doclists[dt] && wn.doclists[dt][dn]) return true;
+		else return false;
 	},
-	
+	get_value: function(dt, dn, fieldname) {
+		var doc = wn.model.get(dt, dn);
+		if(doc) return doc.get(fieldname);
+		else return null;
+	},
+	set_value: function(dt, dn, fieldname, value) {
+		wn.model.get(dt, dn).doc.set(fieldname, value);
+	},
+	remove: function(dt, dn) {
+		delete wn.doclists[dt][dn];
+	},
+	// naming style for onchange events
+	event_name: function(dt, dn) {
+		return 'change-'+dt.replace(/ /g, '_')+'-' + dn.replace(/ /g, '_');
+	}
+}
+
+// document (row) wrapper
+wn.model.Document = Class.extend({
+	init: function(fields) {
+		this.fields = fields;
+	},
+	get: function(key, ifnull) {
+		return this.fields[key] || ifnull;
+	},
+	set: function(key, val) {
+		this.fields[key] = val;
+		$(document).trigger(wn.model.event_name(this.get('doctype'), this.get('name')), [key, val]);
+	}
+});
+
+// doclist (collection) wrapper
+wn.model.DocList = Class.extend({
+	init: function(doclist) {
+		this.doclist = [];
+		if(doclist) {
+			for(var i=0, len=doclist.length; i<len; i++) {
+				this.add(doclist[i]);
+			}
+		}
+	},
+	setup: function(doc) {
+		// first doc, setup and add to dicts
+		this.doc = doc;
+		this.doctype = doc.get('doctype');
+		this.name = doc.get('name');
+		wn.provide('wn.doclists.' + this.doctype);
+		wn.doclists[this.doctype][this.name] = this;
+	},
+	add: function(doc) {
+		if(!(doc instanceof wn.model.Document)) {
+			var doc = new wn.model.Document(doc);
+		}
+		this.doclist.push(doc);
+		if(this.doclist.length==1) {
+			this.setup(doc);
+		}
+	},
+	// usage:
+	// doclist.each(doctype, filters, fn)
+	// doclist.each(filters/doctype, fn);
+	// doclist.each(fn);
+	//
+	// example:
+	// doclist.each({"doctype":"DocField", "fieldtype":"Table"}, function(d) {})
+	// doclist.each('DocField', function(d) { })
+	each: function() {
+		if(typeof arguments[0]=='function') {
+			var fn = arguments[0];
+			$.each(this.doclist, function(i, doc) { fn(doc); })
+		} else if(typeof arguments[1]=='function') {
+			var fn = arguments[1];
+			if(typeof arguments[0]=='string') {
+				$.each(this.get({doctype:arguments[0]}), function(i, doc) { fn(doc); });				
+			} else {
+				$.each(this.get(arguments[0]), function(i, doc) { fn(doc); });				
+			}
+		} else {
+			var fn = arguments[2];
+			$.each(this.get(arguments[0], arguments[1]), function(i, doc) { fn(doc); });
+		}
+	},
+	// usage:
+	// doclist.get(doctype, filters) => filtered doclist
+	// doclist.get(filters) => filtered doclist
+	// doclist.get(fieldname) => value of main doc
+	get: function() {
+		var me = this;
+		if(typeof arguments[0]=='string' && typeof arguments[1]=='object') {
+			var filters = arguments[1];
+			filters.doctype = arguments[0];
+		} else if(typeof arguments[0]=='object') {
+			var filters = arguments[0];
+		} else {
+			return this.doc.get(arguments[0], arguments[1]);
+		}
+		return $.map(this.doclist, function(d) { return me.match(filters, d) });
+	},
+	get_value: function(key, def) {
+		return this.doc.get(key, def);
+	},
 	match: function(filters, doc) {
 		for(key in filters) {
 			var fval = filters[key];
 			if(fval instanceof Array) {
 				// one of
-				if(!in_list(fval, doc[key])) return null;
+				if(!in_list(fval, doc.get(key))) return null;
 			} else {
 				// equal
-				if(doc[key]!=filters[key]) {
+				if(doc.get(key)!=filters[key]) {
 					return null;
 				}				
 			}
 		}
 		return doc;
 	},
-}
+	// save doclist
+	save: function(docstatus, callback) {
+		var me = this;
+		wn.call({
+			method: 'webnotes.model.doclist.save',
+			args: {
+				docs: this.doclist
+			},
+			callback: function(r) {
+				// reset the doclist
+				delete me.doclist;
+				me.doclist = r.docs;
+				if(me.doclist[0].get('name')!=me.name) {
+					me.rename();
+				}
+			}
+		});
+	},
+	rename: function() {
+		this.name = this.doclist[0].get('name');
+	}
+});
