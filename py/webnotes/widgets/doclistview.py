@@ -47,11 +47,10 @@ def get(arg=None):
 	fields = json.loads(data['fields'])
 	tables = get_tables()
 	load_doctypes()
-	
+
 	remove_user_tags(fields)
 	# conditions
 	conditions = build_conditions(filters)
-	
 	# query dict
 	data['tables'] = ', '.join(tables)
 	data['conditions'] = ' and '.join(conditions)
@@ -71,7 +70,6 @@ def get(arg=None):
 	
 	query = """select %(fields)s from %(tables)s where %(conditions)s
 		%(group_by)s order by %(order_by)s %(limit)s""" % data
-
 	return webnotes.conn.sql(query, as_dict=1)
 
 def check_sort_by_table(sort_by, tables):
@@ -280,7 +278,7 @@ def get_stats():
 	doctype = webnotes.form_dict['doctype']
 	stats = {}
 	
-	columns = get_table_columns(doctype)
+	columns = webnotes.conn.get_table_columns(doctype)
 	for tag in tags:
 		if not tag in columns: continue
 		tagcount = webnotes.conn.sql("""select %(tag)s, count(*) 

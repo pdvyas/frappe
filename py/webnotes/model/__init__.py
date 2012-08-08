@@ -99,15 +99,15 @@ def get_controller(doctype, name=None):
 	if os.path.exists(module_path):
 		module = __import__(scrub(doctypeobj[0].module) + '.doctype.' + scrub(doctype) + '.' \
 			+ scrub(doctype), fromlist = True)
-		
+					
 		# find controller in module
 		import inspect
 		for attr in dir(module):
 			attrobj = getattr(module, attr)
-			if inspect.isclass(attrobj):
-				if issubclass(attrobj, DocListController):
-					controllers[doctype] = attrobj
-					return attrobj(doclist)
+			if inspect.isclass(attrobj) and attr.startswith(doctype.replace(' ', '').replace('-', '')) \
+				and issubclass(attrobj, DocListController):
+				controllers[doctype] = attrobj
+				return attrobj(doclist)
 				
 	# vanilla controller
 	return DocListController(doclist)

@@ -84,7 +84,6 @@ def get_module_name(doclist, record_module=None):
 		module = record_module
 	else:
 		module = doclist[0]['module']
-
 	return module
 	
 def write_document_file(doclist, record_module=None):
