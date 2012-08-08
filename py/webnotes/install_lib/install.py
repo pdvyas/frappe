@@ -151,7 +151,7 @@ class Installer:
 	def create_cache_item(self):
 		import webnotes
 		self.dbman.drop_table('__CacheItem')
-		webnotes.conn.sql("""create table __CacheItem(
+		webnotes.conn.sql("""create table __CacheItem (
 			`key` VARCHAR(180) NOT NULL PRIMARY KEY,
 			`value` LONGTEXT,
 			`expires_on` DATETIME
@@ -159,8 +159,7 @@ class Installer:
 			
 	def create_auth_table(self):
 		import webnotes
-		self.dbman.drop_table('__Auth')
-		webnotes.conn.sql("""create table __Auth(
+		webnotes.conn.sql("""create table if not exists __Auth (
 			`user` VARCHAR(180) NOT NULL PRIMARY KEY,
 			`password` VARCHAR(180) NOT NULL
 			) ENGINE=InnoDB DEFAULT CHARSET=utf8""")

@@ -317,7 +317,7 @@ _f.CodeField.prototype.make_input = function() {
 
 			// General options
 			theme : "advanced",
-			plugins : "style,inlinepopups,table",
+			plugins : "style,inlinepopups,table,advimage",
 			extended_valid_elements: "div[id|dir|class|align|style]",
 			
 			// w/h
@@ -325,14 +325,14 @@ _f.CodeField.prototype.make_input = function() {
 			height: '360px',
 	
 			// buttons
-			theme_advanced_buttons1 : "bold,italic,underline,strikethrough,hr,|,justifyleft,justifycenter,justifyright,|,formatselect,fontselect,fontsizeselect",
+			theme_advanced_buttons1 : "bold,italic,underline,strikethrough,hr,|,justifyleft,justifycenter,justifyright,|,formatselect,fontselect,fontsizeselect,|,image",
 			theme_advanced_buttons2 : "bullist,numlist,|,outdent,indent,|,undo,redo,|,link,unlink,code,|,forecolor,backcolor,|,tablecontrols",
 			theme_advanced_buttons3 : "",
 
 			theme_advanced_toolbar_location : "top",
 			theme_advanced_toolbar_align : "left",
 
-			content_css: "js/lib/tiny_mce_33/custom_content.css",
+			content_css: "js/lib/tiny_mce_33/custom_content.css?q=1",
 
 			oninit: function() { me.init_editor(); }
 		});

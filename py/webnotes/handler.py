@@ -34,6 +34,20 @@ errdoc = ''
 errdoctype = ''
 errmethod = ''
 
+def get_cgi_fields():
+	"""make webnotes.form_dict from cgi field storage"""
+	import cgi
+	import webnotes
+	from webnotes.utils import cstr
+	
+	# make the form_dict
+	webnotes.form = cgi.FieldStorage(keep_blank_values=True)
+	for key in webnotes.form.keys():
+		# file upload must not be decoded as it is treated as a binary
+		# file and hence in any encoding (it does not matter)
+		if not getattr(webnotes.form[key], 'filename', None):
+			webnotes.form_dict[key] = cstr(webnotes.form.getvalue(key))
+
 # Logs
 
 @webnotes.whitelist(allow_guest=True)
@@ -238,7 +252,7 @@ def print_json():
 	print webnotes.cookies
 
 	import json
-	print_zip(json.dumps(webnotes.response))
+	print_zip(json.dumps(webnotes.response, default=json_handler))
 		
 def print_csv():
 	eprint("Content-Type: text/csv; charset: utf-8")
@@ -286,7 +300,7 @@ def make_logs():
 	import json
 	from webnotes.utils import cstr
 	if webnotes.debug_log:
-		webnotes.response['exc'] = json.dumps([cstr(d) for d in webnotes.debug_log])
+		webnotes.response['exc'] = json.dumps("\n".join([cstr(d) for d in webnotes.debug_log]))
 
 	if webnotes.message_log:
 		webnotes.response['server_messages'] = json.dumps([cstr(d) for d in webnotes.message_log])
@@ -306,6 +320,17 @@ def print_zip(response):
 		eprint("Content-Length: %d" % len(response))
 	eprint("")
 	print response
+	
+def json_handler(obj):
+	"""serialize non-serializable data for json"""
+	import datetime
+	
+	# serialize date
+	if isinstance(obj, datetime.date):
+		return unicode(obj)
+	else:
+		raise TypeError, """Object of type %s with value of %s is not JSON serializable""" % \
+			(type(obj), repr(obj))
 
 def accept_gzip():
 	"""return true if client accepts gzip"""
