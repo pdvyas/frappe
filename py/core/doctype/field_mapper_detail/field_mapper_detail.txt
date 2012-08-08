@@ -3,31 +3,32 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:35:37',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:35:37',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
+		u'creation': '2012-08-08 11:28:05',
+		u'docstatus': 0,
+		u'modified': '2012-08-08 12:42:12',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
 		'autoname': u'FMD/.#####',
 		'colour': u'White:FFF',
-		'doctype': 'DocType',
+		u'doctype': u'DocType',
+		'document_type': u'System',
 		'istable': 1,
 		'module': u'Core',
-		'name': '__common__',
+		u'name': u'__common__',
 		'section_style': u'Tray',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 10
+		'version': 1
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': u'DocField',
-		'name': '__common__',
+		u'doctype': u'DocField',
+		u'name': u'__common__',
 		'parent': u'Field Mapper Detail',
 		'parentfield': u'fields',
 		'parenttype': u'DocType',
@@ -36,59 +37,64 @@
 
 	# DocType, Field Mapper Detail
 	{
-		'doctype': 'DocType',
-		'name': u'Field Mapper Detail'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'from_field',
-		'fieldtype': u'Data',
-		'label': u'From Field',
-		'oldfieldname': u'from_field',
-		'oldfieldtype': u'Data',
-		'width': u'180px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'to_field',
-		'fieldtype': u'Data',
-		'label': u'To Field',
-		'oldfieldname': u'to_field',
-		'oldfieldtype': u'Data',
-		'width': u'180px'
+		u'doctype': u'DocType',
+		u'name': u'Field Mapper Detail'
 	},
 
 	# DocField
 	{
 		'default': u'0',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'match_id',
 		'fieldtype': u'Int',
 		'label': u'Match Id',
 		'oldfieldname': u'match_id',
 		'oldfieldtype': u'Int',
+		'reqd': 1,
 		'width': u'50px'
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
+		'fieldname': u'from_field',
+		'fieldtype': u'Data',
+		'label': u'From Field',
+		'oldfieldname': u'from_field',
+		'oldfieldtype': u'Data',
+		'reqd': 1,
+		'width': u'180px'
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'to_field',
+		'fieldtype': u'Data',
+		'label': u'To Field',
+		'oldfieldname': u'to_field',
+		'oldfieldtype': u'Data',
+		'reqd': 1,
+		'width': u'180px'
+	},
+
+	# DocField
+	{
+		'default': u'Yes',
+		u'doctype': u'DocField',
 		'fieldname': u'map',
 		'fieldtype': u'Select',
 		'label': u'Map',
 		'oldfieldname': u'map',
 		'oldfieldtype': u'Select',
 		'options': u'Yes\nNo',
+		'reqd': 1,
 		'width': u'50px'
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'checking_operator',
 		'fieldtype': u'Select',
 		'label': u'Checking Operator (To Fld, Operator, From Fld)',

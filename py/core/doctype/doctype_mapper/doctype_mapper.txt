@@ -3,32 +3,33 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:35:37',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:35:37',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
+		u'creation': '2012-08-08 11:28:04',
+		u'docstatus': 0,
+		u'modified': '2012-08-08 12:42:03',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
 		'_last_update': u'1307624201',
 		'colour': u'White:FFF',
-		'doctype': 'DocType',
+		u'doctype': u'DocType',
+		'document_type': u'System',
 		'issingle': 0,
 		'menu_index': 12,
 		'module': u'Core',
-		'name': '__common__',
+		u'name': u'__common__',
 		'section_style': u'Simple',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 9
+		'version': 1
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': u'DocField',
-		'name': '__common__',
+		u'doctype': u'DocField',
+		u'name': u'__common__',
 		'parent': u'DocType Mapper',
 		'parentfield': u'fields',
 		'parenttype': u'DocType',
@@ -37,8 +38,8 @@
 
 	# These values are common for all DocPerm
 	{
-		'doctype': u'DocPerm',
-		'name': '__common__',
+		u'doctype': u'DocPerm',
+		u'name': u'__common__',
 		'parent': u'DocType Mapper',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
@@ -47,40 +48,13 @@
 
 	# DocType, DocType Mapper
 	{
-		'doctype': 'DocType',
-		'name': u'DocType Mapper'
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Administrator',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Administrator'
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'role': u'System Manager',
-		'submit': 0,
-		'write': 1
+		u'doctype': u'DocType',
+		u'name': u'DocType Mapper'
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'module',
 		'fieldtype': u'Select',
 		'label': u'Module',
@@ -92,31 +66,33 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'from_doctype',
 		'fieldtype': u'Select',
 		'label': u'From DocType',
 		'no_copy': 1,
 		'oldfieldname': u'from_doctype',
 		'oldfieldtype': u'Select',
-		'options': u'link:DocType'
+		'options': u'link:DocType',
+		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'to_doctype',
 		'fieldtype': u'Select',
 		'label': u'To DocType',
 		'no_copy': 1,
 		'oldfieldname': u'to_doctype',
 		'oldfieldtype': u'Select',
-		'options': u'link:DocType'
+		'options': u'link:DocType',
+		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'ref_doc_submitted',
 		'fieldtype': u'Check',
 		'label': u'Ref Doc should be submitted?',
@@ -126,7 +102,18 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
+		'fieldname': u'table_mapper_details',
+		'fieldtype': u'Table',
+		'label': u'Table Mapper Details',
+		'oldfieldname': u'table_mapper_details',
+		'oldfieldtype': u'Table',
+		'options': u'Table Mapper Detail'
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
 		'fieldname': u'field_mapper_details',
 		'fieldtype': u'Table',
 		'label': u'Field Mapper Details',
@@ -135,14 +122,30 @@
 		'options': u'Field Mapper Detail'
 	},
 
-	# DocField
+	# DocPerm
 	{
-		'doctype': u'DocField',
-		'fieldname': u'table_mapper_details',
-		'fieldtype': u'Table',
-		'label': u'Table Mapper Details',
-		'oldfieldname': u'table_mapper_details',
-		'oldfieldtype': u'Table',
-		'options': u'Table Mapper Detail'
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Administrator',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		u'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Administrator'
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'role': u'System Manager',
+		'submit': 0,
+		'write': 1
 	}
 ]

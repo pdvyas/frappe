@@ -3,31 +3,32 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:35:39',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:35:39',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
+		u'creation': '2012-05-10 13:55:07',
+		u'docstatus': 0,
+		u'modified': '2012-08-08 12:45:53',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
 		'autoname': u'TMD/.#######',
 		'colour': u'White:FFF',
-		'doctype': 'DocType',
+		u'doctype': u'DocType',
+		'document_type': u'System',
 		'istable': 1,
 		'module': u'Core',
-		'name': '__common__',
+		u'name': u'__common__',
 		'section_style': u'Tray',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 5
+		'version': 1
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': u'DocField',
-		'name': '__common__',
+		u'doctype': u'DocField',
+		u'name': u'__common__',
 		'parent': u'Table Mapper Detail',
 		'parentfield': u'fields',
 		'parenttype': u'DocType',
@@ -36,13 +37,26 @@
 
 	# DocType, Table Mapper Detail
 	{
-		'doctype': 'DocType',
-		'name': u'Table Mapper Detail'
+		u'doctype': u'DocType',
+		u'name': u'Table Mapper Detail'
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		'default': u'0',
+		u'doctype': u'DocField',
+		'fieldname': u'match_id',
+		'fieldtype': u'Int',
+		'label': u'Match Id',
+		'oldfieldname': u'match_id',
+		'oldfieldtype': u'Int',
+		'reqd': 1,
+		'width': u'60px'
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
 		'fieldname': u'from_table',
 		'fieldtype': u'Select',
 		'label': u'From Table',
@@ -55,7 +69,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'to_table',
 		'fieldtype': u'Select',
 		'label': u'To Table',
@@ -68,7 +82,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'from_field',
 		'fieldtype': u'Data',
 		'label': u'From Field',
@@ -79,7 +93,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'to_field',
 		'fieldtype': u'Data',
 		'label': u'To Field',
@@ -90,19 +104,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
-		'fieldname': u'match_id',
-		'fieldtype': u'Int',
-		'label': u'Match Id',
-		'oldfieldname': u'match_id',
-		'oldfieldtype': u'Int',
-		'reqd': 0,
-		'width': u'60px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'validation_logic',
 		'fieldtype': u'Small Text',
 		'label': u'Validation Logic',
@@ -114,7 +116,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'reference_doctype_key',
 		'fieldtype': u'Data',
 		'label': u'Reference DocType Key',
@@ -124,7 +126,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'reference_key',
 		'fieldtype': u'Data',
 		'label': u'Reference Docname Key',
