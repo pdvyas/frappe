@@ -327,7 +327,10 @@ class Document(object):
 		return err_list
 
 	def make_link_list(self):
-		res = webnotes.model.meta.get_link_fields(self.doctype)
+		from webnotes.model.doctype import get_link_fields
+		res = map(lambda df: [df.fieldname, df.options, df.label],
+			get_link_fields(self.doctype))
+		# res = webnotes.model.meta.get_link_fields(self.doctype)
 
 		link_list = {}
 		for i in res: 

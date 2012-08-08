@@ -28,12 +28,12 @@ no_value_fields = ['Section Break', 'Column Break', 'HTML', 'Table', 'FlexTable'
 default_fields = ['doctype','name','owner','creation','modified','modified_by','parent','parentfield','parenttype','idx','docstatus']
 
 def get(doctype, name):
-	"""returns doclist identified by name from table indicated by doctype, with its children"""
+	"""returns doclist identified by name, from table indicated by doctype, with its children"""
 	import webnotes.model.doc
 	return webnotes.model.doc.get(doctype, name)
 	
 def get_doctype(doctype, processed=False):
-	"""returns doclist identified by doctype from tabDocType with its children"""
+	"""returns doclist identified by doctype, from tabDocType with its children"""
 	import webnotes.model.doctype
 	return webnotes.model.doctype.get(doctype, processed)
 
