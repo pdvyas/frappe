@@ -213,9 +213,9 @@ def map(args=None):
 # 					except:
 # 						val = ''
 # 						
-# 					to_doc.fields[f[1]] = val
+# 					to_doc[f[1]] = val
 # 				else:
-# 					to_doc.fields[f[1]] = obj.fields.get(f[0])
+# 					to_doc[f[1]] = obj.get(f[0])
 # 				
 # 				
 # 	#---------------------------------------------------------------------------
@@ -263,7 +263,7 @@ def map(args=None):
 # 			# Reference key is the fieldname which will relate to the from_table
 # 			if t.reference_doctype_key:
 # 				for d in getlist(obj.doclist, t.to_field):
-# 					if d.fields[t.reference_doctype_key] == self.doc.from_doctype:
+# 					if d[t.reference_doctype_key] == self.doc.from_doctype:
 # 						self.check_consistency(obj.doc, d, to_docname)
 # 						self.check_ref_docstatus()
 # 
@@ -294,14 +294,14 @@ def map(args=None):
 # 		checklist = self.get_checklist()
 # 		self.ref_doc = ''
 # 		for t in getlist(self.doclist, 'table_mapper_details'):
-# 			if t.reference_key and child_obj.fields[t.reference_key]:
+# 			if t.reference_key and child_obj[t.reference_key]:
 # 				from_flds, to_flds = self.get_label_and_type(t.from_table, t.to_table)
 # 				for cl in checklist:
 # 					if cl['match_id'] == t.match_id:
 # 						if t.to_field:
-# 							cur_val = child_obj.fields[cl['to_fld']]
+# 							cur_val = child_obj[cl['to_fld']]
 # 						else:
-# 							cur_val = par_obj.fields[cl['to_fld']]
+# 							cur_val = par_obj[cl['to_fld']]
 # 						
 # 						if to_flds[cl['to_fld']]['fieldtype'] in ['Currency', 'Float']:
 # 							cur_val = '%.2f' % flt(cur_val)
@@ -309,16 +309,16 @@ def map(args=None):
 # 						if cl['op'] == '=' and to_flds[cl['to_fld']]['fieldtype'] in ['Currency', 'Float']:
 # 							consistent = sql("""select name, %s from `tab%s` \
 # 								where name = %s and %s - %s <= 0.5"""% (cl['from_fld'], t.from_table, '%s', '%s', \
-# 									 cl['from_fld']), (child_obj.fields[t.reference_key], flt(cur_val)))
+# 									 cl['from_fld']), (child_obj[t.reference_key], flt(cur_val)))
 # 						else:
 # 							consistent = sql("""select name, %s from `tab%s` \
 # 								where name = %s and %s %s ifnull(%s, '')""" % (cl['from_fld'], t.from_table, \
-# 								'%s', '%s', cl['op'], cl['from_fld']), (child_obj.fields[t.reference_key], \
+# 								'%s', '%s', cl['op'], cl['from_fld']), (child_obj[t.reference_key], \
 # 								to_flds[cl['to_fld']]['fieldtype'] in ('Currency', 'Float', 'Int') \
 # 									and flt(cur_val) or cstr(cur_val)))
 # 
 # 						if not self.ref_doc:
-# 							det = sql("""select name, parent from `tab%s` where name = \"%s\"""" % (t.from_table, child_obj.fields[t.reference_key]))
+# 							det = sql("""select name, parent from `tab%s` where name = \"%s\"""" % (t.from_table, child_obj[t.reference_key]))
 # 							self.ref_doc = det[0][1] and det[0][1] or det[0][0]
 # 
 # 						if not consistent:

@@ -106,7 +106,7 @@ def export_doc(doctype=None, name=None, module=None):
 	if not module: 
 		module = webnotes.conn.get_value(doctype, name, 'module')
 
-	doclist = [d.fields for d in webnotes.model.doc.get(doctype, name)]
+	doclist = [d for d in webnotes.model.doc.get(doctype, name)]
 
 	write_document_file(doclist, module)
 	webnotes.msgprint("Exported")

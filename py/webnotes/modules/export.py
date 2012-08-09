@@ -35,7 +35,7 @@ def export_to_files(record_list=[], record_module=None, verbose=0):
 	module_doclist =[]
 	if record_list:
 		for record in record_list:
-			doclist = [d.fields for d in webnotes.model.doc.get(record[0], record[1])]
+			doclist = [d for d in webnotes.model.doc.get(record[0], record[1])]
 			write_document_file(doclist, record_module)
 
 def create_init_py(modules_path, dt, dn):
@@ -126,7 +126,7 @@ def export_for_test(doclist):
 		
 	# convert to dicts if passed as Document objects
 	if hasattr(doclist[0], 'fields'):
-		doclist = [d.fields for d in doclist]
+		doclist = [d for d in doclist]
 
 	doctype = scrub(doclist[0]['doctype'])
 	doctype_path = os.path.join(conf.test_data_path, doctype)

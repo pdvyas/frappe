@@ -54,14 +54,14 @@ def add_comment(args=None):
 		cmt = Document('Comment')
 		for arg in ['comment', 'comment_by', 'comment_by_fullname', 'comment_doctype', \
 			'comment_docname']:
-			cmt.fields[arg] = args[arg]
+			cmt[arg] = args[arg]
 		cmt.save(1)
 
 	import startup.event_handlers
 	if hasattr(startup.event_handlers, 'comment_added'):
 		startup.event_handlers.comment_added(cmt)
 	
-	return cmt.fields
+	return cmt
 
 @webnotes.whitelist()
 def remove_comment():

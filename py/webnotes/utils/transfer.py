@@ -198,7 +198,7 @@ class UpdateDocumentMerge(UpdateDocument):
 		if hasattr(self, 'get_orignal_values'):
 			ov = self.get_orignal_values(d)
 			if ov:
-				d.fields.update(ov)
+				d.update(ov)
 
 
 
@@ -216,9 +216,9 @@ class UpdateDocType(UpdateDocumentMerge):
 	
 	def get_id(self, d):
 		key = d.fieldname and 'fieldname' or 'label'
-		if d.fields.get(key):
+		if d.get(key):
 			return webnotes.conn.sql("""select name, options, permlevel, reqd, print_hide, hidden, fieldtype
-				from tabDocField where %s=%s and parent=%s""" % (key, '%s', '%s'), (d.fields[key], d.parent))
+				from tabDocField where %s=%s and parent=%s""" % (key, '%s', '%s'), (d[key], d.parent))
 				
 	def on_save(self):
 		self.renum()

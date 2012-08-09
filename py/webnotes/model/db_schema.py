@@ -64,9 +64,9 @@ import _mysql_exceptions
 # -------------------------------------------------
 
 class DbTable:
-	def __init__(self, doctype, prefix = 'tab'):
+	def __init__(self, doctype):
 		self.doctype = doctype
-		self.name = prefix + doctype
+		self.name = 'tab' + doctype
 		self.columns = {}
 		self.current_columns = {}
 		

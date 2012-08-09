@@ -22,12 +22,12 @@ class DocTypeTest(unittest.TestCase):
 			and d.fieldname=='defkey', doclist)), 1)
 		
 		# js code added
-		self.assertTrue(doclist[0].fields.get('__js'))
-		self.assertTrue(doclist[0].fields.get('__listjs'))
-		self.assertTrue(doclist[0].fields.get('__css'))
+		self.assertTrue(doclist[0].get('__js'))
+		self.assertTrue(doclist[0].get('__listjs'))
+		self.assertTrue(doclist[0].get('__css'))
 		
 		# test embedded js code
-		self.assertTrue('wn.RoleEditor = Class.extend({' in doclist[0].fields.get('__js'))
+		self.assertTrue('wn.RoleEditor = Class.extend({' in doclist[0].get('__js'))
 		
 		# check if exists in cache
 		self.assertTrue(webnotes.conn.sql("""select `key` from __CacheItem 
@@ -72,7 +72,7 @@ class DocTypeTest(unittest.TestCase):
 				
 		from webnotes.model.doc import Document
 		ps = Document("Property Setter")
-		ps.fields.update({
+		ps.update({
 			'name': 'test',
 			'doc_type': "Profile",
 			'field_name': 'first_name',
@@ -99,7 +99,7 @@ class DocTypeTest(unittest.TestCase):
 				
 		from webnotes.model.doc import Document
 		ps = Document("Property Setter")
-		ps.fields.update({
+		ps.update({
 			'name': 'test',
 			'doc_type': "Profile",
 			'field_name': 'first_name',

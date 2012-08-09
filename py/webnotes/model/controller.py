@@ -44,7 +44,7 @@ class DocListController(object):
 		if isinstance(dt, list):
 			self.set_doclist(dt)
 
-	def load_from_db(self, dt, dn, prefix='tab'):
+	def load_from_db(self, dt, dn):
 		"""Load doclist from database"""
 		import webnotes.model.doc
 		self.set_doclist(webnotes.model.doc.get(dt, dn))
@@ -153,7 +153,7 @@ class DocListController(object):
 	def save_main(self, ignore_fields=0):
 		"""Save the main doc"""
 		try:
-			self.doc.save(cint(self.doc.fields.get('__islocal')), ignore_fields=ignore_fields)
+			self.doc.save(cint(self.doc.get('__islocal')), ignore_fields=ignore_fields)
 		except NameError, e:
 			webnotes.msgprint('%s "%s" already exists' % (self.doc.doctype, self.doc.name))
 
@@ -168,12 +168,12 @@ class DocListController(object):
 		child_map = {}
 		
 		for d in self.doclist[1:]:
-			if d.fields.has_key('parent'):
+			if d.has_key('parent'):
 				if d.parent and (not d.parent.startswith('old_parent:')):
 					d.parent = self.doc.name # rename if reqd
 					d.parenttype = self.doc.doctype
 
-				d.save(new = cint(d.fields.get('__islocal')), ignore_fields=ignore_fields)
+				d.save(new = cint(d.get('__islocal')), ignore_fields=ignore_fields)
 			
 			child_map.setdefault(d.doctype, []).append(d.name)
 		
@@ -198,7 +198,7 @@ class DocListController(object):
 		"""
 		from webnotes.model.meta import is_single
 
-		if (not is_single(self.doc.doctype)) and (not cint(self.doc.fields.get('__islocal'))):
+		if (not is_single(self.doc.doctype)) and (not cint(self.doc.get('__islocal'))):
 			tmp = webnotes.conn.sql("""
 				SELECT modified FROM `tab%s` WHERE name="%s" for update"""
 				% (self.doc.doctype, self.doc.name))
@@ -239,7 +239,7 @@ class DocListController(object):
 		user = webnotes.__dict__.get('session', {}).get('user') or 'Administrator'
 
 		for d in self.docs:
-			if self.doc.fields.get('__islocal'):
+			if self.doc.get('__islocal'):
 				d.owner = user
 				d.creation = ts
 
@@ -279,24 +279,24 @@ def clone(source_doclist):
 	"""make a copy of the doclist"""
 	from webnotes.model.doc import Document
 	new_doclist = []
-	new_parent = Document(fielddata = source_doclist.doc.fields.copy())
+	new_parent = Document(fielddata = source_doclist.doc.copy())
 	new_parent.name = 'Temp/001'
-	new_parent.fields['__islocal'] = 1
-	new_parent.fields['docstatus'] = 0
+	new_parent['__islocal'] = 1
+	new_parent['docstatus'] = 0
 
-	if new_parent.fields.has_key('amended_from'):
-		new_parent.fields['amended_from'] = None
-		new_parent.fields['amendment_date'] = None
+	if new_parent.has_key('amended_from'):
+		new_parent['amended_from'] = None
+		new_parent['amendment_date'] = None
 
 	new_parent.save(1)
 
 	new_doclist.append(new_parent)
 
 	for d in source_doclist.doclist[1:]:
-		newd = Document(fielddata = d.fields.copy())
+		newd = Document(fielddata = d.copy())
 		newd.name = None
-		newd.fields['__islocal'] = 1
-		newd.fields['docstatus'] = 0
+		newd['__islocal'] = 1
+		newd['docstatus'] = 0
 		newd.parent = new_parent.name
 		new_doclist.append(newd)
 	

@@ -176,9 +176,9 @@ def load_install_docs(modules):
 def create_doc(data):
 	from webnotes.model.doc import Document
 	d = Document(data['doctype'])
-	d.fields.update(data)
+	d.update(data)
 	d.save()
-	print 'Created %(doctype)s %(name)s' % d.fields
+	print 'Created %(doctype)s %(name)s' % d
 
 import unittest
 class TestSync(unittest.TestCase):

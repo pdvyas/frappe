@@ -41,8 +41,8 @@ class DocType:
 
 	def validate_field(self, doctype_doclist):
 		exists = any(d for d in doctype_doclist if d.doctype == 'DocField' and
-				(d.fields.get('label') == self.doc.label or 
-				d.fields.get('fieldname') == self.doc.fieldname))
+				(d.get('label') == self.doc.label or 
+				d.get('fieldname') == self.doc.fieldname))
 		if self.doc.__islocal == 1 and exists:
 			msgprint("%s field already exists in Document : %s" % (self.doc.label, self.doc.dt))
 			raise Exception

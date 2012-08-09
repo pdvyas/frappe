@@ -64,8 +64,8 @@ def update_auto_masters(doc):
 
 	# save masters in session cache		
 	for f in fl:
-		if doc.fields.get(f[0]):
-			add_to_master(f[0], doc.fields.get(f[0]))
+		if doc.get(f[0]):
+			add_to_master(f[0], doc.get(f[0]))
 
 # add to master
 def add_to_master(fieldname, value):

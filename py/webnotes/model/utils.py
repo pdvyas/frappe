@@ -94,7 +94,7 @@ def compress(doclist):
 
 	"""
 	if doclist and hasattr(doclist[0],'fields'):
-		docs = [d.fields for d in doclist]
+		docs = [d for d in doclist]
 	else:
 		docs = doclist
 

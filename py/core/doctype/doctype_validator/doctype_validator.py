@@ -40,7 +40,7 @@ def validate(controller):
 	
 	# duplicate validators
 	for d in doctypelist.get({"doctype":"DocType Unique Row"}):
-		no_duplicate(controller.doclist, d.unique_table_field, d.keys.split('\n'))
+		no_duplicate(controller.doclist, d.unique_table_field, d['keys'].split('\n'))
 
 _cached_link_docs = {}
 def filter_link(doclist, link_filter, doctypelist):
@@ -67,7 +67,7 @@ def filter_link(doclist, link_filter, doctypelist):
 			
 
 		# value set
-		val = doc.fields.get(link_filter.link_field)
+		val = doc.get(link_filter.link_field)
 		if val:
 			valdoc = _get(link_df.options, val)
 			
@@ -128,7 +128,7 @@ def no_duplicate(doclist, parentfield, keys):
 	for d in doclist.get({"parentfield":parentfield}):
 		values = []
 		for key in keys:
-			values.append(d.fields.get(key))
+			values.append(d.get(key))
 				
 		if values in all_values:
 			doctypelist = webnotes.model.get_doctype(d.doctype)
@@ -152,11 +152,11 @@ def check_condition(doclist, condition, doctypelist):
 			parentfield=_fvalue(if_then, "table_field") or None)
 			
 	def _check(doc, if_then):
-		return check_filters(doc.fields.get(_fvalue(if_then, "field")), 
+		return check_filters(doc.get(_fvalue(if_then, "field")), 
 			_fvalue(if_then, "condition"), _fvalue(if_then, "value"))
 	
 	def _fvalue(if_then, fname):
-		return condition.fields.get(if_then + "_" + fname)
+		return condition.get(if_then + "_" + fname)
 		
 	# filter records from doclist
 	if_doclist = _get_doclist('if')
@@ -179,14 +179,14 @@ def check_condition(doclist, condition, doctypelist):
 				if not _check(then_doc, 'then'):
 					
 					# get labels for displaying error message
-					condition.fields.update({
+					condition.update({
 						"if_label": if_field.label,
 						"then_label": then_field.label
 					})
 					
 					webnotes.msgprint("""If "%(if_label)s" %(if_condition)s "%(if_value)s", 
 						then "%(then_label)s" should be %(then_condition)s "%(then_value)s" """ \
-						% condition.fields, raise_exception=webnotes.ConditionalPropertyError)
+						% condition, raise_exception=webnotes.ConditionalPropertyError)
 
 class DocTypeValidator(DocListController):
 	pass

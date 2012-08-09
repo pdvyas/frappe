@@ -211,7 +211,7 @@ class Database:
 				
 	def set(self, doc, field, val):
 		self.set_value(doc.doctype, doc.name, field, val, doc.modified)
-		doc.fields[field] = val
+		doc[field] = val
 
 	# ======================================================================================
 

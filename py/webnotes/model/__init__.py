@@ -43,7 +43,7 @@ def insert(doclist, ignore_fields=0):
 		doclist = [doclist]
 	
 	doclistcon = get_controller(doclist)
-	doclistcon.doc.fields['__islocal'] = 1
+	doclistcon.doc['__islocal'] = 1
 	doclistcon.save(ignore_fields=ignore_fields)
 	
 def insert_variants(base, variants, ignore_fields=0):
@@ -60,7 +60,7 @@ def insert_child(fields, ignore_fields=0):
 
 	# make child
 	new = webnotes.model.doc.Document(fielddata = fields)
-	new.fields['__islocal'] = 1
+	new['__islocal'] = 1
 
 	# add to doclist
 	parent.doclist.append(new)
@@ -226,6 +226,10 @@ def get_link_fields(dt):
 	link_fields = webnotes.model.rename_doc.get_link_fields(dt)
 	link_fields = [[lf['parent'], lf['fieldname']] for lf in link_fields]
 	return link_fields
+
+def is_single(doctype):
+	"""used in doc.py"""
+	return cint(webnotes.conn.get_value("DocType", doctype, "issingle"))
 	
 def clear_recycle_bin():
 	"""
@@ -253,4 +257,3 @@ def clear_recycle_bin():
 			sql("delete from `%s` where parent like 'old_parent:%%'" % t[0])
 
 	webnotes.msgprint("%s records deleted" % str(int(total_deleted)))
-

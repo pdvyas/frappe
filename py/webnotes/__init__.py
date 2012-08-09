@@ -65,6 +65,7 @@ class ConditionalPropertyError(ValidationError): pass
 class MandatoryError(ValidationError): pass
 class NameError(ValidationError): pass
 class DocStatusError(ValidationError): pass
+class ProgrammingError(Exception): pass
 
 def getTraceback():
 	import utils
