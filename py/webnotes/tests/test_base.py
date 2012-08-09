@@ -23,6 +23,9 @@ class TestBase(unittest.TestCase):
 	def setUp(self):
 		webnotes.conn.begin()
 		
+	def tearDown(self):
+		webnotes.conn.rollback()
+		
 	def assertDoc(self, lst):
 		"""assert all values"""
 		for d in lst:
@@ -75,6 +78,3 @@ class TestBase(unittest.TestCase):
 		for d in data:
 			webnotes.conn.sql("update `tab%s` set docstatus=2 where name = '%s'" % (d['doctype'], d['name']))
 		return obj
-
-	def tearDown(self):
-		webnotes.conn.rollback()

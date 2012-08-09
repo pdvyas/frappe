@@ -105,4 +105,4 @@ def add_to_cache(bootinfo, country):
 	# make new
 	webnotes.conn.sql("""insert into `__SessionCache` 
 		(user, country, cache) VALUES (%s, %s, %s)""", \
-			(webnotes.session['user'], country, json.dumps(bootinfo)))
+			(webnotes.session['user'], country, json.dumps(bootinfo, default=webnotes.json_handler)))

@@ -136,13 +136,13 @@ class Document(object):
 			del self.fields['__islocal']
 		for i in range(len(description)):
 			v = data[i]
-			self.fields[description[i][0]] = webnotes.conn.convert_to_simple_type(v)
+			self.fields[description[i][0]] = v
 
 	def _merge_values(self, data, description):
 		for i in range(len(description)):
 			v = data[i]
 			if v: # only if value, over-write
-				self.fields[description[i][0]] = webnotes.conn.convert_to_simple_type(v)
+				self.fields[description[i][0]] = v
 			
 	# Load Single Type
 	# ---------------------------------------------------------------------------

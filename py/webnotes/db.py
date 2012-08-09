@@ -98,35 +98,19 @@ class Database:
 				else:
 					webnotes.msgprint('A very long query was encountered. If you are trying to import data, please do so using smaller files')
 					raise Exception, 'Bad Query!!! Too many writes'
-	
-	def fetch_as_dict(self, formatted=0, as_utf8=0):
-		"""
-		      Internal - get results as dictionary
-		"""
-		result = self._cursor.fetchall()
-		ret = []
-		for r in result:
-			dict = {}
-			for i in range(len(r)):
-				val = self.convert_to_simple_type(r[i], formatted)
-				if as_utf8 and type(val) is unicode:
-					val = val.encode('utf-8')
-				dict[self._cursor.description[i][0]] = val
-			ret.append(dict)
-		return ret
-	
+
 	def validate_query(self, q):
 		cmd = q.strip().lower().split()[0]
 		if cmd in ['alter', 'drop', 'truncate'] and webnotes.user.name != 'Administrator':
 			webnotes.msgprint('Not allowed to execute query')
 			raise Execption
 
-	def sql(self, query, values=(), as_dict = 0, as_list = 0, formatted = 0, 
-		debug=0, ignore_ddl=0, as_utf8=0, auto_commit=0):
+	def sql(self, query, values=(), as_dict = 0, as_list = 0, debug=0, ignore_ddl=0,
+		auto_commit=0):
 		"""
 		      * Execute a `query`, with given `values`
 		      * returns as a dictionary if as_dict = 1
-		      * returns as a list of lists (with cleaned up dates) if as_list = 1
+		      * returns as a list of lists if as_list = 1
 		"""
 		# in transaction validations
 		self.check_transaction_status(query)
@@ -161,16 +145,25 @@ class Database:
 
 		if auto_commit: self.commit()
 
+		output = self._cursor.fetchall()
+
 		# scrub output if required
 		if as_dict:
-			return self.fetch_as_dict(formatted, as_utf8)
+			return self.fetch_as_dict(output)
 		elif as_list:
-			return self.convert_to_lists(self._cursor.fetchall(), formatted, as_utf8)
-		elif as_utf8:
-			return self.convert_to_lists(self._cursor.fetchall(), formatted, as_utf8)
+			return map(lambda res: list(res), output)
 		else:
-			return self._cursor.fetchall()
+			return output
 
+	def fetch_as_dict(self, result):
+		"""Internal - get results as dictionary"""
+		ret = []
+		for r in result:
+			row_dict = {}
+			for i in xrange(len(r)):
+				row_dict[self._cursor.description[i][0]] = r[i]
+			ret.append(row_dict)
+		return ret
 		
 	def get_description(self):
 		"""Get metadata of the last query"""
@@ -179,67 +172,6 @@ class Database:
 	def get_table_columns(self, table):
 		"""get columns"""
 		return [r[0] for r in self.sql("DESC `tab%s`" % table)]
-
-	def convert_to_simple_type(self, v, formatted=0):
-		import datetime
-		from webnotes.utils import formatdate, fmt_money
-
-		# date
-		if type(v)==datetime.date:
-			v = str(v)
-			if formatted:
-				v = formatdate(v)
-		
-		# time	
-		elif type(v)==datetime.timedelta:
-			h = int(v.seconds/60/60)
-			v = str(h) + ':' + str(v.seconds/60 - h*60)
-			if v[1]==':': 
-				v='0'+v
-		
-		# datetime
-		elif type(v)==datetime.datetime:
-			v = str(v)
-		
-		# long
-		elif type(v)==long: 
-			v=int(v)
-		
-		# convert to strings... (if formatted)
-		if formatted:
-			if type(v)==float:
-				v=fmt_money(v)
-			if type(v)==int:
-				v=str(v)
-		
-		return v
-
-	def convert_to_lists(self, res, formatted=0, as_utf8=0):
-		"""Convert the given result set to a list of lists 
-		(with cleaned up dates and decimals)"""
-		nres = []
-		for r in res:
-			nr = []
-			for c in r:
-				val = self.convert_to_simple_type(c, formatted)
-				if as_utf8 and type(val) is unicode:
-					val = val.encode('utf-8')
-				nr.append(val)
-			nres.append(nr)
-		return nres
-		
-	def convert_to_utf8(self, res, formatted=0):
-		"""Convert the given result set to a list of lists and as utf8 
-		(with cleaned up dates and decimals)"""
-		nres = []
-		for r in res:
-			nr = []
-			for c in r:
-				if type(c) is unicode:
-					c = c.encode('utf-8')
-					nr.append(self.convert_to_simple_type(c, formatted))
-			nres.append(nr)
-		return nres
 
 	def get_value(self, doctype, filters=None, fieldname="name", ignore=None):
 		"""Get a single / multiple value from a record. 

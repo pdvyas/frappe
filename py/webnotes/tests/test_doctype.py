@@ -40,7 +40,10 @@ class DocTypeTest(unittest.TestCase):
 		
 	def test_print_format(self):
 		doctypelist = webnotes.model.doctype.get("Sales Order", processed=True)
-		self.assertEquals(len(doctypelist.get({"doctype":"Print Format"})), 3)
+		count_print_formats = webnotes.conn.sql("""select count(name) from `tabPrint Format`
+			where doc_type=%s""", "Sales Order")[0][0]
+		self.assertEquals(len(doctypelist.get({"doctype":"Print Format"})),
+			count_print_formats)
 
 	def test_with_cache(self):
 		self.assertFalse(getattr(self.test_profile()[0], '__from_cache', False))
@@ -78,6 +81,8 @@ class DocTypeTest(unittest.TestCase):
 			'value': 1
 		})
 		ps.save()
+		
+		webnotes.model.doctype.clear_cache('Profile')
 
 		doclist = webnotes.model.doctype.get('Profile')
 		self.assertEquals(len(filter(lambda d: d.fieldname=='first_name' 
@@ -103,6 +108,8 @@ class DocTypeTest(unittest.TestCase):
 			'value': 'last_name'
 		})
 		ps.save()
+		
+		webnotes.model.doctype.clear_cache('Profile')
 
 		doclist = webnotes.model.doctype.get('Profile')
 		first_name_idx = doclist.getone({"fieldname":"first_name"}).idx
@@ -117,3 +124,7 @@ class DocTypeTest(unittest.TestCase):
 		# link: type selects
 		doctypelist = webnotes.model.doctype.get_link_fields("Role")
 		self.assertTrue(len(doctypelist.get({"fieldname":"module", "fieldtype":"Select"})), 1)
+		
+	def test_search_fields_of_link_fields(self):
+		doctypelist = webnotes.model.get_doctype("DocType Validator", processed=True)
+		self.assertEqual(doctypelist.get_field("for_doctype").search_fields, ["autoname"])

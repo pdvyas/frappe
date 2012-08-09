@@ -139,7 +139,7 @@ def uploadfile():
 		webnotes.response['result'] = """<script>
 			window.parent.wn.upload.callback("%s", %s);
 		</script>""" % (webnotes.form_dict.get('_id'),
-			json.dumps(ret))
+			json.dumps(ret, default=webnotes.json_handler))
 
 @webnotes.whitelist(allow_guest=True)
 def reset_password():
@@ -258,7 +258,7 @@ def print_json():
 	print webnotes.cookies
 
 	import json
-	print_zip(json.dumps(webnotes.response, default=json_handler))
+	print_zip(json.dumps(webnotes.response, default=webnotes.json_handler))
 		
 def print_csv():
 	eprint("Content-Type: text/csv; charset: utf-8")
@@ -288,8 +288,9 @@ def print_iframe():
 					}
 				}
 			</script>""" % {
-				'messages': json.dumps(webnotes.message_log).replace("'", "\\'"),
-				'errors': json.dumps(webnotes.debug_log).replace("'", "\\'"),
+				'messages': json.dumps(webnotes.message_log, default=webnotes.json_handler).replace(
+					"'", "\\'"),
+				'errors': json.dumps(webnotes.debug_log, default=webnotes.json_handler).replace("'", "\\'"),
 			})
 
 def print_raw():
@@ -306,10 +307,12 @@ def make_logs():
 	import json
 	from webnotes.utils import cstr
 	if webnotes.debug_log:
-		webnotes.response['exc'] = json.dumps("\n".join([cstr(d) for d in webnotes.debug_log]))
+		webnotes.response['exc'] = json.dumps("\n".join([cstr(d) for d in webnotes.debug_log]),
+			default=webnotes.json_handler)
 
 	if webnotes.message_log:
-		webnotes.response['server_messages'] = json.dumps([cstr(d) for d in webnotes.message_log])
+		webnotes.response['server_messages'] = json.dumps([cstr(d) for d in webnotes.message_log],
+			default=webnotes.json_handler)
 
 def add_cookies():
 	"""if there ar additional cookies defined during the request, add them"""
@@ -326,17 +329,6 @@ def print_zip(response):
 		eprint("Content-Length: %d" % len(response))
 	eprint("")
 	print response
-	
-def json_handler(obj):
-	"""serialize non-serializable data for json"""
-	import datetime
-	
-	# serialize date
-	if isinstance(obj, datetime.date):
-		return unicode(obj)
-	else:
-		raise TypeError, """Object of type %s with value of %s is not JSON serializable""" % \
-			(type(obj), repr(obj))
 
 def accept_gzip():
 	"""return true if client accepts gzip"""
