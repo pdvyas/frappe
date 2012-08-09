@@ -25,30 +25,11 @@ import sys, os
 import webnotes
 import webnotes.utils
 
-form = webnotes.form
-form_dict = webnotes.form_dict
-
 sql = None
 session = None
 errdoc = ''
 errdoctype = ''
 errmethod = ''
-
-def get_cgi_fields():
-	"""make webnotes.form_dict from cgi field storage"""
-	import cgi
-	import webnotes
-	from webnotes.utils import cstr
-	
-	# make the form_dict
-	webnotes.form = cgi.FieldStorage(keep_blank_values=True)
-	for key in webnotes.form.keys():
-		# file upload must not be decoded as it is treated as a binary
-		# file and hence in any encoding (it does not matter)
-		if not getattr(webnotes.form[key], 'filename', None):
-			webnotes.form_dict[key] = cstr(webnotes.form.getvalue(key))
-
-# Logs
 
 @webnotes.whitelist(allow_guest=True)
 def startup():
@@ -84,16 +65,17 @@ def dt_map():
 	from webnotes.model.code import get_obj
 	from webnotes.model.doc import Document
 	
-	form_dict = webnotes.form_dict
+	form = webnotes.form
 	
-	dt_list = webnotes.model.utils.expand(form_dict.get('docs'))
-	from_doctype = form_dict.get('from_doctype')
-	to_doctype = form_dict.get('to_doctype')
-	from_docname = form_dict.get('from_docname')
-	from_to_list = form_dict.get('from_to_list')
+	dt_list = webnotes.model.utils.expand(form.get('docs'))
+	from_doctype = form.get('from_doctype')
+	to_doctype = form.get('to_doctype')
+	from_docname = form.get('from_docname')
+	from_to_list = form.get('from_to_list')
 	
 	dm = get_obj('DocType Mapper', from_doctype +'-' + to_doctype)
-	dl = dm.dt_map(from_doctype, to_doctype, from_docname, Document(fielddata = dt_list[0]), [], from_to_list)
+	dl = dm.dt_map(from_doctype, to_doctype, from_docname, Document(fielddata = dt_list[0]), [], 
+		from_to_list)
 	
 	webnotes.response['docs'] = dl
 
@@ -101,8 +83,8 @@ def dt_map():
 def load_month_events():
 	import webnotes
 
-	mm = webnotes.form_dict.get('month')
-	yy = webnotes.form_dict.get('year')
+	mm = webnotes.form.get('month')
+	yy = webnotes.form.get('year')
 	m_st = str(yy) + '-' + str(mm) + '-01'
 	m_end = str(yy) + '-' + str(mm) + '-31'
 
@@ -118,11 +100,11 @@ def uploadfile():
 	ret = []
 
 	try:
-		if webnotes.form_dict.get('from_form'):
+		if webnotes.form.get('from_form'):
 			webnotes.utils.file_manager.upload()
 		else:
-			if webnotes.form_dict.get('method'):
-				m = webnotes.form_dict['method']
+			if webnotes.form.get('method'):
+				m = webnotes.form['method']
 				modulename = '.'.join(m.split('.')[:-1])
 				methodname = m.split('.')[-1]
 
@@ -138,15 +120,14 @@ def uploadfile():
 	if not webnotes.response.get('result'):
 		webnotes.response['result'] = """<script>
 			window.parent.wn.upload.callback("%s", %s);
-		</script>""" % (webnotes.form_dict.get('_id'),
+		</script>""" % (webnotes.form.get('_id'),
 			json.dumps(ret, default=webnotes.json_handler))
 
 @webnotes.whitelist(allow_guest=True)
 def reset_password():
-	form_dict = webnotes.form_dict
 	from webnotes.model.code import get_obj
 	
-	user = form_dict.get('user', '')
+	user = webnotes.form.get('user', '')
 	if webnotes.conn.sql("""select name from tabProfile where name=%s""", user):
 		import profile
 		user_profile = profile.Profile(user)
@@ -160,7 +141,7 @@ def reset_password():
 
 def handle():
 	"""handle request"""
-	cmd = webnotes.form_dict['cmd']
+	cmd = webnotes.form['cmd']
 
 	if cmd!='login':
 		# login executed in webnotes.auth
@@ -191,9 +172,9 @@ def execute_cmd(cmd):
 	if not webnotes.conn.in_transaction:
 		webnotes.conn.begin()
 
-	if 'arg' in webnotes.form_dict:
+	if 'arg' in webnotes.form:
 		# direct method call
-		ret = method(webnotes.form_dict.get('arg'))
+		ret = method(webnotes.form.get('arg'))
 	else:
 		ret = method()
 

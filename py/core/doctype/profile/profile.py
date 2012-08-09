@@ -234,7 +234,7 @@ def get_all_roles(arg=None):
 @webnotes.whitelist()
 def get_user_roles(arg=None):
 	"""get roles for a user"""
-	return webnotes.get_roles(webnotes.form_dict['uid'])
+	return webnotes.get_roles(webnotes.form['uid'])
 
 @webnotes.whitelist()
 def get_perm_info(arg=None):
@@ -242,21 +242,21 @@ def get_perm_info(arg=None):
 	return webnotes.conn.sql("""select parent, permlevel, `read`, `write`, submit,
 		cancel, amend from tabDocPerm where role=%s 
 		and docstatus<2 order by parent, permlevel""", 
-			webnotes.form_dict['role'], as_dict=1)
+			webnotes.form['role'], as_dict=1)
 
 @webnotes.whitelist()
 def get_defaults(arg=None):
 	return webnotes.conn.sql("""select defkey, defvalue from tabDefaultValue where 
-		parent=%s and parenttype = 'Profile'""", webnotes.form_dict['profile'])
+		parent=%s and parenttype = 'Profile'""", webnotes.form['profile'])
 
 @webnotes.whitelist(allow_roles=['System Manager', 'Administrator'])
 def update_password(arg=None):
 	"""update password"""
 	from webnotes.model.code import get_obj
-	profile = get_obj('Profile', webnotes.form_dict['user'])
-	profile.set_password(webnotes.form_dict["new_password"])
-	if webnotes.form_dict.get('send_mail'):
-		profile.password_reset_mail(webnotes.form_dict["new_password"])
+	profile = get_obj('Profile', webnotes.form['user'])
+	profile.set_password(webnotes.form["new_password"])
+	if webnotes.form.get('send_mail'):
+		profile.password_reset_mail(webnotes.form["new_password"])
 		
 	return 'Password Updated'
 	
@@ -264,6 +264,6 @@ def update_password(arg=None):
 def delete(arg=None):
 	"""delete user"""
 	webnotes.conn.sql("update tabProfile set enabled=0, docstatus=2 where name=%s", 
-		webnotes.form_dict['uid'])
-	webnotes.login_manager.logout(user=webnotes.form_dict['uid'])
+		webnotes.form['uid'])
+	webnotes.login_manager.logout(user=webnotes.form['uid'])
 	

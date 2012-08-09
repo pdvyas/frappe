@@ -29,7 +29,7 @@ import webnotes
 def get(args=None):
 	"""get assigned to"""
 	if not args:
-		args = webnotes.form_dict
+		args = webnotes.form
 	return webnotes.conn.sql("""select owner from `tabToDo`
 		where reference_type=%(doctype)s and reference_name=%(name)s
 		order by modified desc limit 5""", args, as_dict=1)
@@ -38,7 +38,7 @@ def get(args=None):
 def add(args=None):
 	"""add in someone's to do list"""
 	if not args:
-		args = webnotes.form_dict
+		args = webnotes.form
 	
 	if webnotes.conn.sql("""select owner from `tabToDo`
 		where reference_type=%(doctype)s and reference_name=%(name)s
@@ -78,7 +78,7 @@ def add(args=None):
 def remove(args=None):
 	"""remove from todo"""
 	if not args:
-		args = webnotes.form_dict
+		args = webnotes.form
 	
 	res = webnotes.conn.sql("""\
 		select assigned_by, owner, reference_type, reference_name from `tabToDo`

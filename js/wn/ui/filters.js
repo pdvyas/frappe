@@ -22,7 +22,6 @@
 
 wn.ui.FilterList = Class.extend({
 	init: function(opts) {
-		wn.require('js/fields.js');
 		$.extend(this, opts);
 		this.filters = [];
 		this.$w = this.$parent;
@@ -83,7 +82,7 @@ wn.ui.FilterList = Class.extend({
 	
 	get_filter: function(fieldname) {
 		for(var i in this.filters) {
-			if(this.filters[i].field.df.fieldname==fieldname)
+			if(this.filters[i].field.docfield.fieldname==fieldname)
 				return this.filters[i];
 		}
 	}
@@ -146,12 +145,12 @@ wn.ui.Filter = Class.extend({
 		// add help for "in" codition
 		me.$w.find('.condition').change(function() {
 			if($(this).val()=='in') {
-				me.set_field(me.field.df.fieldname, 'Data');
+				me.set_field(me.field.docfield.fieldname, 'Data');
 				if(!me.field.desc_area)
 					me.field.desc_area = $a(me.field.wrapper, 'span', 'help', null,
 						'values separated by comma');				
 			} else {
-				me.set_field(me.field.df.fieldname);				
+				me.set_field(me.field.docfield.fieldname);				
 			}
 		});
 		
@@ -178,8 +177,8 @@ wn.ui.Filter = Class.extend({
 		
 		// set in fieldname (again)
 		var cur = me.field ? {
-			fieldname: me.field.df.fieldname,
-			fieldtype: me.field.df.fieldtype
+			fieldname: me.field.docfield.fieldname,
+			fieldtype: me.field.docfield.fieldtype
 		} : {}
 
 		var df = me.fieldselect.fields_by_name[fieldname];
@@ -194,12 +193,11 @@ wn.ui.Filter = Class.extend({
 		// clear field area and make field
 		me.fieldselect.$select.val(fieldname);
 		var field_area = me.$w.find('.filter_field').empty().get(0);
-		f = make_field(df, null, field_area, null, 0, 1);
-		f.df.single_select = 1;
-		f.not_in_form = 1;
-		f.with_label = 0;
-		f.refresh();
-		me.field = f;
+		me.field = wn.ui.make_control({
+			docfield: df,
+			parent: field_area
+		});
+		me.field.hide_label();
 		
 		this.set_default_condition(df, fieldtype);
 		
@@ -250,7 +248,7 @@ wn.ui.Filter = Class.extend({
 		var val = me.field.get_value();
 		var cond = me.$w.find('.condition').val();
 		
-		if(me.field.df.original_type == 'Check') {
+		if(me.field.docfield.original_type == 'Check') {
 			val = (val=='Yes' ? 1 :0);
 		}
 		
@@ -259,7 +257,7 @@ wn.ui.Filter = Class.extend({
 		}
 		
 		return [me.fieldselect.$select.find('option:selected').attr('table'), 
-			me.field.df.fieldname, me.$w.find('.condition').val(), cstr(val)];
+			me.field.docfield.fieldname, me.$w.find('.condition').val(), cstr(val)];
 	}
 
 });
@@ -314,14 +312,15 @@ wn.ui.FieldSelect = Class.extend({
 		}
 
 		// main table
-		$.each(std_filters.concat(wn.meta.docfield_list[me.doctype]), function(i, df) {
+		$.each(std_filters.concat(wn.model.get('DocType', me.doctype).get('DocField')), 
+		function(i, df) {
 			me.add_field_option(df);
 		});
 
 		// child tables
 		$.each(me.table_fields, function(i,table_df) {
 			if(table_df.options) {
-				$.each(wn.meta.docfield_list[table_df.options], function(i, df) {
+				$.each(wn.model.get('DocType', me.doctype).get('DocField'), function(i, df) {
 					me.add_field_option(df);
 				});				
 			}

@@ -558,6 +558,15 @@ def clear_recycle_bin():
 # Dictionary utils
 # ==============================================================================
 
+class DictObj(dict):
+	"""dict like object that exposes keys as attributes"""
+	def __getattr__(self, key):
+		if self.has_key(key):
+			return self.get(key)
+	
+		def __setattr__(self, key, value):
+			self[key] = value
+			
 def remove_blanks(d):
 	"""
 		Returns d with empty ('' or None) values stripped
@@ -694,34 +703,6 @@ def escape_html(text):
 	}
 
 	return "".join(html_escape_table.get(c,c) for c in text)
-
-def get_doctype_label(dt=None):
-	"""
-		Gets label of a doctype
-	"""
-	if dt:
-		res = webnotes.conn.sql("""\
-			SELECT name, dt_label FROM `tabDocType Label`
-			WHERE name=%s""", dt)
-		return res and res[0][0] or dt
-	else:
-		res = webnotes.conn.sql("SELECT name, dt_label FROM `tabDocType Label`")
-		dt_label_dict = {}
-		for r in res:
-			dt_label_dict[r[0]] = r[1]
-
-		return dt_label_dict
-
-
-def get_label_doctype(label):
-	"""
-		Gets doctype from its label
-	"""
-	res = webnotes.conn.sql("""\
-		SELECT name FROM `tabDocType Label`
-		WHERE dt_label=%s""", label)
-
-	return res and res[0][0] or label
 
 
 def get_system_managers_list():

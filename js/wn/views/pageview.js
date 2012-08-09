@@ -29,7 +29,10 @@ wn.views.pageview = {
 			wn.call({
 				method: 'webnotes.widgets.page.getpage', 
 				args: {'name':name },
-				callback: callback
+				callback: function(r) {
+					wn.model.sync(r.docs);
+					callback();
+				}
 			});
 		} else {
 			callback();
@@ -65,7 +68,7 @@ wn.views.Page = Class.extend({
 			
 			// onload called in script
 		} else {
-			this.pagedoc = wn.model.get('Page', this.name);
+			this.pagedoc = wn.model.get('Page', this.name).doc;
 			this.wrapper = wn.container.add_page(this.name);
 			this.wrapper.label = this.pagedoc.get('title') || this.pagedoc.get('name');
 			this.wrapper.page_name = this.pagedoc.get('name');

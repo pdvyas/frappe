@@ -96,10 +96,10 @@ def export_doc(doctype=None, name=None, module=None):
 	"""write out a doc"""
 	import webnotes
 	if not (doctype and name):
-		doctype = webnotes.form_dict['doctype']
-		name = webnotes.form_dict['name']
-		if 'module' in webnotes.form_dict:
-			module = webnotes.form_dict['module']
+		doctype = webnotes.form['doctype']
+		name = webnotes.form['name']
+		if 'module' in webnotes.form:
+			module = webnotes.form['module']
 		
 	from webnotes.modules.export import write_document_file
 	import webnotes.model.doc

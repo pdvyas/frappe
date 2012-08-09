@@ -33,10 +33,10 @@ def runserverobj():
 	from webnotes.utils import cint
 
 	doclist = None
-	method = webnotes.form_dict.get('method')
-	arg = webnotes.form_dict.get('arg')
-	dt = webnotes.form_dict.get('doctype')
-	dn = webnotes.form_dict.get('docname')
+	method = webnotes.form.get('method')
+	arg = webnotes.form.get('arg')
+	dt = webnotes.form.get('doctype')
+	dn = webnotes.form.get('docname')
 
 	if dt: # not called from a doctype (from a page)
 		if not dn: dn = dt # single
@@ -46,7 +46,7 @@ def runserverobj():
 		import webnotes.model
 		from webnotes.model.utils import expand
 		
-		controller = webnotes.model.get_controller(expand(webnotes.form_dict.get('docs')))
+		controller = webnotes.model.get_controller(expand(webnotes.form.get('docs')))
 		controller.check_if_latest()
 
 	check_guest_access(controller.doc)
@@ -55,7 +55,7 @@ def runserverobj():
 		r = controller.run_method(method, arg)
 		if r:
 			#build output as csv
-			if cint(webnotes.form_dict.get('as_csv')):
+			if cint(webnotes.form.get('as_csv')):
 				make_csv_output(r, controller.doc.doctype)
 			else:
 				webnotes.response['message'] = r

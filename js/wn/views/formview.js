@@ -71,14 +71,17 @@ wn.views.FormDialog = wn.ui.Dialog.extend({
 wn.views.FormPage = Class.extend({
 	init: function(doctype, name) {
 		this.make_page();
-		wn.views.breadcrumbs($('<span>').appendTo($(this.page).find('.appframe-titlebar')), 
-			wn.model.get_value('DocType', doctype, 'module'), doctype, name);
+		this.set_breadcrumbs(doctype, name);
 		this.form = new wn.ui.Form({
 			doctype: doctype,
 			name: name,
 			parent: this.$w,
 			appframe: this.page.appframe
 		});
+	},
+	set_breadcrumbs: function(doctype, name) {
+		wn.views.breadcrumbs(this.page.appframe, 
+			wn.model.get_value('DocType', doctype, 'module'), doctype, name);
 	},
 	make_page: function() {
 		var page_name = wn.get_route_str();
@@ -164,6 +167,7 @@ wn.ui.Form = Class.extend({
 	}
 });
 
+// opts: docfield, parent, doctype, docname
 wn.ui.make_control = function(opts) {
 	control_map = {
 		'Check': wn.ui.CheckControl,
@@ -275,12 +279,16 @@ wn.ui.LinkControl = wn.ui.Control.extend({
 		$('<button class="btn"><i class="icon-search"></i></button>')
 			.appendTo(this.$input_wrap)
 			.click(function() {
-				new wn.ui.Search({
-					doctype: me.docfield.options,
+				
+				me.search_dialog = new wn.ui.Search({
+					doctype: me.docfield.options, 
+					txt: me.$input.val(),
+					with_filters: me.filters,
+					df: me.docfield,
 					callback: function(val) {
 						me.set(val);
-					}
-				});
+					}});				
+				
 				return false;
 			});
 	}

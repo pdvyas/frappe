@@ -37,7 +37,7 @@ def get(arg=None):
 	gets doctype, subject, filters
 	limit_start, limit_page_length
 	"""
-	data = webnotes.form_dict
+	data = webnotes.form
 	global tables
 	
 	if 'query' in data:
@@ -107,7 +107,7 @@ def remove_user_tags(fields):
 	"""remove column _user_tags if not in table"""
 	for fld in fields:
 		if '_user_tags' in fld:
-			if not '_user_tags' in webnotes.conn.get_table_columns(webnotes.form_dict['doctype']):
+			if not '_user_tags' in webnotes.conn.get_table_columns(webnotes.form['doctype']):
 				fields.remove(fld)
 				break
 
@@ -119,7 +119,7 @@ def add_limit(data):
 		
 def build_conditions(filters):
 	"""build conditions"""
-	data = webnotes.form_dict
+	data = webnotes.form
 	
 	# docstatus condition
 	docstatus = json.loads(data['docstatus'])
@@ -175,7 +175,7 @@ def build_match_conditions(data, conditions):
 
 def get_tables():
 	"""extract tables from fields"""
-	data = webnotes.form_dict
+	data = webnotes.form
 	tables = ['`tab' + data['doctype'] + '`']
 
 	# add tables from fields
@@ -197,7 +197,7 @@ def save_report():
 	"""save report"""
 	from webnotes.model.doc import Document
 	
-	data = webnotes.form_dict
+	data = webnotes.form
 	if webnotes.conn.exists('Report', data['name']):
 		d = Document('Report', data['name'])
 	else:
@@ -261,8 +261,8 @@ def delete_items():
 	from webnotes.model import delete_doc
 	from webnotes.model.code import get_obj
 
-	il = json.loads(webnotes.form_dict.get('items'))
-	doctype = webnotes.form_dict.get('doctype')
+	il = json.loads(webnotes.form.get('items'))
+	doctype = webnotes.form.get('doctype')
 	
 	for d in il:
 		dt_obj = get_obj(doctype, d)
@@ -274,8 +274,8 @@ def delete_items():
 def get_stats():
 	"""get tag info"""
 	import json
-	tags = json.loads(webnotes.form_dict.get('stats'))
-	doctype = webnotes.form_dict['doctype']
+	tags = json.loads(webnotes.form.get('stats'))
+	doctype = webnotes.form['doctype']
 	stats = {}
 	
 	columns = webnotes.conn.get_table_columns(doctype)

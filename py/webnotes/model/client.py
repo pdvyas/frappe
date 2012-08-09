@@ -18,36 +18,25 @@
 # HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
 # CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-# 
+#
 
 from __future__ import unicode_literals
+
 import webnotes
-
-def sendmail_md(recipients, sender=None, msg=None, subject=None):
-	"""send markdown email"""
-	import markdown2
-	sendmail(recipients, sender, markdown2.markdown(msg), subject)
-			
-def sendmail(recipients, sender='', msg='', subject='[No Subject]'):
-	"""send an html email as multipart with attachments and all"""
-	from webnotes.utils.email_lib.smtp import get_email
-	get_email(recipients, sender, msg, subject).send()
+import webnotes.model
 
 @webnotes.whitelist()
-def send_form():
-	"""Emails a print format (form). Called from form UI"""
-	from webnotes.utils.email_lib.form_email import FormEmail
-	FormEmail().send()
+def get_doclist():
+	"""get bundle of doc"""
+	webnotes.response['docs'] = webnotes.model.get(webnotes.form.doctype, webnotes.form.name)
 
 @webnotes.whitelist()
-def get_contact_list():
-	"""Returns contacts (from autosuggest)"""
-	cond = ['`%s` like "%s%%"' % (f, 
-		webnotes.form.get('txt')) for f in webnotes.form.get('where').split(',')]
-	cl = webnotes.conn.sql("select `%s` from `tab%s` where %s" % (
-  			 webnotes.form.get('select')
-			,webnotes.form.get('from')
-			,' OR '.join(cond)
-		)
-	)
-	webnotes.response['cl'] = filter(None, [c[0] for c in cl])
+def get_doctype():
+	"""get doctype, all child doctypes"""
+	docs = []
+	doctypelist = webnotes.model.get_doctype(webnotes.form.doctype)
+	docs = doctypelist
+	for d in doctypelist.get({"fieldtype":"Table", "doctype":"DocField"}):
+		docs.extend(webnotes.model.get_doctype(d.options))
+	
+	webnotes.response['docs'] = docs

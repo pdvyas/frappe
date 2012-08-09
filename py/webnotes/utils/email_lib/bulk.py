@@ -92,9 +92,9 @@ def add(email, sender, subject, message):
 
 @webnotes.whitelist(allow_guest=True)
 def unsubscribe():
-	doctype = webnotes.form_dict.get('type')
-	field = webnotes.form_dict.get('email_field')
-	email = webnotes.form_dict.get('email')
+	doctype = webnotes.form.get('type')
+	field = webnotes.form.get('email_field')
+	email = webnotes.form.get('email')
 	webnotes.conn.sql("""update `tab%s` set unsubscribed=1 
 		where email_id=%s""" % (doctype, '%s'), email)
 	

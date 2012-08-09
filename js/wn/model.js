@@ -36,7 +36,7 @@ wn.model = {
 			callback();
 		} else {
 			wn.call({
-				method:'webnotes.model.doctype.get',
+				method:'webnotes.model.client.get_doctype',
 				args: {
 					doctype: doctype
 				},
@@ -53,7 +53,7 @@ wn.model = {
 			callback(name);
 		} else {
 			wn.call({
-				method:'webnotes.model.doclist.get',
+				method:'webnotes.model.client.get_doclist',
 				args: {
 					doctype: doctype,
 					name: name
@@ -90,8 +90,8 @@ wn.model = {
 		else return false;
 	},
 	get_value: function(dt, dn, fieldname) {
-		var doc = wn.model.get(dt, dn);
-		if(doc) return doc.get(fieldname);
+		var doclist = wn.model.get(dt, dn);
+		if(doclist) return doclist.doc.get(fieldname);
 		else return null;
 	},
 	set_value: function(dt, dn, fieldname, value) {
@@ -177,13 +177,15 @@ wn.model.DocList = Class.extend({
 	// doclist.get(fieldname) => value of main doc
 	get: function() {
 		var me = this;
-		if(typeof arguments[0]=='string' && typeof arguments[1]=='object') {
-			var filters = arguments[1];
-			filters.doctype = arguments[0];
-		} else if(typeof arguments[0]=='object') {
-			var filters = arguments[0];
-		} else {
+		if(typeof arguments[0]=='string' && typeof arguments[1]=='string') {
 			return this.doc.get(arguments[0], arguments[1]);
+		} else if(typeof arguments[0]=='string') {
+			var filters = {};
+			if(arguments[1])
+				filters = arguments[1];
+			filters.doctype = arguments[0];				
+		} else {
+			var filters = arguments[0];
 		}
 		return $.map(this.doclist, function(d) { return me.match(filters, d) });
 	},

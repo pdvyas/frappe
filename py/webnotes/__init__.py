@@ -37,9 +37,9 @@ code_fields_dict = {
 }
 
 auto_cache_clear = False
-form_dict = {}
 auth_obj = None
 conn = None
+request_form = None
 form = None
 session = None
 user = None
@@ -96,9 +96,23 @@ def msgprint(msg, small=0, raise_exception=0, as_table=False, debug=0):
 		else:
 			raise ValidationError, msg
 
-def get_index_path():
-	import os
-	return os.sep.join(os.path.dirname(os.path.abspath(__file__)).split(os.sep)[:-2])
+def get_cgi_fields():
+	"""make webnotes.form from cgi field storage"""
+	import cgi
+	import conf
+	from webnotes.utils import cstr, DictObj
+	
+	global request_form, auto_cache_clear, form
+
+	request_form = cgi.FieldStorage(keep_blank_values=True)
+	auto_cache_clear = getattr(conf, 'auto_cache_clear', False)
+
+	form = DictObj()
+	for key in request_form.keys():
+		# file upload must not be decoded as it is treated as a binary
+		# file and hence in any encoding (it does not matter)
+		if not getattr(request_form[key], 'filename', None):
+			form[key] = cstr(request_form.getvalue(key))
 
 def get_files_path():
 	import conf
@@ -116,30 +130,6 @@ def create_folder(path):
 		if e.args[0]!=17: 
 			raise e
 
-def create_symlink(source_path, link_path):
-	"""
-	Wrapper function for os.symlink (does not throw exception if directory exists)
-	"""
-	import os
-	
-	try:
-		os.symlink(source_path, link_path)
-	except OSError, e:
-		if e.args[0]!=17: 
-			raise e
-
-def remove_file(path):
-	"""
-	Wrapper function for os.remove (does not throw exception if file/symlink does not exists)
-	"""
-	import os
-	
-	try:
-		os.remove(path)
-	except OSError, e:
-		if e.args[0]!=2: 
-			raise e
-			
 def connect(db_name=None, password=None):
 	"""
 		Connect to this db (or db), if called from command prompt
@@ -238,21 +228,6 @@ def get_roles(user=None, with_standard=True):
 		roles = filter(lambda x: x not in ['All', 'Guest', 'Administrator'], roles)
 	
 	return roles
-
-def get_cgi_fields():
-	"""make webnotes.form_dict from cgi field storage"""
-	global auto_cache_clear, form, form_dict
-
-	import conf
-	auto_cache_clear = getattr(conf, 'auto_cache_clear', False)
-	
-	# make the form_dict
-	import cgi
-	form = cgi.FieldStorage(keep_blank_values=True)
-	
-	from webnotes.utils import cstr
-	for key in form.keys():
-		form_dict[key] = cstr(form.getvalue(key))
 
 def comma_and(lst):
 	if len(lst)==1: return lst[0]

@@ -29,8 +29,8 @@ def get_comments(doctype=None, docname=None, limit=5):
 	nc, cl = 0, []
 
 	if not doctype:
-		doctype, docname, limit = webnotes.form_dict.get('dt'), webnotes.form_dict.get('dn'), \
-			webnotes.form_dict.get('limit')
+		doctype, docname, limit = webnotes.form.get('dt'), webnotes.form.get('dn'), \
+			webnotes.form.get('limit')
 		
 	nc = int(webnotes.conn.sql("""select count(*) from `tabComment` 
 		where comment_doctype=%s and comment_docname=%s""", (doctype, docname))[0][0])
@@ -46,7 +46,7 @@ def get_comments(doctype=None, docname=None, limit=5):
 def add_comment(args=None):
 	"""add a new comment"""
 	import time
-	if not args: args = webnotes.form_dict
+	if not args: args = webnotes.form
 
 	if args.get('comment'):
 		from webnotes.model.doc import Document
@@ -66,5 +66,5 @@ def add_comment(args=None):
 @webnotes.whitelist()
 def remove_comment():
 	"""remove a comment"""
-	args = webnotes.form_dict
+	args = webnotes.form
 	webnotes.conn.sql("delete from `tabComment` where name=%s",args.get('id'))
