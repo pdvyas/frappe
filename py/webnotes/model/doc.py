@@ -30,7 +30,7 @@ import webnotes.model.meta
 
 from webnotes.utils import *
 
-class Document(object):
+class Document(dict):
 	"""
 	   The wn(meta-data)framework equivalent of a Database Record.
 	   Stores,Retrieves,Updates the record in the corresponding table.
@@ -67,16 +67,14 @@ class Document(object):
 	"""
 	
 	def __init__(self, doctype = '', name = '', fielddata = {}, prefix='tab'):
+		if fielddata:
+			# since fielddata is a dict, it is mutable, hence using copy
+			self = fielddata.copy()
+			
 		self._roles = []
 		self._perms = []
 		self._user_defaults = {}
 		self._prefix = prefix
-		
-		if fielddata:
-			# since fielddata is a dict, it is mutable, hence using copy
-			self.fields = fielddata.copy()
-		else: 
-			self.fields = {}
 		
 		if not self.fields.has_key('name'):
 			self.fields['name']='' # required on save
@@ -89,6 +87,7 @@ class Document(object):
 			self.fields['doctype'] = doctype
 		if name:
 			self.fields['name'] = name
+
 		self.__initialized = 1
 
 		if (doctype and name):
@@ -97,9 +96,9 @@ class Document(object):
 			if not fielddata:
 				self.fields['__islocal'] = 1
 
-	def __nonzero__(self):
-		return True
-
+	# def __nonzero__(self):
+	# 	return True
+	# 
 	# Load Document
 	# ---------------------------------------------------------------------------
 
@@ -151,35 +150,46 @@ class Document(object):
 		self.name = self.doctype
 		self.fields.update(getsingle(self.doctype))
 
+	def __getattr__(self, key):
+		if self.has_key(key):
+			return self.get(key)
+		else:
+			return object.__getattribute__(self, key)
+
+	def __setattr__(self, key, value):
+			self[key] = value
+
 	# Setter
 	# ---------------------------------------------------------------------------
 			
-	def __setattr__(self, name, value):
-		# normal attribute
-		if not self.__dict__.has_key('_Document__initialized'): 
-			self.__dict__[name] = value
-		elif self.__dict__.has_key(name):
-			self.__dict__[name] = value
-		else:
-			# field attribute
-			f = self.__dict__['fields']
-			f[name] = value
-
-	# Getter
-	# ---------------------------------------------------------------------------
-
-	def __getattr__(self, name):
-		if self.__dict__.has_key(name):
-			return self.__dict__[name]
-		elif self.fields.has_key(name):
-			return self.fields[name]
-		try:
-			return object.__getattr__(name)
-		except AttributeError, e:
-			return ''
-			
-	def __str__(self):
-		return unicode(self.fields)
+	# def __setattr__(self, name, value):
+	# 	
+	# 	
+	# 	# normal attribute
+	# 	if not self.__dict__.has_key('_Document__initialized'): 
+	# 		self.__dict__[name] = value
+	# 	elif self.__dict__.has_key(name):
+	# 		self.__dict__[name] = value
+	# 	else:
+	# 		# field attribute
+	# 		f = self.__dict__['fields']
+	# 		f[name] = value
+	# 
+	# # Getter
+	# # ---------------------------------------------------------------------------
+	# 
+	# def __getattr__(self, name):
+	# 	if self.__dict__.has_key(name):
+	# 		return self.__dict__[name]
+	# 	elif self.fields.has_key(name):
+	# 		return self.fields[name]
+	# 	try:
+	# 		return object.__getattr__(name)
+	# 	except AttributeError, e:
+	# 		return ''
+	# 		
+	# def __str__(self):
+	# 	return unicode(self.fields)
 
 	# Get Amendement number
 	# ---------------------------------------------------------------------------

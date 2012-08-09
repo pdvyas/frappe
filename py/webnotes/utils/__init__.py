@@ -31,6 +31,14 @@ month_name_full = ['','January','February','March','April','May','June','July','
 no_value_fields = ['Section Break', 'Column Break', 'HTML', 'Table', 'FlexTable', 'Button', 'Image', 'Graph']
 default_fields = ['doctype','name','owner','creation','modified','modified_by','parent','parentfield','parenttype','idx','docstatus']
 
+class DictObj(dict):
+	"""dict like object that exposes keys as attributes"""
+	def __getattr__(self, key):
+		return self.get(key)
+	
+	def __setattr__(self, key, value):
+		self[key] = value
+
 def getCSVelement(v):
 	"""
 		 Returns the CSV value of `v`, For example: 
