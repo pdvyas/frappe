@@ -83,6 +83,7 @@ To subclass, use:
 		// The dummy class constructor
 		function Class() {
 			// All construction is actually done in the init method
+			this._observers = new Object();
 			if ( !initializing && this.init )
 				this.init.apply(this, arguments);
 		}
@@ -96,7 +97,6 @@ To subclass, use:
 		// ----------------------------------
 		// add bindable events
 		// added for binding events on classes
-		Class.prototype._observers = {};
 		Class.prototype.on = function(event_name, handle) {
 			if(!this._observers[event_name]) {
 				this._observers[event_name] = [];

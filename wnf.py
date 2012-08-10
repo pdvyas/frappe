@@ -162,6 +162,12 @@ def setup_options():
 	parser.add_option("--pull", nargs=2, default=False,
 						metavar = "remote branch",
 						help="git pull (both repos)")
+	parser.add_option("--commit", nargs=1, default=False, 
+						metavar = "comment",
+						help="git commit -a -m both branches")
+	parser.add_option("--git", nargs=1, default=False, 
+						metavar = "git options",
+						help="run git with options in both repos")
 	parser.add_option("--push", nargs=3, default=False, 
 						metavar = "remote branch comment",
 						help="git commit + push (both repos) [remote] [branch] [comment]")
@@ -189,12 +195,6 @@ def setup_options():
 	parser.add_option('--install', nargs=2, metavar = "dbname source",
 						help="install fresh db")
 	
-	# diff
-	parser.add_option('--diff_ref_file', nargs=0, \
-						help="Get missing database records and mismatch properties, with file as reference")
-	parser.add_option('--diff_ref_db', nargs=0, \
-						help="Get missing .txt files and mismatch properties, with database as reference")
-
 	# scheduler
 	parser.add_option('--run_scheduler', default=False, action="store_true",
 						help="Trigger scheduler")
@@ -217,9 +217,6 @@ def setup_options():
 			
 	parser.add_option("--cleanup_data", help="Cleanup test data", default=False, 	
 			action="store_true")
-			
-	parser.add_option("--append_future_import", default=False, action="store_true", 
-			help="append from __future__ import unicode literals to py files")
 
 	# testing
 	parser.add_option("--test", help="Run test", metavar="MODULE", 	
@@ -285,7 +282,17 @@ def run():
 		os.chdir('lib')
 		os.system('git commit -a -m "%s"' % options.push[2])
 		os.system('git push %s %s' % (options.push[0], options.push[1]))
-		
+
+	elif options.commit:
+		os.system('git commit -a -m "%s"' % options.commit)
+		os.chdir('lib')
+		os.system('git commit -a -m "%s"' % options.commit)
+
+	elif options.git:
+		os.system('git %s' % options.git)
+		os.chdir('lib')
+		os.system('git %s' % options.git)
+
 	elif options.checkout:
 		os.system('git checkout %s' % options.checkout)
 		os.chdir('lib')
@@ -322,15 +329,6 @@ def run():
 		inst = Installer('root')
 		inst.import_from_db(options.install[0], source_path=options.install[1], \
 			password='admin', verbose = 1)
-			
-	
-	elif options.diff_ref_file is not None:
-		import webnotes.modules.diff
-		webnotes.modules.diff.diff_ref_file()
-
-	elif options.diff_ref_db is not None:
-		import webnotes.modules.diff
-		webnotes.modules.diff.diff_ref_db()
 	
 	elif options.run_scheduler:
 		import webnotes.utils.scheduler

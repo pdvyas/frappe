@@ -24,8 +24,15 @@ wn.route = function() {
 
 	wn._cur_route = window.location.hash;
 
-	route = wn.get_route();	
+	var page_name = wn.get_route_str();
 	
+	if(wn.contents[page_name]) {  // loaded
+		wn.container.change_to(page_name);
+		return;	
+	}
+
+	var route = wn.get_route();	
+			
 	switch (route[0]) {
 		case "List":
 			wn.views.doclistview.show(route[1]);
@@ -64,6 +71,11 @@ wn.get_route_str = function(route) {
 
 	if(route.substr(0,1)=='#') route = route.substr(1);
 	if(route.substr(0,1)=='!') route = route.substr(1);
+	
+	if(!route) {
+		route = wn.control_panel.home_page;
+	}
+	
 	return route;	
 }
 
