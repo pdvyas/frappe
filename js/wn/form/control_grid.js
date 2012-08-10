@@ -35,7 +35,9 @@ wn.ui.GridControl = wn.ui.Control.extend({
 			
 		var options = {
 			enableCellNavigation: true,
-			enableColumnReorder: false
+			enableColumnReorder: false,
+			rowHeight: 32,
+			editable: false
 		};
 		
 		this.grid = new Slick.Grid(this.$w.get(0), [], 
@@ -44,27 +46,55 @@ wn.ui.GridControl = wn.ui.Control.extend({
 	get_columns: function() {
 		var columns = $.map(wn.model.get('DocType', this.tabletype).get({doctype:'DocField'}), 
 			function(d) {
-				return {
-					id: d.get('fieldname'),
-					field: d.get('fieldname'),
-					name: d.get('label'),
-					width: 100
+				if(!d.hidden) {
+					return {
+						id: d.get('fieldname'),
+						field: d.get('fieldname'),
+						name: d.get('label'),
+						width: 100
+					}					
+				} else {
+					return null;
 				}
 			}
 		);
-		return [{id:'idx', field:'idx', name:'Sr', width: 40}].concat(columns);
+		
+		function EditButtonFormatter(row, cell, value, columnDef, data) {
+			return repl('<button class="btn btn-small grid-edit" \
+				data-parentfield="%(parentfield)s" data-name="%(name)s">Edit</button>', data);
+	  	}
+		
+		return [{id:'_edit', field:'_edit', name:'', width: 55, 
+				formatter:EditButtonFormatter},
+				{id:'idx', field:'idx', name:'Sr', width: 40}].concat(columns);
 	},
 	set_init_value: function() {
 		this.set();
 	},
 	set: function() {
 		// refresh values from doclist
-		var rows = wn.model.get(this.docfield.parent, this.docname)
+		var me = this;
+		var rows = wn.model.get(this.doc.get('doctype'), this.doc.get('name'))
 			.get({parentfield:this.docfield.fieldname});
 			
 		this.grid.setData($.map(rows, 
-			function(d) { return d.fields; }));
+			function(d) { 
+				return d.fields; 
+			}));
 		this.grid.render();
+		
+		this.$w.find('.grid-edit').on('click', function() {
+			var d = wn.model.get(me.doc.get('doctype'), me.doc.get('name')).get({
+					parentfield:$(this).attr('data-parentfield'),
+					name:$(this).attr('data-name'),
+				})[0];
+			var form_dialog = new wn.views.FormDialog({
+				title: 'Editing row #' + d.get('idx'),
+				doc: d
+			});
+			form_dialog.show();
+			return false;
+		})
 	}
 })
 

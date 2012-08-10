@@ -27,8 +27,9 @@ wn.ui.RichTextControl = wn.ui.Control.extend({
 	},
 	make_input: function() {
 		var me = this;
+		this.$input_wrap = $('<div>').appendTo(this.$w.find('.controls'));
 		this.$input = $('<textarea type="text">').css('font-size','12px')
-			.appendTo(this.$w.find('.controls'));
+			.appendTo(this.$input_wrap);
 
 		this.myid = wn.dom.set_unique_id(this.$input.get(0));
 
@@ -83,8 +84,11 @@ wn.ui.RichTextControl = wn.ui.Control.extend({
 		});
 
 		// reset content
-		if(this.doc()) {
-			this.editor.setContent(this.doc().get(this.docfield.fieldname));
+		if(this.doc) {
+			this.editor.setContent(this.doc.get(this.docfield.fieldname));
 		}	
+	},
+	toggle_input: function(show) {
+		this.$input_wrap.toggle(show);
 	}
 });

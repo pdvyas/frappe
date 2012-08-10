@@ -20,10 +20,29 @@
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+wn.ui.IntControl = wn.ui.Control.extend({
+	validate: function(val) {
+		return cint(val);
+	}
+});
+
+wn.ui.FloatControl = wn.ui.Control.extend({
+	validate: function(val) {
+		if(val===null) val=0;
+		return parseFloat(val).toFixed(6);
+	}
+});
+
+wn.ui.CurrencyControl = wn.ui.Control.extend({
+	validate: function(val) {
+		if(val===null) val=0;
+		return parseFloat(val).toFixed(6);
+	}
+});
+
 wn.ui.CheckControl = wn.ui.Control.extend({
 	make_input: function() {
-		this.$label = $('<label class="checkbox">').appendTo(this.$w.find('.controls'))
-		this.$input = $('<input type="checkbox">').appendTo(this.$label);
+		this.$input = $('<input type="checkbox">').appendTo(this.$w.find('.controls'));
 	}
 });
 
@@ -32,8 +51,6 @@ wn.ui.TextControl = wn.ui.Control.extend({
 		this.$input = $('<textarea type="text" rows="5">').appendTo(this.$w.find('.controls'));		
 	}
 });
-
-
 
 wn.ui.SelectControl = wn.ui.Control.extend({
 	make_input: function() {
@@ -51,5 +68,7 @@ wn.ui.ButtonControl = wn.ui.Control.extend({
 	},
 	get_value: function() {
 		return null;
-	}
+	},
+	toggle_editable: function() { },
+	set_static: function() { },
 });

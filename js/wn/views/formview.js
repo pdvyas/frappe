@@ -38,8 +38,7 @@ wn.views.formview = {
 				if(wn.model.get('DocType', dt).get_value('in_dialog')) {
 					// dialog
 					var form_dialog = new wn.views.FormDialog({
-						doctype: dt,
-						name: dn
+						doc: wn.model.get(dt, dn).doc
 					});
 					
 					form_dialog.show();
@@ -49,7 +48,7 @@ wn.views.formview = {
 					if(wn.contents[page_name]) {
 						wn.container.change_to(page_name);
 					} else {
-						wn.forms[dt + '/' + dn] = new wn.views.FormPage(dt, dn);					
+						wn.get_or_set(wn.forms, dt, {})[dn] = new wn.views.FormPage(dt, dn);					
 					}
 				}
 				
@@ -72,16 +71,16 @@ wn.views.FormDialog = wn.ui.Dialog.extend({
 		$.extend(this, opts);
 		wn.get_or_set(this, 'width', 600);
 		wn.get_or_set(this, 'title', this.name);
-		
+				
 		// init dialog
 		this._super();
 		
 		this.form = new wn.ui.Form({
-			doctype: this.doctype,
-			name: this.name,
+			doc: this.doc,
 			fields: this.fields,
 			parent: this.body,
-			appframe: this.appframe
+			appframe: this.appframe,
+			dialog: this
 		});
 	}
 })
@@ -93,8 +92,7 @@ wn.views.FormPage = Class.extend({
 		this.make_page();
 		this.set_breadcrumbs(doctype, name);
 		this.form = new wn.ui.Form({
-			doctype: doctype,
-			name: name,
+			doc: wn.model.get(doctype, name).doc,
 			parent: this.$w,
 			appframe: this.page.appframe
 		});
@@ -119,12 +117,8 @@ wn.ui.Form = Class.extend({
 		$.extend(this, opts);
 		this.controls = {};
 
-		if(this.doctype && this.name) {
-			this.doclist = wn.model.get(this.doctype, this.name);			
-		}
-
-		if(this.doctype) {
-			this.fields = $.map(wn.model.get('DocType', this.doctype)
+		if(this.doc) {
+			this.fields = $.map(wn.model.get('DocType', this.doc.get('doctype'))
 				.get('DocField', {}), function(d) { return d.fields; });			
 		}
 		this.make_form();
@@ -134,11 +128,21 @@ wn.ui.Form = Class.extend({
 	make_toolbar: function() {
 		var me = this;
 		this.appframe.add_button('Save', function() { 
-			var btn = this;
-			$(this).html('Saving...').attr('disabled', 'disabled');
-			me.doclist.save(0, function() {
-				$(this).attr('disabled', false).html('Save');
-			});
+			if(me.doc.get('parent')) {
+				// do nothing, saving
+				// to be managed by parent
+				// refresh parent grid
+				wn.forms[me.doc.get('parenttype')][me.doc.get('parent')].form
+					.controls[me.doc.get('parentfield')].set();
+				if(me.dialog.hide) me.dialog.hide();
+				
+			} else {
+				var btn = this;
+				$(this).html('Saving...').attr('disabled', 'disabled');
+				wn.model.get(this.doc.get('doctype'), this.doc.get('name')).save(0, function() {
+					$(this).attr('disabled', false).html('Save');
+				});				
+			}
 		});
 	},
 	make_form: function() {
@@ -149,7 +153,7 @@ wn.ui.Form = Class.extend({
 		if(this.fields[0].fieldtype!='Section Break') {
 			me.make_fieldset('_first_section');
 		}
-		
+				
 		// controls
 		$.each(this.fields, function(i, df) {
 			// change section
@@ -160,8 +164,7 @@ wn.ui.Form = Class.extend({
 				me.controls[df.fieldname] = wn.ui.make_control({
 					docfield: df,
 					parent: me.last_fieldset,
-					doctype: me.doctype,
-					docname: me.name
+					doc: me.doc
 				});
 			}
 		});
@@ -176,10 +179,11 @@ wn.ui.Form = Class.extend({
 	// listen for changes in model
 	listen: function() {
 		var me = this;
-		if(this.doctype && this.name) {
-			$(document).bind(wn.model.event_name(this.doctype, this.name), function(ev, key, val) {
-				if(me.controls[key]) me.controls[key].set_input(val);
-			});
+		if(this.doc) {
+			$(document).bind(wn.model.event_name(this.doc.get('doctype'), this.doc.get('name')), 
+				function(ev, key, val) {
+					if(me.controls[key]) me.controls[key].set_input(val);
+				});
 		}
 	},
 	save: function(callback) {

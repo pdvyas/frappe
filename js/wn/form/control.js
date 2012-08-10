@@ -24,6 +24,9 @@ wn.ui.make_control = function(opts) {
 	control_map = {
 		'Check': wn.ui.CheckControl,
 		'Data': wn.ui.Control,
+		'Int': wn.ui.IntControl,
+		'Float': wn.ui.FloatControl,
+		'Currency': wn.ui.CurrencyControl,
 		'Link': wn.ui.LinkControl,
 		'Select': wn.ui.SelectControl,
 		'Table': wn.ui.GridControl,
@@ -42,7 +45,12 @@ wn.ui.Control = Class.extend({
 	init: function(opts) {
 		$.extend(this, opts);
 		this.make();
+		this.set_events();
+		this.apply_hidden();
+		this.apply_mandatory();
 		this.set_init_value();
+		this.set_change_event();
+		this.toggle_editable(false);
 	},
 	make: function() {
 		if(this.docfield.vertical) {
@@ -51,7 +59,9 @@ wn.ui.Control = Class.extend({
 			this.make_body();			
 		}
 		this.make_input();
-		
+		this.make_label();
+	},
+	make_label: function() {
 		// label and description
 		this.$w.find('label').text(this.docfield.label);
 		if(this.no_label) {
@@ -62,20 +72,54 @@ wn.ui.Control = Class.extend({
 			}
 		}		
 	},
+	set_change_event: function() {
+		var me = this;
+		if(this.$input) 
+			this.$input.change(function() {
+				var val = $(this).val();
+				if(me.validate) {
+					val = me.validate(val);
+					$(this).val(val);
+				}
+				if(me.doc) me.doc.fields[me.docfield.fieldname] = val;
+			})		
+	},
+	set_events: function() {
+		var me = this;
+		this.$w.find('.control-static').click(function() {
+			me.toggle_editable(true);
+		});
+	},
+	toggle_editable: function(editable) {
+		if(this.docfield.reqd) 
+			editable = true;
+		if(editable===undefined)
+			editable = !this.editable
+		this.toggle_input(editable);
+		this.$w.find('.control-static').toggle(!editable);
+		this.editable = editable;
+	},
+	toggle_input: function(show) {
+		this.$input && this.$input.toggle(show);
+	},
 	set_init_value: function() {
-		if(this.doctype && this.docname) {
-			this.set_input(wn.model.get_value(this.doctype, this.docname, this.docfield.fieldname));
+		if(this.doc) {
+			this.set_input(this.doc.get(this.docfield.fieldname));
 		}
 	},
 	hide_label: function() {
 		this.$w.find('.control-label').toggle(false);		
 	},
 	set_input: function(val) {
-		this.$input.val(val);
+		this.$input.val(val).change();
+		this.set_static(val);
+	},
+	set_static: function(val) {
+		this.$w.find('.control-static').html(val || '<i style="color: #888">Click to set</i>');		
 	},
 	set: function(val) {
-		if(this.doctype && this.docname) {
-			wn.model.set_value(this.doctype, this.docname, this.docfield.fieldname, val);
+		if(this.doc) {
+			this.doc.set(this.docfield.fieldname, val);
 		} else {
 			this.set_input(val);
 		}		
@@ -86,13 +130,6 @@ wn.ui.Control = Class.extend({
 	get_value: function() {
 		return this.get();
 	},
-	doc: function() {
-		if(this.doctype & this.docname) {
-			return wn.model.get(this.doctype, this.docname).doc;
-		} else {
-			return null;
-		}
-	},
 	make_input: function() {
 		this.$input = $('<input type="text">').appendTo(this.$w.find('.controls'));
 	},
@@ -100,6 +137,7 @@ wn.ui.Control = Class.extend({
 		this.$w = $('<div class="control-group">\
 			<label class="control-label"></label>\
 			<div class="controls">\
+				<div class="control-static"></div>\
 			</div>\
 			</div>').appendTo(this.parent);
 	},
@@ -107,6 +145,7 @@ wn.ui.Control = Class.extend({
 		this.$w = $('<div class="control-group">\
 			<label></label><br>\
 			<div class="controls" style="margin-left: 0px;">\
+				<div class="control-static"></div>\
 			</div>\
 			</div>').appendTo(this.parent);		
 	},
@@ -115,5 +154,16 @@ wn.ui.Control = Class.extend({
 			this.$w.find('.controls').append('<div class="help-block">');
 		}
 		this.$w.find('.help-block').text(text);
+	},
+	apply_hidden: function() {
+		this.$w.toggle(!this.docfield.hidden);
+	},
+	apply_mandatory: function() {
+		var me = this;
+		if(this.docfield.reqd) {
+			this.$input.change(function() {
+				$(me.$w).toggleClass('error', !$(this).val())
+			});
+		}
 	}
 });

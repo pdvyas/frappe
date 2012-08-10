@@ -25,7 +25,7 @@ wn.ui.LinkControl = wn.ui.Control.extend({
 		var me = this;
 		this.$input_wrap = $('<div class="input-append">').appendTo(this.$w.find('.controls'));
 		this.$input = $('<input type="text" />').appendTo(this.$input_wrap);
-		$('<button class="btn"><i class="icon-search"></i></button>')
+		this.$button = $('<button class="btn"><i class="icon-search"></i></button>')
 			.appendTo(this.$input_wrap)
 			.click(function() {
 				
@@ -40,5 +40,8 @@ wn.ui.LinkControl = wn.ui.Control.extend({
 				
 				return false;
 			});
+	},
+	toggle_input: function(show) {
+		this.$input_wrap.toggle(show);
 	}
 });
