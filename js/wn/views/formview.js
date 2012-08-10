@@ -1,8 +1,28 @@
-
+// Copyright (c) 2012 Web Notes Technologies Pvt Ltd (http://erpnext.com)
+// 
+// MIT License (MIT)
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a 
+// copy of this software and associated documentation files (the "Software"), 
+// to deal in the Software without restriction, including without limitation 
+// the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+// and/or sell copies of the Software, and to permit persons to whom the 
+// Software is furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in 
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A 
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT 
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+// CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
+// OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
 // render formview
 
 wn.provide('wn.views.formview');
-
+wn.provide('wn.forms');
 wn.views.formview = {
 	show: function(dt, dn) {
 		// show doctype
@@ -29,8 +49,8 @@ wn.views.formview = {
 					if(wn.contents[page_name]) {
 						wn.container.change_to(page_name);
 					} else {
-						new wn.views.FormPage(dt, dn);					
-					}					
+						wn.forms[dt + '/' + dn] = new wn.views.FormPage(dt, dn);					
+					}
 				}
 				
 			});
@@ -167,178 +187,5 @@ wn.ui.Form = Class.extend({
 	}
 });
 
-// opts: docfield, parent, doctype, docname
-wn.ui.make_control = function(opts) {
-	control_map = {
-		'Check': wn.ui.CheckControl,
-		'Data': wn.ui.Control,
-		'Link': wn.ui.LinkControl,
-		'Select': wn.ui.SelectControl,
-		'Table': wn.ui.GridControl,
-		'Text': wn.ui.TextControl,
-		'Button': wn.ui.ButtonControl
-	}
-	if(control_map[opts.docfield.fieldtype]) {
-		return new control_map[opts.docfield.fieldtype](opts);
-	} else {
-		return null;		
-	}
-}
 
-wn.ui.Control = Class.extend({
-	init: function(opts) {
-		$.extend(this, opts);
-		this.make_body();
-		this.make_input();
-		this.$w.find('.control-label').text(this.docfield.label);
-		this.set_init_value();
-		if(this.no_label) {
-			this.hide_label();
-		}
-	},
-	set_init_value: function() {
-		if(this.doctype && this.docname) {
-			this.set_input(wn.model.get_value(this.doctype, this.docname, this.docfield.fieldname));
-		}
-	},
-	hide_label: function() {
-		this.$w.find('.control-label').toggle(false);		
-	},
-	set_input: function(val) {
-		this.$input.val(val);
-	},
-	set: function(val) {
-		if(this.doctype && this.docname) {
-			wn.model.set_value(this.doctype, this.docname, this.docfield.fieldname, val);
-		} else {
-			this.set_input(val);
-		}		
-	},
-	get: function() {
-		return this.$input.val();
-	},
-	get_value: function() {
-		return this.get();
-	},
-	make_input: function() {
-		this.$input = $('<input type="text">').appendTo(this.$w.find('.controls'));
-	},
-	make_body: function() {
-		this.$w = $('<div class="control-group">\
-			<label class="control-label"></label>\
-			<div class="controls">\
-			</div>\
-			</div>').appendTo(this.parent);
-	},
-	help_block: function(text) {
-		if(!this.$w.find('.help-block').length) {
-			this.$w.find('.controls').append('<div class="help-block">');
-		}
-		this.$w.find('.help-block').text(text);
-	}
-});
-
-wn.ui.CheckControl = wn.ui.Control.extend({
-	make_input: function() {
-		this.$label = $('<label class="checkbox">').appendTo(this.$w.find('.controls'))
-		this.$input = $('<input type="checkbox">').appendTo(this.$label);
-	}
-});
-
-wn.ui.TextControl = wn.ui.Control.extend({
-	make_input: function() {
-		this.$input = $('<textarea type="text" rows="5">').appendTo(this.$w.find('.controls'));		
-	}
-});
-
-wn.ui.SelectControl = wn.ui.Control.extend({
-	make_input: function() {
-		this.$input = $('<select>').appendTo(this.$w.find('.controls'));
-		this.$input.add_options(this.docfield.options.split('\n'));
-	}
-});
-
-wn.ui.ButtonControl = wn.ui.Control.extend({
-	make_input: function() {
-		this.hide_label();
-		this.$input = $('<button class="btn btn-small">')
-			.html(this.docfield.label)
-			.appendTo(this.$w.find('.controls'));
-	},
-	get_value: function() {
-		return null;
-	}
-});
-
-
-wn.ui.LinkControl = wn.ui.Control.extend({
-	make_input: function() {
-		var me = this;
-		this.$input_wrap = $('<div class="input-append">').appendTo(this.$w.find('.controls'));
-		this.$input = $('<input type="text" />').appendTo(this.$input_wrap);
-		$('<button class="btn"><i class="icon-search"></i></button>')
-			.appendTo(this.$input_wrap)
-			.click(function() {
-				
-				me.search_dialog = new wn.ui.Search({
-					doctype: me.docfield.options, 
-					txt: me.$input.val(),
-					with_filters: me.filters,
-					df: me.docfield,
-					callback: function(val) {
-						me.set(val);
-					}});				
-				
-				return false;
-			});
-	}
-});
-
-wn.ui.GridControl = Class.extend({
-	init: function(opts) {
-		$.extend(this, opts);
-		this.tabletype = this.docfield.options;
-		wn.lib.import_slickgrid();
-		this.make();
-		this.set();
-	},
-	make: function() {
-		var width = $(this.parent).parent('form:first').width();
-		this.$w = $('<div style="height: 300px; border: 1px solid grey;"></div>')
-			.appendTo(this.parent)
-			.css('width', width);
-			
-
-		var options = {
-			enableCellNavigation: true,
-			enableColumnReorder: false
-		};
-		
-		this.grid = new Slick.Grid(this.$w.get(0), [], 
-			this.get_columns(), options);
-		
-	},
-	get_columns: function() {
-		var columns = $.map(wn.model.get('DocType', this.tabletype).get({doctype:'DocField'}), 
-			function(d) {
-				return {
-					id: d.get('fieldname'),
-					field: d.get('fieldname'),
-					name: d.get('label'),
-					width: 100
-				}
-			}
-		);
-		return [{id:'idx', field:'idx', name:'Sr', width: 40}].concat(columns);
-	},
-	set: function(val) {
-		// refresh values from doclist
-		var rows = wn.model.get(this.docfield.parent, this.docname)
-			.get({parentfield:this.docfield.fieldname});
-			
-		this.grid.setData($.map(rows, 
-			function(d) { return d.fields; }));
-		this.grid.render();
-	}
-})
 

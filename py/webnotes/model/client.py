@@ -34,9 +34,9 @@ def get_doclist():
 def get_doctype():
 	"""get doctype, all child doctypes"""
 	docs = []
-	doctypelist = webnotes.model.get_doctype(webnotes.form.doctype)
+	doctypelist = webnotes.model.get_doctype(webnotes.form.doctype, processed=True)
 	docs = doctypelist
 	for d in doctypelist.get({"fieldtype":"Table", "doctype":"DocField"}):
-		docs.extend(webnotes.model.get_doctype(d.options))
+		docs.extend(webnotes.model.get_doctype(d.options, processed=True))
 	
 	webnotes.response['docs'] = docs
