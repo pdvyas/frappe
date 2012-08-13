@@ -162,9 +162,7 @@ def setup_options():
 	parser.add_option("--pull", nargs=2, default=False,
 						metavar = "remote branch",
 						help="git pull (both repos)")
-	parser.add_option("--commit", nargs=1, default=False, 
-						metavar = "comment",
-						help="git commit -a -m both branches")
+
 	parser.add_option("--git", nargs=1, default=False, 
 						metavar = "git options",
 						help="run git with options in both repos")
@@ -282,11 +280,6 @@ def run():
 		os.chdir('lib')
 		os.system('git commit -a -m "%s"' % options.push[2])
 		os.system('git push %s %s' % (options.push[0], options.push[1]))
-
-	elif options.commit:
-		os.system('git commit -a -m "%s"' % options.commit)
-		os.chdir('lib')
-		os.system('git commit -a -m "%s"' % options.commit)
 
 	elif options.git:
 		os.system('git %s' % options.git)
