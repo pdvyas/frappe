@@ -56,8 +56,8 @@ wn.views.formview = {
 		})
 	},
 	create: function(dt) {
-		var new_name = LocalDB.create(dt);
-		wn.set_route('Form', dt, new_name);
+		var newdoclist = wn.model.create(dt);
+		wn.set_route('Form', dt, newdoclist.doc.get('name'));
 	}
 }
 
@@ -139,7 +139,7 @@ wn.ui.Form = Class.extend({
 			} else {
 				var btn = this;
 				$(this).html('Saving...').attr('disabled', 'disabled');
-				wn.model.get(this.doc.get('doctype'), this.doc.get('name')).save(0, function() {
+				wn.model.get(me.doc.get('doctype'), me.doc.get('name')).save(0, function() {
 					$(this).attr('disabled', false).html('Save');
 				});				
 			}

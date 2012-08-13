@@ -77,6 +77,8 @@ wn.assets = {
 	
 	// pass on to the handler to set
 	execute: function(src) {
+		if(wn.assets.executed_[src])
+			return;
 		if(!wn.assets.exists(src)) {
 			wn.assets.load(src);
 		}

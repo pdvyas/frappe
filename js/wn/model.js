@@ -24,8 +24,9 @@
 wn.provide('wn.model');
 wn.provide('wn.docs');
 wn.provide('wn.doclists');
+wn.provide('wn.model.local_name_idx');
 
-wn.model = {
+$.extend(wn.model, {
 	no_value_type: ['Section Break', 'Column Break', 'HTML', 'Table', 
  	'Button', 'Image'],
 
@@ -103,8 +104,44 @@ wn.model = {
 	// naming style for onchange events
 	event_name: function(dt, dn) {
 		return 'change-'+dt.replace(/ /g, '_')+'-' + dn.replace(/ /g, '_');
-	}
-}
+	},
+	
+	// create a new local doclist
+	create: function(dt) {
+		// create a new doclist and add defaults
+		var doc = {doctype:dt, __islocal:1, owner:user, name:wn.model.new_name(dt)};
+		wn.model.set_defaults(doc);
+		return new wn.model.DocList([doc]);
+	},
+	new_name: function(dt) {
+		if(!wn.model.local_name_idx[dt]) wn.model.local_name_idx[dt] = 1;
+		var n = 'New '+ dt + ' ' + wn.model.local_name_idx[dt];
+		wn.model.local_name_idx[dt]++;
+		return n;
+	},
+	set_defaults: function(doc) {
+		wn.model.get('DocType', doc.doctype).each({doctype:'DocField'}, function(df) {
+			var def = wn.model.get_default(df);
+			if(def!==null)
+				doc.set(df.fieldname, def)
+		});
+	},
+	get_default: function(df) {
+		var def = df['default'];
+		var v = null;
+		if(def=='__user')
+			v = user;
+		else if(df.fieldtype=='Date' && (def=='Today' || def=='__today')) {
+			v = get_today(); }
+		else if(def)
+			v = def;
+		else if(user_defaults[df.fieldname])
+			v = user_defaults[df.fieldname][0];
+		else if(sys_defaults[df.fieldname])
+			v = sys_defaults[df.fieldname];
+		return v;
+	}	
+});
 
 // document (row) wrapper
 wn.model.Document = Class.extend({
@@ -114,9 +151,30 @@ wn.model.Document = Class.extend({
 	get: function(key, ifnull) {
 		return this.fields[key] || ifnull;
 	},
+	convert_type: function(key, val) {
+		if(val===null) return val;
+		// check fieldtype and set value
+		var df = wn.model.get('DocType', this.get('doctype'))
+			.get({fieldname:key, doctype:"DocField"});
+			
+		if(df.length) {
+			df = df[0]
+			if(in_list(["Int", "Check"], df.fieldtype)) {
+				val = cint(val);
+			} else if(in_list(["Currency", "Float"], df.fieldtype)) {
+				val = flt(val);
+			} else if(df.fieldtype == 'Select') {
+				if(in_list(df.options.split('\n'), val)) {
+					throw val + " is not a correct option"
+				}
+			}
+		}
+		return val;
+	},
 	set: function(key, val) {
-		this.fields[key] = val;
-		$(document).trigger(wn.model.event_name(this.get('doctype'), this.get('name')), [key, val]);
+		this.fields[key] = this.convert_type(key, val);
+		$(document).trigger(wn.model.event_name(this.get('doctype'), this.get('name')), 
+			[key, this.fields[key]]);
 	}
 });
 

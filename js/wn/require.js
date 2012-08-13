@@ -33,10 +33,7 @@ wn.require = function(items) {
 
 	for(var i=0; i< l; i++) {
 		var src = items[i];
-		//if(!(src in wn.assets.executed_)) {
-			// check if available in localstorage
 		wn.assets.execute(src);
-		//}
 	}
 }
 
@@ -44,8 +41,6 @@ wn.provide('wn.lib');
 wn.lib.import_slickgrid = function() {
 	wn.require('js/lib/slickgrid/slick.grid.css');
 	wn.require('js/lib/slickgrid/slick-default-theme.css');
-	wn.require('js/lib/slickgrid/jquery.event.drag.min.js');
-	wn.require('js/lib/slickgrid/slick.core.js');
-	wn.require('js/lib/slickgrid/slick.grid.js');
+	wn.require('js/slickgrid.bundle.js');
 	wn.dom.set_style('.slick-cell { font-size: 12px; }');
 }

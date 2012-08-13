@@ -259,8 +259,8 @@ wn.views.DocListView = wn.ui.Listing.extend({
 			return;
 		}
 		
-		var docfield = wn.model.get('DocType', this.doctype).get({fieldname:field})
-		var label = docfield ? docfield.get('label') : field;
+		var docfield = wn.model.get('DocType', this.doctype).get({fieldname:field});
+		var label = docfield.length ? docfield[0].get('label') : field;
 		if(label=='_user_tags') label = 'Tags';
 		
 		// grid
