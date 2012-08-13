@@ -57,7 +57,10 @@ def filter_link(doclist, link_filter, doctypelist):
 	def _check(doc):
 		# docfield object of the link_field so we know the doctype
 		link_df = doctypelist.get_field(link_filter.link_field, parentfield=link_filter.table_field or None)
-		
+
+		link_filter.value = link_filter.value.startswith('field:') \
+			and doc.fields.get(link_filter.value[6:].strip()) or link_filter.value
+
 		link_filter.value = convert_type(link_df, link_filter.value)
 		
 		if link_df.fieldtype == 'Int':
@@ -74,7 +77,7 @@ def filter_link(doclist, link_filter, doctypelist):
 			if not valdoc:
 				webnotes.msgprint("""%s: "%s" is not a valid "%s" """ % (link_df.label, val, 
 					link_df.options), raise_exception=webnotes.InvalidLinkError)
-			
+					
 			if not check_filters(valdoc[0].get(link_filter.fieldname), link_filter.condition, 
 					link_filter.value):
 					
