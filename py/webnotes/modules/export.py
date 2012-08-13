@@ -155,5 +155,5 @@ def get_test_doclist(doctype, name=None):
 		for fname in filter(lambda n: n.endswith('.txt'), os.listdir(doctype_path)):
 			with open(os.path.join(doctype_path, scrub(fname)), 'r') as txtfile:
 				all_doclists.append(DocList(peval_doclist(txtfile.read())))
-			
+		
 		return all_doclists

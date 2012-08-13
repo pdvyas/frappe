@@ -259,3 +259,15 @@ def comma_and(lst):
 	if len(lst)==1: return lst[0]
 	return ', '.join(lst[:-1]) + ' and ' + lst[-1]
 	
+
+def json_handler(obj):
+	"""serialize non-serializable data for json"""
+	import datetime
+
+	if isinstance(obj, (datetime.date, datetime.datetime)):
+		return unicode(obj)
+	elif isinstance(obj, long):
+		return int(obj)
+	else:
+		raise TypeError, """Object of type %s with value of %s is not JSON serializable""" % \
+			(type(obj), repr(obj))

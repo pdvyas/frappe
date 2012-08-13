@@ -63,6 +63,7 @@ def get(doctype, processed=False):
 		add_code(doctype, doclist)
 		expand_selects(doclist)
 		add_print_formats(doclist)
+		add_search_fields(doclist)
 
 	# add validators
 	add_validators(doctype, doclist)
@@ -172,7 +173,7 @@ def to_cache(doctype, processed, doclist):
 	global doctype_cache
 	import json
 	
-	json_doclist = json.dumps([d.fields for d in doclist])
+	json_doclist = json.dumps([d.fields for d in doclist], default=webnotes.json_handler)
 	CacheItem(cache_name(doctype, processed)).set(json_doclist)
 
 	if not processed:
@@ -266,6 +267,13 @@ def add_validators(doctype, doclist):
 	for validator in webnotes.conn.sql("""select name from `tabDocType Validator` where
 		for_doctype=%s""", doctype):
 		doclist.extend(webnotes.model.get('DocType Validator', validator))
+		
+def add_search_fields(doclist):
+	"""add search fields found in the doctypes indicated by link fields' options"""
+	for lf in doclist.get({"fieldtype": "Link"}):
+		search_fields = get(lf.options)[0].search_fields
+		if search_fields:
+			lf.search_fields = map(lambda sf: sf.strip(), search_fields.split(","))
 
 class DocTypeDocList(webnotes.model.doc.DocList):
 	def get_field(self, fieldname, parent=None, parentfield=None):
@@ -278,6 +286,9 @@ class DocTypeDocList(webnotes.model.doc.DocList):
 		if parent:
 			filters["parent"] = parent
 		return self.getone(filters)
+		
+	def get_fieldnames(self):
+		return map(lambda f: f.fieldname, self.get({"doctype": "DocField"}))
 	
 	def get_options(self, fieldname, parent=None):
 		return self.get_field(fieldname, parent).options

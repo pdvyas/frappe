@@ -28,12 +28,12 @@ no_value_fields = ['Section Break', 'Column Break', 'HTML', 'Table', 'FlexTable'
 default_fields = ['doctype','name','owner','creation','modified','modified_by','parent','parentfield','parenttype','idx','docstatus']
 
 def get(doctype, name):
-	"""returns doclist identified by name from table indicated by doctype, with its children"""
+	"""returns doclist identified by name, from table indicated by doctype, with its children"""
 	import webnotes.model.doc
 	return webnotes.model.doc.get(doctype, name)
 	
 def get_doctype(doctype, processed=False):
-	"""returns doclist identified by doctype from tabDocType with its children"""
+	"""returns doclist identified by doctype, from tabDocType with its children"""
 	import webnotes.model.doctype
 	return webnotes.model.doctype.get(doctype, processed)
 
@@ -42,7 +42,7 @@ def insert(doclist, ignore_fields=0):
 	if doclist and not isinstance(doclist, list):
 		doclist = [doclist]
 	
-	doclistcon = get_controller(doclist)	
+	doclistcon = get_controller(doclist)
 	doclistcon.doc.fields['__islocal'] = 1
 	doclistcon.save(ignore_fields=ignore_fields)
 	
@@ -92,14 +92,13 @@ def get_controller(doctype, name=None):
 	from webnotes.model.controller import DocListController		
 		
 	doctypeobj = get_doctype(doctype)
-	module_path = os.path.join(get_module_path(doctypeobj[0].module), 'doctype', doctype, 
-		doctype+'.py')
-	
+	module_path = os.path.join(get_module_path(doctypeobj[0].module),
+		'doctype', scrub(doctype), scrub(doctype)+'.py')
 	# check if path exists
 	if os.path.exists(module_path):
 		module = __import__(scrub(doctypeobj[0].module) + '.doctype.' + scrub(doctype) + '.' \
-			+ scrub(doctype), fromlist = True)
-					
+			+ scrub(doctype), fromlist = [scrub(doctype).encode("utf-8")])
+
 		# find controller in module
 		import inspect
 		for attr in dir(module):

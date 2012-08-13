@@ -135,7 +135,6 @@ def exec_report(code, res, colnames=[], colwidths=[], coltypes=[], coloptions=[]
 	set = webnotes.conn.set
 	sql = webnotes.conn.sql
 	get_value = webnotes.conn.get_value
-	convert_to_lists = webnotes.conn.convert_to_lists
 	NEWLINE = '\n'
 
 	exec str(code)
@@ -227,8 +226,6 @@ def build_description_standard(meta, tl):
 def runquery(q='', ret=0, from_export=0):
 	import webnotes.utils
 
-	formatted = cint(webnotes.form_dict.get('formatted'))
-
 	# CASE A: Simple Query
 	# --------------------
 	if webnotes.form_dict.get('simple_query') or webnotes.form_dict.get('is_simple'):
@@ -237,7 +234,7 @@ def runquery(q='', ret=0, from_export=0):
 			raise Exception, 'Query must be a SELECT'
 
 		as_dict = cint(webnotes.form_dict.get('as_dict'))
-		res = sql(q, as_dict = as_dict, as_list = not as_dict, formatted=formatted)
+		res = sql(q, as_dict = as_dict, as_list = not as_dict)
 
 		# build colnames etc from metadata
 		colnames, coltypes, coloptions, colwidths = [], [], [], []
@@ -256,7 +253,7 @@ def runquery(q='', ret=0, from_export=0):
 		q = q.replace('__user', session['user'])
 		q = q.replace('__today', webnotes.utils.nowdate())
 
-		res = sql(q, as_list=1, formatted=formatted)
+		res = sql(q, as_list=1)
 
 		colnames, coltypes, coloptions, colwidths = build_description_standard(meta, tl)
 

@@ -72,8 +72,9 @@ class Document(object):
 		self._user_defaults = {}
 		self._prefix = prefix
 		
-		if fielddata: 
-			self.fields = fielddata
+		if fielddata:
+			# since fielddata is a dict, it is mutable, hence using copy
+			self.fields = fielddata.copy()
 		else: 
 			self.fields = {}
 		
@@ -135,13 +136,13 @@ class Document(object):
 			del self.fields['__islocal']
 		for i in range(len(description)):
 			v = data[i]
-			self.fields[description[i][0]] = webnotes.conn.convert_to_simple_type(v)
+			self.fields[description[i][0]] = v
 
 	def _merge_values(self, data, description):
 		for i in range(len(description)):
 			v = data[i]
 			if v: # only if value, over-write
-				self.fields[description[i][0]] = webnotes.conn.convert_to_simple_type(v)
+				self.fields[description[i][0]] = v
 			
 	# Load Single Type
 	# ---------------------------------------------------------------------------
@@ -327,7 +328,10 @@ class Document(object):
 		return err_list
 
 	def make_link_list(self):
-		res = webnotes.model.meta.get_link_fields(self.doctype)
+		from webnotes.model.doctype import get_link_fields
+		res = map(lambda df: [df.fieldname, df.options, df.label],
+			get_link_fields(self.doctype))
+		# res = webnotes.model.meta.get_link_fields(self.doctype)
 
 		link_list = {}
 		for i in res: 

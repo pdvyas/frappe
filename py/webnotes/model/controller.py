@@ -29,7 +29,7 @@ Group actions like save, etc are performed on doclists
 """
 
 import webnotes
-from webnotes.utils import cint
+from webnotes.utils import cint, cstr
 
 class DocListController(object):
 	"""
@@ -217,11 +217,11 @@ class DocListController(object):
 	def check_links(self):
 		"""Checks integrity of links (throws exception if links are invalid)"""
 		ref, err_list = {}, []
-		for d in self.docs:
+		for d in self.doclist:
 			if not ref.get(d.doctype):
 				ref[d.doctype] = d.make_link_list()
 
-			err_list += d.validate_links(ref[d.doctype])
+			err_list.extend(d.validate_links(ref[d.doctype]))
 
 		if err_list:
 			webnotes.msgprint("""[Link Validation] Could not find the following values: %s.
