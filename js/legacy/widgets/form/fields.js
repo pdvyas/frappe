@@ -644,7 +644,8 @@ LinkField.prototype.setup_validators = function() {
 	}
 	
 	this.filters = $.map(wn.model.get(filters), function(d) {
-		return [[me.df.options, d.fieldname, d.condition, d.value]]
+		var val = (d.value.indexOf('field:') == 0) && cur_frm.doc[strip(d.value.slice(6))] || d.value;
+		return [[me.df.options, d.fieldname, d.condition, val]]
 	});
 }
 

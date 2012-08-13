@@ -287,19 +287,19 @@ class Database:
 		"""
 		      Returns true if the record exists
 		"""	
-		if isinstance(dt, basestring):
+		if isinstance(dn, basestring):
 			try:
 				return self.sql('select name from `tab%s` where name=%s' % (dt, '%s'), dn)
 			except:
 				return None
-		elif isinstance(dt, dict) and dt.get('doctype'):
+		elif isinstance(dn, dict):
 			try:
 				conditions = []
-				for d in dt:
+				for d in dn:
 					if d == 'doctype': continue
-					conditions.append('`%s` = "%s"' % (d, dt[d].replace('"', '\"')))
+					conditions.append('`%s` = "%s"' % (d, dn[d].replace('"', '\"')))
 				return self.sql('select name from `tab%s` where %s' % \
-						(dt['doctype'], " and ".join(conditions)))
+						(dt, " and ".join(conditions)))
 			except:
 				return None
 				

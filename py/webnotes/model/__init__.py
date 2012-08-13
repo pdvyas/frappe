@@ -111,8 +111,6 @@ def get_controller(doctype, name=None):
 	# vanilla controller
 	return DocListController(doclist)
 	
-	
-	
 def check_if_doc_is_linked(dt, dn):
 	"""
 		Raises excption if the given doc(dt, dn) is linked in another record.

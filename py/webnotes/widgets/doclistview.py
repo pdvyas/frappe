@@ -70,6 +70,7 @@ def get(arg=None):
 	
 	query = """select %(fields)s from %(tables)s where %(conditions)s
 		%(group_by)s order by %(order_by)s %(limit)s""" % data
+	
 	return webnotes.conn.sql(query, as_dict=1)
 
 def check_sort_by_table(sort_by, tables):
