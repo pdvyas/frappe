@@ -139,14 +139,13 @@ def get_test_doclist(doctype, name=None):
 	"""get test doclist, collection of doclists"""
 	import os, conf, webnotes
 	from webnotes.model.utils import peval_doclist
-	from webnotes.model.doc import DocList
 
 	doctype = scrub(doctype)
 	doctype_path = os.path.join(conf.test_data_path, doctype)
 	
 	if name:
 		with open(os.path.join(doctype_path, scrub(name) + '.txt'), 'r') as txtfile:
-			doclist = DocList(peval_doclist(txtfile.read()))
+			doclist = peval_doclist(txtfile.read())
 
 		return doclist
 		
@@ -154,6 +153,6 @@ def get_test_doclist(doctype, name=None):
 		all_doclists = []
 		for fname in filter(lambda n: n.endswith('.txt'), os.listdir(doctype_path)):
 			with open(os.path.join(doctype_path, scrub(fname)), 'r') as txtfile:
-				all_doclists.append(DocList(peval_doclist(txtfile.read())))
+				all_doclists.append(peval_doclist(txtfile.read()))
 		
 		return all_doclists
