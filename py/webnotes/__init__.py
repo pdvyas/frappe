@@ -65,6 +65,7 @@ class ConditionalPropertyError(ValidationError): pass
 class MandatoryError(ValidationError): pass
 class NameError(ValidationError): pass
 class DocStatusError(ValidationError): pass
+class IntegrityError(ValidationError): pass
 class ProgrammingError(Exception): pass
 
 def getTraceback():
@@ -88,7 +89,7 @@ def msgprint(msg, small=0, raise_exception=0, as_table=False, debug=0):
 		msg = '<table border="1px" style="border-collapse: collapse" cellpadding="2px">' + ''.join(['<tr>'+''.join(['<td>%s</td>' % c for c in r])+'</tr>' for r in msg]) + '</table>'
 	
 	message_log.append((small and '__small:' or '')+cstr(msg or ''))
-	
+
 	if debug:
 		print msg
 	
