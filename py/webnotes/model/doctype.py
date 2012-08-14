@@ -35,6 +35,8 @@ from __future__ import unicode_literals
 import webnotes
 import webnotes.model
 import webnotes.model.doc
+import webnotes.model.controller
+import webnotes.model.doclist
 from webnotes.utils.cache import CacheItem
 
 doctype_cache = {}
@@ -79,7 +81,7 @@ def load_docfield_types():
 
 def get_doctype_doclist(doctype):
 	"""get doclist of single doctype"""
-	doclist = webnotes.model.get('DocType', doctype)
+	doclist = webnotes.model.doclist.load_doclist('DocType', doctype)
 	add_custom_fields(doctype, doclist)
 	apply_property_setters(doctype, doclist)
 	sort_fields(doclist)
@@ -266,7 +268,7 @@ def get_link_fields(doctype):
 def add_validators(doctype, doclist):
 	for validator in webnotes.conn.sql("""select name from `tabDocType Validator` where
 		for_doctype=%s""", doctype):
-		doclist.extend(webnotes.model.get('DocType Validator', validator))
+		doclist.extend(webnotes.model.get('DocType Validator', validator[0]))
 		
 def add_search_fields(doclist):
 	"""add search fields found in the doctypes indicated by link fields' options"""
@@ -275,7 +277,7 @@ def add_search_fields(doclist):
 		if search_fields:
 			lf.search_fields = map(lambda sf: sf.strip(), search_fields.split(","))
 
-class DocTypeDocList(webnotes.model.doc.DocList):
+class DocTypeDocList(webnotes.model.doclist.DocList):
 	def get_field(self, fieldname, parent=None, parentfield=None):
 		filters = {"doctype":"DocField", "fieldname":fieldname}
 		
@@ -295,3 +297,6 @@ class DocTypeDocList(webnotes.model.doc.DocList):
 		
 	def get_label(self, fieldname, parent=None):
 		return self.get_field(fieldname, parent).label
+		
+	def get_table_fields(self):
+		return self.get({"doctype": "DocField", "fieldtype": "Table"})
