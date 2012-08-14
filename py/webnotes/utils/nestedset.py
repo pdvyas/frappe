@@ -169,7 +169,8 @@ def update_nsm(doc_obj):
 	webnotes.conn.set(d, opf, p or '')
 
 	# reload
-	d._loadfromdb()
+	from webnotes.model.doclist import load_main
+	d = load_main(d.doctype, d.name)
 	
 def rebuild_tree(doctype, parent_field):
 	"""
