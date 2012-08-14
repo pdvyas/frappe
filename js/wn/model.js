@@ -109,7 +109,8 @@ $.extend(wn.model, {
 	// create a new local doclist
 	create: function(dt) {
 		// create a new doclist and add defaults
-		var doc = {doctype:dt, __islocal:1, owner:user, name:wn.model.new_name(dt)};
+		var doc = new wn.model.Document({doctype:dt, __islocal:1, owner:user, 
+				name:wn.model.new_name(dt)});
 		wn.model.set_defaults(doc);
 		return new wn.model.DocList([doc]);
 	},
@@ -120,7 +121,7 @@ $.extend(wn.model, {
 		return n;
 	},
 	set_defaults: function(doc) {
-		wn.model.get('DocType', doc.doctype).each({doctype:'DocField'}, function(df) {
+		wn.model.get('DocType', doc.get('doctype')).each({doctype:'DocField'}, function(df) {
 			var def = wn.model.get_default(df);
 			if(def!==null)
 				doc.set(df.fieldname, def)
@@ -200,6 +201,7 @@ wn.model.DocList = Class.extend({
 		if(!(doc instanceof wn.model.Document)) {
 			var doc = new wn.model.Document(doc);
 		}
+		doc.doclist = this;
 		this.doclist.push(doc);
 		if(this.doclist.length==1) {
 			this.setup(doc);
@@ -245,7 +247,11 @@ wn.model.DocList = Class.extend({
 		} else {
 			var filters = arguments[0];
 		}
-		return $.map(this.doclist, function(d) { return me.match(filters, d) });
+		var ret = $.map(this.doclist, function(d) { return me.match(filters, d) })
+		ret.sort(function(a, b) {
+			return a.idx > b.idx;
+		});
+		return ret;
 	},
 	get_value: function(key, def) {
 		return this.doc.get(key, def);
@@ -285,5 +291,38 @@ wn.model.DocList = Class.extend({
 	},
 	rename: function() {
 		this.name = this.doclist[0].get('name');
+	},
+	meta: function() {
+		return wn.model.get('DocType', this.doc.get('doctype'));
+	},
+	add_child: function(parentfield) {
+		var docfield = this.meta().get({fieldname:parentfield, doctype:'DocField'})[0];
+
+		var doc = new wn.model.Document({
+			doctype: docfield.get('options'), 
+			name: wn.model.new_name(docfield.get('options')),
+			__islocal:1, 
+			owner:user, 
+			parent: this.doc.get('name'),
+			parenttype: this.doc.get('doctype'),
+			parentfield: parentfield,
+			idx: this.get({parentfield: docfield.get('fieldname')}).length + 1
+		});
+
+		wn.model.set_defaults(doc);
+		
+		// append to doclist
+		this.add(doc);
+		
+		return doc;
+	},
+	remove_child: function(doc) {
+		this.doclist.splice(this.doclist.indexOf(doc), 1);
+		this.renum_idx(doc.get('parentfield'));
+	},
+	renum_idx: function(parentfield) {
+		$.each(this.get({parentfield: parentfield}), 
+			function(i, d) { d.set('idx', i+1);
+		});
 	}
 });

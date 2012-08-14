@@ -44,3 +44,9 @@ wn.lib.import_slickgrid = function() {
 	wn.require('js/slickgrid.bundle.js');
 	wn.dom.set_style('.slick-cell { font-size: 12px; }');
 }
+
+wn.lib.import_wysihtml5 = function() {
+	wn.require('js/lib/bootstrap-wysihtml5/bootstrap-wysihtml5.css');
+	wn.require('js/lib/wysihtml5/wysihtml5.min.js');
+	wn.require('js/lib/bootstrap-wysihtml5/bootstrap-wysihtml5.min.js');
+}

@@ -197,6 +197,7 @@ wn.ui.Filter = Class.extend({
 			docfield: df,
 			parent: field_area
 		});
+		me.field.as_inline();
 		me.field.hide_label();
 		
 		this.set_default_condition(df, fieldtype);

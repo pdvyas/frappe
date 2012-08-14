@@ -43,12 +43,18 @@ wn.ui.CurrencyControl = wn.ui.Control.extend({
 wn.ui.CheckControl = wn.ui.Control.extend({
 	make_input: function() {
 		this.$input = $('<input type="checkbox">').appendTo(this.$w.find('.controls'));
-	}
+	},
+	toggle_editable: function() { },
+	set_static: function() { }
 });
 
 wn.ui.TextControl = wn.ui.Control.extend({
 	make_input: function() {
 		this.$input = $('<textarea type="text" rows="5">').appendTo(this.$w.find('.controls'));		
+	},
+	set_static: function(val) {
+		if(val)
+			this._super(wn.markdown(val));
 	}
 });
 

@@ -149,6 +149,9 @@ def setup_options():
 	# build
 	parser.add_option("-b", "--build", default=False, action="store_true",
 						help="minify + concat js files")
+	parser.add_option("--no_compress", default=False, action="store_true",
+						help="do not compress when building js bundle")
+
 						
 	parser.add_option("--build_web_cache", default=False, action="store_true",
 						help="build web cache")
@@ -258,8 +261,8 @@ def run():
 
 	# build
 	if options.build:
-		import build.project
-		build.project.build()	
+		from webnotes.utils import bundlejs
+		bundlejs.bundle(options.no_compress)
 
 	# code replace
 	elif options.replace:

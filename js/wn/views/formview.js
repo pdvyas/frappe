@@ -71,17 +71,16 @@ wn.views.FormDialog = wn.ui.Dialog.extend({
 		$.extend(this, opts);
 		wn.get_or_set(this, 'width', 600);
 		wn.get_or_set(this, 'title', this.name);
-				
+		wn.get_or_set(this, 'form_class', wn.ui.Form);
 		// init dialog
 		this._super();
 		
-		this.form = new wn.ui.Form({
-			doc: this.doc,
-			fields: this.fields,
-			parent: this.body,
-			appframe: this.appframe,
-			dialog: this
-		});
+		// options for form
+		opts.parent = this.body;
+		opts.dialog = this;
+		opts.appframe = this.appframe;
+		
+		this.form = new this.form_class(opts);
 	}
 })
 
@@ -128,21 +127,11 @@ wn.ui.Form = Class.extend({
 	make_toolbar: function() {
 		var me = this;
 		this.appframe.add_button('Save', function() { 
-			if(me.doc.get('parent')) {
-				// do nothing, saving
-				// to be managed by parent
-				// refresh parent grid
-				wn.forms[me.doc.get('parenttype')][me.doc.get('parent')].form
-					.controls[me.doc.get('parentfield')].set();
-				if(me.dialog.hide) me.dialog.hide();
-				
-			} else {
-				var btn = this;
-				$(this).html('Saving...').attr('disabled', 'disabled');
-				wn.model.get(me.doc.get('doctype'), me.doc.get('name')).save(0, function() {
-					$(this).attr('disabled', false).html('Save');
-				});				
-			}
+			var btn = this;
+			$(this).html('Saving...').attr('disabled', 'disabled');
+			wn.model.get(me.doc.get('doctype'), me.doc.get('name')).save(0, function() {
+				$(this).attr('disabled', false).html('Save');
+			});				
 		});
 	},
 	make_form: function() {
@@ -191,5 +180,33 @@ wn.ui.Form = Class.extend({
 	}
 });
 
+// subclass form for editing grid row
+wn.ui.RowEditForm = wn.ui.Form.extend({
+	make_toolbar: function() {
+		var me = this;
+		var save_btn = this.appframe.add_button('Close', function() { 
+			me.control_grid.set(); // reset grid
+			
+			me.dialog.hide();
+		});
+		
+		var delete_btn = this.appframe.add_button('Delete', function() { 
+
+			// remove row from doclist
+			me.control_grid.doc.doclist.remove_child(me.doc);
+			me.control_grid.set(); // reset grid
+			
+			me.dialog.hide();
+		});
+		delete_btn.addClass('btn-danger');
+	}
+})
+
+wn.views.RowEditFormDialog = wn.views.FormDialog.extend({
+	init: function(opts) {
+		opts.form_class = wn.ui.RowEditForm;
+		this._super(opts);
+	},
+});
 
 

@@ -28,65 +28,13 @@ wn.ui.RichTextControl = wn.ui.Control.extend({
 	make_input: function() {
 		var me = this;
 		this.$input_wrap = $('<div>').appendTo(this.$w.find('.controls'));
-		this.$input = $('<textarea type="text">').css('font-size','12px')
+		this.$input = $('<textarea>').css('font-size','12px').css('height', '300px')
 			.appendTo(this.$input_wrap);
-
+		
 		this.myid = wn.dom.set_unique_id(this.$input.get(0));
-
-		// setup tiny mce
-		this.$input.tinymce({
-			// Location of TinyMCE script
-			script_url : 'js/lib/tiny_mce_33/tiny_mce.js',
-
-			// General options
-			theme : "advanced",
-			plugins : "style,inlinepopups,table,advimage",
-			extended_valid_elements: "div[id|dir|class|align|style]",
-
-			// w/h
-			width: '100%',
-			height: '360px',
-
-			// buttons
-			theme_advanced_buttons1 : "bold,italic,underline,strikethrough,hr,|,justifyleft,justifycenter,justifyright,|,formatselect,fontselect,fontsizeselect,|,image",
-			theme_advanced_buttons2 : "bullist,numlist,|,outdent,indent,|,undo,redo,|,link,unlink,code,|,forecolor,backcolor,|,tablecontrols",
-			theme_advanced_buttons3 : "",
-
-			theme_advanced_toolbar_location : "top",
-			theme_advanced_toolbar_align : "left",
-
-			content_css: "js/lib/tiny_mce_33/custom_content.css",
-
-			oninit: function() { me.init_editor(); }
-		});		
-	},
-	get: function() {
-		if(this.editor) return this.editor.getContent();
-		else return this.$input.val();
-	},
-	set_input: function(v) {
-		if(this.editor)this.editor.setContent(v);
-		else this.$input.val(v);
-	
-	},
- 	init_editor: function() {
-		// attach onchange methods
-		var me = this;
-		this.editor = tinymce.get(this.myid);
-		this.editor.onKeyUp.add(function(ed, e) { 
-			me.set(ed.getContent()); 
-		});
-		this.editor.onPaste.add(function(ed, e) { 
-			me.set(ed.getContent());
-		});
-		this.editor.onSetContent.add(function(ed, e) { 
-			me.set(ed.getContent()); 
-		});
-
-		// reset content
-		if(this.doc) {
-			this.editor.setContent(this.doc.get(this.docfield.fieldname));
-		}	
+			
+		wn.lib.import_wysihtml5();
+		this.$input.wysihtml5();
 	},
 	toggle_input: function(show) {
 		this.$input_wrap.toggle(show);

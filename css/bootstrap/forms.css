@@ -629,3 +629,18 @@ legend + .control-group {
 	padding: 3px 8px;
 }
 
+legend {
+	font-weight: bold;
+	margin-bottom: 13px;
+	/*display: block;
+	width: auto;
+	border-bottom: 0px solid #eee;
+	padding: 5px;*/
+}
+
+/*fieldset {
+	padding: 7px;
+	margin-bottom: 11px;
+	border: 1px solid #ddd;
+}*/
+

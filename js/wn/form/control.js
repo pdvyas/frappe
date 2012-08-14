@@ -50,7 +50,8 @@ wn.ui.Control = Class.extend({
 		this.apply_mandatory();
 		this.set_init_value();
 		this.set_change_event();
-		this.toggle_editable(false);
+		if(this.doc)
+			this.toggle_editable(false);
 	},
 	make: function() {
 		if(this.docfield.vertical) {
@@ -63,7 +64,8 @@ wn.ui.Control = Class.extend({
 	},
 	make_label: function() {
 		// label and description
-		this.$w.find('label').text(this.docfield.label);
+		if(this.docfield.label)
+			this.$w.find('label:first').text(this.docfield.label);
 		if(this.no_label) {
 			this.hide_label();
 		} else {
@@ -114,6 +116,10 @@ wn.ui.Control = Class.extend({
 		this.$input.val(val).change();
 		this.set_static(val);
 	},
+	as_inline: function() {
+		this.$w.css('display', 'inline');
+		this.$w.find('div').css('display', 'inline');
+	},
 	set_static: function(val) {
 		this.$w.find('.control-static').html(val || '<i style="color: #888">Click to set</i>');		
 	},
@@ -143,13 +149,19 @@ wn.ui.Control = Class.extend({
 	},
 	make_body_vertical: function() {
 		this.$w = $('<div class="control-group">\
-			<label></label><br>\
+			<div class="vertical-label"><label></label></div>\
 			<div class="controls" style="margin-left: 0px;">\
 				<div class="control-static"></div>\
 			</div>\
-			</div>').appendTo(this.parent);		
+			</div>').appendTo(this.parent);
+		
+		// if no label, remove whitespace
+		if(!this.docfield.label) {
+			this.$w.find('.vertical-label').toggle(false);
+		}
 	},
 	help_block: function(text) {
+		if(!text) return;
 		if(!this.$w.find('.help-block').length) {
 			this.$w.find('.controls').append('<div class="help-block">');
 		}

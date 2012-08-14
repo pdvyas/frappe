@@ -27,9 +27,10 @@ wn.ui.GridControl = wn.ui.Control.extend({
 		this._super(opts);
 	},
 	make_input: function() {
+		var me = this;
 		wn.lib.import_slickgrid();
 		var width = $(this.parent).parent('form:first').width();
-		this.$w = $('<div style="height: 300px; border: 1px solid grey;"></div>')
+		this.$input_wrapper = $('<div style="height: 300px; border: 1px solid grey;"></div>')
 			.appendTo(this.$w.find('.controls'))
 			.css('width', width);
 			
@@ -41,20 +42,30 @@ wn.ui.GridControl = wn.ui.Control.extend({
 			editable: false
 		};
 		
-		this.grid = new Slick.Grid(this.$w.get(0), [], 
+		this.grid = new Slick.Grid(this.$input_wrapper.get(0), [], 
 			this.get_columns(), options);
 		this.setup_drag_and_drop();
+		this.make_add_row_button();
+		this.set_edit_on_double_click();
+		this.$w.find('.vertical-label').toggle(false);
+	},
+	set_edit_on_double_click: function() {
+		var me = this;
+		this.grid.onDblClick.subscribe(function(e, args) {
+			me.edit_row(me.doc.doclist.get({parentfield:me.docfield.fieldname, 
+				idx: args.row + 1})[0]);
+		});
 	},
 	get_columns: function() {
 		var columns = $.map(wn.model.get('DocType', this.tabletype).get({doctype:'DocField'}), 
 			function(d) {
-				if(!d.hidden) {
+				if(!d.get('hidden')) {
 					return {
 						id: d.get('fieldname'),
 						field: d.get('fieldname'),
 						name: d.get('label'),
-						width: 100
-					}					
+						width: cint(d.get('width')) || 100
+					}
 				} else {
 					return null;
 				}
@@ -74,12 +85,26 @@ wn.ui.GridControl = wn.ui.Control.extend({
 			{id:'idx', field:'idx', name:'Sr', width: 40}
 		].concat(columns);
 	},
+	make_add_row_button: function() {
+		var me = this;
+		this.add_row_button = $('<button class="btn btn-small" style="margin-top: 5px;">\
+			<i class="icon-plus"></i>\
+			Add Row</button>').click(function() {
+				wn.model.get(me.doc.get('doctype'), me.doc.get('name'))
+					.add_child(me.docfield.fieldname);
+				me.set();
+				return false;
+			}).appendTo(this.$w.find('.controls'));
+	},
+	toggle_editable: function() {
+		// no toggle for this
+		this.$w.find('.control-static').toggle(false);
+	},
 	set_init_value: function() {
 		this.set();
 	},
 	get_data: function() {
-		var data = wn.model.get(this.doc.get('doctype'), this.doc.get('name'))
-			.get({parentfield:this.docfield.fieldname});
+		var data = this.doc.doclist.get({parentfield:this.docfield.fieldname});
 		
 		data = $.map(data, function(d) { return d.fields;  });
 		data.sort(function(a, b) { return a.idx > b.idx; });
@@ -87,22 +112,28 @@ wn.ui.GridControl = wn.ui.Control.extend({
 	},
 	set: function() {
 		// refresh values from doclist
-		var me = this;
 		this.grid.setData(this.get_data());
 		this.grid.render();
-		
-		this.$w.find('.grid-edit').on('click', function() {
-			var d = wn.model.get(me.doc.get('doctype'), me.doc.get('name')).get({
+		this.set_edit_button();
+	},
+	set_edit_button: function() {
+		var me = this;
+		this.$input_wrapper.find('.grid-edit').on('click', function() {
+			var d = me.doc.doclist.get({
 					parentfield:$(this).attr('data-parentfield'),
 					name:$(this).attr('data-name'),
 				})[0];
-			var form_dialog = new wn.views.FormDialog({
-				title: 'Editing row #' + d.get('idx'),
-				doc: d
-			});
-			form_dialog.show();
+			me.edit_row(d);
 			return false;
-		})
+		});
+	},
+	edit_row: function(d) {
+		var form_dialog = new wn.views.RowEditFormDialog({
+			title: d.get('doctype') + ' in row #' + d.get('idx'),
+			doc: d,
+			control_grid: this
+		});
+		form_dialog.show();		
 	},
 	setup_drag_and_drop: function() {
 		// via http://mleibman.github.com/SlickGrid/examples/example9-row-reordering.html

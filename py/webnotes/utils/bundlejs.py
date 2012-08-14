@@ -21,19 +21,19 @@
 # 
 
 from __future__ import unicode_literals
-from minify import JavascriptMinify
+from webnotes.utils.minify import JavascriptMinify
 
 class Bundle:
 	"""
 		Concatenate, compress and mix (if required) js+css files from build.json
-	"""	
+	"""
+	no_compress = False
 	def concat(self, filelist, outfile=None):	
 		"""
 			Concat css and js files into a bundle
 		"""
 		import os
 		from cStringIO import StringIO
-		from build import verbose
 		
 		out_type = outfile and outfile.split('.')[-1] or 'js'
 		
@@ -60,7 +60,7 @@ class Bundle:
 			outtxt += ('\n/*\n *\t%s\n */' % f)
 					
 			# append
-			if suffix=='concat' or out_type != 'js':
+			if suffix=='concat' or out_type != 'js' or self.no_compress:
 				outtxt += '\n' + data + '\n'
 			else:
 				jsm = JavascriptMinify()
@@ -81,7 +81,6 @@ class Bundle:
 			Build (stitch + compress) the file defined in build.json
 		"""
 		import os, sys
-		from build import no_minify
 		
 		# open the build.json file and read
 		# the dict
@@ -125,3 +124,15 @@ class Bundle:
 			# some files may not work if minified (known jsmin bug)
 			self.concat(fl, os.path.relpath(os.path.join(path, outfile), os.curdir))						
 		
+			import os
+
+def bundle(no_compress):
+	"""concat / minify js files"""
+	# build js files
+	bundle = Bundle()
+	bundle.no_compress = no_compress
+	bundle.make()
+
+	# build index.html and app.html
+	import webnotes.cms.make
+	webnotes.cms.make.make()
