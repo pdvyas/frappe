@@ -20,28 +20,45 @@
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-wn.ui.LinkControl = wn.ui.Control.extend({
-	make_input: function() {
-		var me = this;
-		this.$input_wrap = $('<div class="input-append">').appendTo(this.$w.find('.controls'));
-		this.$input = $('<input type="text" size="16"/>').appendTo(this.$input_wrap);
-		this.$button = $('<button class="btn"><i class="icon-search"></i></button>')
-			.appendTo(this.$input_wrap)
-			.click(function() {
-				
-				me.search_dialog = new wn.ui.Search({
-					doctype: me.docfield.options, 
-					txt: me.$input.val(),
-					with_filters: me.filters,
-					df: me.docfield,
-					callback: function(val) {
-						me.set(val);
-					}});				
-				
-				return false;
-			});
+wn.views.FormDialog = wn.ui.Dialog.extend({
+	init: function(opts) {
+		$.extend(this, opts);
+		wn.get_or_set(this, 'width', 600);
+		wn.get_or_set(this, 'title', this.name);
+		wn.get_or_set(this, 'form_class', wn.ui.Form);
+
+		// init dialog
+		this._super();
+		
+		// options for form
+		opts.parent = this.body;
+		opts.dialog = this;
+		opts.appframe = this.appframe;
+		
+		this.form = new this.form_class(opts);		
+	}
+})
+
+wn.views.RowEditFormDialog = wn.views.FormDialog.extend({
+	init: function(opts) {
+		opts.form_class = wn.ui.RowEditForm;
+		this._super(opts);
+		this.make_toolbar();
 	},
-	toggle_input: function(show) {
-		this.$input_wrap.toggle(show);
+	make_toolbar: function() {
+		var me = this;
+		var save_btn = this.appframe.add_button('Close', function() { 
+			me.control_grid.set(); // reset grid
+			me.hide();
+		});
+		
+		var delete_btn = this.appframe.add_button('Delete', function() { 
+			// remove row from doclist
+			me.control_grid.doc.doclist.remove_child(me.doc);
+			me.control_grid.set(); // reset grid
+			
+			me.hide();
+		});
+		delete_btn.addClass('btn-danger').parent().css('float', 'right');
 	}
 });

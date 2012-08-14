@@ -51,9 +51,13 @@ wn.ui.GridControl = wn.ui.Control.extend({
 	},
 	set_edit_on_double_click: function() {
 		var me = this;
-		this.grid.onDblClick.subscribe(function(e, args) {
-			me.edit_row(me.doc.doclist.get({parentfield:me.docfield.fieldname, 
-				idx: args.row + 1})[0]);
+		this.grid.onClick.subscribe(function(e, args) {
+			if(me.selected_row == args.row) {
+				me.edit_row(me.doc.doclist.get({parentfield:me.docfield.fieldname, 
+					idx: args.row + 1})[0]);
+			}
+			me.selected_row = args.row;
+			return false;
 		});
 	},
 	get_columns: function() {
@@ -80,8 +84,8 @@ wn.ui.GridControl = wn.ui.Control.extend({
 		return [
 			{id: "#", name: "", width: 40, behavior: "selectAndMove", selectable: false,
 				resizable: false, cssClass: "cell-reorder dnd" },
-			{id:'_edit', field:'_edit', name:'', width: 55, 
-				formatter:EditButtonFormatter},
+			//{id:'_edit', field:'_edit', name:'', width: 55, 
+			//	formatter:EditButtonFormatter},
 			{id:'idx', field:'idx', name:'Sr', width: 40}
 		].concat(columns);
 	},
@@ -114,7 +118,7 @@ wn.ui.GridControl = wn.ui.Control.extend({
 		// refresh values from doclist
 		this.grid.setData(this.get_data());
 		this.grid.render();
-		this.set_edit_button();
+		//this.set_edit_button();
 	},
 	set_edit_button: function() {
 		var me = this;

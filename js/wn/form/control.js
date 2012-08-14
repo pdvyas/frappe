@@ -50,8 +50,8 @@ wn.ui.Control = Class.extend({
 		this.apply_mandatory();
 		this.set_init_value();
 		this.set_change_event();
-		if(this.doc)
-			this.toggle_editable(false);
+		//if(this.doc)
+		//	this.toggle_editable(false);
 	},
 	make: function() {
 		if(this.docfield.vertical) {
@@ -143,7 +143,7 @@ wn.ui.Control = Class.extend({
 		this.$w = $('<div class="control-group">\
 			<label class="control-label"></label>\
 			<div class="controls">\
-				<div class="control-static"></div>\
+				<div class="control-static" style="display: none"></div>\
 			</div>\
 			</div>').appendTo(this.parent);
 	},
@@ -151,7 +151,7 @@ wn.ui.Control = Class.extend({
 		this.$w = $('<div class="control-group">\
 			<div class="vertical-label"><label></label></div>\
 			<div class="controls" style="margin-left: 0px;">\
-				<div class="control-static"></div>\
+				<div class="control-static" style="display: none"></div>\
 			</div>\
 			</div>').appendTo(this.parent);
 		
