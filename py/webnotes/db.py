@@ -105,13 +105,14 @@ class Database:
 			webnotes.msgprint('Not allowed to execute query')
 			raise Execption
 
-	def sql(self, query, values=(), as_dict = 0, as_list = 0, debug=0, ignore_ddl=0,
+	def sql(self, query, values=None, as_dict = 0, as_list = 0, debug=0, ignore_ddl=0,
 		auto_commit=0):
 		"""
 		      * Execute a `query`, with given `values`
 		      * returns as a dictionary if as_dict = 1
 		      * returns as a list of lists if as_list = 1
 		"""
+		if values is None: values = ()
 		# in transaction validations
 		self.check_transaction_status(query)
 		
@@ -124,6 +125,9 @@ class Database:
 		with warnings.catch_warnings(record=True) as w:		
 			try:
 				if values!=():
+					# if subclass of dict, convert it back to dict
+					if isinstance(values, dict):
+						values = dict(values)
 					if debug: webnotes.errprint(query % values)
 					self._cursor.execute(query, values)
 				
@@ -157,12 +161,13 @@ class Database:
 
 	def fetch_as_dict(self, result):
 		"""Internal - get results as dictionary"""
+		from webnotes.utils import DictObj
 		ret = []
 		for r in result:
 			row_dict = {}
 			for i in xrange(len(r)):
 				row_dict[self._cursor.description[i][0]] = r[i]
-			ret.append(row_dict)
+			ret.append(DictObj(row_dict))
 		return ret
 		
 	def get_description(self):
@@ -176,9 +181,9 @@ class Database:
 	def get_value(self, doctype, filters=None, fieldname="name", ignore=None):
 		"""Get a single / multiple value from a record. 
 		For Single DocType, let filters be = None"""
-		if filters and (filters!=doctype or filters=='DocType'):
-			fl = isinstance(fieldname, basestring) and fieldname or "`, `".join(fieldname)
+		if filters is not None and (filters!=doctype or filters=='DocType'):
 			
+			fl = isinstance(fieldname, basestring) and fieldname or "`, `".join(fieldname)
 			conditions, filters = self.build_conditions(filters)
 			
 			try:
