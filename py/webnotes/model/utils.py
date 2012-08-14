@@ -85,8 +85,7 @@ def expand(docs):
 		doc = xzip(docs['_kl'][d[0]], d);
 		clist.append(doc)
 		
-	from webnotes.model.doc import DocList
-	return DocList(clist)
+	return clist
 
 def compress(doclist):
 	"""
