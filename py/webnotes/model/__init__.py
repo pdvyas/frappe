@@ -87,13 +87,14 @@ def get_controller(doctype, name=None):
 	import os
 	from webnotes.modules import get_module_path, scrub
 	from webnotes.model.controller import DocListController		
-		
-	doctypeobj = get_doctype(doctype)
-	module_path = os.path.join(get_module_path(doctypeobj[0].module),
+
+	module_name = doctype in ["DocType", "DocField", "Custom Field", "DocPerm"] and "core" \
+		or get_doctype(doctype)[0].module
+	module_path = os.path.join(get_module_path(module_name),
 		'doctype', scrub(doctype), scrub(doctype)+'.py')
 	# check if path exists
 	if os.path.exists(module_path):
-		module = __import__(scrub(doctypeobj[0].module) + '.doctype.' + scrub(doctype) + '.' \
+		module = __import__(scrub(module_name) + '.doctype.' + scrub(doctype) + '.' \
 			+ scrub(doctype), fromlist = [scrub(doctype).encode("utf-8")])
 
 		# find controller in module
@@ -107,8 +108,6 @@ def get_controller(doctype, name=None):
 	
 	# vanilla controller
 	return DocListController(doclist, name)
-	
-	
 	
 def check_if_doc_is_linked(dt, dn):
 	"""

@@ -282,6 +282,7 @@ class DocListController(object):
 		"""add a child doc to doclist"""
 		if not isinstance(doc, webnotes.model.doc.Document):
 			doc = webnotes.model.doc.Document(fielddata = doc)
+		doc.__islocal = 1
 		self.doclist.append(doc)
 	
 	# TODO: should this method be here?

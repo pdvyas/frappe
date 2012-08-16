@@ -120,9 +120,9 @@ def get_server_obj(doclist):
 	module = scrub(module)
 	dt = scrub(doc.doctype)
 	DocType = None
-
+	
 	try:
-		module = __import__('%s.doctype.%s.%s' % (module, dt, dt), fromlist=[''])
+		module = __import__('%s.doctype.%s.%s' % (module, dt, dt), fromlist=[dt])
 		if hasattr(module, 'DocType'):
 			DocType = getattr(module, 'DocType', None)
 		else:

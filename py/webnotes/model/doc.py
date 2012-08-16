@@ -84,8 +84,16 @@ class Document(dict):
 		self[key] = value
 
 	def save(self, new=False):
-		doctypelist = webnotes.model.get_doctype(self.doctype)
+		if self.doctype in ["DocType", "DocField", "DocPerm", "Custom Field"]:
+			doctypelist = [Document(fielddata = {"issingle": 0})]
+		else:
+			doctypelist = webnotes.model.get_doctype(self.doctype)
 		fields_to_save = self.get_valid_fields(doctypelist)
+		
+		# set None if field does not exist
+		for f in fields_to_save:
+			if f not in self:
+				self[f] = None
 		
 		if cint(doctypelist[0].issingle):
 			self.insert_single(fields_to_save)
@@ -114,8 +122,8 @@ class Document(dict):
 		self.validate_name()
 		self.validate_default_fields()
 		
-		column_place_holders = ", ".join(["`%s`" % f for f in fields_to_insert if f in self])
-		value_place_holders = ", ".join(["%%(%s)s" % f for f in fields_to_insert if f in self])
+		column_place_holders = ", ".join(["`%s`" % f for f in fields_to_insert])
+		value_place_holders = ", ".join(["%%(%s)s" % f for f in fields_to_insert])
 	
 		webnotes.conn.sql("""insert into `tab%s` (%s) values (%s)""" % \
 			(self.doctype, column_place_holders, value_place_holders), self)
@@ -124,7 +132,7 @@ class Document(dict):
 		self.validate_default_fields()
 		
 		# exclude name, creation, owner from fields to update
-		fields_to_update = filter(lambda f: f not in ("name", "creation", "owner") and f in self,
+		fields_to_update = filter(lambda f: f not in ("name", "creation", "owner"),
 			fields_to_update)
 		set_fields = map(lambda f: "`%s` = %%(%s)s" % (f, f), fields_to_update)
 		
@@ -202,9 +210,10 @@ class Document(dict):
 
 		# set idx
 		if self.parent and not self.idx:
-			self.idx = webnotes.conn.sql("""select max(idx) from `tab%s`
+			self.idx = cint(webnotes.conn.sql("""select max(idx) from `tab%s`
 				where parent=%s and parenttype=%s and parentfield=%s""" % \
-				(self.doctype, "%s", "%s", "%s"), self.parent, self.parenttype, self.parentfield)
+				(self.doctype, "%s", "%s", "%s"), (self.parent, self.parenttype,
+				self.parentfield))[0][0])
 
 		# set info
 		self.owner = self.owner or webnotes.session["user"]

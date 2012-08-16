@@ -178,7 +178,7 @@ class Database:
 		"""get columns"""
 		return [r[0] for r in self.sql("DESC `tab%s`" % table)]
 
-	def get_value(self, doctype, filters=None, fieldname="name", ignore=None):
+	def get_value(self, doctype, filters=None, fieldname="name", ignore=None, as_dict=0):
 		"""Get a single / multiple value from a record. 
 		For Single DocType, let filters be = None"""
 		if filters is not None and (filters!=doctype or filters=='DocType'):
@@ -187,7 +187,10 @@ class Database:
 			conditions, filters = self.build_conditions(filters)
 			
 			try:
-				r = self.sql("select `%s` from `tab%s` where %s" % (fl, doctype, conditions), filters)
+				if as_dict:
+					r = self.sql("select `%s` from `tab%s` where %s" % (fl, doctype, conditions), filters, as_dict=1)
+				else:
+					r = self.sql("select `%s` from `tab%s` where %s" % (fl, doctype, conditions), filters)
 			except Exception, e:
 				if e.args[0]==1054 and ignore:
 					return None
@@ -199,10 +202,12 @@ class Database:
 		else:
 			fieldname = isinstance(fieldname, basestring) and [fieldname] or fieldname
 
-			r = self.sql("select value from tabSingles where field in (%s) and \
+			r = self.sql("select field, value from tabSingles where field in (%s) and \
 				doctype=%s" % (', '.join(['%s']*len(fieldname)), '%s'), tuple(fieldname) + (doctype,))
-
-			return r and (len(r) > 1 and (i[0] for i in r) or r[0][0]) or None
+			if as_dict:
+				return r and dict(r) or None
+			else:
+				return r and (len(r) > 1 and [i[0] for i in r] or r[0][1]) or None
 
 	def set_value(self, dt, dn, field, val, modified = None):
 		from webnotes.utils import now
@@ -292,19 +297,19 @@ class Database:
 		"""
 		      Returns true if the record exists
 		"""	
-		if isinstance(dt, basestring):
+		if isinstance(dn, basestring):
 			try:
 				return self.sql('select name from `tab%s` where name=%s' % (dt, '%s'), dn)
 			except:
 				return None
-		elif isinstance(dt, dict) and dt.get('doctype'):
+		elif isinstance(dn, dict):
 			try:
 				conditions = []
-				for d in dt:
+				for d in dn:
 					if d == 'doctype': continue
-					conditions.append('`%s` = "%s"' % (d, dt[d].replace('"', '\"')))
+					conditions.append('`%s` = "%s"' % (d, dn[d].replace('"', '\"')))
 				return self.sql('select name from `tab%s` where %s' % \
-						(dt['doctype'], " and ".join(conditions)))
+						(dt, " and ".join(conditions)))
 			except:
 				return None
 				

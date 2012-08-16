@@ -51,13 +51,13 @@ response = {'message':'', 'exc':''}
 debug_log = []
 message_log = []
 
-
+class ProgrammingError(Exception): pass
 class ValidationError(Exception): pass
 class AuthenticationError(Exception): pass
 class PermissionError(Exception): pass
-class OutgoingEmailError(ValidationError): pass
 class UnknownDomainError(Exception): pass
 class SessionStopped(Exception): pass
+class OutgoingEmailError(ValidationError): pass
 class DuplicateEntryError(ValidationError): pass
 class InvalidLinkError(ValidationError): pass
 class LinkFilterError(ValidationError): pass
@@ -66,7 +66,7 @@ class MandatoryError(ValidationError): pass
 class NameError(ValidationError): pass
 class DocStatusError(ValidationError): pass
 class IntegrityError(ValidationError): pass
-class ProgrammingError(Exception): pass
+class CircularLinkError(ValidationError): pass
 
 def getTraceback():
 	import utils

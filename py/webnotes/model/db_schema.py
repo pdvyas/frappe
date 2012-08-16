@@ -426,7 +426,7 @@ def updatedb(dt, archive=0):
 	
 	if not res[0][0]:
 		webnotes.conn.commit()
-		tab = DbTable(dt, archive and 'arc' or 'tab')
+		tab = DbTable(dt)
 		tab.sync()
 		webnotes.conn.begin()
 
