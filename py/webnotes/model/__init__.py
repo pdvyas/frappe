@@ -45,6 +45,7 @@ def insert(doclist, ignore_fields=0):
 	doclistcon = get_controller(doclist)
 	doclistcon.doc.fields['__islocal'] = 1
 	doclistcon.save(ignore_fields=ignore_fields)
+	return doclistcon.doc.name
 	
 def insert_variants(base, variants, ignore_fields=0):
 	for v in variants:
