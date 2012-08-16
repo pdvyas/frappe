@@ -283,6 +283,7 @@ class DocListController(object):
 		if not isinstance(doc, webnotes.model.doc.Document):
 			doc = webnotes.model.doc.Document(fielddata = doc)
 		doc.__islocal = 1
+		doc.parent = self.doc.name
 		self.doclist.append(doc)
 	
 	# TODO: should this method be here?
