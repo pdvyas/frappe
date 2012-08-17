@@ -35,6 +35,8 @@ from __future__ import unicode_literals
 import webnotes
 import webnotes.model
 import webnotes.model.doc
+import webnotes.model.controller
+import webnotes.model.doclist
 from webnotes.utils.cache import CacheItem
 
 doctype_cache = {}
@@ -79,7 +81,7 @@ def load_docfield_types():
 
 def get_doctype_doclist(doctype):
 	"""get doclist of single doctype"""
-	doclist = webnotes.model.get('DocType', doctype)
+	doclist = webnotes.model.doclist.load_doclist('DocType', doctype)
 	add_custom_fields(doctype, doclist)
 	apply_property_setters(doctype, doclist)
 	sort_fields(doclist)
@@ -123,7 +125,7 @@ def apply_property_setters(doctype, doclist):
 	for ps in webnotes.conn.sql("""select * from `tabProperty Setter` where
 		doc_type=%s""", doctype, as_dict=1):
 		if ps['doctype_or_field']=='DocType':
-			doclist[0].fields[ps['property']] = ps['value']
+			doclist[0][ps['property']] = ps['value']
 		else:
 			docfield = filter(lambda d: d.doctype=="DocField" and d.fieldname==ps['field_name'], 
 				doclist)
@@ -131,7 +133,7 @@ def apply_property_setters(doctype, doclist):
 			if docfield_types.get(ps['property'], None) in ('Int', 'Check'):
 				ps['value'] = cint(ps['value'])
 				
-			docfield[0].fields[ps['property']] = ps['value']
+			docfield[0][ps['property']] = ps['value']
 
 def add_custom_fields(doctype, doclist):
 	res = webnotes.conn.sql("""SELECT * FROM `tabCustom Field`
@@ -141,7 +143,7 @@ def add_custom_fields(doctype, doclist):
 		custom_field = webnotes.model.doc.Document(fielddata=r)
 		
 		# convert to DocField
-		custom_field.fields.update({
+		custom_field.update({
 			'doctype': 'DocField',
 			'parent': doctype,
 			'parentfield': 'fields',
@@ -173,7 +175,7 @@ def to_cache(doctype, processed, doclist):
 	global doctype_cache
 	import json
 	
-	json_doclist = json.dumps([d.fields for d in doclist], default=webnotes.json_handler)
+	json_doclist = json.dumps([d for d in doclist], default=webnotes.json_handler)
 	CacheItem(cache_name(doctype, processed)).set(json_doclist)
 
 	if not processed:
@@ -204,7 +206,7 @@ def add_code(doctype, doclist):
 		fpath = os.path.join(path, fname)
 		if os.path.exists(fpath):
 			with open(fpath, 'r') as f:
-				doc.fields[fieldname] = f.read()
+				doc[fieldname] = f.read()
 		
 	_add_code(scrub(doc.name) + '.js', '__js')
 	_add_code(scrub(doc.name) + '.css', '__css')
@@ -219,7 +221,7 @@ def add_embedded_js(doc):
 
 	# custom script
 	custom = get_custom_script(doc.name, 'Client') or ''
-	doc.fields['__js'] = (doc.fields.get('__js') or '') + '\n' + custom	
+	doc['__js'] = (doc.get('__js') or '') + '\n' + custom	
 	
 	def _sub(match):
 		fpath = os.path.join(os.path.dirname(conf.modules_path), \
@@ -230,8 +232,8 @@ def add_embedded_js(doc):
 		else:
 			return '\n// no file "%s" found \n' % fpath
 	
-	if doc.fields.get('__js'):
-		doc.fields['__js'] = re.sub('(wn.require\([^\)]*.)', _sub, doc.fields['__js'])
+	if doc.get('__js'):
+		doc['__js'] = re.sub('(wn.require\([^\)]*.)', _sub, doc['__js'])
 		
 def expand_selects(doclist):
 	for d in filter(lambda d: d.fieldtype=='Select' and (d.options or '').startswith('link:'), doclist):
@@ -244,7 +246,7 @@ def add_print_formats(doclist):
 	# to deprecate code in print_format.py
 	# if this is implemented, clear CacheItem on saving print format
 	print_formats = webnotes.conn.sql("""select * FROM `tabPrint Format`
-		WHERE doc_type=%s AND docstatus<2""", doclist[0].fields.get('name'), as_dict=1)
+		WHERE doc_type=%s AND docstatus<2""", doclist[0].get('name'), as_dict=1)
 	for pf in print_formats:
 		doclist.append(webnotes.model.doc.Document('Print Format', fielddata=pf))
 
@@ -252,9 +254,9 @@ def get_property(dt, property, fieldname=None):
 	"""get a doctype property"""
 	doctypelist = get(dt)
 	if fieldname:
-		doctypelist.getone({"fieldname":fieldname}).fields.get(property)
+		doctypelist.getone({"fieldname":fieldname}).get(property)
 	else:
-		doctypelist[0].fields.get(property)
+		doctypelist[0].get(property)
 		
 def get_link_fields(doctype):
 	"""get docfields of links and selects with "link:" """
@@ -266,7 +268,7 @@ def get_link_fields(doctype):
 def add_validators(doctype, doclist):
 	for validator in webnotes.conn.sql("""select name from `tabDocType Validator` where
 		for_doctype=%s""", doctype):
-		doclist.extend(webnotes.model.get('DocType Validator', validator))
+		doclist.extend(webnotes.model.get('DocType Validator', validator[0]))
 		
 def add_search_fields(doclist):
 	"""add search fields found in the doctypes indicated by link fields' options"""
@@ -275,7 +277,7 @@ def add_search_fields(doclist):
 		if search_fields:
 			lf.search_fields = map(lambda sf: sf.strip(), search_fields.split(","))
 
-class DocTypeDocList(webnotes.model.doc.DocList):
+class DocTypeDocList(webnotes.model.doclist.DocList):
 	def get_field(self, fieldname, parent=None, parentfield=None):
 		filters = {"doctype":"DocField", "fieldname":fieldname}
 		
@@ -295,3 +297,6 @@ class DocTypeDocList(webnotes.model.doc.DocList):
 		
 	def get_label(self, fieldname, parent=None):
 		return self.get_field(fieldname, parent).label
+		
+	def get_table_fields(self):
+		return self.get({"doctype": "DocField", "fieldtype": "Table"})

@@ -167,7 +167,7 @@ def upload():
 			if parenttype:
 				# child doc
 				doc = Document(doctype)
-				doc.fields.update(d)
+				doc.update(d)
 				if parenttype:
 					doc.parenttype = parenttype
 					doc.parentfield = parentfield
@@ -264,7 +264,7 @@ def import_doc(d, doctype, overwrite):
 	if webnotes.conn.exists(doctype, d['name']):
 		if overwrite:
 			doclist = webnotes.model.doc.get(doctype, d['name'])
-			doclist[0].fields.update(d)
+			doclist[0].update(d)
 			DocListController(doclist).save()
 			return 'Updated ' + getlink(doctype, d['name'])
 		else:

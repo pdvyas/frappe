@@ -2,43 +2,15 @@
 -- To be called from install.py
 
 
---
--- Table structure for table `__DocTypeCache`
---
-
-DROP TABLE IF EXISTS `__DocTypeCache`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `__DocTypeCache` (
-  `name` varchar(120) DEFAULT NULL,
-  `modified` datetime DEFAULT NULL,
-  `content` text
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `__SessionCache`
---
-
 DROP TABLE IF EXISTS `__SessionCache`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `__SessionCache` (
   `user` varchar(120) DEFAULT NULL,
   `country` varchar(120) DEFAULT NULL,
   `cache` longtext
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-
-
---
--- Table structure for table `tabDocField`
---
 
 DROP TABLE IF EXISTS `tabDocField`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tabDocField` (
   `name` varchar(120) NOT NULL,
   `creation` datetime DEFAULT NULL,
@@ -76,16 +48,10 @@ CREATE TABLE `tabDocField` (
   KEY `label` (`label`),
   KEY `fieldtype` (`fieldtype`),
   KEY `fieldname` (`fieldname`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
---
--- Table structure for table `tabDocFormat`
---
 
 DROP TABLE IF EXISTS `tabDocFormat`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tabDocFormat` (
   `name` varchar(120) NOT NULL,
   `creation` datetime DEFAULT NULL,
@@ -100,16 +66,10 @@ CREATE TABLE `tabDocFormat` (
   `format` varchar(180) DEFAULT NULL,
   PRIMARY KEY (`name`),
   KEY `parent` (`parent`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
---
--- Table structure for table `tabDocPerm`
---
 
 DROP TABLE IF EXISTS `tabDocPerm`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tabDocPerm` (
   `name` varchar(120) NOT NULL,
   `creation` datetime DEFAULT NULL,
@@ -133,16 +93,10 @@ CREATE TABLE `tabDocPerm` (
   `execute` int(1) DEFAULT NULL,
   PRIMARY KEY (`name`),
   KEY `parent` (`parent`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
---
--- Table structure for table `tabDocType`
---
 
 DROP TABLE IF EXISTS `tabDocType`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tabDocType` (
   `name` varchar(180) NOT NULL DEFAULT '',
   `creation` datetime DEFAULT NULL,
@@ -193,30 +147,17 @@ CREATE TABLE `tabDocType` (
   `read_only_onload` int(1) DEFAULT NULL,
   PRIMARY KEY (`name`),
   KEY `parent` (`parent`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
---
--- Table structure for table `tabSeries`
---
 
 DROP TABLE IF EXISTS `tabSeries`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tabSeries` (
   `name` varchar(40) DEFAULT NULL,
   `current` int(10) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-
---
--- Table structure for table `tabSessions`
---
 
 DROP TABLE IF EXISTS `tabSessions`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tabSessions` (
   `user` varchar(40) DEFAULT NULL,
   `sid` varchar(120) DEFAULT NULL,
@@ -224,21 +165,14 @@ CREATE TABLE `tabSessions` (
   `ipaddress` varchar(16) DEFAULT NULL,
   `lastupdate` datetime DEFAULT NULL,
   `status` varchar(20) DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-
---
--- Table structure for table `tabSingles`
---
 
 DROP TABLE IF EXISTS `tabSingles`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tabSingles` (
   `doctype` varchar(40) DEFAULT NULL,
   `field` varchar(40) DEFAULT NULL,
   `value` text,
   KEY `doctype` (`doctype`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

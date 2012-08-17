@@ -50,7 +50,7 @@ class Page:
 		fpath = os.path.join(path, scrub(doc.name) + '.js')
 		if os.path.exists(fpath):
 			with open(fpath, 'r') as f:
-				doc.fields['__script'] = f.read()
+				doc['__script'] = f.read()
 
 		# css
 		fpath = os.path.join(path, scrub(doc.name) + '.css')

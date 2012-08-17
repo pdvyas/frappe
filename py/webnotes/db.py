@@ -105,13 +105,14 @@ class Database:
 			webnotes.msgprint('Not allowed to execute query')
 			raise Execption
 
-	def sql(self, query, values=(), as_dict = 0, as_list = 0, debug=0, ignore_ddl=0,
+	def sql(self, query, values=None, as_dict = 0, as_list = 0, debug=0, ignore_ddl=0,
 		auto_commit=0):
 		"""
 		      * Execute a `query`, with given `values`
 		      * returns as a dictionary if as_dict = 1
 		      * returns as a list of lists if as_list = 1
 		"""
+		if values is None: values = ()
 		# in transaction validations
 		self.check_transaction_status(query)
 		
@@ -124,8 +125,8 @@ class Database:
 		with warnings.catch_warnings(record=True) as w:
 			try:
 				if values!=():
-					from webnotes.utils import DictObj
-					if isinstance(values, DictObj):
+					# if subclass of dict, convert it back to dict
+					if isinstance(values, dict):
 						values = dict(values)
 					if debug: webnotes.errprint(query % values)
 					self._cursor.execute(query, values)
@@ -160,12 +161,13 @@ class Database:
 
 	def fetch_as_dict(self, result):
 		"""Internal - get results as dictionary"""
+		from webnotes.utils import DictObj
 		ret = []
 		for r in result:
 			row_dict = {}
 			for i in xrange(len(r)):
 				row_dict[self._cursor.description[i][0]] = r[i]
-			ret.append(row_dict)
+			ret.append(DictObj(row_dict))
 		return ret
 		
 	def get_description(self):
@@ -176,16 +178,19 @@ class Database:
 		"""get columns"""
 		return [r[0] for r in self.sql("DESC `tab%s`" % table)]
 
-	def get_value(self, doctype, filters=None, fieldname="name", ignore=None):
+	def get_value(self, doctype, filters=None, fieldname="name", ignore=None, as_dict=0):
 		"""Get a single / multiple value from a record. 
 		For Single DocType, let filters be = None"""
-		if filters and (filters!=doctype or filters=='DocType'):
-			fl = isinstance(fieldname, basestring) and fieldname or "`, `".join(fieldname)
+		if filters is not None and (filters!=doctype or filters=='DocType'):
 			
+			fl = isinstance(fieldname, basestring) and fieldname or "`, `".join(fieldname)
 			conditions, filters = self.build_conditions(filters)
 			
 			try:
-				r = self.sql("select `%s` from `tab%s` where %s" % (fl, doctype, conditions), filters)
+				if as_dict:
+					r = self.sql("select `%s` from `tab%s` where %s" % (fl, doctype, conditions), filters, as_dict=1)
+				else:
+					r = self.sql("select `%s` from `tab%s` where %s" % (fl, doctype, conditions), filters)
 			except Exception, e:
 				if e.args[0]==1054 and ignore:
 					return None
@@ -197,10 +202,12 @@ class Database:
 		else:
 			fieldname = isinstance(fieldname, basestring) and [fieldname] or fieldname
 
-			r = self.sql("select value from tabSingles where field in (%s) and \
+			r = self.sql("select field, value from tabSingles where field in (%s) and \
 				doctype=%s" % (', '.join(['%s']*len(fieldname)), '%s'), tuple(fieldname) + (doctype,))
-
-			return r and (len(r) > 1 and (i[0] for i in r) or r[0][0]) or None
+			if as_dict:
+				return r and dict(r) or None
+			else:
+				return r and (len(r) > 1 and [i[0] for i in r] or r[0][1]) or None
 
 	def set_value(self, dt, dn, field, val, modified = None):
 		from webnotes.utils import now
@@ -214,7 +221,7 @@ class Database:
 				
 	def set(self, doc, field, val):
 		self.set_value(doc.doctype, doc.name, field, val, doc.modified)
-		doc.fields[field] = val
+		doc[field] = val
 
 	# ======================================================================================
 

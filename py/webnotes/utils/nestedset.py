@@ -156,7 +156,7 @@ def update_nsm(doc_obj):
 		if hasattr(doc_obj,'nsm_oldparent_field'):
 			opf = doc_obj.nsm_oldparent_field
 
-	p, op = d.fields.get(pf, ''), d.fields.get(opf, '')
+	p, op = d.get(pf, ''), d.get(opf, '')
 
 	# has parent changed (?) or parent is None (root)
 	if not d.lft and not d.rgt:
@@ -169,7 +169,8 @@ def update_nsm(doc_obj):
 	webnotes.conn.set(d, opf, p or '')
 
 	# reload
-	d._loadfromdb()
+	from webnotes.model.doclist import load_main
+	d = load_main(d.doctype, d.name)
 	
 def rebuild_tree(doctype, parent_field):
 	"""

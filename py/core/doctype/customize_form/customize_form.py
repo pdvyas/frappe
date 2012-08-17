@@ -129,10 +129,10 @@ class DocType:
 		if 'list' in args:
 			if 'value' in args:
 				for f in args['list']:
-					args['doc_to_set'].fields[f] = None
+					args['doc_to_set'][f] = None
 			elif 'doc' in args:
 				for f in args['list']:
-					args['doc_to_set'].fields[f] = args['doc'].fields.get(f)
+					args['doc_to_set'][f] = args['doc'].get(f)
 		else:
 			webnotes.msgprint("Please specify args['list'] to set", raise_exception=1)
 
@@ -207,47 +207,47 @@ class DocType:
 			sets delete property if it is required to be deleted
 		"""
 		# Check if property has changed compared to when it was loaded 
-		if new_d.fields.get(prop) != ref_d.fields.get(prop) \
+		if new_d.get(prop) != ref_d.get(prop) \
 		and not \
 		( \
-			new_d.fields.get(prop) in [None, 0] \
-			and ref_d.fields.get(prop) in [None, 0] \
+			new_d.get(prop) in [None, 0] \
+			and ref_d.get(prop) in [None, 0] \
 		) and not \
 		( \
-			new_d.fields.get(prop) in [None, ''] \
-			and ref_d.fields.get(prop) in [None, ''] \
+			new_d.get(prop) in [None, ''] \
+			and ref_d.get(prop) in [None, ''] \
 		):
-			#webnotes.msgprint("new: " + str(new_d.fields[prop]) + " | old: " + str(ref_d.fields[prop]))
+			#webnotes.msgprint("new: " + str(new_d[prop]) + " | old: " + str(ref_d[prop]))
 			# Check if the new property is same as that in original doctype
 			# If yes, we need to delete the property setter entry
 			for dt_d in dt_doclist:
 				if dt_d.name == ref_d.name \
-				and (new_d.fields.get(prop) == dt_d.fields.get(prop) \
+				and (new_d.get(prop) == dt_d.get(prop) \
 				or \
 				( \
-					new_d.fields.get(prop) in [None, 0] \
-					and dt_d.fields.get(prop) in [None, 0] \
+					new_d.get(prop) in [None, 0] \
+					and dt_d.get(prop) in [None, 0] \
 				) or \
 				( \
-					new_d.fields.get(prop) in [None, ''] \
-					and dt_d.fields.get(prop) in [None, ''] \
+					new_d.get(prop) in [None, ''] \
+					and dt_d.get(prop) in [None, ''] \
 				)):
 					delete = 1
 					break
 		
-			value = new_d.fields.get(prop)
+			value = new_d.get(prop)
 			
 			if (prop in self.property_restrictions and 
 				(value not in self.property_restrictions.get(prop) or
-				ref_d.fields.get(prop) not in self.property_restrictions.get(prop)
+				ref_d.get(prop) not in self.property_restrictions.get(prop)
 				)):
 				webnotes.msgprint("""\
 					You cannot change '%s' of '%s' from '%s' to '%s'.
 					%s can only be changed among '%s'.
 					<i>Ignoring this change and saving.</i>\
 					""" % (self.defaults.get(prop, {}).get('label') or prop,
-						new_d.fields.get('label') or new_d.fields.get('idx'),
-						ref_d.fields.get(prop), value,
+						new_d.get('label') or new_d.get('idx'),
+						ref_d.get(prop), value,
 						self.defaults.get(prop, {}).get('label') or prop,
 						", ".join(self.property_restrictions.get(prop)),
 					))
@@ -257,7 +257,7 @@ class DocType:
 			#if prop == 'idx':
 			#	if value > 1:
 			#		for idoc in ([self.doc] + self.doclist):
-			#				if idoc.fields.get(prop) == (value - 1):
+			#				if idoc.get(prop) == (value - 1):
 			#					prop = 'previous_field'
 			#					value = idoc.fieldname
 			#					break
@@ -305,7 +305,7 @@ class DocType:
 				DELETE FROM `tabProperty Setter`
 				WHERE doc_type = %(doc_type)s
 				AND field_name = %(field_name)s
-				AND property = %(property)s""", d.fields)
+				AND property = %(property)s""", d)
 
 			# Save the property setter doc if not marked for deletion i.e. delete=0
 			if not d.delete:

@@ -29,30 +29,33 @@ default_fields = ['doctype','name','owner','creation','modified','modified_by','
 
 def get(doctype, name):
 	"""returns doclist identified by name, from table indicated by doctype, with its children"""
-	import webnotes.model.doc
-	return webnotes.model.doc.get(doctype, name)
+	return get_controller(doctype, name).doclist
 	
 def get_doctype(doctype, processed=False):
 	"""returns doclist identified by doctype, from tabDocType with its children"""
 	import webnotes.model.doctype
 	return webnotes.model.doctype.get(doctype, processed)
 
-def insert(doclist, ignore_fields=0):
+def insert(doclist):
 	"""insert a new doclist"""
-	if doclist and not isinstance(doclist, list):
+	if doclist and isinstance(doclist, dict):
 		doclist = [doclist]
 	
 	doclistcon = get_controller(doclist)
-	doclistcon.doc.fields['__islocal'] = 1
-	doclistcon.save(ignore_fields=ignore_fields)
+	for d in doclistcon.doclist:
+		d["__islocal"] = 1
+	doclistcon.save()
+
+	# can be used to retrieve name or any value after save
+	return doclistcon
 	
-def insert_variants(base, variants, ignore_fields=0):
+def insert_variants(base, variants):
 	for v in variants:
 		base_copy = base.copy()
 		base_copy.update(v)
-		insert(base_copy, ignore_fields)
-	
-def insert_child(fields, ignore_fields=0):
+		insert(base_copy)
+
+def insert_child(fields):
 	"""insert a child, must specify parent, parenttype and doctype"""
 
 	# load parent
@@ -60,7 +63,7 @@ def insert_child(fields, ignore_fields=0):
 
 	# make child
 	new = webnotes.model.doc.Document(fielddata = fields)
-	new.fields['__islocal'] = 1
+	new['__islocal'] = 1
 
 	# add to doclist
 	parent.doclist.append(new)
@@ -72,31 +75,26 @@ controllers = {}
 def get_controller(doctype, name=None):
 	"""return controller object"""
 	global controllers
-	from webnotes.model.doc import Document
 	
+	doclist = doctype
 	if isinstance(doctype, list):
-		doclist = doctype
-		if isinstance(doclist[0], Document):
-			doctype = doclist[0].doctype
-		else:
-			doctype = doclist[0]['doctype']
-	else:
-		doclist = get(doctype, name)
+		doctype = doclist[0]['doctype']
 	
 	# return if already loaded
 	if doctype in controllers:
-		return controllers[doctype](doclist)
+		return controllers[doctype](doclist, name)
 
 	import os
 	from webnotes.modules import get_module_path, scrub
 	from webnotes.model.controller import DocListController		
-		
-	doctypeobj = get_doctype(doctype)
-	module_path = os.path.join(get_module_path(doctypeobj[0].module),
+
+	module_name = doctype in ["DocType", "DocField", "Custom Field", "DocPerm"] and "core" \
+		or get_doctype(doctype)[0].module
+	module_path = os.path.join(get_module_path(module_name),
 		'doctype', scrub(doctype), scrub(doctype)+'.py')
 	# check if path exists
 	if os.path.exists(module_path):
-		module = __import__(scrub(doctypeobj[0].module) + '.doctype.' + scrub(doctype) + '.' \
+		module = __import__(scrub(module_name) + '.doctype.' + scrub(doctype) + '.' \
 			+ scrub(doctype), fromlist = [scrub(doctype).encode("utf-8")])
 
 		# find controller in module
@@ -106,10 +104,10 @@ def get_controller(doctype, name=None):
 			if inspect.isclass(attrobj) and attr.startswith(doctype.replace(' ', '').replace('-', '')) \
 				and issubclass(attrobj, DocListController):
 				controllers[doctype] = attrobj
-				return attrobj(doclist)
-				
+				return attrobj(doclist, name)
+	
 	# vanilla controller
-	return DocListController(doclist)
+	return DocListController(doclist, name)
 	
 def check_if_doc_is_linked(dt, dn):
 	"""
@@ -224,6 +222,18 @@ def get_link_fields(dt):
 	link_fields = webnotes.model.rename_doc.get_link_fields(dt)
 	link_fields = [[lf['parent'], lf['fieldname']] for lf in link_fields]
 	return link_fields
+
+def is_single(doctype):
+	"""used in doc.py"""
+	from webnotes.utils import cint
+	return cint(webnotes.conn.get_value("DocType", doctype, "issingle"))
+	
+def get_table_fields(doctype):
+	table_fields = webnotes.conn.sql("""select options, fieldname from `tabDocField`
+		where parent = %s and fieldtype='Table'""", doctype, as_dict=1)
+	custom_table_fields = webnotes.conn.sql("""select options, fieldname from `tabCustom Field`
+		where dt = %s and fieldtype='Table'""", doctype, as_dict=1)
+	return (table_fields or []) + (custom_table_fields or [])
 	
 def clear_recycle_bin():
 	"""
@@ -251,4 +261,3 @@ def clear_recycle_bin():
 			sql("delete from `%s` where parent like 'old_parent:%%'" % t[0])
 
 	webnotes.msgprint("%s records deleted" % str(int(total_deleted)))
-

@@ -61,12 +61,12 @@ def get_link_fields(doctype):
 	import webnotes.model.doctype
 	doclist = webnotes.model.doctype.get(doctype)
 	return [
-		(d.fields.get('fieldname'), d.fields.get('options'), d.fields.get('label'))
+		(d.get('fieldname'), d.get('options'), d.get('label'))
 		for d in doclist
-		if d.fields.get('doctype') == 'DocField' and d.fields.get('parent') == doctype
-		and d.fields.get('fieldname')!='owner'
-		and (d.fields.get('fieldtype') == 'Link' or
-			(	d.fields.get('fieldtype') == 'Select'
+		if d.get('doctype') == 'DocField' and d.get('parent') == doctype
+		and d.get('fieldname')!='owner'
+		and (d.get('fieldtype') == 'Link' or
+			(	d.get('fieldtype') == 'Select'
 				and (d.options or '').startswith('link:'))
 			)
 	]

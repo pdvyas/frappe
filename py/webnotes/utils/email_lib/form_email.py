@@ -158,7 +158,7 @@ class FormEmail:
 			
 			# tag to record
 			if self.dt in comm_cols:
-				comm.fields[self.dt] = self.dn
+				comm[self.dt] = self.dn
 				
 			# tag to customer, supplier (?)
 			if self.customer:

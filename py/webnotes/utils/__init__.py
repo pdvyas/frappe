@@ -31,6 +31,14 @@ month_name_full = ['','January','February','March','April','May','June','July','
 no_value_fields = ['Section Break', 'Column Break', 'HTML', 'Table', 'FlexTable', 'Button', 'Image', 'Graph']
 default_fields = ['doctype','name','owner','creation','modified','modified_by','parent','parentfield','parenttype','idx','docstatus']
 
+class DictObj(dict):
+	"""dict like object that exposes keys as attributes"""
+	def __getattr__(self, key):
+		return self.get(key)
+	
+	def __setattr__(self, key, value):
+		self[key] = value
+
 def getCSVelement(v):
 	"""
 		 Returns the CSV value of `v`, For example: 
@@ -153,20 +161,16 @@ def getdate(string_date):
 		 Coverts string date (yyyy-mm-dd) to datetime.date object
 	"""
 	import datetime
-
-	if type(string_date)==unicode:
-		string_date = str(string_date)
 	
-	if type(string_date) in (datetime.datetime, datetime.date): 
+	if isinstance(string_date, datetime.date):
 		return string_date
+	elif isinstance(string_date, datetime.datetime):
+		return datetime.date()
 	
-	if ' ' in string_date:
-		string_date = string_date.split(' ')[0]
-	t = string_date.split('-')
-	if len(t)==3:
-		return datetime.date(cint(t[0]), cint(t[1]), cint(t[2]))
-	else:
-		return ''
+	if " " in string_date:
+		string_date = string_date.split(" ")[0]
+		
+	return datetime.datetime.strptime(string_date, "%Y-%m-%d").date()
 
 def add_days(date, days, format='string'):
 	"""
@@ -231,10 +235,13 @@ def get_first_day(dt, d_years=0, d_months=0):
 	 Also adds `d_years` and `d_months` if specified
 	"""
 	import datetime
-	# d_years, d_months are "deltas" to apply to dt
-	y, m = dt.year + d_years, dt.month + d_months
-	a, m = divmod(m-1, 12)
-	return datetime.date(y+a, m+1, 1)
+	dt = getdate(dt)
+
+	# d_years, d_months are "deltas" to apply to dt	
+	overflow_years, month = divmod(dt.month + d_months - 1, 12)
+	year = dt.year + d_years + overflow_years
+	
+	return datetime.date(year, month + 1, 1)
 
 def get_last_day(dt):
 	"""

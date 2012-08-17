@@ -120,9 +120,9 @@ def get_server_obj(doclist):
 	module = scrub(module)
 	dt = scrub(doc.doctype)
 	DocType = None
-
+	
 	try:
-		module = __import__('%s.doctype.%s.%s' % (module, dt, dt), fromlist=[''])
+		module = __import__('%s.doctype.%s.%s' % (module, dt, dt), fromlist=[dt])
 		if hasattr(module, 'DocType'):
 			DocType = getattr(module, 'DocType', None)
 		else:
@@ -159,9 +159,9 @@ def get_obj(dt = None, dn = None, doc=None, doclist=[], with_children = 0):
 		if not dn:
 			dn = dt
 		if with_children:
-			doclist = webnotes.model.doc.get(dt, dn, from_get_obj=1)
+			doclist = webnotes.model.doc.get(dt, dn)
 		else:
-			doclist = webnotes.model.doc.get(dt, dn, with_children = 0, from_get_obj=1)
+			doclist = webnotes.model.doc.get(dt, dn)
 		return get_server_obj(doclist)
 	elif doclist:
 		return get_server_obj(doclist)

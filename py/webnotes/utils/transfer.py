@@ -121,7 +121,7 @@ class UpdateDocument:
 		
 	def save(self):
 		# parent
-		self.doc.save(new = 1, ignore_fields = 1, check_links=0)
+		self.doc.save(new = 1)
 		self.doclist = [self.doc]
 		self.save_children()
 			
@@ -131,7 +131,7 @@ class UpdateDocument:
 			
 	def save_one_doc(self, df, as_new=1):
 		d = Document(fielddata = df)
-		d.save(new = as_new, ignore_fields = 1, check_links=0)
+		d.save(new = as_new)
 		self.doclist.append(d)
 
 	def run_on_update(self):
@@ -166,7 +166,7 @@ class UpdateDocumentMerge(UpdateDocument):
 		if self.exists:
 			# save main doc
 			self.keep_values(self.doc)
-			self.doc.save(ignore_fields = 1, check_links=0)
+			self.doc.save()
 			self.doclist.append(self.doc)
 			self.save_children()
 			self.on_save()
@@ -187,10 +187,10 @@ class UpdateDocumentMerge(UpdateDocument):
 					# is it new?
 					if self.child_exists(d):
 						self.keep_values(d)
-						d.save(ignore_fields = 1, check_links=0)
+						d.save()
 						self.log.append('updated %s, %s' % (d.doctype, d.name))
 					else:
-						d.save(1, ignore_fields = 1, check_links=0)
+						d.save(1)
 						self.log.append('new %s' % d.doctype)
 			self.doclist.append(d)
 
@@ -198,7 +198,7 @@ class UpdateDocumentMerge(UpdateDocument):
 		if hasattr(self, 'get_orignal_values'):
 			ov = self.get_orignal_values(d)
 			if ov:
-				d.fields.update(ov)
+				d.update(ov)
 
 
 
@@ -216,9 +216,9 @@ class UpdateDocType(UpdateDocumentMerge):
 	
 	def get_id(self, d):
 		key = d.fieldname and 'fieldname' or 'label'
-		if d.fields.get(key):
+		if d.get(key):
 			return webnotes.conn.sql("""select name, options, permlevel, reqd, print_hide, hidden, fieldtype
-				from tabDocField where %s=%s and parent=%s""" % (key, '%s', '%s'), (d.fields[key], d.parent))
+				from tabDocField where %s=%s and parent=%s""" % (key, '%s', '%s'), (d[key], d.parent))
 				
 	def on_save(self):
 		self.renum()
@@ -273,7 +273,7 @@ class UpdateDocType(UpdateDocumentMerge):
 					tmp = Document(fielddata = d)
 					tmp.fieldname = ''
 					tmp.name = None
-					tmp.save(1, ignore_fields = 1, check_links=0)
+					tmp.save(1)
 				else:
 					webnotes.conn.sql("update tabDocField set idx=%s where %s=%s and parent=%s" % \
 						('%s', d.get('fieldname') and 'fieldname' or 'label', '%s', '%s'), (d.get('idx'), d.get('fieldname') or d.get('label'), self.doc.name))

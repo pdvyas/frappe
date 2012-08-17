@@ -44,15 +44,15 @@ class DocType:
 
 	def validate(self):
 		self.temp = {}
-		if self.doc.fields.get('__temp'):
-			self.temp = json.loads(self.doc.fields['__temp'])
-			del self.doc.fields['__temp']
+		if self.doc.get('__temp'):
+			self.temp = json.loads(self.doc['__temp'])
+			del self.doc['__temp']
 
 		self.validate_max_users()
 		self.update_roles()
 		self.logout_if_disabled()
 		
-		if self.doc.fields.get('__islocal') and not self.doc.new_password:
+		if self.doc.get('__islocal') and not self.doc.new_password:
 			webnotes.msgprint("Password required while creating new doc")
 		
 	def logout_if_disabled(self):

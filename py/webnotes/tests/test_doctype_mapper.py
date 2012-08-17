@@ -36,6 +36,16 @@ base_field_mapper_detail = {
 	"__islocal": 1,
 }
 
+base_quotation = {
+
+}
+
+base_quotation_item = {
+
+}
+
+
+
 class DocTypeMapperTest(unittest.TestCase):
 	def setUp(self):
 		webnotes.conn.begin()
@@ -78,6 +88,9 @@ class DocTypeMapperTest(unittest.TestCase):
 		self.assertEqual(doctype_mapper_doclist.getone(
 			{"doctype":"Table Mapper Detail"}).match_id, 0)
 		self.assertEqual(doctype_mapper_doclist.getone(
-			{"doctype":"Field Mapper Detail"}).fields['map'], "Yes")
+			{"doctype":"Field Mapper Detail"})['map'], "Yes")
 		
+	def test_is_submitted(self):
+		"""do not allow mapping, if from doc is not submitted, but is required to be submitted"""
+		webnotes.model.insert()
 		
