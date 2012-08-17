@@ -280,10 +280,13 @@ class DocListController(object):
 	
 	def add_child(self, doc):
 		"""add a child doc to doclist"""
+		# make child
 		if not isinstance(doc, webnotes.model.doc.Document):
 			doc = webnotes.model.doc.Document(fielddata = doc)
 		doc.__islocal = 1
 		doc.parent = self.doc.name
+		
+		# add to doclist
 		self.doclist.append(doc)
 	
 	# TODO: should this method be here?

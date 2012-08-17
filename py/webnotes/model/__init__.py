@@ -62,14 +62,10 @@ def insert_child(fields):
 	parent = get_controller(fields['parenttype'], fields['parent'])
 
 	# make child
-	new = webnotes.model.doc.Document(fielddata = fields)
-	new['__islocal'] = 1
+	parent.add_child(fields)
 
-	# add to doclist
-	parent.doclist.append(new)
-	
 	# save
-	parent.save(ignore_fields=ignore_fields)
+	parent.save()
 
 controllers = {}
 def get_controller(doctype, name=None):
