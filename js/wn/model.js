@@ -108,7 +108,7 @@ $.extend(wn.model, {
 	insert: function(doc, callback, btn) {
 		var doclist = wn.model.create(doc.doctype);
 		$.extend(doclist.doc.fields, doc);
-		doclist.insert(callback, btn);
+		doclist.save(callback, btn);
 	},
 	// create a new local doclist
 	create: function(dt) {
@@ -214,18 +214,6 @@ wn.model.DocList = Class.extend({
 		wn.provide('wn.doclists.' + this.doctype);
 		wn.doclists[this.doctype][this.name] = this;
 	},
-	reset: function(doclist) {
-		// clear
-		var oldname = this.doc.get('name');
-		this.doclist.splice(0, this.doclist.length);
-		for(i in doclist) {
-			this.add(doclist[i]);
-		}
-		if(oldname != this.name) {
-			// remove old reference
-			delete wn.doclists[this.doctype][oldname];
-		}
-	},
 	// usage:
 	// doclist.each(doctype, filters, fn)
 	// doclist.each(filters/doctype, fn);
@@ -290,23 +278,10 @@ wn.model.DocList = Class.extend({
 		}
 		return doc;
 	},
-	insert: function(callback, btn) {
+	save: function(callback, btn) {
 		var me = this;
 		wn.call({
-			method: 'webnotes.model.client.insert',
-			args: {docs: this.get_docs()},
-			callback: function(r) {
-				me.reset(r.docs);
-				callback(r);
-			},
-			btn: btn
-		});
-	},
-	// save doclist
-	save: function(docstatus, callback) {
-		var me = this;
-		wn.call({
-			method: 'webnotes.model.doclist.save',
+			method: 'webnotes.model.client.save',
 			args: {
 				docs: this.get_docs()
 			},
@@ -316,6 +291,18 @@ wn.model.DocList = Class.extend({
 				callback(r);
 			}
 		});
+	},
+	reset: function(doclist) {
+		// clear
+		var oldname = this.doc.get('name');
+		this.doclist.splice(0, this.doclist.length);
+		for(i in doclist) {
+			this.add(doclist[i]);
+		}
+		if(oldname != this.name) {
+			// remove old reference
+			delete wn.doclists[this.doctype][oldname];
+		}
 	},
 	get_docs: function() {
 		return $.map(this.doclist, function(d) { return d.fields; });

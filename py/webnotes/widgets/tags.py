@@ -50,14 +50,17 @@ from webnotes.utils import cint, load_json
 def add_tag():
 	"adds a new tag to a record, and creates the Tag master"	
 	f = webnotes.form
-	DocTags(f.dt).add(f.dn, f.tag)		
+	DocTags(f.dt).add(f.dn, f.tag)
 
 @webnotes.whitelist()
 def remove_tag():
 	"removes tag from the record"
 	f = webnotes.form
 	DocTags(f.dt).remove(f.dn, f.tag)
-		
+
+def clear_tags(dt, dn):
+	DocTags(dt).remove_all(dn)
+
 class DocTags:
 	"""Tags for a particular doctype"""
 	def __init__(self, dt):
@@ -131,3 +134,4 @@ class DocTags:
 		webnotes.conn.commit()
 		webnotes.conn.sql("alter table `tab%s` add column `_user_tags` varchar(180)" % self.dt)
 		webnotes.conn.begin()
+

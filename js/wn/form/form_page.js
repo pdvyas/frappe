@@ -52,8 +52,13 @@ wn.views.FormPage = Class.extend({
 		this.page.appframe.add_button('Save', function() { 
 			var btn = this;
 			$(this).html('Saving...').attr('disabled', 'disabled');
-			me.form.doclist.save(0, function() {
-				$(this).attr('disabled', false).html('Save');
+			freeze();
+			me.form.doclist.save(function() {
+				unfreeze();
+				$(btn).attr('disabled', false).html('Save').attr('saving', 1)
+					.addClass('btn-success');
+				setTimeout('$(".btn[saving]").removeClass("btn-success").attr("saving",null)', 2000);
+				
 			});
 		});
 		

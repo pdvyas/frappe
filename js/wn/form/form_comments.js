@@ -28,26 +28,27 @@ wn.ui.Comments = Class.extend({
 		wn.model.insert({
 			doctype: 'Comment',
 			comment: comment,
-			comment_doctype: this.form_page.doclist.doc.get('name'),
-			comment_docname: this.form_page.doclist.doc.get('doctype'),
+			parenttype: this.form_page.doclist.doc.get('doctype'),
+			parent: this.form_page.doclist.doc.get('name'),
+			parentfield: 'comments',
 			comment_by: user,
-			comment_by_fullname: wn.boot.user_info[user].fullname
 		}, function(r) {
 			me.$w.find('textarea').val('');
-			me.render_comment(r.message);
+			me.render_comment(r.docs[0]);
 		}, this.$w.find('.btn'))
 
 	},
 	render_comment: function(comment) {
-		comment.date = prettyDate(comment.creation)
+		comment.date = prettyDate(comment.creation);
+		comment.comment_by_fullname = wn.boot.user_info[comment.comment_by].fullname;
 		$(repl('<div style="margin-bottom: 7px; border-bottom: 1px dashed #888; \
 			padding-bottom: 7px;">\
-			<p class="comment">%(comment)s<br>\
-			<div style="font-size: 80%">\
-				<span style="color: #888;">%(date)s</span>\
-				<span style="float: right; color: #888;">- %(comment_by_fullname)s</span>\
-			</div>\
-			</p></div>', comment))
+				<div class="comment">%(comment)s</div>\
+				<div style="font-size: 80%">\
+					<span style="color: #888;">%(date)s</span>\
+					<span style="float: right; color: #888;">- %(comment_by_fullname)s</span>\
+				</div>\
+			</div>', comment))
 				.prependTo(this.$w.find('.comment-list'));
 	}
 })

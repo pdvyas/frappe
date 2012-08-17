@@ -26,14 +26,10 @@ import webnotes
 from webnotes.utils import now, cint
 msgprint = webnotes.msgprint
 
+from webnotes.model.controller import DocListController
 
 
-
-class DocType:
-	def __init__(self, doc=None, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
-
+class DocType(DocListController):
 	def change_modified_of_parent(self):
 		sql = webnotes.conn.sql
 		parent_list = sql('SELECT parent from tabDocField where fieldtype="Table" and options="%s"' % self.doc.name)
@@ -52,12 +48,6 @@ class DocType:
 					if d.fieldname in restricted:
 						d.fieldname = d.fieldname + '1'
 	
-	def set_version(self):
-		self.doc.version = cint(self.doc.version) + 1
-	
-	#
-	# check if this series is not used elsewhere
-	#
 	def validate_series(self, autoname=None, name=None):
 		sql = webnotes.conn.sql
 		if not autoname: autoname = self.doc.autoname
@@ -69,9 +59,6 @@ class DocType:
 			if used_in:
 				msgprint('<b>Series already in use:</b> The series "%s" is already used in "%s"' % (prefix, used_in[0][0]), raise_exception=1)
 
-	#
-	# field validations
-	#
 	def validate_fields(self):
 		"validates fields for incorrect properties and double entries"
 		fieldnames = {}
@@ -97,7 +84,6 @@ class DocType:
 				# check illegal mandatory
 				if d.fieldtype in ('HTML', 'Button', 'Section Break', 'Column Break') and d.reqd:
 					webnotes.msgprint('%(lable)s [%(fieldtype)s] cannot be mandatory', raise_exception=1)
-		
 		
 	def validate(self):
 		self.validate_series()

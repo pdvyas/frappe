@@ -32,7 +32,7 @@ def get_doclist():
 
 	# add comments
 	doclist[0]['__comments'] = webnotes.conn.sql("""select * from tabComment where
-		comment_doctype=%s and comment_docname=%s order by modified""", 
+		parenttype=%s and parent=%s order by modified""", 
 		(doclist[0].doctype, doclist[0].name), as_dict=1)
 	
 	# add assignment
@@ -54,22 +54,11 @@ def get_doctype():
 	webnotes.response['docs'] = docs
 	
 @webnotes.whitelist()
-def insert():
+def save():
 	"""insert doclist"""
 	import webnotes.model
 	import json
 	
-	c = webnotes.model.get_controller(json.loads(webnotes.form.get('docs')))
-	c.doc['__islocal'] = 1
-	c.save()
-	webnotes.response['docs'] = c.doclist
-
-@webnotes.whitelist()
-def update():
-	"""insert doclist"""
-	import webnotes.model
-	import json
-
 	c = webnotes.model.get_controller(json.loads(webnotes.form.get('docs')))
 	c.save()
 	webnotes.response['docs'] = c.doclist

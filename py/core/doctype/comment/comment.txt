@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		u'creation': '2012-05-03 18:41:14',
-		u'docstatus': 0,
-		u'modified': '2012-08-06 15:10:41',
+		u'creation': datetime.datetime(2012, 8, 9, 14, 44, 10),
+		u'docstatus': 0L,
+		u'modified': datetime.datetime(2012, 8, 17, 18, 1, 23),
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -16,44 +16,44 @@
 		'autoname': u'CWR/.#####',
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
-		u'doctype': u'DocType',
-		'issingle': 0,
+		'doctype': u'DocType',
+		'issingle': 0L,
 		'module': u'Core',
 		u'name': u'__common__',
 		'section_style': u'Simple',
 		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'version': 1
+		'show_in_menu': 0L,
+		'version': 5L
 	},
 
 	# These values are common for all DocField
 	{
-		u'doctype': u'DocField',
+		'doctype': u'DocField',
 		u'name': u'__common__',
 		'parent': u'Comment',
 		'parentfield': u'fields',
 		'parenttype': u'DocType',
-		'permlevel': 0
+		'permlevel': 0L
 	},
 
 	# These values are common for all DocPerm
 	{
-		'create': 1,
-		u'doctype': u'DocPerm',
+		'create': 1L,
+		'doctype': u'DocPerm',
 		u'name': u'__common__',
 		'parent': u'Comment',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
-		'permlevel': 0,
-		'read': 1,
+		'permlevel': 0L,
+		'read': 1L,
 		'role': u'System Manager',
-		'write': 1
+		'write': 1L
 	},
 
 	# DocType, Comment
 	{
 		u'doctype': u'DocType',
-		u'name': u'Comment'
+		'name': u'Comment'
 	},
 
 	# DocField
@@ -62,10 +62,10 @@
 		'fieldname': u'comment',
 		'fieldtype': u'Text',
 		'label': u'Comment',
-		'no_copy': 0,
+		'no_copy': 0L,
 		'oldfieldname': u'comment',
 		'oldfieldtype': u'Text',
-		'search_index': 0
+		'search_index': 0L
 	},
 
 	# DocField
@@ -74,82 +74,10 @@
 		'fieldname': u'comment_by',
 		'fieldtype': u'Data',
 		'label': u'Comment By',
-		'no_copy': 0,
+		'no_copy': 0L,
 		'oldfieldname': u'comment_by',
 		'oldfieldtype': u'Data',
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'comment_by_fullname',
-		'fieldtype': u'Data',
-		'label': u'Comment By Fullname',
-		'no_copy': 0,
-		'oldfieldname': u'comment_by_fullname',
-		'oldfieldtype': u'Data',
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'comment_date',
-		'fieldtype': u'Date',
-		'label': u'Comment Date',
-		'no_copy': 0,
-		'oldfieldname': u'comment_date',
-		'oldfieldtype': u'Date',
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'comment_time',
-		'fieldtype': u'Data',
-		'label': u'Comment Time',
-		'no_copy': 0,
-		'oldfieldname': u'comment_time',
-		'oldfieldtype': u'Data',
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'comment_doctype',
-		'fieldtype': u'Data',
-		'label': u'Comment Doctype',
-		'no_copy': 0,
-		'oldfieldname': u'comment_doctype',
-		'oldfieldtype': u'Data',
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'comment_docname',
-		'fieldtype': u'Data',
-		'label': u'Comment Docname',
-		'no_copy': 0,
-		'oldfieldname': u'comment_docname',
-		'oldfieldtype': u'Data',
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'post_topic',
-		'fieldtype': u'Data',
-		'label': u'Post Topic',
-		'no_copy': 0,
-		'oldfieldname': u'post_topic',
-		'oldfieldtype': u'Data',
-		'search_index': 0
+		'search_index': 0L
 	},
 
 	# DocField
