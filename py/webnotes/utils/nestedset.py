@@ -255,7 +255,8 @@ def update_remove_node(doctype, name):
 		webnotes.conn.sql("update `tab%s` set rgt = rgt-2, modified='%s' where rgt > %s" %(doctype,n,left[0][0]))
 		webnotes.conn.sql("update `tab%s` set lft = lft-2, modified='%s' where lft > %s" %(doctype,n,left[0][0]))
 
-class DocTypeNestedSet:
+from webnotes.model.controller import DocListController
+class NestedSetController(DocListController):
 	def on_update(self):
 		update_nsm(self)
 		

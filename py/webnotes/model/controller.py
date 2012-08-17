@@ -41,10 +41,10 @@ class DocListController(object):
 	"""
 	def __init__(self, doctype=None, name=None):
 		self.to_docstatus = 0
-		self.doctype = doctype
-		self.name = name
 		if doctype:
 			self.load(doctype, name)
+		if hasattr(self, "setup"):
+			self.setup()
 	
 	def load(self, doctype, name=None):
 		if isinstance(doctype, list):
@@ -253,37 +253,31 @@ class DocListController(object):
 		validate(self)
 
 	def run(self, method, args=None):
-
-		# TODO: deprecate these conditions and replace obj with self
-		if getattr(self, 'new_style', None):
-			obj = self
-		else:
-			if hasattr(self, 'obj'):
-				obj = self.obj
-			else:
-				from webnotes.model.code import get_obj
-				obj = self.obj = get_obj(doclist = self.doclist)
-
-		if hasattr(obj, method):
+		if hasattr(self, method):
 			if args:
-				getattr(obj, method)(args)
+				getattr(self, method)(args)
 			else:
-				getattr(obj, method)()
+				getattr(self, method)()
 
-		if hasattr(obj, "custom_%s" % method):
-			getattr(obj, "custom_%s" % method)()
+		# for testing
+		# else:
+		# 	print "method", method, "not found for", self.doc.doctype
 
+		# if possible, deprecate
 		trigger(method, self.doclist[0])
-		
+
 	def clear_table(self, table_field):
 		self.doclist = filter(lambda d: d.parentfield != table_field, self.doclist)
 	
 	def add_child(self, doc):
 		"""add a child doc to doclist"""
+		# make child
 		if not isinstance(doc, webnotes.model.doc.Document):
 			doc = webnotes.model.doc.Document(fielddata = doc)
 		doc.__islocal = 1
 		doc.parent = self.doc.name
+		
+		# add to doclist
 		self.doclist.append(doc)
 	
 	# TODO: should this method be here?
@@ -323,48 +317,3 @@ def trigger(method, doc):
 		
 	if hasattr(startup.event_handlers, 'doclist_all'):
 		startup.event_handlers.doclist_all(doc, method)
-
-
-
-# for bc
-def getlist(doclist, parentfield):
-	"""
-		Return child records of a particular type
-	"""
-	import webnotes.model.utils
-	return webnotes.model.utils.getlist(doclist, parentfield)
-
-		
-# clone - To deprecate
-
-def clone(source_doclist):
-	"""make a copy of the doclist"""
-	from webnotes.model.doc import Document
-	new_doclist = []
-	new_parent = Document(fielddata = source_doclist.doc.copy())
-	new_parent.name = 'Temp/001'
-	new_parent['__islocal'] = 1
-	new_parent['docstatus'] = 0
-
-	if new_parent.has_key('amended_from'):
-		new_parent['amended_from'] = None
-		new_parent['amendment_date'] = None
-
-	new_parent.save(1)
-
-	new_doclist.append(new_parent)
-
-	for d in source_doclist.doclist[1:]:
-		newd = Document(fielddata = d.copy())
-		newd.name = None
-		newd['__islocal'] = 1
-		newd['docstatus'] = 0
-		newd.parent = new_parent.name
-		new_doclist.append(newd)
-
-	doclistobj = DocListController()
-	doclistobj.docs = new_doclist
-	doclistobj.doc = new_doclist[0]
-	doclistobj.doclist = new_doclist
-	doclistobj.save()
-	return doclistobj

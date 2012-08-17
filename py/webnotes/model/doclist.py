@@ -90,6 +90,7 @@ def load_main(doctype, name):
 		doc = webnotes.conn.sql("""select field, value from `tabSingles`
 			where doctype=%s""", doctype)
 		doc = dict(doc)
+		doc["name"] = doctype
 	else:
 		doc  = webnotes.conn.sql("""select * from `tab%s` where name = %s""" % \
 			(doctype, "%s"), name, as_dict=1)

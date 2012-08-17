@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 import webnotes
+import webnotes.model
 
 def rename_doc(doctype, old, new, is_doctype=0, debug=0):
 	"""
@@ -8,12 +9,11 @@ def rename_doc(doctype, old, new, is_doctype=0, debug=0):
 	"""
 	import webnotes.utils
 	import webnotes.model.doctype
-	from webnotes.model.code import get_obj
 	
 	# call on_rename method if exists
-	obj = get_obj(doctype, old)
-	if hasattr(obj, 'on_rename'):
-		obj.on_rename(new, old)
+	controller = webnotes.model.get_controller(doctype, old)
+	if hasattr(controller, "on_rename"):
+		controller.on_rename(new, old)
 
 	# get doclist of given doctype
 	# without child fields of table type fields (form=0)

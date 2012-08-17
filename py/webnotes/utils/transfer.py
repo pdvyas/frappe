@@ -35,6 +35,7 @@ from __future__ import unicode_literals
 """
 
 import webnotes
+import webnotes.model
 from webnotes.model.doc import Document
 
 # this variable is a flag that transfer process is on, to the on_update
@@ -135,12 +136,7 @@ class UpdateDocument:
 		self.doclist.append(d)
 
 	def run_on_update(self):
-		
-		from webnotes.model.code import get_obj
-		so = get_obj(doclist = self.doclist)
-		if hasattr(so, 'on_update'):
-			so.on_update()
-
+		webnotes.model.get_controller(self.doclist).run("on_update")
 
 class UpdateDocumentMerge(UpdateDocument):
 	def __init__(self, in_doclist):
@@ -295,12 +291,7 @@ class UpdateDocType(UpdateDocumentMerge):
 					('%s', e[0] and 'fieldname' or 'label', '%s', '%s'), (idx+1, e[0] or e[1], self.doc.name))
 
 	def run_on_update(self):
-		from webnotes.model.code import get_obj
-		so = get_obj(doclist = self.doclist)
-		if hasattr(so, 'on_update'):
-			so.on_update()
-
-
+		webnotes.model.get_controller(self.doclist).run("on_update")
 
 class UpdateDocTypeMapper(UpdateDocumentMerge):
 	"""
