@@ -19,8 +19,6 @@
 # CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
-
-from __future__ import unicode_literals
 """
 	Execute Patch Files
 
@@ -33,8 +31,9 @@ from __future__ import unicode_literals
 	
 	where patch1, patch2 is module name
 """
+from __future__ import unicode_literals
 import webnotes
-		
+import webnotes.utils
 
 def run_all(patch_dict=None):
 	"""run all pending patches"""
@@ -102,7 +101,7 @@ def execute_patch(patchmodule, method=None, methodargs=None):
 		webnotes.conn.rollback()
 		global has_errors
 		has_errors = True
-		tb = webnotes.getTraceback()
+		tb = webnotes.utils.getTraceback()
 		log(tb)
 		import os
 		if os.environ.get('HTTP_HOST'):

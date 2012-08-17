@@ -36,6 +36,7 @@ code_fields_dict = {
 	'Control Panel':[('startup_code', 'js'), ('startup_css', 'css')]
 }
 
+# globals
 auto_cache_clear = False
 auth_obj = None
 conn = None
@@ -51,6 +52,7 @@ response = {'message':'', 'exc':''}
 debug_log = []
 message_log = []
 
+# exceptions
 class ProgrammingError(Exception): pass
 class ValidationError(Exception): pass
 class AuthenticationError(Exception): pass
@@ -68,26 +70,21 @@ class DocStatusError(ValidationError): pass
 class IntegrityError(ValidationError): pass
 class CircularLinkError(ValidationError): pass
 
-def getTraceback():
-	import utils
-	return utils.getTraceback()
-
 def errprint(msg):
-	"""
-	   Append to the :data:`debug log`
-	"""
+	"""Append to the :data:`debug log`"""
 	from utils import cstr
 	debug_log.append(cstr(msg or ''))
 
 def msgprint(msg, small=0, raise_exception=0, as_table=False, debug=0):
-	"""
-	   Append to the :data:`message_log`
-	"""	
+	"""Append to the :data:`message_log`"""
 	from utils import cstr
 	import inspect
-	if as_table and type(msg) in (list, tuple):
-		msg = '<table border="1px" style="border-collapse: collapse" cellpadding="2px">' + ''.join(['<tr>'+''.join(['<td>%s</td>' % c for c in r])+'</tr>' for r in msg]) + '</table>'
 	
+	# TODO: should we deprecate this?
+	if as_table and isinstance(msg, (list, tuple)):
+		msg = """<table border="1px" stype="border-collapse:collapse;" cellpadding="2px">%s</table>""" \
+			% "\n".join(["""<tr>%s</tr>""" % "\n".join(["""<td>%s</td>""" % col for col in row]) for row in msg])
+
 	message_log.append((small and '__small:' or '')+cstr(msg or ''))
 
 	if debug:
@@ -122,9 +119,7 @@ def get_files_path():
 	return conf.files_path
 	
 def create_folder(path):
-	"""
-	Wrapper function for os.makedirs (does not throw exception if directory exists)
-	"""
+	"""Wrapper function for os.makedirs (does not throw exception if directory exists)"""
 	import os
 	
 	try:
@@ -154,7 +149,7 @@ def get_env_vars(env_var):
 	import os
 	return os.environ.get(env_var,'None')
 
-remote_ip = get_env_vars('REMOTE_ADDR')		#Required for login from python shell
+remote_ip = get_env_vars('REMOTE_ADDR') #Required for login from python shell
 logger = None
 	
 def get_db_password(db_name):
@@ -210,11 +205,6 @@ def whitelist(allow_guest=False, allow_roles=[]):
 
 	return innerfn
 	
-def clear_cache(user=None):
-	"""clear boot cache"""
-	from webnotes.session_cache import clear
-	clear(user)
-	
 def get_roles(user=None, with_standard=True):
 	"""get roles of current user"""
 	if not user:
@@ -231,11 +221,6 @@ def get_roles(user=None, with_standard=True):
 		roles = filter(lambda x: x not in ['All', 'Guest', 'Administrator'], roles)
 	
 	return roles
-
-def comma_and(lst):
-	if len(lst)==1: return lst[0]
-	return ', '.join(lst[:-1]) + ' and ' + lst[-1]
-	
 
 def json_handler(obj):
 	"""serialize non-serializable data for json"""
