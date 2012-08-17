@@ -151,7 +151,7 @@ class Document(dict):
 			return
 
 		# call autoname method of controller
-		controller = webnotes.model.get_controller([self])
+		controller = webnotes.model.get_controller([self], module=self.module or None)
 		if hasattr(controller, "autoname"):
 			name = controller.autoname()
 			if name:
