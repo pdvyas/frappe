@@ -36,7 +36,7 @@ wn.ui.Form = Class.extend({
 	make_form: function() {
 		// form
 		var me = this;
-		this.$form = $('<form class="form-horizontal">').appendTo(this.parent);
+		this.$form = $('<form class="form-horizontal" style="clear: both;">').appendTo(this.parent);
 		
 		if(this.fields[0].fieldtype!='Section Break') {
 			me.make_fieldset('_first_section');

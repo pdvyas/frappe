@@ -35,3 +35,10 @@ div.appframe-toolbar {
 	border-bottom: 1px solid #ccc;
 }
 
+div.tag-line {
+	margin: -15px;
+	margin-bottom: 15px;
+	height: 24px;
+	padding: 7px 15px;
+	background-color: #E5F5F9;
+}
