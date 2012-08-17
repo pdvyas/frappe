@@ -111,7 +111,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 	init: function(doctype, docname, page) {
 		var me = this;
 		$(page).find('.layout-main').html('Loading Report...');
-		this.import_slickgrid();
+		wn.lib.import_slickgrid();
 		$(page).find('.layout-main').empty();
 		this.doctype = doctype;
 		this.docname = docname;
@@ -119,15 +119,6 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		this.tab_name = '`tab'+doctype+'`';
 		this.setup();
 	},
-	import_slickgrid: function() {
-		wn.require('js/lib/slickgrid/slick.grid.css');
-		wn.require('js/lib/slickgrid/slick-default-theme.css');
-		wn.require('js/lib/slickgrid/jquery.event.drag.min.js');
-		wn.require('js/lib/slickgrid/slick.core.js');
-		wn.require('js/lib/slickgrid/slick.grid.js');
-		wn.dom.set_style('.slick-cell { font-size: 12px; }');
-	},
-
 	set_init_columns: function() {
 		// pre-select mandatory columns
 		var columns = [['name'], ['owner']];

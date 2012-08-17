@@ -42,7 +42,7 @@ class TestEmail(unittest.TestCase):
 		
 	def test_unsubscribe(self):
 		from webnotes.utils.email_lib.bulk import unsubscribe, send
-		webnotes.form_dict = {
+		webnotes.form = {
 			'email':'rmehta@gmail.com',
 			'type':'Lead',
 			'email_field':'email_id'

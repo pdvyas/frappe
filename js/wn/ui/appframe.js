@@ -5,7 +5,7 @@ wn.ui.AppFrame = Class.extend({
 		
 		this.$titlebar = $('<div class="appframe-titlebar">\
 			<span class="appframe-title"></span>\
-			<span class="close">&times;</span>\
+			<span class="close" style="line-height: 28px;">&times;</span>\
 		</div>').appendTo(this.$w);
 
 		this.$w.find('.close').click(function() {
@@ -21,7 +21,7 @@ wn.ui.AppFrame = Class.extend({
 	},
 	make_toolbar: function() {
 		if(!this.$w.find('.appframe-toolbar').length)
-			this.$w.append('<div class="appframe-toolbar"></div>');	
+			this.$w.append('<div class="appframe-toolbar btn-toolbar"></div>');	
 	},
 	add_button: function(label, click, icon) {
 		this.make_toolbar();
@@ -32,8 +32,11 @@ wn.ui.AppFrame = Class.extend({
 		this.buttons[label] = $(repl('<button class="btn btn-small">\
 			%(icon)s %(label)s</button>', args))
 			.click(click)
-			.appendTo(this.$w.find('.appframe-toolbar'));
+			.appendTo(this.new_btn_group());
 		return this.buttons[label];
+	},
+	new_btn_group: function() {
+		return $('<div class="btn-group">').appendTo(this.$w.find('.appframe-toolbar'));
 	},
 	add_help_button: function(txt) {
 		this.make_toolbar();
@@ -41,7 +44,13 @@ wn.ui.AppFrame = Class.extend({
 			<b>?</b></button>')
 			.data('help-text', txt)
 			.click(function() { msgprint($(this).data('help-text'), 'Help'); })
-			.appendTo(this.$w.find('.appframe-toolbar'));			
+			.appendTo(this.new_btn_group().css('float', 'right'));			
+	},
+	add_inverse_button: function(label, click) {
+		$('<button class="btn btn-small btn-inverse"></button>')
+			.on('click', click)
+			.html(label)
+			.appendTo(this.new_btn_group().css('float', 'right'));		
 	},
 	clear_buttons: function() {
 		this.$w.find('.appframe-toolbar').empty();

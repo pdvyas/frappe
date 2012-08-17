@@ -35,7 +35,7 @@ def getdoc():
 	import webnotes
 	from webnotes.utils import cint
 	
-	form = webnotes.form_dict
+	form = webnotes.form
 	doctype, docname = form.get('doctype'), form.get('name')
 
 	if not (doctype and docname):
@@ -60,8 +60,8 @@ def getdoctype():
 	
 	doclist = []
 	
-	dt = webnotes.form_dict.get('doctype')
-	with_parent = webnotes.form_dict.get('with_parent')
+	dt = webnotes.form.get('doctype')
+	with_parent = webnotes.form.get('with_parent')
 
 	# with parent (called from report builder)
 	if with_parent:

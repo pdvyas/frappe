@@ -9,7 +9,7 @@ def get_doctypes():
 @webnotes.whitelist()
 def get_doctype_options():
 	import webnotes
-	doctype = webnotes.form_dict['doctype']
+	doctype = webnotes.form['doctype']
 	import webnotes.model.doctype
 	return [doctype] + filter(None, map(lambda d: \
 		d.doctype=='DocField' and d.fieldtype=='Table' and d.options or None, 
@@ -26,8 +26,8 @@ def get_template():
 	import webnotes.model.doctype
 	global doctype_dl
 
-	doctype = webnotes.form_dict['doctype']
-	parenttype = webnotes.form_dict.get('parent_doctype')
+	doctype = webnotes.form['doctype']
+	parenttype = webnotes.form.get('parent_doctype')
 	
 	doctype_dl = webnotes.model.doctype.get(doctype)
 	tablecolumns = [f[0] for f in webnotes.conn.sql('desc `tab%s`' % doctype)]
@@ -93,7 +93,7 @@ def get_template():
 
 	from webnotes.utils import cstr
 
-	if webnotes.form_dict.get('with_data')=='Yes':
+	if webnotes.form.get('with_data')=='Yes':
 		data = webnotes.conn.sql("""select * from `tab%s` where docstatus<2""" % doctype, as_dict=1)
 		for d in data:
 			row = ['']
@@ -121,7 +121,7 @@ def upload():
 	from webnotes.model.doc import Document
 	
 	fname, fcontent = get_uploaded_content()
-	overwrite = webnotes.form_dict.get('overwrite')
+	overwrite = webnotes.form.get('overwrite')
 
 	ret = []
 	
@@ -196,7 +196,7 @@ def read_csv_content(fcontent):
 		for row in csvrows:
 			newrow = []
 			for val in row:
-				if webnotes.form_dict.get('ignore_encoding_errors'):
+				if webnotes.form.get('ignore_encoding_errors'):
 					newrow.append(cstr(val.strip()))
 				else:
 					try:
@@ -244,7 +244,7 @@ def check_record(d, parenttype):
 					'mm/dd/yyyy':'%m/%d/%Y'
 				}
 				d[key] = datetime.datetime.strptime(val, 
-					dateformats[webnotes.form_dict['date_format']]).strftime('%Y-%m-%d')
+					dateformats[webnotes.form['date_format']]).strftime('%Y-%m-%d')
 
 def getlink(doctype, name):
 	return '<a href="#Form/%(doctype)s/%(name)s">%(name)s</a>' % locals()

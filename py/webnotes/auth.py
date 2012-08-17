@@ -67,7 +67,7 @@ class HTTPRequest:
 		self.setup_profile()
 
 		# run login triggers
-		if webnotes.form_dict.get('cmd')=='login':
+		if webnotes.form.get('cmd')=='login':
 			webnotes.login_manager.run_trigger('on_login_post_session')
 
 		# write out cookies
@@ -108,10 +108,10 @@ class HTTPRequest:
 
 class LoginManager:
 	def __init__(self):
-		if webnotes.form_dict.get('cmd')=='login':
+		if webnotes.form.get('cmd')=='login':
 			# clear cache
 			from webnotes.session_cache import clear_cache
-			clear_cache(webnotes.form_dict.get('usr'))				
+			clear_cache(webnotes.form.get('usr'))				
 
 			self.authenticate()
 			self.post_login()
@@ -130,7 +130,7 @@ class LoginManager:
 	
 	def authenticate(self, user=None, pwd=None):
 		if not (user and pwd):	
-			user, pwd = webnotes.form_dict.get('usr'), webnotes.form_dict.get('pwd')
+			user, pwd = webnotes.form.get('usr'), webnotes.form.get('pwd')
 		if not (user and pwd):
 			self.fail('Incomplete login details')
 		
@@ -250,7 +250,7 @@ class CookieManager:
 	def set_remember_me(self):
 		from webnotes.utils import cint
 		
-		if not cint(webnotes.form_dict.get('remember_me')): return
+		if not cint(webnotes.form.get('remember_me')): return
 		
 		remember_days = webnotes.conn.get_value('Control Panel', None,
 			'remember_for_days') or 7
@@ -271,10 +271,10 @@ class CookieManager:
 class Session:
 	def __init__(self, user=None):
 		self.user = user
-		self.sid = webnotes.form_dict.get('sid') or webnotes.incoming_cookies.get('sid', 'Guest')
+		self.sid = webnotes.form.get('sid') or webnotes.incoming_cookies.get('sid', 'Guest')
 		self.data = {'user':user,'data':{}}
 
-		if webnotes.form_dict.get('cmd')=='login':
+		if webnotes.form.get('cmd')=='login':
 			self.start()
 			return
 			

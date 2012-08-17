@@ -62,8 +62,8 @@ def get_cal_events(m_st, m_end):
 def load_month_events():
 	from webnotes.utils import cint
 
-	mm = webnotes.form_dict.get('month')
-	yy = webnotes.form_dict.get('year')
+	mm = webnotes.form.get('month')
+	yy = webnotes.form.get('year')
 	m_st = str(yy) + '-%.2i' % cint(mm) + '-01'
 	m_end = str(yy) + '-%.2i' % cint(mm) + '-31'
 

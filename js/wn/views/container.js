@@ -1,6 +1,28 @@
+// Copyright (c) 2012 Web Notes Technologies Pvt Ltd (http://erpnext.com)
+// 
+// MIT License (MIT)
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a 
+// copy of this software and associated documentation files (the "Software"), 
+// to deal in the Software without restriction, including without limitation 
+// the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+// and/or sell copies of the Software, and to permit persons to whom the 
+// Software is furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in 
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A 
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT 
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+// CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
+// OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+
 // page container
-wn.provide('wn.pages');
 wn.provide('wn.views');
+wn.provide('wn.contents');
 
 wn.views.Container = Class.extend({
 	init: function() {
@@ -18,8 +40,7 @@ wn.views.Container = Class.extend({
 		if(onshow)
 			$(page).bind('hide', onhide);
 		page.label = label;
-		wn.pages[label] = page;
-		
+		wn.contents[label] = page;
 		return page;
 	},
 	change_to: function(label) {
@@ -33,7 +54,7 @@ wn.views.Container = Class.extend({
 			// if sent the div, get the table
 			var page = label;
 		} else {
-			var page = wn.pages[label];			
+			var page = wn.contents[label];			
 		}
 		if(!page) {
 			console.log('Page not found ' + label);
@@ -49,10 +70,11 @@ wn.views.Container = Class.extend({
 		// show new
 		this.page = page;
 		$(this.page).fadeIn();
+		$(this.page).trigger('show');
 		this.page._route = window.location.hash;
 		document.title = this.page.label;
-		$(this.page).trigger('show');
-		scroll(0,0);				
+		scroll(0,0);
+				
 		return this.page;
 	}
 });

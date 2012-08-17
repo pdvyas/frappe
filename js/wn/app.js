@@ -49,7 +49,7 @@ wn.Application = Class.extend({
 
 		// page container
 		this.make_page_container();
-		
+				
 		// navbar
 		this.make_nav_bar();
 			
@@ -68,10 +68,10 @@ wn.Application = Class.extend({
 	},
 	load_bootinfo: function() {
 		if(wn.boot) {
-			LocalDB.sync(wn.boot.docs);
+			wn.model.sync(wn.boot.docs);
 			wn.control_panel = wn.boot.control_panel;
 
-			this.set_globals();					
+			this.set_globals();		
 		} else {
 			this.set_as_guest();
 		}

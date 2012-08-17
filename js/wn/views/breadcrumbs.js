@@ -10,7 +10,7 @@ wn.views.breadcrumbs = function(appframe, module, doctype, name) {
 		appframe.add_breadcrumb(module);
 	}
 
-	if(name && doctype && (!locals['DocType'][doctype].issingle)) {
+	if(name && doctype && (!wn.model.get('DocType', doctype).issingle)) {
 		appframe.add_breadcrumb(repl(' in <a href="#!List/%(doctype)s">%(doctype)s List</a>',
 			{doctype: doctype}))
 	};

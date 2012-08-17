@@ -28,7 +28,7 @@ def savedocs():
 	"""save / submit / cancel / update doclist"""
 	try:
 		import webnotes.model
-		form = webnotes.form_dict
+		form = webnotes.form
 
 		from webnotes.model.utils import expand
 		controller = webnotes.model.get_controller(expand(form.get('docs')))

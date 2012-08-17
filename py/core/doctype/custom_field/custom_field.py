@@ -124,8 +124,8 @@ def get_fields_label(dt=None, form=1):
 	import webnotes.model.doctype
 	fieldname = None
 	if not dt:
-		dt = webnotes.form_dict.get('doctype')
-		fieldname = webnotes.form_dict.get('fieldname')
+		dt = webnotes.form.get('doctype')
+		fieldname = webnotes.form.get('fieldname')
 	if not dt: return ""
 	
 	doclist = webnotes.model.doctype.get(dt, processed=False)

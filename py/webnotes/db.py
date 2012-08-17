@@ -122,7 +122,7 @@ class Database:
 			
 		# execute
 		import warnings
-		with warnings.catch_warnings(record=True) as w:		
+		with warnings.catch_warnings(record=True) as w:
 			try:
 				if values!=():
 					# if subclass of dict, convert it back to dict

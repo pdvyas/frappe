@@ -25,12 +25,12 @@ import webnotes
 
 def upload():
 	# get record details
-	dt = webnotes.form_dict.get('doctype')
-	dn = webnotes.form_dict.get('docname')
-	at_id = webnotes.form_dict.get('at_id')
+	dt = webnotes.form.get('doctype')
+	dn = webnotes.form.get('docname')
+	at_id = webnotes.form.get('at_id')
 
 	webnotes.response['type'] = 'iframe'
-	filename = webnotes.form['filedata'].filename
+	filename = webnotes.request_form['filedata'].filename
 	if not filename:
 		webnotes.response['result']	= """
 		<script type='text/javascript'>
@@ -128,8 +128,8 @@ def get_uploaded_content():
 	import webnotes
 	
 	# should not be unicode when reading a file, hence using webnotes.form
-	if 'filedata' in webnotes.form:
-		i = webnotes.form['filedata']
+	if 'filedata' in webnotes.request_form:
+		i = webnotes.request_form['filedata']
 		webnotes.uploaded_filename, webnotes.uploaded_content = i.filename, i.file.read()
 		return webnotes.uploaded_filename, webnotes.uploaded_content
 	else:

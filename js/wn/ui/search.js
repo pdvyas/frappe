@@ -23,7 +23,9 @@ wn.ui.Search = Class.extend({
 				<div><b>Results containing: </b></div>\
 				</div>').appendTo(this.dialog.body);			
 			$.each(this.with_filters, function(i, f) {
-				$('<div>"' + wn.model.get_label(f[1], me.doctype) + '" ' + 
+				var label = wn.model.get('DocType', me.doctype)
+					.get({fieldname:f[1], doctype:'DocField'}).label;
+				$('<div>"' + label + '" ' + 
 					f[2] + ' "'+ f[3]+'"</div>').appendTo(me.msg_area);
 			})
 		}
@@ -48,8 +50,8 @@ wn.ui.Search = Class.extend({
 						filters = filters.concat(me.with_filters);
 					}
 					
-					me.search_fields = cstr(wn.model.getone({
-						doctype: "DocType", name: me.doctype}).search_fields).split(",");
+					me.search_fields = cstr(wn.model.get("DocType", me.doctype).doc.get('search_fields'))
+						.split(",");
 					
 					return {
 						doctype: me.doctype,

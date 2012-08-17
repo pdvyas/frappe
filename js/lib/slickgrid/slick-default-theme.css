@@ -5,20 +5,6 @@ No built-in (selected, editable, highlight, flashing, invalid, loading, :focus) 
 classes should alter those!
 */
 
-.slick-header-columns {
-  background: url('js/lib/slickgrid/images/header-columns-bg.gif') repeat-x center bottom;
-  border-bottom: 1px solid silver;
-}
-
-.slick-header-column {
-  background: url('js/lib/slickgrid/images/header-columns-bg.gif') repeat-x center bottom;
-  border-right: 1px solid silver;
-}
-
-.slick-header-column:hover, .slick-header-column-active {
-  background: white url('js/lib/slickgrid/images/header-columns-over-bg.gif') repeat-x center bottom;
-}
-
 .slick-headerrow {
   background: #fafafa;
 }
@@ -292,4 +278,30 @@ input.editor-checkbox {
   height: 100%;
   padding: 0;
   border: 0;
+}
+
+.cell-title {
+  zfont-weight: bold;
+}
+
+.cell-effort-driven {
+  text-align: center;
+}
+
+.cell-reorder {
+  cursor: move;
+  background: url("js/lib/slickgrid/images/drag-handle.png") no-repeat center center;
+}
+
+.cell-selection {
+  border-right-color: silver;
+  border-right-style: solid;
+  background: #f5f5f5;
+  color: gray;
+  text-align: right;
+  font-size: 10px;
+}
+
+.slick-row.selected .cell-selection {
+  background-color: transparent; /* show default selected row background */
 }

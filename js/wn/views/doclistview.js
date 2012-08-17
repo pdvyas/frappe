@@ -46,6 +46,7 @@ wn.views.DocListView = wn.ui.Listing.extend({
 		this.label = get_doctype_label(doctype);
 		this.label = (this.label.toLowerCase().substr(-4) == 'list') ?
 		 	this.label : (this.label + ' List');
+		this.meta = wn.model.get('DocType', this.doctype).doc;
 		this.make_page();
 		this.setup();
 	},
@@ -74,13 +75,12 @@ wn.views.DocListView = wn.ui.Listing.extend({
 		</div>');
 		
 		this.appframe = new wn.ui.AppFrame(this.$page.find('.appframe-area'));
-		wn.views.breadcrumbs(this.appframe, locals.DocType[this.doctype].module, this.doctype);
+		wn.views.breadcrumbs(this.appframe, this.meta.get('module'), this.doctype);
 	},
 
 	setup: function() {
 		var me = this;
 		me.can_delete = wn.model.can_delete(me.doctype);
-		me.meta = locals.DocType[me.doctype];
 		me.$page.find('.wnlist-area').empty(),
 		me.setup_docstatus_filter();
 		me.setup_listview();
@@ -100,17 +100,14 @@ wn.views.DocListView = wn.ui.Listing.extend({
 	},
 	make_help: function() {
 		// Help
-		if(this.meta.description) {
-			this.appframe.add_help_button(wn.markdown('## ' + this.meta.name + '\n\n'
-				+ this.meta.description));
+		if(this.meta.get('description')) {
+			this.appframe.add_help_button(wn.markdown('## ' + this.meta.get('name') + '\n\n'
+				+ this.meta.get('description')));
 		}
 	},
 	setup_docstatus_filter: function() {
 		var me = this;
-		this.can_submit = $.map(locals.DocPerm, function(d) { 
-			if(d.parent==me.meta.name && d.submit) return 1
-			else return null; 
-		}).length;
+		this.can_submit = wn.model.get('DocType', me.doctype).doc.get('is_submittable');
 		if(this.can_submit) {
 			this.$page.find('.show-docstatus').removeClass('hide');
 			this.$page.find('.show-docstatus input').click(function() {
@@ -119,8 +116,8 @@ wn.views.DocListView = wn.ui.Listing.extend({
 		}
 	},
 	setup_listview: function() {
-		if(this.meta.__listjs) {
-			eval(this.meta.__listjs);
+		if(this.meta.get('__listjs')) {
+			eval(this.meta.get('__listjs'));
 			this.listview = new wn.doclistviews[this.doctype](this);
 		} else {
 			this.listview = new wn.views.ListView(this);
@@ -262,8 +259,8 @@ wn.views.DocListView = wn.ui.Listing.extend({
 			return;
 		}
 		
-		var label = wn.meta.docfield_map[this.doctype][field] ? 
-			wn.meta.docfield_map[this.doctype][field].label : field;
+		var docfield = wn.model.get('DocType', this.doctype).get({fieldname:field});
+		var label = docfield.length ? docfield[0].get('label') : field;
 		if(label=='_user_tags') label = 'Tags';
 		
 		// grid

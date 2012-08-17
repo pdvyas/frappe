@@ -49,6 +49,7 @@
 			"lib/css/bootstrap/dropdown.css",
 			"lib/css/bootstrap/tooltip.css",
 			"lib/css/bootstrap/icons.css",
+			"lib/css/bootstrap/forms.css",
 			"lib/css/legacy/body.css",
 			"lib/css/legacy/messages.css",
 			"lib/css/legacy/dialog.css",
@@ -69,11 +70,9 @@
 			"lib/css/bootstrap/label.css",
 			"lib/css/bootstrap/icons.css",
 			"lib/css/bootstrap/popover.css",
+			"lib/css/bootstrap/forms.css",
 			"lib/css/legacy/body.css",
 			"lib/css/legacy/messages.css",
-			"lib/css/legacy/forms.css",
-			"lib/css/legacy/fields.css",
-			"lib/css/legacy/grid.css",
 			"lib/css/legacy/listing.css",
 			"lib/css/legacy/report.css",
 			"lib/css/legacy/dialog.css",
@@ -100,7 +99,6 @@
 			"lib/js/wn/ui/appframe.js",
 			"lib/js/wn/ui/dialog.js",
 			"lib/js/wn/ui/button.js",
-			"lib/js/legacy/widgets/dialog.js",
 			"lib/js/legacy/webpage/page_header.js",
 			"lib/js/legacy/webpage/spinner.js",
 			"lib/js/legacy/webpage/loaders.js",
@@ -116,7 +114,6 @@
 			"lib/js/lib/jquery/jquery.ui.core.js:concat",
 			"lib/js/lib/jquery/jquery.ui.datepicker.js:concat",
 			"lib/js/lib/jquery/jquery.ui.autocomplete.js:concat",
-			"lib/js/lib/tiny_mce_33/jquery.tinymce.js:concat",
 			"lib/js/lib/mousetrap.min.js:concat",
 			"lib/js/lib/bootstrap.min.js:concat",
 			"lib/js/lib/sprintf.js",
@@ -128,7 +125,6 @@
 			"lib/js/legacy/utils/handler.js",
 			"lib/js/legacy/utils/msgprint.js",
 			"lib/js/legacy/utils/printElement.js",
-			"lib/js/legacy/widgets/form/fields.js",
 			"lib/js/wn/ui/appframe.js",
 			"lib/js/wn/ui/dialog.js",
 			"lib/js/wn/ui/button.js",
@@ -137,9 +133,16 @@
 			"lib/js/wn/upload.js",
 			"lib/js/wn/misc/about.js",
 			"lib/js/wn/views/doclistview.js",
+			"lib/js/wn/form/control.js",
+			"lib/js/wn/form/control_input.js",
+			"lib/js/wn/form/control_link.js",
+			"lib/js/wn/form/control_richtext.js",
+			"lib/js/wn/form/control_grid.js",
+			"lib/js/wn/form/form.js",
+			"lib/js/wn/form/form_page.js",
+			"lib/js/wn/form/form_dialog.js",
 			"lib/js/wn/views/formview.js",
 			"lib/js/wn/views/reportview.js",
-			"lib/js/legacy/widgets/dialog.js",
 			"lib/js/legacy/widgets/layout.js",
 			"lib/js/legacy/widgets/tabbedpage.js",
 			"lib/js/legacy/webpage/page_header.js",
@@ -154,31 +157,26 @@
 			"lib/js/legacy/model/doclist.js",
 			"lib/js/wn/ui/toolbar.min.js:concat",
 			"lib/js/wn/views/breadcrumbs.js",
-			"lib/js/legacy/widgets/form/fields.js",
-			"lib/js/legacy/widgets/form/form_dialog.js",
-			"lib/js/legacy/widgets/form/form_header.js",
-			"lib/js/legacy/widgets/form/form.js",
-			"lib/js/legacy/widgets/form/form_fields.js",
-			"lib/js/legacy/widgets/form/grid.js",
-			"lib/js/legacy/widgets/form/form_grid.js",
-			"lib/js/legacy/widgets/form/print_format.js",
-			"lib/js/legacy/widgets/form/email.js",
-			"lib/js/legacy/widgets/form/clientscriptAPI.js",
-			"lib/js/legacy/widgets/form/form_comments.js",
-			"lib/js/legacy/wn/widgets/form/sidebar.js",
-			"lib/js/legacy/wn/widgets/form/comments.js",
-			"lib/js/legacy/wn/widgets/form/attachments.js",
-			"lib/js/legacy/wn/widgets/form/assign_to.js",
 			"lib/js/wn/app.js"
 		]
 	},
 	
 	{
-		"public/js/fields.js": ["lib/js/legacy/widgets/form/fields.js"]
+		"public/js/slickgrid.bundle.js": [
+			'lib/js/lib/slickgrid/jquery.event.drag.min.js',
+			'lib/js/lib/slickgrid/plugins/slick.cellrangeselector.js',
+			'lib/js/lib/slickgrid/plugins/slick.cellselectionmodel.js',
+			'lib/js/lib/slickgrid/plugins/slick.rowselectionmodel.js',
+			'lib/js/lib/slickgrid/plugins/slick.rowmovemanager.js',
+			'lib/js/lib/slickgrid/slick.formatters.js',
+			'lib/js/lib/slickgrid/slick.editors.js',
+			'lib/js/lib/slickgrid/slick.core.js',
+			'lib/js/lib/slickgrid/slick.grid.js'
+		]
 	},
-
+	
 	{
-		"public/css/fields.css": ["lib/css/legacy/fields.css"]
+		"public/js/fields.js": ["lib/js/legacy/widgets/form/fields.js"]
 	},
 
 	{

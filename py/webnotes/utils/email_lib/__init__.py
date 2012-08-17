@@ -43,10 +43,10 @@ def send_form():
 def get_contact_list():
 	"""Returns contacts (from autosuggest)"""
 	cond = ['`%s` like "%s%%"' % (f, 
-		webnotes.form_dict.get('txt')) for f in webnotes.form_dict.get('where').split(',')]
+		webnotes.form.get('txt')) for f in webnotes.form.get('where').split(',')]
 	cl = webnotes.conn.sql("select `%s` from `tab%s` where %s" % (
-  			 webnotes.form_dict.get('select')
-			,webnotes.form_dict.get('from')
+  			 webnotes.form.get('select')
+			,webnotes.form.get('from')
 			,' OR '.join(cond)
 		)
 	)

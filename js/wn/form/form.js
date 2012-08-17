@@ -1,0 +1,77 @@
+// Copyright (c) 2012 Web Notes Technologies Pvt Ltd (http://erpnext.com)
+// 
+// MIT License (MIT)
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a 
+// copy of this software and associated documentation files (the "Software"), 
+// to deal in the Software without restriction, including without limitation 
+// the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+// and/or sell copies of the Software, and to permit persons to whom the 
+// Software is furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in 
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A 
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT 
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+// CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
+// OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+
+wn.ui.Form = Class.extend({
+	init: function(opts) {
+		$.extend(this, opts);
+		this.controls = {};
+
+		if(this.doc) {
+			this.meta = wn.model.get('DocType', this.doc.get('doctype'));
+			this.fields = $.map(this.meta.get('DocField', {}), function(d) { return d.fields; });			
+		}
+		this.make_form();
+		this.listen();
+	},
+
+	make_form: function() {
+		// form
+		var me = this;
+		this.$form = $('<form class="form-horizontal">').appendTo(this.parent);
+		
+		if(this.fields[0].fieldtype!='Section Break') {
+			me.make_fieldset('_first_section');
+		}
+				
+		// controls
+		$.each(this.fields, function(i, df) {
+			// change section
+			if(df.fieldtype=='Section Break') {
+				me.make_fieldset(df.fieldname, df.label);
+			} else {
+				// make control 
+				me.controls[df.fieldname] = wn.ui.make_control({
+					docfield: df,
+					parent: me.last_fieldset,
+					doc: me.doc
+				});
+			}
+		});
+	},
+	make_fieldset: function(name, legend) {
+		var $fset = $('<fieldset data-name="'+name+'"></fieldset>').appendTo(this.$form);
+		if(legend) {
+			$('<legend>').text(legend).appendTo($fset);
+		}
+		this.last_fieldset = $fset;
+	},
+	// listen for changes in model
+	listen: function() {
+		var me = this;
+		if(this.doc) {
+			$(document).bind(wn.model.event_name(this.doc.get('doctype'), this.doc.get('name')), 
+				function(ev, key, val) {
+					if(me.controls[key]) me.controls[key].set_input(val);
+				});
+		}
+	}
+});

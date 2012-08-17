@@ -34,7 +34,7 @@ class FormEmail:
 		"""
 			Get paramteres from the cgi form object
 		"""
-		self.__dict__.update(webnotes.form_dict)		
+		self.__dict__.update(webnotes.form)		
 
 		self.recipients = None
 		if self.sendto:
@@ -106,7 +106,7 @@ class FormEmail:
 		"""
 		al = []
 		try:
-			al = webnotes.conn.sql('select file_list from `tab%s` where name="%s"' % (webnotes.form_dict.get('dt'), webnotes.form_dict.get('dn')))
+			al = webnotes.conn.sql('select file_list from `tab%s` where name="%s"' % (webnotes.form.get('dt'), webnotes.form.get('dn')))
 			if al:
 				al = (al[0][0] or '').split('\n')
 		except Exception, e:

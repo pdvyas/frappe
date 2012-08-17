@@ -94,10 +94,9 @@ def load(country):
 def add_to_cache(bootinfo, country):
 	"""add to cache"""
 	import json
-	import webnotes.model.utils
 
 	if bootinfo.get('docs'):
-		bootinfo['docs'] = webnotes.model.utils.compress(bootinfo['docs'])
+		bootinfo['docs'] = [d.fields for d in bootinfo['docs']]
 
 	# delete earlier (?)
 	webnotes.conn.sql("""delete from __SessionCache where user=%s 

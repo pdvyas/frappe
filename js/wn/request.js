@@ -84,11 +84,6 @@ wn.request.cleanup = function(opts, r) {
 	if(r['403']) {
 		wn.container.change_to('403');
 	}
-
-	// sync docs
-	if(r.docs) {
-		LocalDB.sync(r.docs);
-	}
 }
 
 wn.request.call = function(opts) {
