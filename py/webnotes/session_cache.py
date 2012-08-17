@@ -95,9 +95,6 @@ def add_to_cache(bootinfo, country):
 	"""add to cache"""
 	import json
 
-	if bootinfo.get('docs'):
-		bootinfo['docs'] = [d.fields for d in bootinfo['docs']]
-
 	# delete earlier (?)
 	webnotes.conn.sql("""delete from __SessionCache where user=%s 
 		and country=%s""", (webnotes.session['user'], country))

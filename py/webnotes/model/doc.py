@@ -27,6 +27,7 @@ Contains the Document class representing an object / record
 
 import webnotes
 import webnotes.model
+import webnotes.model.doclist
 from webnotes.utils import cint, cstr, now, now_datetime
 
 valid_fields = {}
