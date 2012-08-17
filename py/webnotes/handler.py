@@ -38,17 +38,6 @@ def startup():
 
 	webnotes.response.update(webnotes.session_cache.get())
 
-def cleanup_docs():
-	from webnotes.model.doc import Document
-	if webnotes.response.get('docs'):
-		clean = []
-		for d in webnotes.response['docs']:
-			if isinstance(d, Document):
-				clean.append(d.fields)
-			else:
-				clean.append(d)
-		webnotes.response['docs'] = clean
-
 @webnotes.whitelist()
 def runserverobj(arg=None):
 	import webnotes.widgets.form.run_method
@@ -232,7 +221,6 @@ def eprint(content):
 
 def print_json():	
 	make_logs()
-	cleanup_docs()
 	add_cookies()
 
 	eprint("Content-Type: text/html; charset: utf-8")

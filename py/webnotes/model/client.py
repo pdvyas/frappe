@@ -31,14 +31,14 @@ def get_doclist():
 	doclist = webnotes.model.get(webnotes.form.doctype, webnotes.form.name)
 
 	# add comments
-	doclist[0].fields['__comments'] = webnotes.conn.sql("""select * from tabComment where
+	doclist[0]['__comments'] = webnotes.conn.sql("""select * from tabComment where
 		comment_doctype=%s and comment_docname=%s order by modified""", 
 		(doclist[0].doctype, doclist[0].name), as_dict=1)
 	
 	# add assignment
 	todo = 	webnotes.conn.sql("""select owner from tabToDo where
 			reference_type=%s and reference_name=%s""", (doclist[0].doctype, doclist[0].name))
-	doclist[0].fields['__assigned_to'] = todo and todo[0][0] or ''
+	doclist[0]['__assigned_to'] = todo and todo[0][0] or ''
 
 	webnotes.response['docs'] = doclist
 
@@ -60,7 +60,7 @@ def insert():
 	import json
 	
 	c = webnotes.model.get_controller(json.loads(webnotes.form.get('docs')))
-	c.doc.fields['__islocal'] = 1
+	c.doc['__islocal'] = 1
 	c.save()
 	webnotes.response['docs'] = c.doclist
 
