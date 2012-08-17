@@ -27,8 +27,20 @@ import webnotes.model
 
 @webnotes.whitelist()
 def get_doclist():
-	"""get bundle of doc"""
-	webnotes.response['docs'] = webnotes.model.get(webnotes.form.doctype, webnotes.form.name)
+	"""get bundle of doc"""	
+	doclist = webnotes.model.get(webnotes.form.doctype, webnotes.form.name)
+
+	# add comments
+	doclist[0].fields['__comments'] = webnotes.conn.sql("""select * from tabComment where
+		comment_doctype=%s and comment_docname=%s order by modified""", 
+		(doclist[0].doctype, doclist[0].name), as_dict=1)
+	
+	# add assignment
+	todo = 	webnotes.conn.sql("""select owner from tabToDo where
+			reference_type=%s and reference_name=%s""", (doclist[0].doctype, doclist[0].name))
+	doclist[0].fields['__assigned_to'] = todo and todo[0][0] or ''
+
+	webnotes.response['docs'] = doclist
 
 @webnotes.whitelist()
 def get_doctype():
@@ -40,3 +52,37 @@ def get_doctype():
 		docs.extend(webnotes.model.get_doctype(d.options, processed=True))
 	
 	webnotes.response['docs'] = docs
+	
+@webnotes.whitelist()
+def insert():
+	"""insert doclist"""
+	import webnotes.model
+	import json
+	
+	c = webnotes.model.get_controller(json.loads(webnotes.form.get('docs')))
+	c.doc.fields['__islocal'] = 1
+	c.save()
+	webnotes.response['docs'] = c.doclist
+
+@webnotes.whitelist()
+def update():
+	"""insert doclist"""
+	import webnotes.model
+	import json
+
+	c = webnotes.model.get_controller(json.loads(webnotes.form.get('docs')))
+	c.save()
+	webnotes.response['docs'] = c.doclist
+
+@webnotes.whitelist()
+def delete():
+	"""delete model, by id"""
+	import webnotes.model
+	import json
+
+	if 'docs' in webnotes.form:
+		c = webnotes.model.get_controller(json.loads(webnotes.form.get('docs')))
+	else:
+		c = webnotes.model.get_controller(webnotes.form.doctype, webnotes.form.name)
+		
+	#c.delete()

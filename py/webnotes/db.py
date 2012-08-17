@@ -121,9 +121,12 @@ class Database:
 			
 		# execute
 		import warnings
-		with warnings.catch_warnings(record=True) as w:		
+		with warnings.catch_warnings(record=True) as w:
 			try:
 				if values!=():
+					from webnotes.utils import DictObj
+					if isinstance(values, DictObj):
+						values = dict(values)
 					if debug: webnotes.errprint(query % values)
 					self._cursor.execute(query, values)
 				

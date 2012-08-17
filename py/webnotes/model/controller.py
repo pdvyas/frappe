@@ -93,7 +93,7 @@ class DocListController(object):
 			if hasattr(self.obj, 'custom_' + method):
 				getattr(self.obj, 'custom_' + method)()
 		
-			self.set_doclist([self.doc] + self.obj.doclist)
+			self.set_doclist(self.obj.doclist)
 
 		trigger(method, self.doc)
 
