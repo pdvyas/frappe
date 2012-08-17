@@ -43,9 +43,10 @@ class Bundle:
 			if ':' in f:
 				f, suffix = f.split(':')
 			
-			# print f + ' | ' + str(int(os.path.getsize(f)/1024)) + 'k'
-			
-			# get data
+			if os.path.isdir(f):
+				continue
+							
+			# get datas
 			with open(f, 'r') as infile:			
 				# get file type
 				ftype = f.split('.')[-1] 
@@ -60,7 +61,7 @@ class Bundle:
 			outtxt += ('\n/*\n *\t%s\n */' % f)
 					
 			# append
-			if suffix=='concat' or out_type != 'js' or self.no_compress:
+			if suffix=='concat' or out_type != 'js' or self.no_compress or '.min.' in f:
 				outtxt += '\n' + data + '\n'
 			else:
 				jsm = JavascriptMinify()
@@ -117,8 +118,14 @@ class Bundle:
 					if f not in infiles:
 						infiles.append(f)
 			
-			fl = [os.path.relpath(os.path.join(path, f), os.curdir) for f in infiles]
-
+			fl = []
+			for f in infiles:
+				if f.endswith('/'):
+					fl += [os.path.relpath(os.path.join(f, tmp), os.curdir) \
+						for tmp in os.listdir(f)]
+				else:
+					fl.append(os.path.relpath(os.path.join(path, f), os.curdir))
+						
 			# js files are minified by default unless explicitly
 			# mentioned in the prefix.
 			# some files may not work if minified (known jsmin bug)
