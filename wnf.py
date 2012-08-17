@@ -234,6 +234,9 @@ def setup_options():
 	parser.add_option("--test_export", help="""Export data for tests at conf.test_data_path
 		If name is *, all records are exported""", 
 		metavar="DOCTYPE NAME", nargs=2)
+	
+	parser.add_option("--append_future_import", default=False, action="store_true",
+		help="adds from __future__ import unicode_literals in py files, if required")
 
 	return parser.parse_args()
 	
