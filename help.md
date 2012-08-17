@@ -8,6 +8,8 @@
 
 * `webnotes.model.insert(doclist)` - inserts doclist and returns the corresponding controller
 
+* `webnotes.model.update(doclist)` - in doclist, updates doc if exists, else appends as new
+
 * `webnotes.model.insert_variants(base, variants)` - copies base doc, updates it with variant info and inserts it
 
 * `webnotes.model.insert_child(fields)` - insert child to doclist specified by parenttype and parent and saves the doclist
