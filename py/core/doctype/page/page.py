@@ -22,11 +22,9 @@
 
 from __future__ import unicode_literals
 import webnotes
+from webnotes.model.controller import DocListController
 
-class DocType:
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d,dl
-
+class PageController(DocListController):
 	def autoname(self):
 		"""
 			Creates a url friendly name for this page.

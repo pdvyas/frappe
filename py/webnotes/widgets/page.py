@@ -86,8 +86,8 @@ def get(name):
 	"""
 	   Return the :term:`doclist` of the `Page` specified by `name`
 	"""
-	from webnotes.model.code import get_obj
-	page = get_obj('Page', name)
+	from webnotes.model import get_controller
+	page = get_controller('Page', name)
 	page.get_from_files()
 	return page.doclist
 

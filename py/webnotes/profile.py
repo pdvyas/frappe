@@ -147,12 +147,6 @@ class Profile:
 			self.defaults[rec[0]].append(rec[1] or '')
 
 		return self.defaults
-		
-	def get_hide_tips(self):
-		try:
-			return webnotes.conn.sql("select hide_tips from tabProfile where name=%s", self.name)[0][0] or 0
-		except:
-			return 0
 			
 	# update recent documents
 	def update_recent(self, dt, dn):
@@ -210,9 +204,7 @@ class Profile:
 		d['first_name'] = t[1] or ''
 		d['last_name'] = t[2] or ''
 		d['recent'] = t[3] or ''
-		
-		d['hide_tips'] = self.get_hide_tips()
-		
+				
 		d['roles'] = self.roles
 		d['defaults'] = self.get_defaults()
 		
