@@ -119,7 +119,13 @@ wn.ui.GridControl = wn.ui.Control.extend({
 		// refresh values from doclist
 		this.grid.setData(this.get_data());
 		this.grid.render();
+		this.set_height();
 		//this.set_edit_button();
+	},
+	set_height: function() {
+		var height = 32 * (this.doclist.get(
+			{parentfield: this.docfield.fieldname}).length + 2);
+		this.$w.find('.ui-widget:first').css('height', (height > 300 ? 300 : height) + 'px');
 	},
 	set_edit_button: function() {
 		var me = this;
