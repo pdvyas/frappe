@@ -50,6 +50,7 @@ wn.ui.toolbar.SelectorDialog = Class.extend({
 			if(!me.dialog.display) return;
 			me.dialog.hide();
 			me.opts.execute(me.dialog.form.controls.doctype.get_value());
+			return false;
 		});
 		
 		// on change

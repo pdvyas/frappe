@@ -47,10 +47,11 @@ wn.ui.AssignTo = Class.extend({
 		if(user_info.id) {
 			wn.model.insert({
 				doctype: 'ToDo',
-				reference_name: this.form_page.doclist.doc.get('name'),
-				reference_type: this.form_page.doclist.doc.get('doctype'),
+				parent: this.form_page.doclist.doc.get('name'),
+				parenttype: this.form_page.doclist.doc.get('doctype'),
 				owner: user_info.id,
 				description: 'You have been assigned this.',
+				priority: 'Medium'
 				assigned_by: user
 			}, function(r) {
 				me.set_assign_button_text(user_info);
@@ -59,8 +60,8 @@ wn.ui.AssignTo = Class.extend({
 			wn.call({
 				method: 'core.doctype.todo.todo.remove_todo',
 				args: {
-					reference_name: this.form_page.doclist.doc.get('name'),
-					reference_type: this.form_page.doclist.doc.get('doctype')					
+					parent: this.form_page.doclist.doc.get('name'),
+					parenttype: this.form_page.doclist.doc.get('doctype')					
 				},
 				callback: function(r) {
 					me.set_assign_button_text(user_info);

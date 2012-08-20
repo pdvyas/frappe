@@ -20,10 +20,6 @@
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-// page container
-wn.provide('wn.views');
-wn.provide('wn.contents');
-
 wn.views.Container = Class.extend({
 	init: function() {
 		this.container = $('#body_div').get(0);

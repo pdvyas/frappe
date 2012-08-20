@@ -13,10 +13,8 @@
 			"lib/js/wn/misc/user.js",
 			"lib/js/lib/json2.js",
 			"lib/js/wn/router.js",
-			"lib/js/wn/ui/listing.js",
-			"lib/js/wn/ui/filters.js",
 			"lib/js/wn/request.js",
-			"lib/js/core.js"
+			"lib/js/wn/app.js"
 		]
 	},
 
@@ -73,37 +71,36 @@
 
 	{
 		"public/js/all-web.js": [
-			"lib/js/lib/bootstrap.min.js:concat",
-			"lib/js/core.min.js:concat",
+			"lib/js/lib/bootstrap.min.js",
+			"lib/js/core.min.js",
 			"lib/js/legacy/globals.js",
 			"lib/js/legacy/utils/datatype.js",
 			"lib/js/legacy/utils/datetime.js",
 			"lib/js/legacy/utils/dom.js",
 			"lib/js/legacy/utils/handler.js",
 			"lib/js/legacy/utils/msgprint.js",
-			"lib/js/wn/ui/appframe.js",
-			"lib/js/wn/ui/dialog.js",
-			"lib/js/wn/ui/button.js",
+			"lib/js/wn/ui/",
+			"lib/js/wn/views/container.js",
+			"lib/js/wn/views/pageview.js",
 			"lib/js/legacy/webpage/page_header.js",
 			"lib/js/legacy/webpage/spinner.js",
 			"lib/js/legacy/webpage/loaders.js",
 			"lib/js/legacy/wn/widgets/footer.js",
 			"lib/js/legacy/model/local_data.js",
-			"lib/js/legacy/model/doclist.js",
-			"lib/js/wn/app.js"
+			"lib/js/legacy/model/doclist.js"
 		]
 	},
 	
 	{
 		"public/js/all-app.js": [
-			"lib/js/lib/jquery/jquery.ui.core.js:concat",
-			"lib/js/lib/jquery/jquery.ui.datepicker.js:concat",
-			"lib/js/lib/jquery/jquery.ui.autocomplete.js:concat",
-			"lib/js/lib/mousetrap.min.js:concat",
-			"lib/js/lib/bootstrap.min.js:concat",
+			"lib/js/lib/jquery/jquery.ui.core.js",
+			"lib/js/lib/jquery/jquery.ui.datepicker.min.js",
+			"lib/js/lib/jquery/jquery.ui.autocomplete.min.js",
+			"lib/js/lib/mousetrap.min.js",
+			"lib/js/lib/bootstrap.min.js",
 			"lib/js/lib/tag-it/tag-it.js",
 			"lib/js/lib/sprintf.js",
-			"lib/js/core.min.js:concat",
+			"lib/js/core.min.js",
 			"lib/js/legacy/globals.js",
 			"lib/js/legacy/utils/datatype.js",
 			"lib/js/legacy/utils/datetime.js",
@@ -116,18 +113,10 @@
 			"lib/js/wn/misc/about.js",
 			"lib/js/wn/views/",
 			"lib/js/wn/form/",
-			"lib/js/legacy/widgets/layout.js",
-			"lib/js/legacy/widgets/tabbedpage.js",
-			"lib/js/legacy/webpage/page_header.js",
-			"lib/js/legacy/widgets/tags.js",
 			"lib/js/legacy/widgets/export_query.js",
 			"lib/js/legacy/webpage/spinner.js",
 			"lib/js/legacy/webpage/loaders.js",
-			"lib/js/legacy/wn/page_layout.js",
-			"lib/js/legacy/wn/widgets/page_sidebar.js",
-			"lib/js/legacy/wn/widgets/footer.js",
-			"lib/js/legacy/model/local_data.js",
-			"lib/js/wn/app.js"
+			"lib/js/legacy/model/local_data.js"
 		]
 	},
 	

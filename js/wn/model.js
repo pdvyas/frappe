@@ -286,8 +286,10 @@ wn.model.DocList = Class.extend({
 				docs: this.get_docs()
 			},
 			callback: function(r) {
-				// reset the doclist
-				me.reset(r.docs);
+				if(!r.exc) {
+					// reset the doclist
+					me.reset(r.docs);					
+				}
 				callback(r);
 			}
 		});

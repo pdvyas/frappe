@@ -5,7 +5,7 @@
 	{
 		u'creation': datetime.datetime(2012, 7, 3, 13, 30, 35),
 		u'docstatus': 0L,
-		u'modified': datetime.datetime(2012, 8, 17, 18, 7, 24),
+		u'modified': datetime.datetime(2012, 8, 20, 12, 42, 11),
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -117,6 +117,7 @@
 		'no_copy': 0L,
 		'oldfieldname': u'priority',
 		'oldfieldtype': u'Data',
+		'options': u'Medium\nHigh\nLow',
 		'print_hide': 0L,
 		'report_hide': 0L,
 		'reqd': 0L,

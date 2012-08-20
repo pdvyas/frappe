@@ -37,7 +37,7 @@ def get_doclist():
 	
 	# add assignment
 	todo = 	webnotes.conn.sql("""select owner from tabToDo where
-			reference_type=%s and reference_name=%s""", (doclist[0].doctype, doclist[0].name))
+			parent=%s and reference_name=%s""", (doclist[0].doctype, doclist[0].name))
 	doclist[0]['__assigned_to'] = todo and todo[0][0] or ''
 
 	webnotes.response['docs'] = doclist

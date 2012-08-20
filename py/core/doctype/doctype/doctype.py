@@ -89,7 +89,6 @@ class DocType(DocListController):
 		self.validate_series()
 		self.scrub_field_names()
 		self.validate_fields()
-		self.set_version()
 
 	def on_update(self):
 		self.make_amendable()

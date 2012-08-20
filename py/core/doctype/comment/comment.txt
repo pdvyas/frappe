@@ -5,7 +5,7 @@
 	{
 		u'creation': datetime.datetime(2012, 8, 9, 14, 44, 10),
 		u'docstatus': 0L,
-		u'modified': datetime.datetime(2012, 8, 17, 18, 1, 23),
+		u'modified': datetime.datetime(2012, 8, 17, 18, 17, 18),
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},

@@ -78,14 +78,14 @@ wn.views.Page = Class.extend({
 			wn.dom.eval(this.pagedoc.get('script', ''));
 			wn.dom.set_style(this.pagedoc.get('style', ''));
 
-			this.trigger('load');
+			this.trigger('load', this.wrapper);
 		}
 		
 		// set events
 		$(this.wrapper).bind('show', function() {
 			cur_frm = null;
-			me.trigger('show');
-			me.trigger('refresh');
+			me.trigger('show', this.wrapper);
+			me.trigger('refresh', this.wrapper);
 		});
 	}
 })

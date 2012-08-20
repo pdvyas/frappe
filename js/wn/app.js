@@ -20,6 +20,26 @@
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+// page container
+wn.provide('wn.views');
+wn.provide('wn.contents');
+
+if(!console) {
+	var console = {
+		log: function(txt) {
+			// suppress
+		}
+	}
+}
+
+
+/* start the application */
+$(document).ready(function() {
+	wn.versions.check();
+	wn.provide('wn.app');
+	$.extend(wn.app, new wn.Application());
+});
+
 wn.Application = Class.extend({
 	init: function() {
 		var me = this;

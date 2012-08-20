@@ -105,7 +105,7 @@ To subclass, use:
 		}
 		Class.prototype.trigger = function(event_name) {
 			var args = [];
-			if(arguments.lengths > 1) args = arguments.splice(1);
+			if(arguments.length > 1) args = Array.prototype.slice.call(arguments, 1);
 			var observer_list = this._observers[event_name] || [];
 			for(var i=0;i< observer_list.length; i++) {
 				observer_list[i].apply(this, args);

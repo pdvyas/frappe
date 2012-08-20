@@ -24,13 +24,13 @@ class ToDoController(DocListController):
 	def validate(self):
 		"""create comment if assignment"""
 		if self.doc.assigned_by:
-			remove(self.doc.reference_type, self.doc.reference_name)
+			remove(self.doc.parent, self.doc.reference_name)
 			webnotes.model.insert({
 				'doctype':'Comment',
 				'comment':'<a href="#Form/%s/%s">%s</a> has been assigned to you.' % (
-					self.doc.reference_type, self.doc.reference_name, self.doc.reference_name),
+					self.doc.parent, self.doc.reference_name, self.doc.reference_name),
 				'owner': self.doc.owner,
-				'comment_doctype': 'Message',
+				'parenttype': 'Message',
 				'comment_by': webnotes.session['user']
 			})
 			
@@ -40,18 +40,18 @@ class ToDoController(DocListController):
 			webnotes.model.insert({
 				'doctype':'Comment',
 				'comment':'<a href="#Form/%s/%s">%s</a> you had assigned has been closed.' % (
-					self.doc.reference_type, self.doc.reference_name, self.doc.reference_name),
+					self.doc.parent, self.doc.reference_name, self.doc.reference_name),
 				'owner': self.doc.assigned_by,
-				'comment_doctype': 'Message',
+				'parenttype': 'Message',
 				'comment_by': webnotes.session['user']
 			})
 
 @webnotes.whitelist()
 def remove_todo():
-	remove(webnotes.form.reference_type, webnotes.form.reference_name)
+	remove(webnotes.form.parent, webnotes.form.reference_name)
 	
-def remove(reference_type, reference_name):
+def remove(parent, reference_name):
 	"""remove any other assignment related to this reference"""
-	for name in webnotes.conn.sql("""select name from tabToDo where reference_type=%s and 
-		reference_name=%s""", (reference_type, reference_name)):
+	for name in webnotes.conn.sql("""select name from tabToDo where parent=%s and 
+		reference_name=%s""", (parent, reference_name)):
 		webnotes.model.delete_doc('ToDo', name[0])
