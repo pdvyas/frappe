@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		u'creation': datetime.datetime(2012, 8, 9, 14, 44, 10),
+		u'creation': '2012-08-09 14:44:10',
 		u'docstatus': 0L,
-		u'modified': datetime.datetime(2012, 8, 17, 18, 17, 18),
+		u'modified': '2012-08-17 18:17:18',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
