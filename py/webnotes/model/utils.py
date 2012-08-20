@@ -77,9 +77,8 @@ def expand(docs):
 			d[a[i]] = b[i]
 		return d
 
-	from webnotes.utils import load_json
-
-	docs = load_json(docs)
+	import json
+	docs = json.loads(docs)
 	clist = []
 	for d in docs['_vl']:
 		doc = xzip(docs['_kl'][d[0]], d);
