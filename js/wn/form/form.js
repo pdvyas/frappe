@@ -59,7 +59,8 @@ wn.ui.Form = Class.extend({
 				me.controls[df.fieldname] = wn.ui.make_control({
 					docfield: df,
 					parent: me.last_fieldset,
-					doc: me.doc
+					doc: me.doc,
+					doclist: me.doclist
 				});
 			}
 		});
