@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		u'creation': datetime.datetime(2012, 7, 13, 11, 7, 19),
-		u'docstatus': 0L,
-		u'modified': datetime.datetime(2012, 8, 17, 17, 50, 54),
+		u'creation': '2012-07-13 11:07:19',
+		u'docstatus': 0,
+		u'modified': '2012-08-20 15:22:18',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -20,8 +20,8 @@
 		'name_case': u'Title Case',
 		'section_style': u'Simple',
 		'server_code_error': u' ',
-		'show_in_menu': 0L,
-		'version': 12L
+		'show_in_menu': 0,
+		'version': 12
 	},
 
 	# These values are common for all DocField
@@ -36,21 +36,21 @@
 		'parent': u'Tag',
 		'parentfield': u'fields',
 		'parenttype': u'DocType',
-		'permlevel': 0L
+		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
 	{
-		'create': 1L,
+		'create': 1,
 		'doctype': u'DocPerm',
 		u'name': u'__common__',
 		'parent': u'Tag',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
-		'permlevel': 0L,
-		'read': 1L,
+		'permlevel': 0,
+		'read': 1,
 		'role': u'System Manager',
-		'write': 1L
+		'write': 1
 	},
 
 	# DocType, Tag

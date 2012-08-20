@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		u'creation': datetime.datetime(2012, 8, 9, 14, 44, 10),
-		u'docstatus': 0L,
-		u'modified': datetime.datetime(2012, 8, 17, 18, 17, 18),
+		u'creation': '2012-08-09 14:44:10',
+		u'docstatus': 0,
+		u'modified': '2012-08-20 14:04:19',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -17,13 +17,13 @@
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
 		'doctype': u'DocType',
-		'issingle': 0L,
+		'issingle': 0,
 		'module': u'Core',
 		u'name': u'__common__',
 		'section_style': u'Simple',
 		'server_code_error': u' ',
-		'show_in_menu': 0L,
-		'version': 5L
+		'show_in_menu': 0,
+		'version': 5
 	},
 
 	# These values are common for all DocField
@@ -33,21 +33,21 @@
 		'parent': u'Comment',
 		'parentfield': u'fields',
 		'parenttype': u'DocType',
-		'permlevel': 0L
+		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
 	{
-		'create': 1L,
+		'create': 1,
 		'doctype': u'DocPerm',
 		u'name': u'__common__',
 		'parent': u'Comment',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
-		'permlevel': 0L,
-		'read': 1L,
+		'permlevel': 0,
+		'read': 1,
 		'role': u'System Manager',
-		'write': 1L
+		'write': 1
 	},
 
 	# DocType, Comment
@@ -62,10 +62,10 @@
 		'fieldname': u'comment',
 		'fieldtype': u'Text',
 		'label': u'Comment',
-		'no_copy': 0L,
+		'no_copy': 0,
 		'oldfieldname': u'comment',
 		'oldfieldtype': u'Text',
-		'search_index': 0L
+		'search_index': 0
 	},
 
 	# DocField
@@ -74,10 +74,10 @@
 		'fieldname': u'comment_by',
 		'fieldtype': u'Data',
 		'label': u'Comment By',
-		'no_copy': 0L,
+		'no_copy': 0,
 		'oldfieldname': u'comment_by',
 		'oldfieldtype': u'Data',
-		'search_index': 0L
+		'search_index': 0
 	},
 
 	# DocField

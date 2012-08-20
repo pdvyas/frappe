@@ -62,7 +62,8 @@ class Database:
 		"""
 		      Connect to a database
 		"""
-		self._conn = MySQLdb.connect(user=self.user, host=self.host, passwd=self.password, use_unicode=True)
+		self._conn = MySQLdb.connect(user=self.user, host=self.host, passwd=self.password, 
+			charset='utf8', use_unicode=True)
 		self._conn.converter[246]=float
 		self._conn.set_character_set('utf8')		
 		self._cursor = self._conn.cursor()
@@ -71,7 +72,7 @@ class Database:
 		"""
 		      `USE` db_name
 		"""
-		self._conn.select_db(db_name)
+		self.sql("use " + db_name)
 		self.cur_db_name = db_name
 	
 	def check_transaction_status(self, query):
@@ -122,23 +123,24 @@ class Database:
 			
 		# execute
 		import warnings
+				
 		with warnings.catch_warnings(record=True) as w:
 			try:
 				if values!=():
-					# if subclass of dict, convert it back to dict
 					if isinstance(values, dict):
 						values = dict(values)
-					if debug: webnotes.errprint(query % values)
+					if debug: 
+						webnotes.errprint(query % values)
 					self._cursor.execute(query, values)
 				
 				else:
 					if debug: webnotes.errprint(query)
 					self._cursor.execute(query)	
 			except Exception, e:
-				# ignore data definition errors
 				if ignore_ddl and e.args[0] in (1146,1054,1091):
 					pass
 				else:
+					webnotes.errprint(webnotes.getTraceback())
 					raise e
 					
 			if webnotes.catch_warning and w:

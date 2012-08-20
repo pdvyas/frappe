@@ -135,7 +135,7 @@ class Document(dict):
 		fields_to_update = filter(lambda f: f not in ("name", "creation", "owner"),
 			fields_to_update)
 		set_fields = map(lambda f: "`%s` = %%(%s)s" % (f, f), fields_to_update)
-		
+				
 		webnotes.conn.sql("""update `tab%s` set %s where name = %s""" % \
 			(self.doctype, ", ".join(set_fields), "%(name)s"), self)
 			
@@ -203,11 +203,6 @@ class Document(dict):
 				(self.doctype, self.name), raise_exception=webnotes.NameError)
 	
 	def validate_default_fields(self):
-		# validate parent info
-		if self.parent and not (self.parenttype and self.parentfield):
-			webnotes.msgprint("""Incomplete Parent Info for "%s": "%s" """ % \
-				(self.doctype, self.name or "[new]"), raise_exception=ParentInfoError)
-
 		# set idx
 		if self.parent and not self.idx:
 			self.idx = cint(webnotes.conn.sql("""select max(idx) from `tab%s`

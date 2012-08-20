@@ -3,40 +3,40 @@
 
 	# These values are common in all dictionaries
 	{
-		u'creation': datetime.datetime(2012, 7, 3, 13, 30, 35),
-		u'docstatus': 0L,
-		u'modified': datetime.datetime(2012, 8, 20, 12, 42, 11),
+		u'creation': '2012-07-03 13:30:35',
+		u'docstatus': 0,
+		u'modified': '2012-08-20 14:04:44',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'allow_attach': 0L,
-		'allow_copy': 0L,
-		'allow_email': 0L,
-		'allow_print': 0L,
-		'allow_rename': 0L,
-		'allow_trash': 0L,
+		'allow_attach': 0,
+		'allow_copy': 0,
+		'allow_email': 0,
+		'allow_print': 0,
+		'allow_rename': 0,
+		'allow_trash': 0,
 		'autoname': u'TDI.########',
 		'colour': u'White:FFF',
 		'doctype': u'DocType',
-		'hide_heading': 0L,
-		'hide_toolbar': 0L,
-		'in_create': 1L,
-		'in_dialog': 0L,
-		'is_transaction_doc': 0L,
-		'issingle': 0L,
-		'max_attachments': 0L,
+		'hide_heading': 0,
+		'hide_toolbar': 0,
+		'in_create': 1,
+		'in_dialog': 0,
+		'is_transaction_doc': 0,
+		'issingle': 0,
+		'max_attachments': 0,
 		'module': u'Core',
 		u'name': u'__common__',
-		'read_only': 1L,
-		'read_only_onload': 0L,
+		'read_only': 1,
+		'read_only_onload': 0,
 		'section_style': u'Simple',
 		'server_code_error': u' ',
-		'show_in_menu': 0L,
-		'use_template': 0L,
-		'version': 6L
+		'show_in_menu': 0,
+		'use_template': 0,
+		'version': 6
 	},
 
 	# These values are common for all DocField
@@ -46,19 +46,19 @@
 		'parent': u'ToDo',
 		'parentfield': u'fields',
 		'parenttype': u'DocType',
-		'permlevel': 0L
+		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
 	{
-		'create': 1L,
+		'create': 1,
 		'doctype': u'DocPerm',
 		u'name': u'__common__',
 		'parent': u'ToDo',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
-		'permlevel': 0L,
-		'read': 1L,
+		'permlevel': 0,
+		'read': 1,
 		'role': u'All'
 	},
 
@@ -70,76 +70,76 @@
 
 	# DocField
 	{
-		'allow_on_submit': 0L,
+		'allow_on_submit': 0,
 		u'doctype': u'DocField',
 		'fieldname': u'description',
 		'fieldtype': u'Text',
-		'hidden': 0L,
-		'in_filter': 0L,
+		'hidden': 0,
+		'in_filter': 0,
 		'label': u'Description',
-		'no_copy': 0L,
+		'no_copy': 0,
 		'oldfieldname': u'description',
 		'oldfieldtype': u'Text',
-		'print_hide': 0L,
-		'report_hide': 0L,
-		'reqd': 0L,
-		'search_index': 0L,
+		'print_hide': 0,
+		'report_hide': 0,
+		'reqd': 0,
+		'search_index': 0,
 		'width': u'300px'
 	},
 
 	# DocField
 	{
-		'allow_on_submit': 0L,
+		'allow_on_submit': 0,
 		u'doctype': u'DocField',
 		'fieldname': u'date',
 		'fieldtype': u'Date',
-		'hidden': 0L,
-		'in_filter': 0L,
+		'hidden': 0,
+		'in_filter': 0,
 		'label': u'Date',
-		'no_copy': 0L,
+		'no_copy': 0,
 		'oldfieldname': u'date',
 		'oldfieldtype': u'Date',
-		'print_hide': 0L,
-		'report_hide': 0L,
-		'reqd': 0L,
-		'search_index': 0L
+		'print_hide': 0,
+		'report_hide': 0,
+		'reqd': 0,
+		'search_index': 0
 	},
 
 	# DocField
 	{
-		'allow_on_submit': 0L,
+		'allow_on_submit': 0,
 		u'doctype': u'DocField',
 		'fieldname': u'priority',
 		'fieldtype': u'Data',
-		'hidden': 0L,
-		'in_filter': 0L,
+		'hidden': 0,
+		'in_filter': 0,
 		'label': u'Priority',
-		'no_copy': 0L,
+		'no_copy': 0,
 		'oldfieldname': u'priority',
 		'oldfieldtype': u'Data',
 		'options': u'Medium\nHigh\nLow',
-		'print_hide': 0L,
-		'report_hide': 0L,
-		'reqd': 0L,
-		'search_index': 0L
+		'print_hide': 0,
+		'report_hide': 0,
+		'reqd': 0,
+		'search_index': 0
 	},
 
 	# DocField
 	{
-		'allow_on_submit': 0L,
+		'allow_on_submit': 0,
 		u'doctype': u'DocField',
 		'fieldname': u'checked',
 		'fieldtype': u'Check',
-		'hidden': 0L,
-		'in_filter': 0L,
+		'hidden': 0,
+		'in_filter': 0,
 		'label': u'Checked',
-		'no_copy': 0L,
+		'no_copy': 0,
 		'oldfieldname': u'checked',
 		'oldfieldtype': u'Check',
-		'print_hide': 0L,
-		'report_hide': 0L,
-		'reqd': 0L,
-		'search_index': 0L
+		'print_hide': 0,
+		'report_hide': 0,
+		'reqd': 0,
+		'search_index': 0
 	},
 
 	# DocField

@@ -263,9 +263,9 @@ def peval_doclist(txt):
 	"""
 		Restore a pretty printed doclist
 	"""
+	doclist = eval(txt)
+	
 	if txt.startswith('#'):
-		return uncommonify_doclist(eval(txt))
+		return uncommonify_doclist(doclist)
 	else:
-		return eval(txt)
-
-	return uncommonify_doclist(eval(txt))
+		return doclist

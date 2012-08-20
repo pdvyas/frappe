@@ -467,6 +467,8 @@ def pprint_dict(d, level=1, no_blanks=True):
 	"""
 		Pretty print a dictionary with indents
 	"""
+	from datetime import datetime
+	
 	if no_blanks:
 		remove_blanks(d)
 		
@@ -482,7 +484,13 @@ def pprint_dict(d, level=1, no_blanks=True):
 	# make lines
 	for key in kl:
 		if key != '##comment':
-			tmp = {key: d[key]}
+			val = d[key]
+			if isinstance(val, datetime):
+				val = str(val)
+			if isinstance(val, long):
+				val = int(val)
+
+			tmp = {key: val}
 			lines.append(indent + str(tmp)[1:-1] )
 	
 	# add comment string

@@ -96,6 +96,10 @@ def msgprint(msg, small=0, raise_exception=0, as_table=False, debug=0):
 		else:
 			raise ValidationError, msg
 
+def getTraceback():
+	import webnotes.utils
+	return webnotes.utils.getTraceback()
+	
 def get_cgi_fields():
 	"""make webnotes.form from cgi field storage"""
 	import cgi

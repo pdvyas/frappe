@@ -51,7 +51,7 @@ wn.ui.AssignTo = Class.extend({
 				parenttype: this.form_page.doclist.doc.get('doctype'),
 				owner: user_info.id,
 				description: 'You have been assigned this.',
-				priority: 'Medium'
+				priority: 'Medium',
 				assigned_by: user
 			}, function(r) {
 				me.set_assign_button_text(user_info);
