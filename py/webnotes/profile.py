@@ -147,7 +147,7 @@ class Profile:
 			self.defaults[rec[0]].append(rec[1] or '')
 
 		return self.defaults
-					
+
 	# update recent documents
 	def update_recent(self, dt, dn):
 		"""
