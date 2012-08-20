@@ -94,9 +94,11 @@ wn.ui.GridControl = wn.ui.Control.extend({
 		this.add_row_button = $('<button class="btn btn-small" style="margin-top: 5px;">\
 			<i class="icon-plus"></i>\
 			Add Row</button>').click(function() {
-				wn.model.get(me.doc.get('doctype'), me.doc.get('name'))
+				var d = wn.model.get(me.doc.get('doctype'), me.doc.get('name'))
 					.add_child(me.docfield.fieldname);
 				me.set();
+				// edit
+				me.edit_row(d);
 				return false;
 			}).appendTo(this.$w.find('.controls'));
 	},

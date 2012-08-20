@@ -51,6 +51,7 @@ wn.views.RowEditFormDialog = wn.views.FormDialog.extend({
 			me.control_grid.set(); // reset grid
 			me.hide();
 		});
+		save_btn.addClass('btn-info');
 		
 		var delete_btn = this.appframe.add_button('Delete', function() { 
 			// remove row from doclist
@@ -58,7 +59,7 @@ wn.views.RowEditFormDialog = wn.views.FormDialog.extend({
 			me.control_grid.set(); // reset grid
 			
 			me.hide();
-		});
-		delete_btn.addClass('btn-danger').parent().css('float', 'right');
+		}, 'icon-remove');
+		delete_btn.parent().css('float', 'right');
 	}
 });

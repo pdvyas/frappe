@@ -5,7 +5,7 @@
 	{
 		u'creation': '2012-07-13 11:07:19',
 		u'docstatus': 0,
-		u'modified': '2012-08-20 15:22:18',
+		u'modified': '2012-08-20 19:09:37',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -15,9 +15,11 @@
 		'autoname': u'field:tag_name',
 		'colour': u'White:FFF',
 		'doctype': u'DocType',
+		'in_create': 1,
 		'module': u'Core',
 		u'name': u'__common__',
 		'name_case': u'Title Case',
+		'read_only': 1,
 		'section_style': u'Simple',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
@@ -41,16 +43,12 @@
 
 	# These values are common for all DocPerm
 	{
-		'create': 1,
 		'doctype': u'DocPerm',
 		u'name': u'__common__',
 		'parent': u'Tag',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
-		'permlevel': 0,
-		'read': 1,
-		'role': u'System Manager',
-		'write': 1
+		'role': u'System Manager'
 	},
 
 	# DocType, Tag
@@ -66,6 +64,18 @@
 
 	# DocPerm
 	{
-		u'doctype': u'DocPerm'
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'read': 1,
+		'submit': 0,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		u'doctype': u'DocPerm',
+		'read': 0,
+		'write': 0
 	}
 ]

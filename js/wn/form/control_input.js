@@ -44,6 +44,12 @@ wn.ui.CheckControl = wn.ui.Control.extend({
 	make_input: function() {
 		this.$input = $('<input type="checkbox">').appendTo(this.$w.find('.controls'));
 	},
+	get: function() {
+		return this.$input.get(0).checked ? 1 : 0;
+	},
+	set_input: function(val) {
+		this.$input.get(0).checked = val ? true : false;
+	},
 	toggle_editable: function() { },
 	set_static: function() { }
 });

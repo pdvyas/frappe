@@ -78,12 +78,13 @@ wn.ui.Control = Class.extend({
 		var me = this;
 		if(this.$input) 
 			this.$input.change(function() {
-				var val = $(this).val();
+				var val = me.get();
 				if(me.validate) {
 					val = me.validate(val);
-					$(this).val(val);
+					me.set_input(val);
 				}
-				if(me.doc) me.doc.fields[me.docfield.fieldname] = val;
+				if(me.doc) 
+					me.doc.fields[me.docfield.fieldname] = val;
 			})		
 	},
 	set_events: function() {
