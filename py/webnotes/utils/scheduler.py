@@ -96,10 +96,10 @@ def trigger(method):
 def log(method):
 	"""log error in patch_log"""
 	import webnotes
-	webnotes.conn.rollback()
-	traceback = webnotes.getTraceback()
-
 	import webnotes.utils
+	webnotes.conn.rollback()
+	traceback = webnotes.utils.getTraceback()
+
 	webnotes.conn.begin()
 	webnotes.conn.sql("""insert into __SchedulerLog (`timestamp`, method, error) 
 		values (%s, %s, %s)""", (webnotes.utils.now_datetime(), method, traceback))

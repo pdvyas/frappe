@@ -20,14 +20,12 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
 
-# util __init__.py
-
 from __future__ import unicode_literals
 import webnotes
 
 user_time_zone = None
-month_name = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-month_name_full = ['','January','February','March','April','May','June','July','August','September','October','November','December']
+user_format = None
+
 no_value_fields = ['Section Break', 'Column Break', 'HTML', 'Table', 'FlexTable', 'Button', 'Image', 'Graph']
 default_fields = ['doctype','name','owner','creation','modified','modified_by','parent','parentfield','parenttype','idx','docstatus']
 
@@ -39,63 +37,37 @@ class DictObj(dict):
 	def __setattr__(self, key, value):
 		self[key] = value
 
-def getCSVelement(v):
-	"""
-		 Returns the CSV value of `v`, For example: 
-		 
-		 * apple becomes "apple"
-		 * hi"there becomes "hi""there"
-	"""
-	v = cstr(v)
-	if not v: return ''
-	if (',' in v) or ('\n' in v) or ('"' in v):
-		if '"' in v: v = v.replace('"', '""')
-		return '"'+v+'"'
-	else: return v or ''
-
 def get_fullname(profile):
 	"""get the full name (first name + last name) of the user from Profile"""
 	p = webnotes.conn.sql("""select first_name, last_name from `tabProfile`
 		where name=%s""", profile, as_dict=1)
 	if p:
-		p = p[0]
-		full_name = (p['first_name'] and (p['first_name'] + ' ') or '') + (p['last_name'] or '')
-		return full_name or profile
-	else:
-		return profile
-		
+		profile = " ".join([p[0]["first_name"] or "", p[0]["last_name"] or ""]) or profile
+
+	return profile
+
+# email functions
 def decode_email_header(s):
 	import email.header
-	
-	# replace double quotes with blank
-	# double quotes in header prohibit decoding of header
-	decoded_header_tuple = email.header.decode_header(s.replace('"', ''))
-	
-	decoded_list = map(lambda h: unicode(h[0], encoding=h[1] or 'utf-8'), decoded_header_tuple)
-	
+	# replace double quotes with blank, double quotes in header prevent decoding of header
+	decoded_tuple = email.header.decode_header(s.replace('"', ''))
+	decoded_list = map(lambda h: unicode(h[0], encoding=h[1] or 'utf-8'), decoded_tuple)
 	return " ".join(decoded_list)
 
 def extract_email_id(s):
-	"""
-		Extract email id from email header format
-	"""
-	if '<' in s:
-		s = s.split('<')[1].split('>')[0]
-	if s: 
-		s = s.strip().lower()
-	return s
+	"""Extract email id from email header format"""
+	import re
+	email_id = re.findall("<(.*)>", s)
+	if email_id and email_id[0]:
+		s = email_id[0]
+	
+	return s.strip().lower()
 	
 def validate_email_add(email_str):
 	"""Validates the email string"""
 	s = extract_email_id(email_str)
 	import re
-	#return re.match("^[a-zA-Z0-9._%-]+@[a-zA-Z0-9._%-]+.[a-zA-Z]{2,6}$", email_str)
 	return re.match("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", s)
-
-def sendmail(recipients, sender='', msg='', subject='[No Subject]', parts=[], cc=[], attach=[]):
-	"""Send an email. For more details see :func:`email_lib.sendmail`"""
-	import webnotes.utils.email_lib
-	return email_lib.sendmail(recipients, sender, msg, subject, parts, cc, attach)
 
 def get_request_site_address():
 	"""get app url from request"""
@@ -119,17 +91,6 @@ def random_string(length):
 	from random import choice
 	return ''.join([choice(string.letters + string.digits) for i in range(length)])
 
-def load_json(arg):
-	# already a dictionary?
-	if not isinstance(arg, basestring):
-		return arg
-	
-	import json
-	return json.loads(arg, encoding='utf-8')
-	
-# Get Traceback
-# ==============================================================================
-
 def getTraceback():
 	"""
 		 Returns the traceback of the Exception
@@ -146,16 +107,10 @@ def getTraceback():
 	
 	return body
 
-# Log
-# ==============================================================================
-
 def log(event, details):
 	webnotes.logger.info(details)
 
-# Date and Time
-# ==============================================================================
-
-
+# datetime functions
 def getdate(string_date):
 	"""
 		 Coverts string date (yyyy-mm-dd) to datetime.date object
@@ -172,34 +127,55 @@ def getdate(string_date):
 		
 	return datetime.datetime.strptime(string_date, "%Y-%m-%d").date()
 
-def add_days(date, days, format='string'):
-	"""
-		 Adds `days` to the given `string_date`
-	"""
-	import datetime
-	if not date:
-		date = now_datetime()
-
-	if type(date) not in (datetime.datetime, datetime.date): 
+def add_to_date(date, years=0, months=0, days=0):
+	"""Adds `days` to the given date"""
+	format = isinstance(date, basestring)
+	if date:
 		date = getdate(date)
-
-	dt =  date + datetime.timedelta(days)
-	if format=='string':
-		return dt.strftime('%Y-%m-%d')
 	else:
-		return dt
+		date = now_datetime()
+	
+	from dateutil.relativedelta import relativedelta
+	date += relativedelta(years=years, months=months, days=days)
+	
+	if format:
+		return date.strftime("%Y-%m-%d")
+	else:
+		return date
 
-def add_months(string_date, months):
-	import datetime
-	return webnotes.conn.sql("select DATE_ADD('%s',INTERVAL '%s' MONTH)" % (getdate(string_date),months))[0][0]
+def add_days(date, days):
+	return add_to_date(date, days=days)
 
-def add_years(string_date, years):
-	import datetime
-	return webnotes.conn.sql("select DATE_ADD('%s',INTERVAL '%s' YEAR)" % (getdate(string_date),years))[0][0]
+def add_months(date, months):
+	return add_to_date(date, months=months)
 
-def date_diff(string_ed_date, string_st_date=None):
+def add_years(date, years):
+	return add_to_date(date, years=years)
+
+def date_diff(string_ed_date, string_st_date):
+	return (getdate(string_ed_date) - getdate(string_st_date)).days
+	
+def get_first_day(dt, d_years=0, d_months=0):
+	"""
+	 Returns the first day of the month for the date specified by date object
+	 Also adds `d_years` and `d_months` if specified
+	"""
 	import datetime
-	return webnotes.conn.sql("SELECT DATEDIFF('%s','%s')" %(getdate(string_ed_date), getdate(string_st_date)))[0][0]
+	dt = getdate(dt)
+
+	# d_years, d_months are "deltas" to apply to dt	
+	overflow_years, month = divmod(dt.month + d_months - 1, 12)
+	year = dt.year + d_years + overflow_years
+
+	return datetime.date(year, month + 1, 1)
+
+def get_last_day(dt):
+	"""
+	 Returns last day of the month using:
+	 `get_first_day(dt, 0, 1) + datetime.timedelta(-1)`
+	"""
+	import datetime
+	return get_first_day(dt, 0, 1) + datetime.timedelta(-1)
 
 def now_datetime():
 	global user_time_zone
@@ -208,8 +184,9 @@ def now_datetime():
 	
 	# get localtime
 	if not user_time_zone:
+		import conf
 		user_time_zone = webnotes.conn.get_value('Control Panel', None, 'time_zone') \
-			or 'Asia/Calcutta'
+			or getattr(conf, "user_timezone") or 'Asia/Calcutta'
 
 	# convert to UTC
 	utcnow = timezone('UTC').localize(datetime.utcnow())
@@ -229,109 +206,38 @@ def nowtime():
 	"""return current time in hh:mm"""
 	return now_datetime().strftime('%H:%M')
 
-def get_first_day(dt, d_years=0, d_months=0):
-	"""
-	 Returns the first day of the month for the date specified by date object
-	 Also adds `d_years` and `d_months` if specified
-	"""
-	import datetime
-	dt = getdate(dt)
-
-	# d_years, d_months are "deltas" to apply to dt	
-	overflow_years, month = divmod(dt.month + d_months - 1, 12)
-	year = dt.year + d_years + overflow_years
-	
-	return datetime.date(year, month + 1, 1)
-
-def get_last_day(dt):
-	"""
-	 Returns last day of the month using:
-	 `get_first_day(dt, 0, 1) + datetime.timedelta(-1)`
-	"""
-	import datetime
-	return get_first_day(dt, 0, 1) + datetime.timedelta(-1)
-
-user_format = None
-"""
-	 User format specified in :term:`Control Panel`
-	 
-	 Examples:
-	 
-	 * dd-mm-yyyy
-	 * mm-dd-yyyy
-	 * dd/mm/yyyy
-"""
-
 def formatdate(string_date):
 	"""
 	 	Convers the given string date to :data:`user_format`
+		User format specified in :term:`Control Panel`
+
+		 Examples:
+
+		 * dd-mm-yyyy
+		 * mm-dd-yyyy
+		 * dd/mm/yyyy
 	"""
+	date = getdate(string_date)
+	
 	global user_format
 	if not user_format:
 		user_format = webnotes.conn.get_value('Control Panel', None, 'date_format')
-	d = string_date.split('-');
+	
 	out = user_format
-	return out.replace('dd', ('%.2i' % cint(d[2]))).replace('mm', ('%.2i' % cint(d[1]))).replace('yyyy', d[0])
+	return out.replace("dd", date.strftime("%d")).replace("mm", date.strftime("%m"))\
+		.replace("yyyy", date.strftime("%Y"))
 	
-def dict_to_str(args, sep='&'):
-	"""
-	Converts a dictionary to URL
-	"""
-	import urllib
-	t = []
-	for k in args.keys():
-		t.append(str(k)+'='+urllib.quote(str(args[k] or '')))
-	return sep.join(t)
-
-def timestamps_equal(t1, t2):
-	"""Returns true if same the two string timestamps are same"""
-	scrub = lambda x: x.replace(':', ' ').replace('-',' ').split()
-
-	t1, t2 = scrub(t1), scrub(t2)
-	
-	if len(t1) != len(t2):
-		return
-	
-	for i in range(len(t1)):
-		if t1[i]!=t2[i]:
-			return
-	return 1
-
 def global_date_format(date):
 	"""returns date as 1 January 2012"""
-	import datetime
+	formatted_date = getdate(date).strftime("%d %B %Y")
+	return formatted_date.startswith("0") and formatted_date[1:] or formatted_date
 
-	if isinstance(date, basestring):
-		date = getdate(date)
-	
-	return cstr(cint(date.strftime('%d'))) + ' ' + month_name_full[int(date.strftime('%m'))] \
-		+ ' ' + date.strftime('%Y')
-	
-	
-	
-
-# Datatype
-# ==============================================================================
-
-def isNull(v):
-	"""
-	Returns true if v='' or v is `None`
-	"""
-	return (v=='' or v==None)
-	
 def has_common(l1, l2):
-	"""
-	Returns true if there are common elements in lists l1 and l2
-	"""
-	for l in l1:
-		if l in l2: 
-			return 1
-	return 0
+	"""Returns truthy value if there are common elements in lists l1 and l2"""
+	return set(l1) & set(l2)
 	
 def flt(s):
-	"""
-	Convert to float (ignore commas)
-	"""
+	"""Convert to float (ignore commas)"""
 	if isinstance(s, basestring): # if string
 		s = s.replace(',','')
 	try: tmp = float(s)
@@ -356,7 +262,7 @@ def cstr(s):
 	else:
 		return unicode(s)
 
-def convert_type(df, val):
+def cast(df, val):
 	if df.fieldtype == 'Int':
 		return cint(val)
 	elif df.fieldtype in ('Float', 'Currency'):
@@ -364,40 +270,9 @@ def convert_type(df, val):
 	else:
 		return val
 		
-def str_esc_quote(s):
-	"""
-	Escape quotes
-	"""
-	if s==None:return ''
-	return s.replace("'","\'")
-
-def replace_newlines(s):
-	"""
-	Replace newlines by '<br>'
-	"""
-	if s==None:return ''
-	return s.replace("\n","<br>")
-
-
-# ==============================================================================
-
-def parse_val(v):
-	"""
-	Converts to simple datatypes from SQL query results
-	"""
-	import datetime
-	
-	if type(v)==datetime.date:
-		v = str(v)
-	elif type(v)==datetime.timedelta:
-		v = ':'.join(str(v).split(':')[:2])
-	elif type(v)==datetime.datetime:
-		v = str(v)
-	elif type(v)==long: v=int(v)
-
-	return v
-	
-# ==============================================================================
+def comma_and(lst):
+	if len(lst)==1: return lst[0]
+	return ', '.join(lst[:-1]) + ' and ' + lst[-1]
 
 def fmt_money(amount, fmt = '%.2f'):
 	"""

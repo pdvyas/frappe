@@ -20,7 +20,6 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
 
-# model __init__.py
 from __future__ import unicode_literals
 import webnotes
 
@@ -208,9 +207,10 @@ def delete_doc(doctype=None, name=None, doclist = None, force=0):
 	if not force:
 		check_if_doc_is_linked(doctype, name)
 
+	# TODO: implement clear_tags
 	# remove tags
-	from webnotes.widgets.tags import clear_tags
-	clear_tags(doctype, name)
+	# from webnotes.widgets.tags import clear_tags
+	# 	clear_tags(doctype, name)
 	
 	try:
 		webnotes.conn.sql("delete from `tab%s` where name='%s' limit 1" % (doctype, name))

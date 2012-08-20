@@ -33,7 +33,7 @@ import webnotes.model
 import webnotes.model.doc
 import webnotes.model.doclist
 
-from webnotes.utils import cint, cstr, now
+from webnotes.utils import cint, cstr, now, comma_and
 
 class DocListController(object):
 	"""
@@ -228,7 +228,7 @@ class DocListController(object):
 		if error_list:
 			webnotes.msgprint("""The following values do not exist in the database: %s.
 				Please correct these values and try to save again.""" % \
-				webnotes.comma_and(["%s: \"%s\" (specified in field: %s)" % err for err in error_list]),
+				comma_and(["%s: \"%s\" (specified in field: %s)" % err for err in error_list]),
 				raise_exception=webnotes.InvalidLinkError)
 
 	def update_timestamps_and_docstatus(self):

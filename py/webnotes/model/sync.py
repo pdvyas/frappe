@@ -5,6 +5,9 @@ from __future__ import unicode_literals
 """
 import webnotes
 
+# used during sync_install
+doctypelist = {}
+
 def sync_all(force=0):
 	modules = []
 	modules += sync_core_doctypes(force)
@@ -64,33 +67,36 @@ def walk_and_sync(start_path, force=0):
 		
 	return modules
 
+def load_doctypelist(module_name, docname):
+	with open(get_file_path(module_name, docname), 'r') as f:
+		from webnotes.model.utils import peval_doclist
+		doclist = peval_doclist(f.read())
+	return doclist
 
 # docname in small letters with underscores
 def sync(module_name, docname, force=0):
 	"""sync doctype from file if modified"""
-	with open(get_file_path(module_name, docname), 'r') as f:
-		from webnotes.model.utils import peval_doclist
-		doclist = peval_doclist(f.read())
-		modified = doclist[0]['modified']
-		if not doclist:
-			raise Exception('DocList could not be evaluated')
-		if modified == str(webnotes.conn.get_value(doclist[0].get('doctype'), 
-			doclist[0].get('name'), 'modified')) and not force:
-			return
-		webnotes.conn.begin()
-		
-		delete_doctype_docfields(doclist)
-		save_doctype_docfields(doclist)
-		save_perms_if_none_exist(doclist)
-		webnotes.conn.sql("""UPDATE `tab{doctype}` 
-			SET modified=%s WHERE name=%s""".format(doctype=doclist[0]['doctype']),
-				(modified, doclist[0]['name']))
-		
-		webnotes.conn.commit()
-		print module_name, '|', docname
-		
-		#raise Exception
-		return doclist[0].get('name')
+	doclist = load_doctypelist(module_name, docname)
+	modified = doclist[0]['modified']
+	if not doclist:
+		raise Exception('DocList could not be evaluated')
+	if modified == str(webnotes.conn.get_value(doclist[0].get('doctype'), 
+		doclist[0].get('name'), 'modified')) and not force:
+		return
+	webnotes.conn.begin()
+	
+	delete_doctype_docfields(doclist)
+	save_doctype_docfields(doclist)
+	save_perms_if_none_exist(doclist)
+	webnotes.conn.sql("""UPDATE `tab{doctype}` 
+		SET modified=%s WHERE name=%s""".format(doctype=doclist[0]['doctype']),
+			(modified, doclist[0]['name']))
+	
+	webnotes.conn.commit()
+	print module_name, '|', docname
+	
+	#raise Exception
+	return doclist[0].get('name')
 		
 def get_file_path(module_name, docname):
 	if not (module_name and docname):
@@ -108,14 +114,16 @@ def delete_doctype_docfields(doclist):
 	webnotes.conn.sql("DELETE FROM `tabDocField` WHERE parent=%s", parent)
 
 def save_doctype_docfields(doclist):
+	global doctypelist
 	from webnotes.model.doc import Document
+	from webnotes.modules import scrub
 	parent_doc = Document(fielddata=doclist[0])
-	parent_doc.save(1)
+	parent_doc.save(1, doctypelist=doctypelist.get("doctype"))
 	idx = 1
 	for d in doclist:
 		if d.get('doctype') != 'DocField': continue
 		d['idx'] = idx
-		Document(fielddata=d).save(1)
+		Document(fielddata=d).save(1, doctypelist.get("docfield"))
 		idx += 1
 	
 	update_schema(parent_doc.name)
@@ -128,20 +136,31 @@ def update_schema(docname):
 	clear_cache(docname)
 
 def save_perms_if_none_exist(doclist):
+	global doctypelist
 	res = webnotes.conn.sql("""SELECT name FROM `tabDocPerm`
 			WHERE parent=%s""", doclist[0].get('name'))
 	if res and res[0][0]: return
 
 	from webnotes.model.doc import Document
+	from webnotes.modules import scrub
 	for d in doclist:
 		if d.get('doctype') != 'DocPerm': continue
-		Document(fielddata=d).save(1)
+		Document(fielddata=d).save(1, doctypelist=doctypelist.get("docperm"))
 
 def sync_install(force=1):
+	# load required doctypes' doclist
+	global doctypelist
+	from webnotes.model.doclist import objectify_doclist
+	doctypelist["doctype"] = objectify_doclist(load_doctypelist("core", "doctype"))
+	doctypelist["docfield"] = objectify_doclist(load_doctypelist("core", "docfield"))
+	doctypelist["docperm"] = objectify_doclist(load_doctypelist("core", "docperm"))
+		
 	# sync required doctypes first
 	sync("core", "docperm")
 	sync("core", "docfield")
 	sync("core", "custom_field")
+	sync("core", "property_setter")
+	sync("core", "doctype_validator")
 	sync("core", "doctype")
 	
 	# sync all doctypes

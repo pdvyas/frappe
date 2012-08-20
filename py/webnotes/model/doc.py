@@ -84,11 +84,10 @@ class Document(dict):
 	def __setattr__(self, key, value):
 		self[key] = value
 
-	def save(self, new=False):
-		if self.doctype in ["DocType", "DocField", "DocPerm", "Custom Field"]:
-			doctypelist = [Document(fielddata = {"issingle": 0})]
-		else:
+	def save(self, new=False, doctypelist=None):
+		if not doctypelist:
 			doctypelist = webnotes.model.get_doctype(self.doctype)
+
 		fields_to_save = self.get_valid_fields(doctypelist)
 		
 		# set None if field does not exist

@@ -46,7 +46,7 @@ _cached_link_docs = {}
 def filter_link(doclist, link_filter, doctypelist):
 	"""check if all the rules are valid"""
 	import webnotes
-	from webnotes.utils import convert_type
+	from webnotes.utils import cast
 	
 	def _get(doctype, name):
 		global _cached_link_docs
@@ -61,7 +61,7 @@ def filter_link(doclist, link_filter, doctypelist):
 		link_filter.value = link_filter.value.startswith('field:') \
 			and doc.fields.get(link_filter.value[6:].strip()) or link_filter.value
 
-		link_filter.value = convert_type(link_df, link_filter.value)
+		link_filter.value = cast(link_df, link_filter.value)
 		
 		if link_df.fieldtype == 'Int':
 			link_filter.value = cint(link_filter.value)
@@ -123,9 +123,9 @@ def check_filters(val1, condition, val2):
 
 def no_duplicate(doclist, parentfield, keys):
 	"""raise exception if duplicate entries are found"""
-
-	import webnotes.model
 	import webnotes
+	import webnotes.model
+	from webnotes.utils import comma_and
 	
 	all_values = []
 	for d in doclist.get({"parentfield":parentfield}):
@@ -137,7 +137,7 @@ def no_duplicate(doclist, parentfield, keys):
 			doctypelist = webnotes.model.get_doctype(d.doctype)
 			labels = map(doctypelist.get_label, keys)
 			webnotes.msgprint("""Duplicate rows found in table %s 
-				having same values for colums %s""" % (d.doctype, webnotes.comma_and(labels)),
+				having same values for colums %s""" % (d.doctype, comma_and(labels)),
 				raise_exception=webnotes.DuplicateEntryError)
 				
 		all_values.append(values)
@@ -166,12 +166,12 @@ def check_condition(doclist, condition, doctypelist):
 	then_doclist = _get_doclist('then')
 	
 	# convert type if Int, Float, Currency
-	from webnotes.utils import convert_type
+	from webnotes.utils import cast
 	if_field = _get_field("if")
-	condition.if_value = convert_type(if_field, condition.if_value)
+	condition.if_value = cast(if_field, condition.if_value)
 	
 	then_field = _get_field("then")
-	condition.then_value = convert_type(then_field, condition.then_value)
+	condition.then_value = cast(then_field, condition.then_value)
 		
 	# for each, check if "if" condition is true
 	for if_doc in if_doclist:
