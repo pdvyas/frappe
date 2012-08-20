@@ -47,7 +47,6 @@ def get(arg=None):
 	fields = json.loads(data['fields'])
 	tables = get_tables()
 	load_doctypes()
-
 	remove_user_tags(fields)
 	# conditions
 	conditions = build_conditions(filters)

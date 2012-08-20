@@ -50,9 +50,9 @@ wn.ui.Search = Class.extend({
 						filters = filters.concat(me.with_filters);
 					}
 					
-					me.search_fields = cstr(wn.model.get("DocType", me.doctype).doc.get('search_fields'))
-						.split(",");
-					
+					me.search_fields = cstr(wn.model.get("DocType", me.doctype).doc.get('search_fields'));
+					me.search_fields = me.search_fields ? me.search_fields.split(",") : [];
+
 					return {
 						doctype: me.doctype,
 						fields: $.map(["name"].concat(me.search_fields), function(v) {
