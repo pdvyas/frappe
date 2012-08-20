@@ -27,7 +27,12 @@ wn.ui.Form = Class.extend({
 
 		if(this.doc) {
 			this.meta = wn.model.get('DocType', this.doc.get('doctype'));
-			this.fields = $.map(this.meta.get('DocField', {}), function(d) { return d.fields; });			
+			this.fields = $.map(this.meta.get('DocField', {}), function(d) { return d.fields; });
+			if(this.doc.get('__islocal') && this.meta.doc.get('autoname')=='Prompt') {
+				this.doc.set('name', '');
+				this.fields = [{"fieldtype":"Data", "fieldname":"name", 
+					"label":"New " + this.doc.get('doctype') + " Name", reqd:1}].concat(this.fields);
+			}
 		}
 		this.make_form();
 		this.listen();

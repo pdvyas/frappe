@@ -103,7 +103,7 @@ $.extend(wn.model, {
 	},
 	// naming style for onchange events
 	event_name: function(dt, dn) {
-		return 'change-'+dt.replace(/ /g, '_')+'-' + dn.replace(/ /g, '_');
+		return 'change-'+dt.replace(/ /g, '_')+'-' + (dn || '').replace(/ /g, '_');
 	},
 	insert: function(doc, callback, btn) {
 		var doclist = wn.model.create(doc.doctype);

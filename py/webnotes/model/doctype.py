@@ -273,9 +273,10 @@ def add_validators(doctype, doclist):
 def add_search_fields(doclist):
 	"""add search fields found in the doctypes indicated by link fields' options"""
 	for lf in doclist.get({"fieldtype": "Link"}):
-		search_fields = get(lf.options)[0].search_fields
-		if search_fields:
-			lf.search_fields = map(lambda sf: sf.strip(), search_fields.split(","))
+		if lf.options:
+			search_fields = get(lf.options)[0].search_fields
+			if search_fields:
+				lf.search_fields = map(lambda sf: sf.strip(), search_fields.split(","))
 
 class DocTypeDocList(webnotes.model.doclist.DocList):
 	def get_field(self, fieldname, parent=None, parentfield=None):

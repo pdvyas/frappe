@@ -53,12 +53,23 @@ wn.views.FormPage = Class.extend({
 			var btn = this;
 			$(this).html('Saving...').attr('disabled', 'disabled');
 			freeze();
-			me.form.doclist.save(function() {
-				unfreeze();
-				$(btn).attr('disabled', false).html('Save').attr('saving', 1)
-					.addClass('btn-success');
-				setTimeout('$(".btn[saving]").removeClass("btn-success").attr("saving",null)', 2000);
+			me.form.doclist.save(function(r) {
 				
+				unfreeze();
+				$(btn).attr('disabled', false).html('Save')
+				
+				if(!r.exc) {
+					var doc = me.doclist.doc;
+					if(doc.get('name') != wn.get_route()[2]) {
+						wn.re_route[window.location.hash] = 
+							wn.make_route_str(['Form', doc.get('doctype'), doc.get('name')])
+						wn.set_route('Form', doc.get('doctype'), doc.get('name'));
+					} else {
+						$(btn).attr('saving', 1)
+							.addClass('btn-success');
+						setTimeout('$(".btn[saving]").removeClass("btn-success").attr("saving",null)', 2000);
+					}					
+				}
 			});
 		});
 		
