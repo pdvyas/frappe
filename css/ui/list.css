@@ -74,31 +74,6 @@ div.list_filter input, div.list_filter select {
 	margin-right: 7px;
 }
 
-/* bar */
-
-span.bar-outer {
-	display: inline-block;
-	margin: 0px 7px;
-	margin-top: 3px;
-	background-color: #fff;
-	border: 1px solid #aaa;
-	height: 10px;
-}
-
-span.bar-inner {
-	display: inline-block;
-	background-color: #bdf;
-	height: 100%;
-	margin-bottom: 2px;
-	float: left;
-}
-span.bar-complete {
-	background-color: #009900;
-}
-span.bar-empty {
-	background-color: #990000;
-}
-
 
 /* stats */
 
@@ -109,46 +84,4 @@ div.stat-wrapper {
 div.stat-grid {
 	margin-top: 9px;
 	overflow: hidden;
-}
-
-div.stat-label {
-	position: relative;
-	padding: 3px;
-	text-align: center;
-	font-size: 11px;
-}
-div.stat-label, div.stat-label a {
-	z-index: 5;
-}
-
-div.stat-item {
-	position: relative;
-	margin-bottom: 7px;
-	background-color: #fff;
-	height: 18px;
-	border: 1px solid #aaa;
-	border-radius: 9px;
-	-webkit-border-radius: 9px;
-	-moz-border-radius: 9px;
-	overflow: hidden;
-}
-
-div.stat-bar {
-	position: absolute;
-	left: 0px;
-	height: 100%;
-	z-index: 0;
-	/* So that this div is also curved like the enclosing one */
-	border-radius: 9px;
-	-webkit-border-radius: 9px;
-	-moz-border-radius: 9px;
-
-	background: #e0ff84; /* Old browsers */
-	background: -moz-linear-gradient(top,  #e0ff84 0%, #a4e567 100%); /* FF3.6+ */
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#e0ff84), color-stop(100%,#a4e567)); /* Chrome,Safari4+ */
-	background: -webkit-linear-gradient(top,  #e0ff84 0%,#a4e567 100%); /* Chrome10+,Safari5.1+ */
-	background: -o-linear-gradient(top,  #e0ff84 0%,#a4e567 100%); /* Opera 11.10+ */
-	background: -ms-linear-gradient(top,  #e0ff84 0%,#a4e567 100%); /* IE10+ */
-	background: linear-gradient(top,  #e0ff84 0%,#a4e567 100%); /* W3C */
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e0ff84', endColorstr='#a4e567',GradientType=0 ); /* IE6-9 */
 }

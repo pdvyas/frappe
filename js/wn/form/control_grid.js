@@ -125,7 +125,9 @@ wn.ui.GridControl = wn.ui.Control.extend({
 	set_height: function() {
 		var height = 32 * (this.doclist.get(
 			{parentfield: this.docfield.fieldname}).length + 2);
-		this.$w.find('.ui-widget:first').css('height', (height > 300 ? 300 : height) + 'px');
+		this.$w.find('.ui-widget:first')
+			.css('height', (height > 300 ? 300 : height) + 'px')
+			.css('background-color', '#f2f2f2');
 		this.grid.resizeCanvas();
 	},
 	set_edit_button: function() {

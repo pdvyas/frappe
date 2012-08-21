@@ -280,6 +280,13 @@ wn.model.DocList = Class.extend({
 	},
 	save: function(callback, btn) {
 		var me = this;
+		try {
+			this.validate();			
+		} catch(e) {
+			console.log(e);
+			callback({exc: e});
+			return;
+		}
 		wn.call({
 			method: 'webnotes.model.client.save',
 			args: {
@@ -293,6 +300,35 @@ wn.model.DocList = Class.extend({
 				callback(r);
 			}
 		});
+	},
+	validate: function() {
+		// validate mandatory and duplication?
+		var reqd = []
+		$.each(this.doclist, function(i, d) {
+			$.each(wn.model.get('DocType', d.get('doctype')).get({doctype:'DocField', reqd:1}), 
+				function(i, df) {
+					if(d.get(df.get('fieldname'))===null || d.get(df.get('fieldname'))===undefined) {
+						reqd.push([df, d]);
+					}
+				});
+		})
+		if(reqd.length) {
+			$.each(reqd, function(i, info) {
+				if(info[1].get('parent')) {
+					msgprint(repl("<b>%(label)s</b> in <b>%(parent)s</b> \
+						table row %(idx)s is mandatory.", {
+							label: info[0].get('label'),
+							idx: info[1].get('idx'),
+							parent: wn.model.get('DocType', info[1].get('parenttype'))
+								.get({fieldname: info[1].get('parentfield')})[0].get('label')
+						}));
+				} else {
+					msgprint(repl("<b>%(label)s</b> in <b>%(parent)s</b> is mandatory.", info[0].fields));					
+				}
+			});
+			msgprint('<div class="alert alert-error">Please enter some values in the above fields.</div>');
+			throw 'mandatory error';
+		}
 	},
 	reset: function(doclist) {
 		// clear
