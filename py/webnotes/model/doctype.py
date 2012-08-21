@@ -99,7 +99,7 @@ def sort_fields(doclist):
 			if d.previous_field:
 				# field already added
 				for n in newlist:
-					if n.fieldname==d.previous_field:						
+					if n.fieldname==d.previous_field:
 						newlist.insert(newlist.index(n)+1, d)
 						pending.remove(d)
 						break
@@ -116,9 +116,8 @@ def sort_fields(doclist):
 	for d in newlist:
 		d.idx = idx
 		idx += 1
-	
-	doclist.get({"doctype":"!DocField"}).extend(newlist)
 
+	doclist.get({"doctype":"!DocField"}).extend(newlist)
 			
 def apply_property_setters(doctype, doclist):		
 	from webnotes.utils import cint
@@ -217,10 +216,9 @@ def add_embedded_js(doc):
 	"""embed all require files"""
 
 	import re, os, conf
-	from webnotes.model.code import get_custom_script
 
 	# custom script
-	custom = get_custom_script(doc.name, 'Client') or ''
+	custom = webnotes.conn.get_value("Custom Script", {"dt": doc.name, "script_type": "Client"}) or ""
 	doc['__js'] = (doc.get('__js') or '') + '\n' + custom	
 	
 	def _sub(match):

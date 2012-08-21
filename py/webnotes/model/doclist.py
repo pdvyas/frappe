@@ -107,7 +107,7 @@ def load_children(options, parent, parentfield, parenttype):
 	options = options.split("\n")[0].strip()
 		
 	return webnotes.conn.sql("""select *, "%s" as doctype from `tab%s` where parent = %s 
-		and parentfield = %s and parenttype = %s""" % (options, options, "%s", "%s", "%s"),
+		and parentfield = %s and parenttype = %s order by idx""" % (options, options, "%s", "%s", "%s"),
 		(parent, parentfield, parenttype), as_dict=1)
 		
 def objectify_doclist(doclist):
