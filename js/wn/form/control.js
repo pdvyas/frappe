@@ -87,7 +87,7 @@ wn.ui.Control = Class.extend({
 					}
 				}
 				if(me.doc) 
-					me.doc.fields[me.docfield.fieldname] = val;
+					me.doc.set(me.docfield.fieldname, val);
 			});
 	},
 	set_events: function() {

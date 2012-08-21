@@ -65,14 +65,17 @@ function show_alert(txt, add_class) {
 	if(!$('#dialog-container').length) {
 		$('<div id="dialog-container">').appendTo('body');		
 	}
-	if(!$('.growl').length) {
-		$('<div class="growl" style="position: fixed; bottom: 8px; right: 8px; \
+	if(!$('#alert-container').length) {
+		$('<div id="alert-container" style="position: fixed; bottom: 8px; right: 8px; \
 			z-index: 10;"></div>').appendTo('#dialog-container');
 	}
 
-	return $('<div class="alert">'+txt+'\
-		<button type="button" class="close" data-dismiss="alert">&times;</button></div>')
-			.appendTo($('.growl'))
-			.alert()
+	var div = $('<div class="alert">'+txt+'\
+		<button type="button" class="close">&times;</button></div>')
+			.appendTo('#alert-container')
 			.addClass(add_class);
+	div.find('.close').click(function() {
+		$(this).parent().css('display', 'none');
+	});
+	return div;
 }

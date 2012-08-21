@@ -114,7 +114,7 @@ $.extend(wn.model, {
 	create: function(dt) {
 		// create a new doclist and add defaults
 		var doc = new wn.model.Document({doctype:dt, __islocal:1, owner:user, 
-				name:wn.model.new_name(dt)});
+				name:wn.model.new_name(dt), docstatus:0});
 		wn.model.set_defaults(doc);
 		return new wn.model.DocList([doc]);
 	},
