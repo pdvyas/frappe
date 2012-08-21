@@ -69,6 +69,7 @@ class NameError(ValidationError): pass
 class DocStatusError(ValidationError): pass
 class IntegrityError(ValidationError): pass
 class CircularLinkError(ValidationError): pass
+class DependencyError(ValidationError): pass
 
 def errprint(msg):
 	"""Append to the :data:`debug log`"""
