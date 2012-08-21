@@ -40,7 +40,6 @@ class DocListController(object):
 	Collection of Documents with one parent and multiple children
 	"""
 	def __init__(self, doctype=None, name=None):
-		self.to_docstatus = 0
 		if doctype:
 			self.load(doctype, name)
 		if hasattr(self, "setup"):
@@ -80,9 +79,11 @@ class DocListController(object):
 		"""
 			Save & Submit - set docstatus = 1, run "on_submit"
 		"""
-		if self.doc.docstatus != 0:
-			msgprint("Only draft can be submitted", raise_exception=1)
-		self.to_docstatus = 1
+		self.doc.docstatus = 1 # remove this line after form revamp
+		
+		if self.doc.docstatus != 1:
+			webnotes.msgprint("""Cannot Submit if DocStatus is not set to 1""",
+				raise_exception=webnotes.DocStatusError)
 		self.save()
 		self.run('on_submit')
 
@@ -90,12 +91,12 @@ class DocListController(object):
 		"""
 			Cancel - set docstatus 2, run "on_cancel"
 		"""
-		if self.doc.docstatus != 1:
-			msgprint("Only submitted can be cancelled", raise_exception=1)
-		self.to_docstatus = 2
-		self.prepare_for_save()
-		self.save_main()
-		self.save_children()
+		self.docstatus = 2 # remove this line after form revamp
+		
+		if self.doc.docstatus != 2:
+			webnotes.msgprint("""Cannot Cancel if DocStatus is not set to 2""",
+				raise_exception=webnotes.DocStatusError)
+		self.save()
 		self.run('on_cancel')
 
 	def update_after_submit(self):
@@ -103,11 +104,8 @@ class DocListController(object):
 			Update after submit - some values changed after submit
 		"""
 		if self.doc.docstatus != 1:
-			msgprint("Only to called after submit", raise_exception=1)
-		self.to_docstatus = 1
-		self.prepare_for_save()
-		self.save_main()
-		self.save_children()
+			webnotes.msgprint("Cannot Update if Document is not Submitted", raise_exception=webnotes.DocStatusError)
+		self.save()
 		self.run('on_update_after_submit')
 
 	def prepare_for_save(self):
@@ -115,7 +113,7 @@ class DocListController(object):
 		self.check_if_latest()
 		self.check_permission()
 		self.check_links()
-		self.update_timestamps_and_docstatus()
+		self.update_metadata()
 
 	def save_main(self):
 		"""Save the main doc"""
@@ -231,7 +229,7 @@ class DocListController(object):
 				comma_and(["%s: \"%s\" (specified in field: %s)" % err for err in error_list]),
 				raise_exception=webnotes.InvalidLinkError)
 
-	def update_timestamps_and_docstatus(self):
+	def update_metadata(self):
 		"""Update owner, creation, modified_by, modified, docstatus"""
 		ts = now()
 
@@ -242,10 +240,6 @@ class DocListController(object):
 
 			d.modified_by = webnotes.session["user"]
 			d.modified = ts
-			
-			# doubt: why do this?
-			if d.docstatus != 2: # don't update cancelled
-				d.docstatus = self.to_docstatus
 
 	def doctype_validate(self):
 		"""run DocType Validator"""
@@ -258,10 +252,6 @@ class DocListController(object):
 				getattr(self, method)(args)
 			else:
 				getattr(self, method)()
-
-		# for testing
-		# else:
-		# 	print "method", method, "not found for", self.doc.doctype
 
 		# if possible, deprecate
 		trigger(method, self.doclist[0])
@@ -276,34 +266,36 @@ class DocListController(object):
 			doc = webnotes.model.doc.Document(fielddata = doc)
 		doc.__islocal = 1
 		doc.parent = self.doc.name
+		doc.parenttype = self.doc.doctype
+		# parentfield is to be supplied in the doc
 		
 		# add to doclist
 		self.doclist.append(doc)
 	
 	# TODO: should this method be here?
 	def get_csv_from_attachment(self):
-			"""get csv from attachment"""
-			if not self.doc.file_list:
-			  msgprint("File not attached!")
-			  raise Exception
+		"""get csv from attachment"""
+		if not self.doc.file_list:
+		  msgprint("File not attached!")
+		  raise Exception
 
-			# get file_id
-			fid = self.doc.file_list.split(',')[1]
-		  
-			# get file from file_manager
-			try:
-				from webnotes.utils import file_manager
-				fn, content = file_manager.get_file(fid)
-			except Exception, e:
-				webnotes.msgprint("Unable to open attached file. Please try again.")
-				raise e
-	
-			# convert char to string (?)
-			if not isinstance(content, basestring) and hasattr(content, 'tostring'):
-			  content = content.tostring()
+		# get file_id
+		fid = self.doc.file_list.split(',')[1]
+	  
+		# get file from file_manager
+		try:
+			from webnotes.utils import file_manager
+			fn, content = file_manager.get_file(fid)
+		except Exception, e:
+			webnotes.msgprint("Unable to open attached file. Please try again.")
+			raise e
 
-			import csv
-			return csv.reader(content.splitlines())
+		# convert char to string (?)
+		if not isinstance(content, basestring) and hasattr(content, 'tostring'):
+		  content = content.tostring()
+
+		import csv
+		return csv.reader(content.splitlines())
 
 def trigger(method, doc):
 	"""trigger doctype events"""
