@@ -112,7 +112,7 @@ wn.ui.GridControl = wn.ui.Control.extend({
 		var data = this.doc.doclist.get({parentfield:this.docfield.fieldname});
 		
 		data = $.map(data, function(d) { return d.fields;  });
-		data.sort(function(a, b) { return a.idx > b.idx; });
+		data.sort(function(a, b) { return (a.idx - b.idx); });
 		return data;
 	},
 	set: function() {
