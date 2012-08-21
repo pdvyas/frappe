@@ -99,7 +99,7 @@ wn.request.call = function(opts) {
 		},
 		error: function(xhr, textStatus) {
 			wn.request.cleanup(opts, {});
-			show_alert('Unable to complete request: ' + textStatus)
+			show_alert('Unable to complete request: ' + textStatus, 'alert-error')
 			opts.error && opts.error(xhr)
 		}
 	})

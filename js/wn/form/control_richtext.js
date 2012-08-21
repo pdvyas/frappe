@@ -28,7 +28,7 @@ wn.ui.RichTextControl = wn.ui.Control.extend({
 	make_input: function() {
 		var me = this;
 		this.$input_wrap = $('<div>').appendTo(this.$w.find('.controls'));
-		this.$input = $('<textarea>').css('font-size','12px').css('height', '300px')
+		this.$input = $('<textarea class="span8">').css('font-size','12px').css('height', '300px')
 			.appendTo(this.$input_wrap);
 		
 		this.myid = wn.dom.set_unique_id(this.$input.get(0));

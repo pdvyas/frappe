@@ -66,9 +66,12 @@ wn.views.DocListView = wn.ui.Listing.extend({
 			<div class="layout-side-section">\
 				<div class="show-docstatus hide" style="margin-bottom: 19px">\
 					<h4>Show</h4>\
-					<div><input data-docstatus="0" type="checkbox" checked="checked" /> Drafts</div>\
-					<div><input data-docstatus="1" type="checkbox" checked="checked" /> Submitted</div>\
-					<div><input data-docstatus="2" type="checkbox" /> Cancelled</div>\
+					<label class="checkbox">\
+						<input data-docstatus="0" type="checkbox" checked="checked" /> Drafts</label>\
+					<label class="checkbox">\
+						<input data-docstatus="1" type="checkbox" checked="checked" /> Submitted</label>\
+					<label class="checkbox">\
+						<input data-docstatus="2" type="checkbox" /> Cancelled</label>\
 				</div>\
 			</div>\
 			<div style="clear: both"></div>\
@@ -188,8 +191,8 @@ wn.views.DocListView = wn.ui.Listing.extend({
 		var me = this;
 		if(this.can_delete) {
 			this.add_button('Delete', function() { me.delete_items(); }, 'icon-remove');
-			$('<div style="padding: 4px"><input type="checkbox" name="select-all" />\
-			 	Select all</div>').insertBefore(this.$page.find('.result-list'));
+			$('<label class="checkbox"><input type="checkbox" name="select-all" />\
+			 	Select all</label>').insertBefore(this.$page.find('.result-list'));
 			this.$page.find('[name="select-all"]').click(function() {
 				me.$page.find('.list-delete').attr('checked', $(this).attr('checked') || false);
 			})
@@ -290,13 +293,11 @@ wn.views.DocListView = wn.ui.Listing.extend({
 		args.count = v[1];
 		args.field = field;
 		
-		$item = $(repl('<div class="stat-item">\
-			<div class="stat-bar" style="width: %(width)s%"></div>\
-			<div class="stat-label">\
+		$item = $(repl('<div class="progress">\
+			<div class="bar" style="width: %(width)s%"></div></div>\
+			<div style="text-align: center; margin-top: -20px; font-size: 90%;">\
 				<a href="#" data-label="%(label)s" data-field="%(field)s">\
-					%(label)s</a> \
-				(%(count)s)</div>\
-		</div>', args));
+				%(label)s (%(count)s)</a></div>', args));
 		
 		this.setup_stat_item_click($item);
 		return $item;

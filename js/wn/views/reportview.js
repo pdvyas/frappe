@@ -84,7 +84,7 @@ wn.views.ReportViewPage = Class.extend({
 			me.make_report_view();
 			if(docname) {
 				wn.model.with_doc('Report', docname, function(r) {
-					me.reportview.set_columns_and_filters(JSON.parse(locals['Report'][docname].json));
+					me.reportview.set_columns_and_filters(wn.model.get('Report', docname).doc.get('json'));
 					me.reportview.run();
 				});
 			} else {
@@ -101,8 +101,7 @@ wn.views.ReportViewPage = Class.extend({
 	},
 	make_report_view: function() {
 		// add breadcrumbs
-		this.page.appframe.add_breadcrumb(locals.DocType[this.doctype].module);
-			
+		this.page.appframe.add_breadcrumb(wn.model.get('DocType', this.doctype).doc.get('module'));
 		this.reportview = new wn.views.ReportView(this.doctype, this.docname, this.page)
 	}
 })
@@ -122,7 +121,8 @@ wn.views.ReportView = wn.ui.Listing.extend({
 	set_init_columns: function() {
 		// pre-select mandatory columns
 		var columns = [['name'], ['owner']];
-		$.each(wn.meta.docfield_list[this.doctype], function(i, df) {
+		$.each(wn.model.get('DocType', this.doctype).get({doctype:'DocField'}), function(i, df) {
+			var df = df.fields;
 			if(df.in_filter && df.fieldname!='naming_series' && df.fieldtype!='Table') {
 				columns.push([df.fieldname]);
 			}
@@ -207,13 +207,13 @@ wn.views.ReportView = wn.ui.Listing.extend({
 	build_columns: function() {
 		var me = this;
 		return $.map(this.columns, function(c) {
-			var docfield = wn.meta.docfield_map[c[1] || me.doctype][c[0]];
+			var docfield = wn.model.get('DocType', (c[1] || me.doctype)).get({"fieldname":c[0]})[0];
 			coldef = {
 				id: c[0],
 				field: c[0],
 				docfield: docfield,
-				name: (docfield ? docfield.label : toTitle(c[0])),
-				width: (docfield ? cint(docfield.width) : 120) || 120
+				name: (docfield ? docfield.get('label') : toTitle(c[0])),
+				width: (docfield ? cint(docfield.get('width')) : 120) || 120
 			}
 						
 			if(c[0]=='name') {
@@ -223,11 +223,11 @@ wn.views.ReportView = wn.ui.Listing.extend({
 						name: value
 					});
 				}
-			} else if(docfield && docfield.fieldtype=='Link') {
+			} else if(docfield && docfield.get('fieldtype')=='Link') {
 				coldef.formatter = function(row, cell, value, columnDef, dataContext) {
 					if(value) {
 						return repl("<a href='#!Form/%(doctype)s/%(name)s'>%(name)s</a>", {
-							doctype: columnDef.docfield.options,
+							doctype: columnDef.docfield.get('options'),
 							name: value
 						});						
 					} else {

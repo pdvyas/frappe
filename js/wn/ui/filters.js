@@ -295,8 +295,8 @@ wn.ui.FieldSelect = Class.extend({
 		];
 		
 		// add parenttype column
-		var doctype_obj = locals['DocType'][me.doctype];
-		if(doctype_obj && cint(doctype_obj.istable)) {
+		var doctype_obj = wn.model.get('DocType', me.doctype);
+		if(doctype_obj && cint(doctype_obj.doc.get('istable'))) {
 			std_filters = std_filters.concat([{
 				fieldname: 'parent',
 				fieldtype: 'Data',
@@ -313,16 +313,16 @@ wn.ui.FieldSelect = Class.extend({
 		}
 
 		// main table
-		$.each(std_filters.concat(wn.model.get('DocType', me.doctype).get('DocField')), 
-		function(i, df) {
-			me.add_field_option(df);
-		});
+		$.each(std_filters.concat(wn.model.get('DocType', me.doctype).get({doctype:'DocField'})), 
+			function(i, df) {
+				me.add_field_option(df.fields || df);
+			});
 
 		// child tables
 		$.each(me.table_fields, function(i,table_df) {
 			if(table_df.options) {
-				$.each(wn.model.get('DocType', me.doctype).get('DocField'), function(i, df) {
-					me.add_field_option(df);
+				$.each(wn.model.get('DocType', me.doctype).get({doctype:'DocField'}), function(i, df) {
+					me.add_field_option(df.fields);
 				});				
 			}
 		});

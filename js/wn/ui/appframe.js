@@ -21,13 +21,13 @@ wn.ui.AppFrame = Class.extend({
 	},
 	make_toolbar: function() {
 		if(!this.$w.find('.appframe-toolbar').length)
-			this.$w.append('<div class="appframe-toolbar btn-toolbar"></div>');	
+			this.$w.append('<div class="appframe-toolbar btn-toolbar" style="margin: 0px;"></div>');	
 	},
 	add_button: function(label, click, icon) {
 		this.make_toolbar();
 		args = { label: label, icon:'' };
 		if(icon) {
-			args.icon = '<i class="icon '+icon+'"></i>';
+			args.icon = '<i class="'+icon+'"></i>';
 		}
 		this.buttons[label] = $(repl('<button class="btn btn-small">\
 			%(icon)s %(label)s</button>', args))

@@ -61,25 +61,18 @@ function msgprint(msg, title) {
 }
 
 // Floating Message
-var growl_area;
-function show_alert(txt, id) {
-	if(!growl_area) {
-		if(!$('#dialog-container').length) {
-			$('<div id="dialog-container">').appendTo('body');
-		}
-		growl_area = $a($i('dialog-container'), 'div', '', {position:'fixed', bottom:'8px', right:'8px', width: '320px', zIndex:10});
+function show_alert(txt, add_class) {
+	if(!$('#dialog-container').length) {
+		$('<div id="dialog-container">').appendTo('body');		
 	}
-	var wrapper = $a(growl_area, 'div', '', {position:'relative'});
-	var body = $a(wrapper, 'div', 'notice');
-	
-	// close
-	var c = $a(body, 'i', 'icon-remove-sign', {cssFloat:'right', cursor: 'pointer'});
-	$(c).click(function() { $dh(this.wrapper) });
-	c.wrapper = wrapper;
-	
-	// text
-	var t = $a(body, 'div', '', { color:'#FFF' });
-	$(t).html(txt);
-	if(id) { $(t).attr('id', id); }
-	$(wrapper).hide().fadeIn(1000);
+	if(!$('.growl').length) {
+		$('<div class="growl" style="position: fixed; bottom: 8px; right: 8px; \
+			z-index: 10;"></div>').appendTo('#dialog-container');
+	}
+
+	$('<div class="alert">'+txt+'\
+		<button type="button" class="close" data-dismiss="alert">&times;</button></div>')
+			.appendTo($('.growl'))
+			.alert()
+			.addClass(add_class);
 }
