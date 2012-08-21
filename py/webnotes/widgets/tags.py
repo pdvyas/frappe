@@ -44,7 +44,7 @@ Design:
 """
 
 import webnotes
-from webnotes.utils import cint, load_json
+from webnotes.utils import cint
 
 @webnotes.whitelist()
 def add_tag():

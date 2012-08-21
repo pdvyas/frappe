@@ -39,9 +39,8 @@
 
 	{
 		"public/css/all-web.css": [
-			"lib/css/bootstrap/",
+			"lib/css/bootstrap.css",
 			"lib/css/legacy/body.css",
-			"lib/css/legacy/messages.css",
 			"lib/css/legacy/dialog.css",
 			"lib/css/ui/common.css",
 			"lib/css/ui/fonts.css",
@@ -52,13 +51,9 @@
 	
 	{
 		"public/css/all-app.css": [
-			"lib/css/bootstrap/",
+			"lib/css/bootstrap.css",
 			"lib/css/legacy/body.css",
-			"lib/css/legacy/messages.css",
-			"lib/css/legacy/listing.css",
-			"lib/css/legacy/report.css",
 			"lib/css/legacy/dialog.css",
-			"lib/css/legacy/tabs.css",
 			"lib/css/legacy/sidebar.css",
 			"lib/css/ui/common.css",
 			"lib/css/ui/list.css",

@@ -56,7 +56,7 @@ wn.ui.CheckControl = wn.ui.Control.extend({
 
 wn.ui.TextControl = wn.ui.Control.extend({
 	make_input: function() {
-		this.$input = $('<textarea type="text" rows="5">').appendTo(this.$w.find('.controls'));		
+		this.$input = $('<textarea type="text" rows="6" class="span6">').appendTo(this.$w.find('.controls'));		
 	},
 	set_static: function(val) {
 		if(val)

@@ -16,6 +16,7 @@
 div.list-row {
 	border-bottom: 1px solid #ddd;
 	padding: 5px 0px;
+	font-size: 13px;
 }
 
 div.list-row .label {

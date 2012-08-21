@@ -230,7 +230,7 @@ def json_handler(obj):
 	"""serialize non-serializable data for json"""
 	import datetime
 
-	if isinstance(obj, (datetime.date, datetime.datetime)):
+	if isinstance(obj, (datetime.date, datetime.datetime, datetime.timedelta)):
 		return unicode(obj)
 	elif isinstance(obj, long):
 		return int(obj)

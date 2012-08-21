@@ -6,10 +6,12 @@ wn.ui.TagEditor = Class.extend({
 		this.$tags = $('<ul>').prependTo(this.$w).tagit({
 			placeholderText: 'Add Tag',
 			onTagAdded: function(ev, tag) {
-				wn.call({
-					method: 'webnotes.widgets.tags.add_tag',
-					args: me.get_args(tag.find('.tagit-label').text())
-				});
+				if(me.initialized) {
+					wn.call({
+						method: 'webnotes.widgets.tags.add_tag',
+						args: me.get_args(tag.find('.tagit-label').text())
+					});					
+				}
 			},
 			onTagRemoved: function(ev, tag) {
 				wn.call({
@@ -19,6 +21,7 @@ wn.ui.TagEditor = Class.extend({
 			}
 		});	
 		this.render();
+		this.initialized = true;
 	},
 	get_args: function(tag) {
 		return {
