@@ -70,7 +70,7 @@ function show_alert(txt, add_class) {
 			z-index: 10;"></div>').appendTo('#dialog-container');
 	}
 
-	$('<div class="alert">'+txt+'\
+	return $('<div class="alert">'+txt+'\
 		<button type="button" class="close" data-dismiss="alert">&times;</button></div>')
 			.appendTo($('.growl'))
 			.alert()

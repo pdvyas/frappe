@@ -40,6 +40,44 @@ wn.ui.LinkControl = wn.ui.Control.extend({
 				
 				return false;
 			});
+		this.make_autocomplete();
+	},
+	make_autocomplete: function() {
+		var me = this;
+		this.$input.autocomplete({
+			source: function(request, response) {
+				var tab_name = "`tab"+ me.docfield.options+"`"
+				var filters = [[me.docfield.options, "name", "like", request.term + '%']].concat(me.filters || []);
+				var search_fields = me.docfield.search_fields || [];
+				wn.call({
+					method: 'webnotes.widgets.doclistview.get',
+					args: {
+						'docstatus': ["0", "1"],
+						"fields": $.map(["name"].concat(search_fields), function(v) {
+							return "`tab" + me.docfield.options + "`." + strip(v);
+						}),
+						"filters": filters,
+						'doctype': me.docfield.options
+					},
+					callback: function(r) {
+						response($.map(r.message, function(v) {
+							return {
+								"label": v.name,
+								"info": $.map(search_fields, function(f) { return v[f]; }).join(", "),
+							}
+						}));
+					}
+				});
+			},
+			select: function(event, ui) {
+				me.set_input(ui.item.value);
+			}
+		}).data('autocomplete')._renderItem = function(ul, item) {
+			return $('<li></li>')
+				.data('item.autocomplete', item)
+				.append(repl('<a>%(label)s<br><span style="font-size:10px">%(info)s</span></a>', item))
+				.appendTo(ul);
+		};		
 	},
 	toggle_input: function(show) {
 		this.$input_wrap.toggle(show);
