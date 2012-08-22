@@ -32,7 +32,8 @@ wn.ui.make_control = function(opts) {
 		'Table': wn.ui.GridControl,
 		'Text': wn.ui.TextControl,
 		'Text Editor': wn.ui.RichTextControl,
-		'Button': wn.ui.ButtonControl
+		'Button': wn.ui.ButtonControl,
+		'Date': wn.ui.DateControl
 	}
 	if(control_map[opts.docfield.fieldtype]) {
 		return new control_map[opts.docfield.fieldtype](opts);
