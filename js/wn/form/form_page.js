@@ -34,6 +34,7 @@ wn.views.FormPage = Class.extend({
 			appframe: this.page.appframe
 		});
 		this.make_toolbar(doctype, name);
+		wn.ui.toolbar.recent.add(doctype, name, true);
 	},
 	set_breadcrumbs: function(doctype, name) {
 		wn.views.breadcrumbs(this.page.appframe, 
