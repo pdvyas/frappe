@@ -22,7 +22,7 @@
 
 from __future__ import unicode_literals
 import webnotes
-
+from webnotes.utils import cint
 no_value_fields = ['Section Break', 'Column Break', 'HTML', 'Table', 'FlexTable', 'Button', 'Image', 'Graph']
 default_fields = ['doctype','name','owner','creation','modified','modified_by','parent','parentfield','parenttype','idx','docstatus']
 
@@ -187,7 +187,7 @@ def delete_doc(doctype=None, name=None, doclist = None, force=0):
 	
 	# check if submitted
 	d = webnotes.conn.sql("select docstatus from `tab%s` where name=%s" % (doctype, '%s'), name)
-	if d and int(d[0][0]) == 1:
+	if d and cint(d[0][0]) == 1:
 		webnotes.msgprint("Submitted Record '%s' '%s' cannot be deleted" % (doctype, name))
 		raise Exception
 	
