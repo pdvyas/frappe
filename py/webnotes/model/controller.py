@@ -91,7 +91,7 @@ class DocListController(object):
 		"""
 			Cancel - set docstatus 2, run "on_cancel"
 		"""
-		self.docstatus = 2 # remove this line after form revamp
+		self.doc.docstatus = 2 # remove this line after form revamp
 		
 		if self.doc.docstatus != 2:
 			webnotes.msgprint("""Cannot Cancel if DocStatus is not set to 2""",
@@ -124,10 +124,9 @@ class DocListController(object):
 		child_map = {}
 		
 		for d in self.doclist[1:]:
-			if d.has_key('parent'):
-				if d.parent and (not d.parent.startswith('old_parent:')):
-					d.parent = self.doc.name # rename if reqd
-					d.parenttype = self.doc.doctype
+			if d.has_key('parentfield'):
+				d.parent = self.doc.name # rename if reqd
+				d.parenttype = self.doc.doctype
 
 				d.save(new = cint(d.get('__islocal')))
 			
@@ -157,7 +156,7 @@ class DocListController(object):
 		"""Raises exception if the modified time is not the same as in the database"""
 		if not (webnotes.model.is_single(self.doc.doctype) or cint(self.doc.get('__islocal'))):
 			modified = webnotes.conn.sql("""select modified from `tab%s`
-				where name=%s for update""" % (self.doc.doctype, "%s"), self.doc.name)
+				where name=%s for update""" % (self.doc.doctype, "%s"), self.doc.name or "")
 			
 			if modified and unicode(modified[0][0]) != unicode(self.doc.modified):
 				webnotes.msgprint("""\

@@ -53,7 +53,7 @@ class DocType(DocListController):
 		if not autoname: autoname = self.doc.autoname
 		if not name: name = self.doc.name
 		
-		if autoname and (not autoname.startswith('field:')) and (not autoname.startswith('eval:')) and (not autoname=='Prompt'):
+		if autoname and (not autoname.startswith('field:')) and (not autoname.startswith('eval:')) and (not autoname=='Prompt') and (not autoname == 'naming_series'):
 			prefix = autoname.split('.')[0]
 			used_in = sql('select name from tabDocType where substring_index(autoname, ".", 1) = %s and name!=%s', (prefix, name))
 			if used_in:
