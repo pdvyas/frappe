@@ -124,3 +124,13 @@ class PageController(DocListController):
 		if os.path.exists(fpath):
 			with open(fpath, 'r') as f:
 				self.doc.content = f.read()
+				
+@webnotes.whitelist()
+def get():
+	"""
+	   Return the :term:`doclist` of the `Page` specified by `name`
+	"""
+	from webnotes.model import get_controller
+	page = get_controller('Page', webnotes.form.page_name)
+	page.get_from_files()
+	return page.doclist

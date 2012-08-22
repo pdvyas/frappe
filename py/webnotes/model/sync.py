@@ -150,10 +150,10 @@ def save_perms_if_none_exist(doclist):
 def sync_install(force=1):
 	# load required doctypes' doclist
 	global doctypelist
-	from webnotes.model.doclist import objectify_doclist
-	doctypelist["doctype"] = objectify_doclist(load_doctypelist("core", "doctype"))
-	doctypelist["docfield"] = objectify_doclist(load_doctypelist("core", "docfield"))
-	doctypelist["docperm"] = objectify_doclist(load_doctypelist("core", "docperm"))
+	from webnotes.model.doclist import objectify
+	doctypelist["doctype"] = objectify(load_doctypelist("core", "doctype"))
+	doctypelist["docfield"] = objectify(load_doctypelist("core", "docfield"))
+	doctypelist["docperm"] = objectify(load_doctypelist("core", "docperm"))
 		
 	# sync required doctypes first
 	sync("core", "docperm")

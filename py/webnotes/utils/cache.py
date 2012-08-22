@@ -34,7 +34,7 @@ setup() sets up cache
 
 import webnotes
 
-def clear(key):
+def clear(key=None):
 	"""clear doctype cache"""
 	if key:
 		webnotes.conn.sql("delete from __CacheItem where `key`=%s", key)

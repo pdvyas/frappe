@@ -81,7 +81,7 @@ def load_docfield_types():
 
 def get_doctype_doclist(doctype):
 	"""get doclist of single doctype"""
-	doclist = webnotes.model.doclist.load_doclist('DocType', doctype)
+	doclist = webnotes.model.doclist.load('DocType', doctype)
 	add_custom_fields(doctype, doclist)
 	apply_property_setters(doctype, doclist)
 	sort_fields(doclist)

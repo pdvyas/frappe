@@ -28,10 +28,11 @@ objects for a transaction with main and children.
 Group actions like save, etc are performed on doclists
 """
 
-import webnotes
+import webnotes, json
 import webnotes.model
 import webnotes.model.doc
 import webnotes.model.doclist
+import webnotes.utils.cache
 
 from webnotes.utils import cint, cstr, now, comma_and
 
@@ -52,19 +53,17 @@ class DocListController(object):
 			
 		if not name: name = doctype
 		
-		self.set_doclist(webnotes.model.doclist.load_doclist(doctype, name))
+		self.set_doclist(self.load_doclist(doctype, name))
+		
+	def load_doclist(self, doctype, name):
+		return webnotes.model.doclist.load(doctype, name)
 	
 	def set_doclist(self, doclist):
 		if not isinstance(doclist, webnotes.model.doclist.DocList):
-			self.doclist = webnotes.model.doclist.objectify_doclist(doclist)
+			self.doclist = webnotes.model.doclist.objectify(doclist)
 		else:
 			self.doclist = doclist
 		self.doc = self.doclist[0]
-
-	def from_compressed(self, data):
-		"""Expand called from client"""
-		from webnotes.model.utils import expand
-		self.set_doclist(expand(data))
 
 	def save(self):
 		"""Save the doclist"""
