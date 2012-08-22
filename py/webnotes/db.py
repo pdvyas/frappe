@@ -27,6 +27,7 @@ from __future__ import unicode_literals
 import MySQLdb
 import webnotes
 import conf
+from webnotes.utils import DictObj
 
 class Database:
 	"""
@@ -227,7 +228,7 @@ class Database:
 			r = self.sql("select field, value from tabSingles where field in (%s) and \
 				doctype=%s" % (', '.join(['%s']*len(fieldname)), '%s'), tuple(fieldname) + (doctype,))
 			if as_dict:
-				return r and dict(r) or None
+				return r and DictObj(r) or None
 			else:
 				return r and (len(r) > 1 and [i[0] for i in r] or r[0][1]) or None
 
