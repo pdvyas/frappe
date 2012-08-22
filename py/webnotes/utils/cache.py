@@ -34,44 +34,21 @@ setup() sets up cache
 
 import webnotes
 
-def clear():
+def clear(key):
 	"""clear doctype cache"""
-	try:
+	if key:
+		webnotes.conn.sql("delete from __CacheItem where `key`=%s", key)
+	else:
 		webnotes.conn.sql("""delete from __CacheItem""")
-	except Exception, e:
-		if e.args[0]!=1146: raise e
 
-class CacheItem:
-	def __init__(self, key):
-		"""create a new cache"""
-		self.key = key
+def get(key):
+	"""get cache"""
+	value = webnotes.conn.sql("""select `value` from __CacheItem where 
+		`key`=%s""", key)
+	return value and value[0][0] or None
 	
-	def get(self):
-		"""get value"""
-		try:
-			return webnotes.conn.sql("""select `value` from __CacheItem where 
-				`key`=%s and ifnull(expires_on, '2100-01-01') > NOW()""", self.key)[0][0]
-		except Exception:
-			return None
-	
-	def set(self, value, interval=None):
-		"""set a new value, with interval"""
-		self.clear()
-		if interval:
-			webnotes.conn.sql("""insert into 
-					__CacheItem (`key`, `value`, expires_on) 
-				values (%s, %s, addtime(now(), sec_to_time(%s)))
-				""", (self.key, str(value), interval))
-		else:
-			webnotes.conn.sql("""insert into 
-					__CacheItem (`key`, `value`) 
-				values (%s, %s)
-				""", (self.key, str(value)))
-			
-	
-	def clear(self):
-		"""clear the item"""
-		try:
-			webnotes.conn.sql("delete from __CacheItem where `key`=%s", self.key)
-		except Exception, e:
-			if e.args[0]!=1146: raise e
+def set(key, value):
+	"""set in cache"""
+	clear(key)	
+	webnotes.conn.sql("""insert into __CacheItem (`key`, `value`) 
+		values (%s, %s)""", (key, str(value)))

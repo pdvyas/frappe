@@ -154,8 +154,7 @@ class Installer:
 		self.dbman.drop_table('__CacheItem')
 		webnotes.conn.sql("""create table __CacheItem (
 			`key` VARCHAR(180) NOT NULL PRIMARY KEY,
-			`value` LONGTEXT,
-			`expires_on` DATETIME
+			`value` LONGTEXT
 			) ENGINE=InnoDB DEFAULT CHARSET=utf8""")
 			
 	def create_auth_table(self):
