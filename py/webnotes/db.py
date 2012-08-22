@@ -107,7 +107,7 @@ class Database:
 			raise Execption
 
 	def sql(self, query, values=None, as_dict = 0, as_list = 0, debug=0, ignore_ddl=0,
-		auto_commit=0):
+		auto_commit=0, only_literals=False):
 		"""
 		      * Execute a `query`, with given `values`
 		      * returns as a dictionary if as_dict = 1
@@ -153,14 +153,34 @@ class Database:
 
 		output = self._cursor.fetchall()
 
+		if only_literals:
+			output = self.to_literals(output)
+
 		# scrub output if required
 		if as_dict:
 			return self.fetch_as_dict(output)
 		elif as_list:
 			return map(lambda res: list(res), output)
-		else:
-			return output
 
+		return output
+	
+	def to_literals(self, output):
+		"""convert query output value objects (datetime, long) to literals"""
+		import datetime
+		newoutput = []
+		for row in output:
+			newrow = []
+			for c in row:
+				if isinstance(c, (datetime.date, datetime.datetime, datetime.timedelta)):
+					c = unicode(c)
+				elif isinstance(c, long):
+					c = int(c)
+				
+				newrow.append(c)
+			newoutput.append(newrow)
+	
+		return newoutput
+			
 	def fetch_as_dict(self, result):
 		"""Internal - get results as dictionary"""
 		from webnotes.utils import DictObj
@@ -225,8 +245,6 @@ class Database:
 		self.set_value(doc.doctype, doc.name, field, val, doc.modified)
 		doc[field] = val
 
-	# ======================================================================================
-
 	def set_global(self, key, val, user='__global'):
 		res = self.sql('select defkey from `tabDefaultValue` where defkey=%s and parent=%s', (key, user))
 		if res:
@@ -237,8 +255,6 @@ class Database:
 	def get_global(self, key, user='__global'):
 		g = self.sql("select defvalue from tabDefaultValue where defkey=%s and parent=%s", (key, user))
 		return g and g[0][0] or None
-
-	# ======================================================================================
 
 	def set_default(self, key, val):
 		"""set control panel default (tabDefaultVal)"""
@@ -287,8 +303,6 @@ class Database:
 	def rollback(self):
 		self.sql("ROLLBACK")
 
-	# ======================================================================================
-
 	def field_exists(self, dt, fn):
 		"""
 		      Returns True if `fn` exists in `DocType` `dt`
@@ -336,7 +350,6 @@ class Database:
 
 		return " and ".join(conditions), filters
 
-	# ======================================================================================
 	def close(self):
 		"""
 		      Close my connection
