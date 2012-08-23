@@ -28,7 +28,15 @@ wn.request.url = 'server.py';
 // call execute serverside request
 wn.request.prepare = function(opts) {
 	// btn indicator
-	if(opts.btn) $(opts.btn).set_working();
+	if(opts.btn) {
+		if($(opts.btn).data('progress_html')) {
+			$(opts.btn).data('original_html', $(opts.btn).html())
+				.attr('disabled', 'disabled')
+				.html($(opts.btn).data('progress_html'));
+		} else {
+			$(opts.btn).set_working();			
+		}
+	}
 	
 	// navbar indicator
 	if(opts.show_spinner) set_loading();
@@ -45,7 +53,15 @@ wn.request.prepare = function(opts) {
 
 wn.request.cleanup = function(opts, r) {
 	// stop button indicator
-	if(opts.btn) $(opts.btn).done_working();
+	if(opts.btn) {
+		if($(opts.btn).data('original_html')) {
+			$(opts.btn)
+				.attr('disabled', null)
+				.html($(opts.btn).data('original_html'));
+		} else {
+			$(opts.btn).done_working();
+		}
+	}
 	
 	// hide button indicator
 	if(opts.show_spinner) hide_loading();

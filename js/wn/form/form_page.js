@@ -51,30 +51,7 @@ wn.views.FormPage = Class.extend({
 		this.$sidebar = $(this.page).find('.layout-side-section');
 	},
 	make_toolbar: function() {
-		var me = this;
-		this.page.appframe.add_button('Save', function() { 
-			var btn = this;
-			$(this).html('Saving...').attr('disabled', 'disabled');
-			freeze();
-			me.doclist.save(function(r) {
-				
-				unfreeze();
-				$(btn).attr('disabled', false).html('Save')
-				
-				if(!r.exc) {
-					var doc = me.doclist.doc;
-					if(doc.get('name') != wn.get_route()[2]) {
-						wn.re_route[window.location.hash] = 
-							wn.make_route_str(['Form', doc.get('doctype'), doc.get('name')])
-						wn.set_route('Form', doc.get('doctype'), doc.get('name'));
-					} else {
-						$(btn).attr('saving', 1)
-							.addClass('btn-success');
-						setTimeout('$(".btn[saving]").removeClass("btn-success").attr("saving",null)', 2000);
-					}					
-				}
-			});
-		});
+		this.make_save_btn();
 		
 		if(!this.doclist.doc.get('__islocal')) {
 			this.make_action_buttons();
@@ -84,6 +61,33 @@ wn.views.FormPage = Class.extend({
 		}
 
 		this.make_help_buttons();
+	},
+	make_save_btn: function() {
+		var me = this;
+		this.save_btn = this.page.appframe.add_button('Save', function() { 
+			freeze();
+			me.doclist.save(function(r) {
+				unfreeze();
+				if(!r.exc) {
+					var doc = me.doclist.doc;
+					if(doc.get('name') != wn.get_route()[2]) {
+						wn.re_route[window.location.hash] = 
+							wn.make_route_str(['Form', doc.get('doctype'), doc.get('name')])
+						wn.set_route('Form', doc.get('doctype'), doc.get('name'));
+					}				
+				}
+			}, me.save_btn);
+		});
+		
+		$(this.save_btn).data('progress_html', 'Saving...')
+		
+		this.doclist.on('change', function() {
+			me.save_btn.addClass('btn-warning').attr('title', 'Not Saved');
+		});
+		
+		this.doclist.on('reset', function() {
+			me.save_btn.removeClass('btn-warning').attr('title', 'Saved');
+		});			
 	},
 
 	make_action_buttons: function() {
@@ -119,12 +123,16 @@ wn.views.FormPage = Class.extend({
 	},
 	make_help_buttons: function() {
 		var meta = this.form.meta.doc;
+		var me = this;
 		if(meta.get('description')) {
 			this.page.appframe.add_help_button(meta.get('description'));			
 		}
-		this.page.appframe.add_inverse_button(meta.get('name'), function() {
-			
-		})
+		
+		// doctype button
+		this.doctype_btn = this.page.appframe.add_button(meta.get('name'), function() {
+			wn.set_route('List', meta.get('name'));
+		}).addClass('btn-inverse');
+		this.doctype_btn.parent().css('float', 'right');
 	},	
 });
 

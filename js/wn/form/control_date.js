@@ -39,6 +39,6 @@ wn.ui.DateControl = wn.ui.Control.extend({
 		$(this.$input).val(val);		
 	},
 	get: function() {
-		dateutil.user_to_str($(this.$input).val());
+		return dateutil.user_to_str($(this.$input).val());
 	}
 })

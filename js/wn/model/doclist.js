@@ -132,7 +132,8 @@ wn.model.DocList = Class.extend({
 					me.reset(r.docs);					
 				}
 				callback(r);
-			}
+			},
+			btn: btn
 		});
 	},
 	validate: function() {
@@ -175,6 +176,7 @@ wn.model.DocList = Class.extend({
 			// remove old reference
 			delete wn.doclists[this.doctype][oldname];
 		}
+		this.trigger('reset');
 	},
 	get_docs: function() {
 		return $.map(this.doclist, function(d) { return d.fields; });

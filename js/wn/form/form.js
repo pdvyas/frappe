@@ -75,12 +75,11 @@ wn.ui.Form = Class.extend({
 	// listen for changes in model
 	listen: function() {
 		var me = this;
-		if(this.doc) {
-			$(document).bind(wn.model.event_name(this.doc.get('doctype'), this.doc.get('name')), 
-				function(ev, key, val) {
-					if(me.controls[key] && me.controls[key].get()!=val) 
-						me.controls[key].set_input(val);
-				});
+		if(this.doclist) {
+			this.doclist.on('change', function(key, val) {
+				if(me.controls[key] && me.controls[key].get()!=val) 
+					me.controls[key].set_input(val);				
+			});
 		}
 	}
 });

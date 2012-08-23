@@ -58,9 +58,13 @@ wn.model.Document = Class.extend({
 		return val;
 	},
 	set: function(key, val) {
-		this.fields[key] = this.convert_type(key, val);
-		$(document).trigger(wn.model.event_name(this.get('doctype'), this.get('name')), 
-			[key, this.fields[key]]);
+		var new_val = this.convert_type(key, val);
+		if(this.fields[key] != new_val) {
+			this.fields[key] = new_val;
+			if(this.doclist) {
+				this.doclist.trigger('change', key, this.fields[key]);
+			}
+		}
 	},
 	copy_from: function(doc) {
 		var meta = wn.model.get('DocType', this.get('doctype'));

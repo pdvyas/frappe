@@ -46,12 +46,6 @@ wn.ui.AppFrame = Class.extend({
 			.click(function() { msgprint($(this).data('help-text'), 'Help'); })
 			.appendTo(this.new_btn_group().css('float', 'right'));			
 	},
-	add_inverse_button: function(label, click) {
-		$('<button class="btn btn-small btn-inverse"></button>')
-			.on('click', click)
-			.html(label)
-			.appendTo(this.new_btn_group().css('float', 'right'));		
-	},
 	clear_buttons: function() {
 		this.$w.find('.appframe-toolbar').empty();
 	},
