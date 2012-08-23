@@ -201,12 +201,14 @@ wn.ui.Filter = Class.extend({
 		me.field.hide_label();
 		
 		this.set_default_condition(df, fieldtype);
-		
-		$(me.field.wrapper).find(':input').keydown(function(ev) {
-			if(ev.which==13) {
-				me.flist.listobj.run();
-			}
-		})
+
+		if(me.field.$input) {
+			me.field.$input.keydown(function(ev) {
+				if(ev.which==13) {
+					me.flist.listobj.run();
+				}
+			})			
+		}
 	},
 	
 	set_fieldtype: function(df, fieldtype) {

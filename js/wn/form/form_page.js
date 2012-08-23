@@ -24,6 +24,8 @@
 
 wn.views.FormPage = Class.extend({
 	init: function(doctype, name) {
+		this.doctype = doctype;
+		this.name = name;
 		this.doclist = wn.model.get(doctype, name);
 		this.make_page();
 		this.set_breadcrumbs(doctype, name);
@@ -54,7 +56,7 @@ wn.views.FormPage = Class.extend({
 			var btn = this;
 			$(this).html('Saving...').attr('disabled', 'disabled');
 			freeze();
-			me.form.doclist.save(function(r) {
+			me.doclist.save(function(r) {
 				
 				unfreeze();
 				$(btn).attr('disabled', false).html('Save')
@@ -99,6 +101,13 @@ wn.views.FormPage = Class.extend({
 		</ul>\
 		</div>').appendTo(this.page.appframe.$w.find('.appframe-toolbar'));
 		this.action_btn_group.find('.dropdown-toggle').dropdown();
+		
+		var me = this;
+		this.action_btn_group.find('.action-new').click(function() {
+			var new_doclist = wn.model.create(me.doctype);
+			wn.set_route('Form', me.doctype, new_doclist.doc.get('name'));
+			return false;
+		});
 		
 	},
 	make_help_buttons: function() {
