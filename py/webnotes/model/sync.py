@@ -79,7 +79,12 @@ def load_doctypelist(module_name, docname):
 # docname in small letters with underscores
 def sync(module_name, docname, force=0):
 	"""sync doctype from file if modified"""
-	doclist = load_doctypelist(module_name, docname)
+	try:
+		doclist = load_doctypelist(module_name, docname)
+	except SyntaxError, e:
+		print 'Bad txt file:' + get_file_path(module_name, docname)
+		return
+		
 	modified = doclist[0]['modified']
 	if not doclist:
 		raise Exception('DocList could not be evaluated')

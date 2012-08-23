@@ -483,6 +483,7 @@ def pprint_dict(d, level=1, no_blanks=True):
 		
 	# make lines
 	for key in kl:
+		val = d[key]
 		if key != '##comment':
 			if isinstance(val, datetime):
 				val = str(val)
