@@ -95,7 +95,7 @@ wn.views.FormPage = Class.extend({
 		<ul class="dropdown-menu">\
 			<li><a href="#" class="action-new"><i class="icon icon-plus"></i> New</a></li>\
 			<li><a href="#" class="action-print"><i class="icon icon-print"></i> Print...</a></li>\
-			<li><a href="#" class="action-print"><i class="icon icon-envelope"></i> Email...</a></li>\
+			<li><a href="#" class="action-email"><i class="icon icon-envelope"></i> Email...</a></li>\
 			<li><a href="#" class="action-copy"><i class="icon icon-file"></i> Copy</a></li>\
 			<li><a href="#" class="action-refresh"><i class="icon icon-refresh"></i> Refresh</a></li>\
 		</ul>\
@@ -103,8 +103,15 @@ wn.views.FormPage = Class.extend({
 		this.action_btn_group.find('.dropdown-toggle').dropdown();
 		
 		var me = this;
+
 		this.action_btn_group.find('.action-new').click(function() {
 			var new_doclist = wn.model.create(me.doctype);
+			wn.set_route('Form', me.doctype, new_doclist.doc.get('name'));
+			return false;
+		});
+
+		this.action_btn_group.find('.action-copy').click(function() {
+			var new_doclist = me.doclist.copy();
 			wn.set_route('Form', me.doctype, new_doclist.doc.get('name'));
 			return false;
 		});
@@ -112,8 +119,9 @@ wn.views.FormPage = Class.extend({
 	},
 	make_help_buttons: function() {
 		var meta = this.form.meta.doc;
-		if(meta.get('description'))
-			this.page.appframe.add_help_button(meta.get('description'));
+		if(meta.get('description')) {
+			this.page.appframe.add_help_button(meta.get('description'));			
+		}
 		this.page.appframe.add_inverse_button(meta.get('name'), function() {
 			
 		})

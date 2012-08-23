@@ -144,6 +144,18 @@ function replace_newlines(t) {
 	return t?t.replace(/\n/g, '<br>'):'';
 }
 
+function cint(v, def) { 
+	v=v+''; 
+	v=lstrip(v, ['0']); 
+	v=parseInt(v); 
+	if(isNaN(v))v=def?def:0; return v; 
+}
+function validate_email(id) { 
+	if(strip(id.toLowerCase()).search("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")==-1) return 0; else return 1; }
+function validate_spl_chars(txt) { 
+	if(txt.search(/^[a-zA-Z0-9_\- ]*$/)==-1) return 1; else return 0; }
+
+
 function cstr(s) {
 	if(s==null)return '';
 	return s+'';
@@ -252,16 +264,6 @@ function add_lists(l1, l2) {
 	for(var k in l2) l.push(l2[k]);
 	return l;
 }
-
-function docstring(obj)  {
-	return JSON.stringify(obj);
-}
-
-function DocLink(p, doctype, name, onload) {
-	var a = $a(p,'span','link_type'); a.innerHTML = a.dn = name; a.dt = doctype;
-	a.onclick=function() { loaddoc(this.dt,this.dn,onload) }; return a;
-}
-var doc_link = DocLink;
 
 function roundNumber(num, dec) {
 	var result = Math.round(num*Math.pow(10,dec))/Math.pow(10,dec);

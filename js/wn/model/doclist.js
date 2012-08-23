@@ -20,172 +20,6 @@
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-
-wn.provide('wn.model');
-wn.provide('wn.docs');
-wn.provide('wn.doclists');
-wn.provide('wn.model.local_name_idx');
-
-$.extend(wn.model, {
-	no_value_type: ['Section Break', 'Column Break', 'HTML', 'Table', 
- 	'Button', 'Image'],
-
-	new_names: {},
-
-	with_doctype: function(doctype, callback) {
-		if(wn.model.has('DocType', doctype)) {
-			callback();
-		} else {
-			wn.call({
-				method:'webnotes.model.client.get_doctype',
-				args: {
-					doctype: doctype
-				},
-				callback: function(r) {
-					wn.model.sync(r.docs);
-					callback(r);
-				}
-			});
-		}
-	},
-	with_doc: function(doctype, name, callback) {
-		if(!name) name = doctype; // single type
-		if(wn.model.has(doctype, name)) {
-			callback(name);
-		} else {
-			wn.call({
-				method:'webnotes.model.client.get_doclist',
-				args: {
-					doctype: doctype,
-					name: name
-				},
-				callback: function(r) {
-					wn.model.sync(r.docs);
-					callback(name, r);
-				}
-			});
-		}
-	},
-	can_delete: function(doctype) {
-		if(!doctype) return false;
-		return wn.model.get('DocType', doctype).get('allow_trash') && 
-			wn.boot.profile.can_cancel.indexOf(doctype)!=-1;
-	},
-	sync: function(doclist) {
-		for(var i=0, len=doclist.length; i<len; i++) {
-			var doc = doclist[i];
-			if(doc.parent) {
-				var doclistobj = wn.doclists[doc.parenttype][doc.parent];
-				doclistobj.add(doc);
-			} else {
-				new wn.model.DocList([doc]);
-			}
-		}
-	},
-	// return doclist
-	get: function(dt, dn) {
-		return wn.doclists[dt] && wn.doclists[dt][dn];
-	},
-	has: function(dt, dn) {
-		if(wn.doclists[dt] && wn.doclists[dt][dn]) return true;
-		else return false;
-	},
-	get_value: function(dt, dn, fieldname) {
-		var doclist = wn.model.get(dt, dn);
-		if(doclist) return doclist.doc.get(fieldname);
-		else return null;
-	},
-	set_value: function(dt, dn, fieldname, value) {
-		wn.model.get(dt, dn).doc.set(fieldname, value);
-	},
-	remove: function(dt, dn) {
-		delete wn.doclists[dt][dn];
-	},
-	// naming style for onchange events
-	event_name: function(dt, dn) {
-		return 'change-'+dt.replace(/ /g, '_')+'-' + (dn || '').replace(/ /g, '_');
-	},
-	insert: function(doc, callback, btn) {
-		var doclist = wn.model.create(doc.doctype);
-		$.extend(doclist.doc.fields, doc);
-		doclist.save(callback, btn);
-	},
-	// create a new local doclist
-	create: function(dt) {
-		// create a new doclist and add defaults
-		var doc = new wn.model.Document({doctype:dt, __islocal:1, owner:user, 
-				name:wn.model.new_name(dt), docstatus:0});
-		wn.model.set_defaults(doc);
-		return new wn.model.DocList([doc]);
-	},
-	new_name: function(dt) {
-		if(!wn.model.local_name_idx[dt]) wn.model.local_name_idx[dt] = 1;
-		var n = 'New '+ dt + ' ' + wn.model.local_name_idx[dt];
-		wn.model.local_name_idx[dt]++;
-		return n;
-	},
-	set_defaults: function(doc) {
-		var doctypelist = wn.model.get('DocType', doc.get('doctype'));
-		if(doctypelist) {
-			doctypelist.each({doctype:'DocField'}, function(df) {
-				var def = wn.model.get_default(df);
-				if(def!==null)
-					doc.set(df.fieldname, def)
-			});			
-		}
-	},
-	get_default: function(df) {
-		var def = df['default'];
-		var v = null;
-		if(def=='__user')
-			v = user;
-		else if(df.fieldtype=='Date' && (def=='Today' || def=='__today')) {
-			v = get_today(); }
-		else if(def)
-			v = def;
-		else if(user_defaults[df.fieldname])
-			v = user_defaults[df.fieldname][0];
-		else if(sys_defaults[df.fieldname])
-			v = sys_defaults[df.fieldname];
-		return v;
-	}	
-});
-
-// document (row) wrapper
-wn.model.Document = Class.extend({
-	init: function(fields) {
-		this.fields = fields;
-	},
-	get: function(key, ifnull) {
-		return this.fields[key] || ifnull;
-	},
-	convert_type: function(key, val) {
-		if(val===null) return val;
-		// check fieldtype and set value
-		var df = wn.model.get('DocType', this.get('doctype'))
-			.get({fieldname:key, doctype:"DocField"});
-			
-		if(df.length) {
-			df = df[0]
-			if(in_list(["Int", "Check"], df.fieldtype)) {
-				val = cint(val);
-			} else if(in_list(["Currency", "Float"], df.fieldtype)) {
-				val = flt(val);
-			} else if(df.fieldtype == 'Select') {
-				if(in_list(df.options.split('\n'), val)) {
-					throw val + " is not a correct option"
-				}
-			}
-		}
-		return val;
-	},
-	set: function(key, val) {
-		this.fields[key] = this.convert_type(key, val);
-		$(document).trigger(wn.model.event_name(this.get('doctype'), this.get('name')), 
-			[key, this.fields[key]]);
-	}
-});
-
 // doclist (collection) wrapper
 wn.model.DocList = Class.extend({
 	init: function(doclist) {
@@ -354,16 +188,13 @@ wn.model.DocList = Class.extend({
 	add_child: function(parentfield) {
 		var docfield = this.meta().get({fieldname:parentfield, doctype:'DocField'})[0];
 
-		var doc = new wn.model.Document({
-			doctype: docfield.get('options'), 
-			name: wn.model.new_name(docfield.get('options')),
-			__islocal:1, 
-			owner:user, 
+		var doc = new wn.model.Document(docfield.get('options'));
+		doc.extend({
 			parent: this.doc.get('name'),
 			parenttype: this.doc.get('doctype'),
 			parentfield: parentfield,
-			idx: this.get({parentfield: docfield.get('fieldname')}).length + 1
-		});
+			idx: this.get({parentfield: docfield.get('fieldname')}).length + 1			
+		})
 
 		wn.model.set_defaults(doc);
 		
@@ -380,5 +211,19 @@ wn.model.DocList = Class.extend({
 		$.each(this.get({parentfield: parentfield}), 
 			function(i, d) { d.set('idx', i+1);
 		});
+	},
+	copy: function() {
+		var new_doclist = new wn.model.DocList();
+		this.each(function(d) {
+			var new_doc = d.copy();
+			
+			// parent must point to new main
+			if(d.get('parent')) 
+				new_doc.set('parent', new_doclist.doc.get('name'));
+
+			new_doclist.add(new_doc);
+		});
+		console.log(new_doclist);
+		return new_doclist;
 	}
 });

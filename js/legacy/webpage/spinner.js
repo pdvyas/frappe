@@ -41,16 +41,15 @@ function hide_loading() {
 function freeze() {
 	// blur
 	if(!dialog_back) {
-		dialog_back = $a($i('body_div'), 'div', 'dialog_back');
-		$(dialog_back).css('opacity', 0.6);
+		dialog_back = $('<div class="dialog_back">').appendTo('#body-div').css('opacity', 0.6);
 	}
-	$ds(dialog_back);
+	dialog_back.toggle(true);
 	fcount++;
 }
 function unfreeze() {
 	if(!fcount)return; // anything open?
 	fcount--;
 	if(!fcount) {
-		$dh(dialog_back);
+		dialog_back.toggle(false);
 	}
 }
