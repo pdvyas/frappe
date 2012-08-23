@@ -45,14 +45,20 @@ wn.ui.make_control = function(opts) {
 wn.ui.Control = Class.extend({
 	init: function(opts) {
 		$.extend(this, opts);
+		this.setup_perm();
 		this.make();
 		this.set_events();
+		this.apply_disabled();
 		this.apply_hidden();
 		this.apply_mandatory();
 		this.set_init_value();
 		this.set_change_event();
-		//if(this.doc)
-		//	this.toggle_editable(false);
+	},
+	setup_perm: function() {
+		this.perm = this.doclist ? this.doclist.get_perm()[this.docfield.permlevel] : [1,1];
+		if(!this.perm) {
+			this.perm = [0, 0]
+		}		
 	},
 	make: function() {
 		if(this.docfield.vertical) {
@@ -173,7 +179,19 @@ wn.ui.Control = Class.extend({
 		this.$w.find('.help-block').text(text);
 	},
 	apply_hidden: function() {
-		this.$w.toggle(!this.docfield.hidden);
+		this.$w.toggle(!this.get_hidden());
+	},
+	get_hidden: function() {
+		return this.docfield.hidden || !this.perm[READ]
+	},
+	apply_disabled: function() {
+		this.set_disabled(this.get_disabled());
+	},
+	get_disabled: function() {
+		return this.docfield.disabled || (!this.perm[WRITE]);
+	},
+	set_disabled: function(disabled) {
+		this.$input.attr('disabled', disabled ? 'disabled' : null);
 	},
 	apply_mandatory: function() {
 		var me = this;
@@ -182,5 +200,5 @@ wn.ui.Control = Class.extend({
 				$(me.$w).toggleClass('error', !$(this).val())
 			});
 		}
-	}
+	},
 });

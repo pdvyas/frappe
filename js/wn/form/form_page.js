@@ -133,6 +133,9 @@ wn.views.FormPage = Class.extend({
 			wn.set_route('List', meta.get('name'));
 		}).addClass('btn-inverse');
 		this.doctype_btn.parent().css('float', 'right');
-	},	
+	},
+	apply_permissions: function() {
+		
+	}
 });
 

@@ -227,5 +227,11 @@ wn.model.DocList = Class.extend({
 		});
 		console.log(new_doclist);
 		return new_doclist;
+	},
+	get_perm: function() {
+		if(!this.perm) {
+			this.perm = wn.model.perm.get(this.doc.get('doctype'), this.doc.get('name'));
+		}
+		return this.perm;
 	}
 });

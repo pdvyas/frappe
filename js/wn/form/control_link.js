@@ -81,5 +81,9 @@ wn.ui.LinkControl = wn.ui.Control.extend({
 	},
 	toggle_input: function(show) {
 		this.$input_wrap.toggle(show);
+	},
+	set_disabled: function(disabled) {
+		this.$input.attr('disabled', disabled ? 'disabled' : null);
+		this.$button.attr('disabled', disabled ? 'disabled' : null);
 	}
 });

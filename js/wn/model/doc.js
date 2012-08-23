@@ -57,12 +57,22 @@ wn.model.Document = Class.extend({
 		}
 		return val;
 	},
+	
+	// will trigger events
+	// "change"
+	// "change fieldname" or "change parentfield.fieldname"
 	set: function(key, val) {
 		var new_val = this.convert_type(key, val);
 		if(this.fields[key] != new_val) {
 			this.fields[key] = new_val;
 			if(this.doclist) {
 				this.doclist.trigger('change', key, this.fields[key]);
+				if(this.get('parentfield')) {
+					this.doclist.trigger('change ' + this.get('parentfield') + '.' + key, 
+						this.fields[key]);					
+				} else {
+					this.doclist.trigger('change ' + key, this.fields[key]);
+				}
 			}
 		}
 	},
