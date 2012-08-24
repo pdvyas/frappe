@@ -46,7 +46,7 @@ wn.ui.GridControl = wn.ui.Control.extend({
 			this.get_columns(), options);
 			
 		if(!this.get_disabled()) {
-			this.setup_drag_and_drop();			
+			this.setup_drag_and_drop();
 			this.make_add_row_button();
 		}
 		this.set_edit_on_double_click();
@@ -59,7 +59,7 @@ wn.ui.GridControl = wn.ui.Control.extend({
 		var me = this;
 		this.grid.onClick.subscribe(function(e, args) {
 			if(me.selected_row == args.row) {
-				me.edit_row(me.doc.doclist.get({parentfield:me.docfield.fieldname, 
+				me.edit_row(me.doclist.get({parentfield:me.docfield.fieldname, 
 					idx: args.row + 1})[0]);
 			}
 			me.selected_row = args.row;
@@ -116,7 +116,7 @@ wn.ui.GridControl = wn.ui.Control.extend({
 		this.set();
 	},
 	get_data: function() {
-		var data = this.doc.doclist.get({parentfield:this.docfield.fieldname});
+		var data = this.doclist.get({parentfield:this.docfield.fieldname});
 		
 		data = $.map(data, function(d) { return d.fields;  });
 		data.sort(function(a, b) { return (a.idx - b.idx); });
@@ -143,7 +143,7 @@ wn.ui.GridControl = wn.ui.Control.extend({
 			if(me.get_disabled()) {
 				show_alert('Grid is not editable');
 			} else {
-				var d = me.doc.doclist.get({
+				var d = me.doclist.get({
 						parentfield:$(this).attr('data-parentfield'),
 						name:$(this).attr('data-name'),
 					})[0];
@@ -215,7 +215,7 @@ wn.ui.GridControl = wn.ui.Control.extend({
 			$.each(data, function(idx, row) {
 				row.idx = idx+1
 			});
-
+			
 			grid.resetActiveCell();
 			grid.setData(data);
 			grid.setSelectedRows(selectedRows);
