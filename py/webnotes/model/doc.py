@@ -32,8 +32,6 @@ from webnotes.utils import cint, cstr, now, now_datetime
 
 valid_fields = {}
 
-class ParentInfoError(webnotes.ValidationError): pass
-
 class Document(dict):
 	"""
 	   The wn(meta-data)framework equivalent of a Database Record.

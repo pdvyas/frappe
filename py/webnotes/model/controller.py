@@ -124,10 +124,9 @@ class DocListController(object):
 		child_map = {}
 		
 		for d in self.doclist[1:]:
-			if d.has_key('parent'):
-				if d.parent and (not d.parent.startswith('old_parent:')):
-					d.parent = self.doc.name # rename if reqd
-					d.parenttype = self.doc.doctype
+			if d.has_key("parentfield"):
+				d.parent = self.doc.name # rename if reqd
+				d.parenttype = self.doc.doctype
 
 				d.save(new = cint(d.get('__islocal')))
 			
