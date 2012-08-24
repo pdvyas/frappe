@@ -3,11 +3,11 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:35:37',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:35:37',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
+		u'creation': '2012-07-03 13:30:35',
+		u'docstatus': 0,
+		u'modified': '2012-08-24 18:22:36',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
@@ -16,10 +16,11 @@
 		'allow_attach': 1,
 		'autoname': u'field:letter_head_name',
 		'colour': u'White:FFF',
-		'doctype': 'DocType',
+		'doctype': u'DocType',
+		'document_type': u'Setup',
 		'max_attachments': 3,
 		'module': u'Core',
-		'name': '__common__',
+		u'name': u'__common__',
 		'section_style': u'Simple',
 		'server_code_error': u' ',
 		'version': 2
@@ -28,7 +29,7 @@
 	# These values are common for all DocField
 	{
 		'doctype': u'DocField',
-		'name': '__common__',
+		u'name': u'__common__',
 		'parent': u'Letter Head',
 		'parentfield': u'fields',
 		'parenttype': u'DocType',
@@ -39,7 +40,7 @@
 	{
 		'create': 1,
 		'doctype': u'DocPerm',
-		'name': '__common__',
+		u'name': u'__common__',
 		'parent': u'Letter Head',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
@@ -51,18 +52,13 @@
 
 	# DocType, Letter Head
 	{
-		'doctype': 'DocType',
+		u'doctype': u'DocType',
 		'name': u'Letter Head'
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm'
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'letter_head_name',
 		'fieldtype': u'Data',
 		'in_filter': 0,
@@ -74,7 +70,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'disabled',
 		'fieldtype': u'Check',
 		'label': u'Disabled',
@@ -85,7 +81,7 @@
 	# DocField
 	{
 		'description': u'Check this to make this the default letter head in all prints',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'is_default',
 		'fieldtype': u'Check',
 		'label': u'Is Default',
@@ -96,7 +92,7 @@
 	# DocField
 	{
 		'description': u'To update your HTML from attachment, click here',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'set_from_image',
 		'fieldtype': u'Button',
 		'label': u'Set From Image',
@@ -106,7 +102,7 @@
 	# DocField
 	{
 		'description': u'Your letter head content in HTML.',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'content',
 		'fieldtype': u'Code',
 		'label': u'Content',
@@ -116,7 +112,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'url',
 		'fieldtype': u'Data',
 		'hidden': 1,
@@ -125,12 +121,17 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'file_list',
 		'fieldtype': u'Text',
 		'hidden': 1,
 		'label': u'File LIst',
 		'oldfieldname': u'file_list',
 		'oldfieldtype': u'Text'
+	},
+
+	# DocPerm
+	{
+		u'doctype': u'DocPerm'
 	}
 ]

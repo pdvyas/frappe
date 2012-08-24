@@ -33,7 +33,7 @@ wn.ui.toolbar.SelectorDialog = Class.extend({
 		this.bind_events();
 	},
 	make_dialog: function() {
-		this.dialog = new wn.views.FormDialog({
+		this.dialog = new wn.ui.FormDialog({
 			title: this.opts.title,
 			width: 480,
 			fields: [

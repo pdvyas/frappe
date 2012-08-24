@@ -134,6 +134,7 @@ $.extend(wn.model, {
 		}
 	},
 	get_default: function(df) {
+		if(df.fields) df = df.fields;
 		var def = df['default'];
 		var v = null;
 		if(def=='__user')
@@ -147,5 +148,14 @@ $.extend(wn.model, {
 		else if(sys_defaults[df.fieldname])
 			v = sys_defaults[df.fieldname];
 		return v;
-	}	
+	},
+	get_grid_width: function(df, def_width) {
+		if(df.fields) df = df.fields;
+		if(df.width)
+			return cint(df.width)
+		else if(in_list(['Text', 'Small Text', 'Text Editor'], df.fieldtype))
+			return 240
+		else
+			return def_width || 140
+	}
 });

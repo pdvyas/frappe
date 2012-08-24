@@ -138,16 +138,27 @@ wn.views.ReportView = wn.ui.Listing.extend({
 			get_args: this.get_args,
 			parent: $(this.page).find('.layout-main'),
 			start: 0,
-			page_length: 20,
+			page_length: function() { return $(me.page).find('.page_length').val(); },
 			show_filters: true,
 			new_doctype: this.doctype,
 			allow_delete: true,
 		});
+		this.make_limit_setter();
 		this.make_column_picker();
 		this.make_sorter();
 		this.make_export();
 		this.set_init_columns();
 		this.make_save();
+	},
+	
+	make_limit_setter: function() {
+		$('<span style="float: right;"><label class="small">Per Page</label>\
+			<select class="page_length span1 small">\
+			<option value="20">20</option>\
+			<option value="50">50</option>\
+			<option value="100">100</option>\
+			<option value="500">500</option>\
+		</select></span>').prependTo($(this.page).find(".wnlist"));
 	},
 	
 	// preset columns and filters from saved info
@@ -208,12 +219,12 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		var me = this;
 		return $.map(this.columns, function(c) {
 			var docfield = wn.model.get('DocType', (c[1] || me.doctype)).get({"fieldname":c[0]})[0];
-			coldef = {
+			var coldef = {
 				id: c[0],
 				field: c[0],
 				docfield: docfield,
 				name: (docfield ? docfield.get('label') : toTitle(c[0])),
-				width: (docfield ? cint(docfield.get('width')) : 120) || 120
+				width: (docfield ? wn.model.get_grid_width(docfield) : 140)
 			}
 						
 			if(c[0]=='name') {
@@ -244,7 +255,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 	render_list: function() {
 		var me = this;
 		//this.gridid = wn.dom.set_unique_id()
-		var columns = [{id:'_idx', field:'_idx', name: 'Sr.', width: 40}].concat(this.build_columns());
+		this.col_defs = [{id:'_idx', field:'_idx', name: 'Sr.', width: 40}].concat(this.build_columns());
 
 		// add sr in data
 		$.each(this.data, function(i, v) {
@@ -257,11 +268,73 @@ wn.views.ReportView = wn.ui.Listing.extend({
 			enableColumnReorder: false
 		};
 		
-		var grid = new Slick.Grid(this.$w.find('.result-list')
+		this.grid = new Slick.Grid(this.$w.find('.result-list')
 			.css('border', '1px solid grey')
 			.css('height', '500px')
 			.get(0), this.data, 
-			columns, options);
+			this.col_defs, options);
+		
+		this.grid.setSelectionModel(new Slick.RowSelectionModel());
+		this.set_edit();
+	},
+	
+	set_edit: function() {
+		// edit row
+		var me = this;
+		this.grid.onClick.subscribe(function(e, args) {
+			if(me.selected_row == args.row) {
+				var docfield = me.col_defs[args.cell].docfield;
+				var rowdata = me.data[args.row];
+				if(docfield && rowdata.name) {
+					var fieldname = docfield.get('fieldname');
+					var dialog = new wn.ui.FormDialog({
+						title: rowdata.name,
+						width: 700,
+						fields: [
+							copy_dict(docfield.fields),
+							{fieldname:'update', label:'Update', fieldtype:'Button'}
+						]
+					});
+					dialog.form.controls[fieldname].set_input(rowdata[fieldname])
+					
+					dialog.form.controls.update.$input.click(function() {
+						// parent
+						var call_args = {
+							doctype: me.doctype,
+							name: rowdata.name,
+							field: fieldname,
+							value: dialog.form.controls[fieldname].get()								
+						};
+						
+						if(docfield.get('parent') && docfield.get('parent')!=me.doctype)
+							call_args.parent = docfield.get('parent');
+	
+						wn.call({
+							method: 'webnotes.model.client.update_value',
+							args: call_args,
+							callback: function(r) {
+								if(r.exc) {
+									msgprint('Could not update');
+								} else {
+									$.extend(me.data[args.row], r.message);
+									dialog.hide();									
+									me.grid.setData(me.data);
+									me.grid.render();
+								}
+							},
+							btn: this
+						})
+					}).addClass('btn-info')
+					
+					
+					dialog.show();
+					
+				}
+			}
+			me.selected_row = args.row;
+			return false;
+		});
+		
 	},
 	
 	// setup column picker
@@ -386,7 +459,7 @@ wn.ui.ColumnPicker = Class.extend({
 		if(!this.dialog) {
 			this.dialog = new wn.ui.Dialog({
 				title: 'Pick Columns',
-				width: '400'
+				width: 400
 			});
 		}
 		$(this.dialog.body).html('<div class="help">Drag to sort columns</div>\

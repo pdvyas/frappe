@@ -37,7 +37,7 @@ wn.views.formview = {
 				
 				if(wn.model.get('DocType', dt).get_value('in_dialog')) {
 					// dialog
-					var form_dialog = new wn.views.FormDialog({
+					var form_dialog = new wn.ui.FormDialog({
 						doc: wn.model.get(dt, dn).doc
 					});
 					

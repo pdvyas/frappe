@@ -323,7 +323,7 @@ wn.ui.FieldSelect = Class.extend({
 		// child tables
 		$.each(me.table_fields, function(i,table_df) {
 			if(table_df.options) {
-				$.each(wn.model.get('DocType', me.doctype).get({doctype:'DocField'}), function(i, df) {
+				$.each(wn.model.get('DocType', table_df.options).get({doctype:'DocField'}), function(i, df) {
 					me.add_field_option(df.fields);
 				});				
 			}
@@ -332,6 +332,7 @@ wn.ui.FieldSelect = Class.extend({
 
 	add_field_option: function(df) {
 		var me = this;
+		if(!df.label || !df.fieldname) return;
 		if(me.doctype && df.parent==me.doctype) {
 			var label = df.label;
 			var table = me.doctype;

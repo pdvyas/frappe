@@ -190,6 +190,11 @@ wn.ui.Listing = Class.extend({
 		}
 	},
 	
+	get_page_length: function() {
+		if(typeof this.page_length == 'function') return this.page_length();
+		else return this.page_length;
+	},
+	
 	make_new_doc: function(new_doctype) {
 		new_doc(new_doctype);
 	},
@@ -251,7 +256,7 @@ wn.ui.Listing = Class.extend({
 		} else {
 			var args = {
 				limit_start: this.start,
-				limit_page_length: this.page_length
+				limit_page_length: this.get_page_length()
 			}
 		}
 		
@@ -288,7 +293,7 @@ wn.ui.Listing = Class.extend({
 	},
 
 	render_list: function(values) {		
-		var m = Math.min(values.length, this.page_length);
+		var m = Math.min(values.length, this.get_page_length());
 		
 		// render the rows
 		for(var i=0; i < m; i++) {
@@ -296,9 +301,9 @@ wn.ui.Listing = Class.extend({
 		}
 	},
 	update_paging: function(values) {
-		if(values.length >= this.page_length) {
+		if(values.length >= this.get_page_length()) {
 			this.$w.find('.btn-more').toggle(true);			
-			this.start += this.page_length;
+			this.start += this.get_page_length();
 		}
 	},
 	add_row: function() {
@@ -308,7 +313,7 @@ wn.ui.Listing = Class.extend({
 		this.run(); 
 	},
 	add_limits: function(query) {
-		query += ' LIMIT ' + this.start + ',' + (this.page_length+1);
+		query += ' LIMIT ' + this.start + ',' + (this.get_page_length()+1);
 		return query
 	}
 });

@@ -3,11 +3,11 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-07-03 13:30:35',
-		'docstatus': 0,
-		'modified': '2012-07-25 11:55:23',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
+		u'creation': '2012-07-03 13:30:35',
+		u'docstatus': 0,
+		u'modified': '2012-08-24 18:26:34',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
@@ -15,11 +15,12 @@
 		'_last_update': u'1326273643',
 		'autoname': u'DL.####',
 		'colour': u'White:FFF',
-		'doctype': 'DocType',
+		'doctype': u'DocType',
+		'document_type': u'Tool',
 		'hide_toolbar': 0,
 		'issingle': 1,
 		'module': u'Core',
-		'name': '__common__',
+		u'name': u'__common__',
 		'search_fields': u'doc_type',
 		'section_style': u'Simple',
 		'show_in_menu': 0,
@@ -29,7 +30,7 @@
 	# These values are common for all DocField
 	{
 		'doctype': u'DocField',
-		'name': '__common__',
+		u'name': u'__common__',
 		'parent': u'Customize Form',
 		'parentfield': u'fields',
 		'parenttype': u'DocType'
@@ -38,7 +39,7 @@
 	# These values are common for all DocPerm
 	{
 		'doctype': u'DocPerm',
-		'name': '__common__',
+		u'name': u'__common__',
 		'parent': u'Customize Form',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
@@ -48,36 +49,14 @@
 
 	# DocType, Customize Form
 	{
-		'doctype': 'DocType',
+		u'doctype': u'DocType',
 		'name': u'Customize Form'
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 2
 	},
 
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'doc_type',
 		'fieldtype': u'Link',
 		'hidden': 0,
@@ -90,7 +69,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'properties',
 		'fieldtype': u'Section Break',
 		'label': u'Properties',
@@ -99,7 +78,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break0',
 		'fieldtype': u'Column Break',
 		'permlevel': 0
@@ -108,7 +87,7 @@
 	# DocField
 	{
 		'description': u'Fields separated by comma (,) will be included in the<br /><b>Search By</b> list of Search dialog box',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'search_fields',
 		'fieldtype': u'Data',
 		'label': u'Search Fields',
@@ -119,7 +98,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'default_print_format',
 		'fieldtype': u'Link',
 		'label': u'Default Print Format',
@@ -131,7 +110,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break1',
 		'fieldtype': u'Column Break',
 		'permlevel': 0
@@ -140,7 +119,7 @@
 	# DocField
 	{
 		'description': u'Load Print View on opening of an existing form',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'read_only_onload',
 		'fieldtype': u'Check',
 		'label': u'Show Print First',
@@ -151,7 +130,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'allow_print',
 		'fieldtype': u'Check',
 		'label': u'Hide Print',
@@ -162,7 +141,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'allow_email',
 		'fieldtype': u'Check',
 		'label': u'Hide Email',
@@ -173,7 +152,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'allow_copy',
 		'fieldtype': u'Check',
 		'label': u'Hide Copy',
@@ -185,7 +164,7 @@
 	# DocField
 	{
 		'description': u'Note: maximum attachment size = 1mb',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'allow_attach',
 		'fieldtype': u'Check',
 		'label': u'Allow Attach',
@@ -197,7 +176,7 @@
 	# DocField
 	{
 		'depends_on': u'eval:doc.allow_attach',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'max_attachments',
 		'fieldtype': u'Int',
 		'label': u'Max Attachments',
@@ -209,7 +188,7 @@
 	# DocField
 	{
 		'description': u'Customize Label, Print Hide, Default etc.',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'fields_section_break',
 		'fieldtype': u'Section Break',
 		'label': u'Fields',
@@ -219,7 +198,7 @@
 	# DocField
 	{
 		'default': u'no add rows',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'fields',
 		'fieldtype': u'Table',
 		'label': u'Fields',
@@ -227,5 +206,27 @@
 		'options': u'Customize Form Field',
 		'permlevel': 1,
 		'search_index': 0
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'permlevel': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		u'doctype': u'DocPerm',
+		'permlevel': 2
 	}
 ]

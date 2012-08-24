@@ -77,3 +77,24 @@ def delete():
 		c = webnotes.model.get_controller(webnotes.form.doctype, webnotes.form.name)
 		
 	#c.delete()
+
+@webnotes.whitelist()
+def update_value():
+	"""update a single value"""
+	import webnotes.model
+	from webnotes.utils import remove_nulls
+	
+	obj = webnotes.model.get_controller(webnotes.form.doctype, webnotes.form.parent \
+		or webnotes.form.name)
+	if webnotes.form.parent:
+		doc = obj.doclist.get({ "name": webnotes.form.name })[0]
+	else:
+		doc = obj.doc
+	
+	doc[webnotes.form.field] = webnotes.form.value
+	
+	obj.save()
+	
+	return remove_nulls(doc)
+	
+	

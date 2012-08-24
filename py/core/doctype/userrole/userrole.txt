@@ -3,11 +3,11 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-07-03 13:30:34',
-		'docstatus': 0,
-		'modified': '2012-07-13 12:25:07',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
+		u'creation': '2012-07-03 13:30:34',
+		u'docstatus': 0,
+		u'modified': '2012-08-24 16:18:20',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
@@ -17,13 +17,14 @@
 		'allow_print': 0,
 		'autoname': u'UR.#####',
 		'colour': u'White:FFF',
-		'doctype': 'DocType',
+		'doctype': u'DocType',
+		'document_type': u'System',
 		'hide_heading': 0,
 		'hide_toolbar': 0,
 		'issingle': 0,
 		'istable': 0,
 		'module': u'Core',
-		'name': '__common__',
+		u'name': u'__common__',
 		'read_only': 0,
 		'section_style': u'Simple',
 		'server_code_error': u' ',
@@ -38,7 +39,7 @@
 		'fieldtype': u'Link',
 		'hidden': 0,
 		'label': u'Role',
-		'name': '__common__',
+		u'name': u'__common__',
 		'oldfieldname': u'role',
 		'oldfieldtype': u'Link',
 		'options': u'Role',
@@ -53,12 +54,12 @@
 
 	# DocType, UserRole
 	{
-		'doctype': 'DocType',
+		u'doctype': u'DocType',
 		'name': u'UserRole'
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField'
+		u'doctype': u'DocField'
 	}
 ]

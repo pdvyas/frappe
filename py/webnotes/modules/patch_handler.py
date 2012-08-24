@@ -129,7 +129,7 @@ def get_executed_patches(patchmodule=None):
 			print "Patch %s already executed in %s" % (patchmodule, webnotes.conn.cur_db_name)
 		return p
 	else:
-		return [p[0] for p in webnotes.conn.sql("""select distinct patch from __PatchLog""")]
+		return [p.patch for p in webnotes.conn.sql("""select distinct patch from __PatchLog""")]
 	
 def block_user(block):
 	"""stop/start execution till patch is run"""

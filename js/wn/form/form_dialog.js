@@ -20,7 +20,7 @@
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-wn.views.FormDialog = wn.ui.Dialog.extend({
+wn.ui.FormDialog = wn.ui.Dialog.extend({
 	init: function(opts) {
 		$.extend(this, opts);
 		wn.get_or_set(this, 'width', 700);
@@ -39,7 +39,7 @@ wn.views.FormDialog = wn.ui.Dialog.extend({
 	}
 })
 
-wn.views.RowEditFormDialog = wn.views.FormDialog.extend({
+wn.views.RowEditFormDialog = wn.ui.FormDialog.extend({
 	init: function(opts) {
 		opts.form_class = wn.ui.RowEditForm;
 		this._super(opts);
