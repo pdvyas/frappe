@@ -44,10 +44,16 @@ wn.ui.GridControl = wn.ui.Control.extend({
 		
 		this.grid = new Slick.Grid(this.$input_wrapper.get(0), [], 
 			this.get_columns(), options);
-		this.setup_drag_and_drop();
-		this.make_add_row_button();
+			
+		if(!this.get_disabled()) {
+			this.setup_drag_and_drop();			
+			this.make_add_row_button();
+		}
 		this.set_edit_on_double_click();
 		this.$w.find('.vertical-label').toggle(false);
+	},
+	set_disabled: function() {
+		
 	},
 	set_edit_on_double_click: function() {
 		var me = this;
@@ -68,7 +74,8 @@ wn.ui.GridControl = wn.ui.Control.extend({
 						id: d.get('fieldname'),
 						field: d.get('fieldname'),
 						name: d.get('label'),
-						width: cint(d.get('width')) || 100
+						width: cint(d.get('width')) || 100,
+						cssClass: d.get('reqd') ? 'slick-mandatory-column' : null
 					}
 				} else {
 					return null;
@@ -133,11 +140,15 @@ wn.ui.GridControl = wn.ui.Control.extend({
 	set_edit_button: function() {
 		var me = this;
 		this.$input_wrapper.find('.grid-edit').on('click', function() {
-			var d = me.doc.doclist.get({
-					parentfield:$(this).attr('data-parentfield'),
-					name:$(this).attr('data-name'),
-				})[0];
-			me.edit_row(d);
+			if(me.get_disabled()) {
+				show_alert('Grid is not editable');
+			} else {
+				var d = me.doc.doclist.get({
+						parentfield:$(this).attr('data-parentfield'),
+						name:$(this).attr('data-name'),
+					})[0];
+				me.edit_row(d);
+			}
 			return false;
 		});
 	},

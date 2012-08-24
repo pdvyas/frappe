@@ -286,7 +286,7 @@ def get(doctype, name=None):
 	"""
 	Returns a doclist containing the main record and all child records
 	"""
-	return webnotes.model.doclist.load_doclist(doctype, name or doctype)
+	return webnotes.model.doclist.load(doctype, name or doctype)
 
 def getsingle(doctype):
 	"""get single doc as dict"""

@@ -5,7 +5,7 @@ wn.ui.Comments = Class.extend({
 		this.make_body();
 		// render existing
 		var me = this;
-		$.each(this.form_page.doclist.doc.get('__comments'), function(i, v) {
+		$.each(this.form_page.doclist.doc.get('__comments') || [], function(i, v) {
 			me.render_comment(v);
 		})
 	},

@@ -34,7 +34,15 @@ wn.ui.RichTextControl = wn.ui.Control.extend({
 		this.myid = wn.dom.set_unique_id(this.$input.get(0));
 			
 		wn.lib.import_wysihtml5();
-		this.$input.wysihtml5();
+		this.$input.wysihtml5({
+			"events": {
+				change: function() {
+					var val = $('#' + me.myid).val().replace(/&nbsp;/g, ' ');
+					if(me.doc) 
+						me.doc.set(me.docfield.fieldname, val);
+				}
+			}
+		});
 	},
 	toggle_input: function(show) {
 		this.$input_wrap.toggle(show);

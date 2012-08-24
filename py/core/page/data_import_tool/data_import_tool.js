@@ -1,4 +1,4 @@
-wn.pages['data-import-tool'].onload = function(wrapper) { 
+wn.pages['data-import-tool'].on('load', function(wrapper) { 
 	wrapper.app_page = wn.ui.make_app_page({
 		parent: wrapper,
 		title: "Data Import Tool"
@@ -9,9 +9,9 @@ wn.pages['data-import-tool'].onload = function(wrapper) {
 			<p class="help">Download a template for importing a table.</p>\
 			<p class="float-column">\
 				<select style="width: 200px" name="dit-doctype">\
-				</select><br><br>\
-				<input type="checkbox" name="dit-with-data">\
-				<span> Download with data</span>\
+				</select>\
+				<label class="checkbox"><input type="checkbox" name="dit-with-data">\
+				 Download with data</label>\
 			</p>\
 			<p class="float-column" id="dit-download"></p>\
 		</div>\
@@ -118,11 +118,11 @@ wn.pages['data-import-tool'].onload = function(wrapper) {
 	});
 	
 	// add overwrite option
-	$('<input type="checkbox" name="overwrite"><span> Overwrite</span><br><br>')
+	$('<label class="checkbox"><input type="checkbox" name="overwrite"> Overwrite</label>')
 		.insertBefore('#dit-upload-area form input[type="submit"]')
 
 	// add ignore option
-	$('<input type="checkbox" name="ignore_encoding_errors"><span> Ignore Encoding Errors</span><br><br>')
+	$('<label class="checkbox"><input type="checkbox" name="ignore_encoding_errors"> Ignore Encoding Errors</label>')
 		.insertBefore('#dit-upload-area form input[type="submit"]')
 
 
@@ -139,4 +139,4 @@ wn.pages['data-import-tool'].onload = function(wrapper) {
 		.click(function() {
 			$('#dit-output').html('Performing hardcore import process....')
 		});
-}
+});

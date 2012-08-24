@@ -18,29 +18,27 @@
 // HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
 // CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-// 
+//
 
-// overlay an element
-// http://blog.learnboost.com/blog/a-css3-overlay-system/
+wn.ui.DateControl = wn.ui.Control.extend({
+	make_input: function() {
+		this.$input = $('<input type="text">')
+			.appendTo(this.$w.find('.controls'));
 
-wn.ui.Overlay = function(ele) {
-	wn.require('lib/css/ui/overlay.css');
+		var user_fmt = sys_defaults.date_format || 'yy-mm-dd';
 
-	var me = this;
-	$.extend(this, {
-		render: function() {
-			me.wrap = wn.dom.add(
-				wn.dom.add(
-					wn.dom.add($('body').get(0), 'div', 'overlay')
-				, 'div', 'wrap-outer')
-			, 'div', 'wrap');
-			me.wrap.appendChild(ele);
-			$('body').addClass('overlaid');
-		},
-		hide: function() {
-			wn.dom.hide(me.wrap);
-			$('body').removeClass('overlaid');
-		}
-	});
-	me.render();	
-}
+		this.$input.datepicker({
+			dateFormat: user_fmt.replace('yyyy','yy'), 
+			altFormat:'yy-mm-dd', 
+			changeYear: true
+		})
+	},
+	set_input: function(val) {
+		if(val==null) val='';
+		else val = dateutil.str_to_user(val);
+		$(this.$input).val(val);		
+	},
+	get: function() {
+		return dateutil.user_to_str($(this.$input).val());
+	}
+})

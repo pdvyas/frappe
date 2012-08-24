@@ -68,7 +68,9 @@ wn.ui.TextControl = wn.ui.Control.extend({
 wn.ui.SelectControl = wn.ui.Control.extend({
 	make_input: function() {
 		this.$input = $('<select>').appendTo(this.$w.find('.controls'));
-		this.$input.add_options(this.docfield.options.split('\n'));
+		if(this.docfield.options) {
+			this.$input.add_options(this.docfield.options.split('\n'));			
+		}
 	}
 });
 

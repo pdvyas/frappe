@@ -21,9 +21,10 @@
 # 
 
 from __future__ import unicode_literals
-import webnotes
+import webnotes, json
 import webnotes.model
 import webnotes.model.doc
+import webnotes.utils.cache
 from webnotes.utils import cstr
 
 class DocList(list):
@@ -70,7 +71,12 @@ class DocList(list):
 		return self
 
 
-def load_doclist(doctype, name):
+def load(doctype, name):
+	# from cache?
+	doclist = webnotes.utils.cache.get(doctype + '/' + name)
+	if doclist:
+		return json.loads(doclist)
+	
 	# load main doc
 	doclist = [load_main(doctype, name)]
 	
@@ -82,7 +88,7 @@ def load_doclist(doctype, name):
 		children = load_children(*args)
 		if children: doclist += children
 
-	return objectify_doclist(doclist)
+	return objectify(doclist)
 
 def load_main(doctype, name):
 	"""retrieves doc from database"""
@@ -110,7 +116,7 @@ def load_children(options, parent, parentfield, parenttype):
 		and parentfield = %s and parenttype = %s order by idx""" % (options, options, "%s", "%s", "%s"),
 		(parent, parentfield, parenttype), as_dict=1)
 		
-def objectify_doclist(doclist):
+def objectify(doclist):
 	doclist_obj = DocList([])
 	for d in doclist:
 		if isinstance(d, webnotes.model.doc.Document):

@@ -43,9 +43,12 @@ class Bundle:
 			if ':' in f:
 				f, suffix = f.split(':')
 			
+			if not os.path.exists(f):
+				continue
+			
 			if os.path.isdir(f):
 				continue
-							
+			
 			# get datas
 			with open(f, 'r') as infile:			
 				# get file type
@@ -120,9 +123,14 @@ class Bundle:
 			
 			fl = []
 			for f in infiles:
+				## load files from directory
 				if f.endswith('/'):
+					# add init js first
+					fl += [os.path.relpath(os.path.join(f, 'init.js'), os.curdir)]
+					
+					# files other than init.js and beginning with "_"
 					fl += [os.path.relpath(os.path.join(f, tmp), os.curdir) \
-						for tmp in os.listdir(f)]
+						for tmp in os.listdir(f) if (tmp != 'init.js' and not tmp.startswith('_'))]
 				else:
 					fl.append(os.path.relpath(os.path.join(path, f), os.curdir))
 						

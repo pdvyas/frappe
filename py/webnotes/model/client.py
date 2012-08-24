@@ -41,6 +41,8 @@ def get_doclist():
 	doclist[0]['__assigned_to'] = todo and todo[0][0] or ''
 
 	webnotes.response['docs'] = doclist
+	
+	webnotes.user.update_recent(webnotes.form.doctype, webnotes.form.name)
 
 @webnotes.whitelist()
 def get_doctype():

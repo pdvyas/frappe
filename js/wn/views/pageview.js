@@ -27,10 +27,10 @@ wn.views.pageview = {
 	with_page: function(name, callback) {
 		if(!wn.model.has('Page', name)) {
 			wn.call({
-				method: 'webnotes.widgets.page.getpage', 
-				args: {'name':name },
+				method: 'core.doctype.page.page.get', 
+				args: {'page_name':name },
 				callback: function(r) {
-					wn.model.sync(r.docs);
+					wn.model.sync(r.message);
 					callback();
 				}
 			});

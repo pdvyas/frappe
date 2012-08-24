@@ -3,8 +3,11 @@ import webnotes
 
 @webnotes.whitelist()
 def get_doctypes():
-    return [r[0] for r in webnotes.conn.sql("""select name from `tabDocType` 
-		where document_type = 'Master'""")]	
+	if webnotes.session['user']=='Administrator':
+		return [r[0] for r in webnotes.conn.sql("""select name from tabDocType""")]
+	else:
+		return [r[0] for r in webnotes.conn.sql("""select name from `tabDocType` 
+			where document_type = 'Master'""")]	
 		
 @webnotes.whitelist()
 def get_doctype_options():
@@ -94,11 +97,15 @@ def get_template():
 	from webnotes.utils import cstr
 
 	if webnotes.form.get('with_data')=='Yes':
-		data = webnotes.conn.sql("""select * from `tab%s` where docstatus<2""" % doctype, as_dict=1)
+		data = webnotes.conn.sql("""select * from `tab%s` where docstatus<2""" % doctype, as_dict=1, only_literals=True)
 		for d in data:
 			row = ['']
 			for c in columns:
-				row.append(d.get(c, '').encode('utf-8'))
+				val = d.get(c)
+				if hasattr(val, 'encode'):
+					row.append(val.encode('utf-8'))
+				else:
+					row.append(val)
 			w.writerow(row)
 
 	# write out response as a type csv

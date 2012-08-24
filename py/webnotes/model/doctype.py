@@ -37,7 +37,7 @@ import webnotes.model
 import webnotes.model.doc
 import webnotes.model.controller
 import webnotes.model.doclist
-from webnotes.utils.cache import CacheItem
+import webnotes.utils.cache
 
 doctype_cache = {}
 docfield_types = None
@@ -81,7 +81,7 @@ def load_docfield_types():
 
 def get_doctype_doclist(doctype):
 	"""get doclist of single doctype"""
-	doclist = webnotes.model.doclist.load_doclist('DocType', doctype)
+	doclist = webnotes.model.doclist.load('DocType', doctype)
 	add_custom_fields(doctype, doclist)
 	apply_property_setters(doctype, doclist)
 	sort_fields(doclist)
@@ -162,7 +162,7 @@ def from_cache(doctype, processed):
 		return doctype_cache[doctype]
 
 
-	json_doclist = CacheItem(cache_name(doctype, processed)).get()
+	json_doclist = webnotes.utils.cache.get(cache_name(doctype, processed))
 	if json_doclist:
 		import json
 		doclist = [webnotes.model.doc.Document(fielddata=d)
@@ -175,11 +175,10 @@ def to_cache(doctype, processed, doclist):
 	import json
 	
 	json_doclist = json.dumps([d for d in doclist], default=webnotes.json_handler)
-	CacheItem(cache_name(doctype, processed)).set(json_doclist)
+	webnotes.utils.cache.set(cache_name(doctype, processed), json_doclist)
 
 	if not processed:
 		doctype_cache[doctype] = doclist
-	
 
 def cache_name(doctype, processed):
 	"""returns cache key"""
@@ -187,12 +186,12 @@ def cache_name(doctype, processed):
 
 def clear_cache(doctype):
 	global doctype_cache
-	CacheItem(cache_name(doctype, False)).clear()
-	CacheItem(cache_name(doctype, True)).clear()
+	webnotes.utils.cache.clear(cache_name(doctype, False))
+	webnotes.utils.cache.clear(cache_name(doctype, True))
+
 	if doctype in doctype_cache:
 		del doctype_cache[doctype]
 	
-
 def add_code(doctype, doclist):
 	import os, conf
 	from webnotes.modules import scrub, get_module_path

@@ -22,6 +22,7 @@
 
 from __future__ import unicode_literals
 import webnotes
+import webnotes.model
 from webnotes.model.controller import DocListController
 
 class PageController(DocListController):
@@ -124,3 +125,19 @@ class PageController(DocListController):
 		if os.path.exists(fpath):
 			with open(fpath, 'r') as f:
 				self.doc.content = f.read()
+				
+				# is it a template
+				if self.doc.content.startswith('{# template #}'):
+					from jinja2 import Template
+					Template(self.doc.content).render(globals())
+					
+				
+@webnotes.whitelist()
+def get():
+	"""
+	   Return the :term:`doclist` of the `Page` specified by `name`
+	"""
+	from webnotes.model import get_controller
+	page = get_controller('Page', webnotes.form.page_name)
+	page.get_from_files()
+	return page.doclist

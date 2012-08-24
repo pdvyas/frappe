@@ -35,7 +35,7 @@ def export_to_files(record_list=[], record_module=None, verbose=0):
 	module_doclist =[]
 	if record_list:
 		for record in record_list:
-			doclist = [d for d in webnotes.model.doc.get(record[0], record[1])]
+			doclist = webnotes.model.doc.get(record[0], record[1])
 			write_document_file(doclist, record_module)
 
 def create_init_py(modules_path, dt, dn):

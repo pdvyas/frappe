@@ -75,7 +75,9 @@ def errprint(msg):
 	"""Append to the :data:`debug log`"""
 	from utils import cstr
 	debug_log.append(cstr(msg or ''))
-
+	if not form:
+		print msg	
+	
 def msgprint(msg, small=0, raise_exception=0, as_table=False, debug=0):
 	"""Append to the :data:`message_log`"""
 	from utils import cstr

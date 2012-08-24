@@ -10,7 +10,7 @@ doctypelist = {}
 
 def sync_all(force=0):
 	modules = []
-	modules += sync_core_doctypes(force)
+	modules += sync_core_module(force)
 	modules += sync_modules(force)
 	try:
 		webnotes.conn.begin()
@@ -20,10 +20,13 @@ def sync_all(force=0):
 		if e[0]!=1146: raise e
 	return modules
 
-def sync_core_doctypes(force=0):
+def sync_core_module(force=0):
 	import os
 	import core
 	# doctypes
+
+	sync_core()
+	
 	return walk_and_sync(os.path.abspath(os.path.dirname(core.__file__)), force)
 
 def sync_modules(force=0):
@@ -76,7 +79,12 @@ def load_doctypelist(module_name, docname):
 # docname in small letters with underscores
 def sync(module_name, docname, force=0):
 	"""sync doctype from file if modified"""
-	doclist = load_doctypelist(module_name, docname)
+	try:
+		doclist = load_doctypelist(module_name, docname)
+	except SyntaxError, e:
+		print 'Bad txt file:' + get_file_path(module_name, docname)
+		return
+		
 	modified = doclist[0]['modified']
 	if not doclist:
 		raise Exception('DocList could not be evaluated')
@@ -147,13 +155,12 @@ def save_perms_if_none_exist(doclist):
 		if d.get('doctype') != 'DocPerm': continue
 		Document(fielddata=d).save(1, doctypelist=doctypelist.get("docperm"))
 
-def sync_install(force=1):
-	# load required doctypes' doclist
+def sync_core():
 	global doctypelist
-	from webnotes.model.doclist import objectify_doclist
-	doctypelist["doctype"] = objectify_doclist(load_doctypelist("core", "doctype"))
-	doctypelist["docfield"] = objectify_doclist(load_doctypelist("core", "docfield"))
-	doctypelist["docperm"] = objectify_doclist(load_doctypelist("core", "docperm"))
+	from webnotes.model.doclist import objectify
+	doctypelist["doctype"] = objectify(load_doctypelist("core", "doctype"))
+	doctypelist["docfield"] = objectify(load_doctypelist("core", "docfield"))
+	doctypelist["docperm"] = objectify(load_doctypelist("core", "docperm"))
 		
 	# sync required doctypes first
 	sync("core", "docperm")
@@ -162,6 +169,10 @@ def sync_install(force=1):
 	sync("core", "property_setter")
 	sync("core", "doctype_validator")
 	sync("core", "doctype")
+	
+def sync_install(force=1):
+	# load required doctypes' doclist
+	sync_core()
 	
 	# sync all doctypes
 	modules = sync_all(force)
