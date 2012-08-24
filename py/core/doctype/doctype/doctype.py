@@ -99,7 +99,7 @@ class DocType(DocListController):
 		from webnotes.model.db_schema import updatedb
 		updatedb(self.doc.name)
 
-		self.change_modified_of_parent()
+		# self.change_modified_of_parent()
 		
 		import conf
 		from webnotes.utils.transfer import in_transfer
