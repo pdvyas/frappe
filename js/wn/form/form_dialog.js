@@ -55,11 +55,11 @@ wn.views.RowEditFormDialog = wn.views.FormDialog.extend({
 		
 		var delete_btn = this.appframe.add_button('Delete', function() { 
 			// remove row from doclist
-			me.control_grid.doc.doclist.remove_child(me.doc);
+			me.control_grid.doclist.remove_child(me.doc);
 			me.control_grid.set(); // reset grid
-			
 			me.hide();
 		}, 'icon-remove');
+		
 		delete_btn.parent().css('float', 'right');
 	}
 });

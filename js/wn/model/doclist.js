@@ -88,10 +88,8 @@ wn.model.DocList = Class.extend({
 		} else {
 			var filters = arguments[0];
 		}
-		var ret = $.map(this.doclist, function(d) { return me.match(filters, d) })
-		ret.sort(function(a, b) {
-			return a.idx > b.idx;
-		});
+		var ret = $.map(this.doclist, function(d) { return me.match(filters, d) });
+		ret.sort(function(a, b) { return (a.fields.idx - b.fields.idx); });
 		return ret;
 	},
 	get_value: function(key, def) {
