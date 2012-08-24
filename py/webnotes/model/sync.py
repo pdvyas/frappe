@@ -147,7 +147,7 @@ def save_perms_if_none_exist(doclist):
 	global doctypelist
 	res = webnotes.conn.sql("""SELECT name FROM `tabDocPerm`
 			WHERE parent=%s""", doclist[0].get('name'))
-	if res and res[0][0]: return
+	if res and res[0].name: return
 
 	from webnotes.model.doc import Document
 	from webnotes.modules import scrub
