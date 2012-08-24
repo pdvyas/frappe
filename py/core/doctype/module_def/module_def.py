@@ -18,37 +18,41 @@
 # HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
 # CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-# 
+#
 
 from __future__ import unicode_literals
-"""
-Simple Caching:
-
-Stores key-value pairs in database and enables simple caching
-
-CacheItem(key).get() returns the cached value if not expired (else returns null)
-CacheItem(key).set(interval = 60000) sets a value to cache, expiring after x seconds
-CacheItem(key).clear() clears an old value
-setup() sets up cache
-"""
-
 import webnotes
+from webnotes.model.controller import DocListController
 
-def clear(key=None):
-	"""clear doctype cache"""
-	if key:
-		webnotes.conn.sql("delete from __CacheItem where `key`=%s", key)
-	else:
-		webnotes.conn.sql("""delete from __CacheItem""")
-
-def get(key):
-	"""get cache"""
-	value = webnotes.conn.sql("""select `value` from __CacheItem where 
-		`key`=%s""", key)
-	return value and value[0].value or None
+@webnotes.whitelist()
+def get_items():
+	"""get module doctypes (master, transaction, setup, tool), pages and reports"""
 	
-def set(key, value):
-	"""set in cache"""
-	clear(key)	
-	webnotes.conn.sql("""insert into __CacheItem (`key`, `value`) 
-		values (%s, %s)""", (key, str(value)))
+	out = webnotes.DictObj({
+		'master': [],
+		'transaction': [],
+		'setup': [],
+		'tool': [],
+		'other': [],
+		'report': []
+	})
+	
+	# doctypes
+	for dt in webnotes.conn.sql("""select name, document_type from tabDocType where module=%s""",
+		webnotes.form.module):
+		if dt.document_type:
+			out[dt.document_type.lower()].append(["DocType", dt.name])
+	
+	# pages
+	for page in webnotes.conn.sql("""select name from tabPage where module=%s""", webnotes.form.module):
+		out.tool.append(["Page", page.name])
+		
+	# reports
+	for report in webnotes.conn.sql("""select tabReport.name from tabReport, tabDocType
+		where tabReport.ref_doctype = tabDocType.name and tabDocType.module = %s""",
+			webnotes.form.module):
+		
+		out.report.append(['Report', report.name])
+		
+	return out
+	

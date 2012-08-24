@@ -22,18 +22,24 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import cint
+from webnotes.utils import cint, remove_nulls
 no_value_fields = ['Section Break', 'Column Break', 'HTML', 'Table', 'FlexTable', 'Button', 'Image', 'Graph']
 default_fields = ['doctype','name','owner','creation','modified','modified_by','parent','parentfield','parenttype','idx','docstatus']
 
-def get(doctype, name):
+def get(doctype, name, strip_nulls = False):
 	"""returns doclist identified by name, from table indicated by doctype, with its children"""
-	return get_controller(doctype, name).doclist
+	doclist = get_controller(doctype, name).doclist
+	if strip_nulls:
+		[remove_nulls(d) for d in doclist]
+	return doclist
 	
-def get_doctype(doctype, processed=False):
+def get_doctype(doctype, processed=False, strip_nulls = False):
 	"""returns doclist identified by doctype, from tabDocType with its children"""
 	import webnotes.model.doctype
-	return webnotes.model.doctype.get(doctype, processed)
+	doclist = webnotes.model.doctype.get(doctype, processed)
+	if strip_nulls:
+		[remove_nulls(d) for d in doclist]
+	return doclist
 
 def insert(doclist):
 	"""insert a new doclist"""

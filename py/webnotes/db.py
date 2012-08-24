@@ -27,7 +27,6 @@ from __future__ import unicode_literals
 import MySQLdb
 import webnotes
 import conf
-from webnotes.utils import DictObj
 
 class Database:
 	"""
@@ -107,7 +106,7 @@ class Database:
 			webnotes.msgprint('Not allowed to execute query')
 			raise Execption
 
-	def sql(self, query, values=None, as_dict = 0, as_list = 0, debug=0, ignore_ddl=0,
+	def sql(self, query, values=None, as_dict = True, as_list = 0, debug=0, ignore_ddl=0,
 		auto_commit=0, only_literals=False):
 		"""
 		      * Execute a `query`, with given `values`
@@ -158,10 +157,10 @@ class Database:
 			output = self.to_literals(output)
 
 		# scrub output if required
-		if as_dict:
-			return self.fetch_as_dict(output)
-		elif as_list:
+		if as_list:
 			return map(lambda res: list(res), output)
+		elif as_dict:
+			return self.fetch_as_dict(output)
 
 		return output
 	
@@ -184,13 +183,12 @@ class Database:
 			
 	def fetch_as_dict(self, result):
 		"""Internal - get results as dictionary"""
-		from webnotes.utils import DictObj
 		ret = []
 		for r in result:
 			row_dict = {}
 			for i in xrange(len(r)):
 				row_dict[self._cursor.description[i][0]] = r[i]
-			ret.append(DictObj(row_dict))
+			ret.append(webnotes.DictObj(row_dict))
 		return ret
 		
 	def get_description(self):
@@ -199,7 +197,7 @@ class Database:
 		
 	def get_table_columns(self, table):
 		"""get columns"""
-		return [r[0] for r in self.sql("DESC `tab%s`" % table)]
+		return [r[0] for r in self.sql("DESC `tab%s`" % table, as_dict=False)]
 
 	def get_value(self, doctype, filters=None, fieldname="name", ignore=None, as_dict=0):
 		"""Get a single / multiple value from a record. 
@@ -211,9 +209,11 @@ class Database:
 			
 			try:
 				if as_dict:
-					r = self.sql("select `%s` from `tab%s` where %s" % (fl, doctype, conditions), filters, as_dict=1)
+					r = self.sql("select `%s` from `tab%s` where %s" % (fl, doctype, conditions), 
+						filters)
 				else:
-					r = self.sql("select `%s` from `tab%s` where %s" % (fl, doctype, conditions), filters)
+					r = self.sql("select `%s` from `tab%s` where %s" % (fl, doctype, conditions), 
+						filters, as_dict=False)
 			except Exception, e:
 				if e.args[0]==1054 and ignore:
 					return None
@@ -226,9 +226,9 @@ class Database:
 			fieldname = isinstance(fieldname, basestring) and [fieldname] or fieldname
 
 			r = self.sql("select field, value from tabSingles where field in (%s) and \
-				doctype=%s" % (', '.join(['%s']*len(fieldname)), '%s'), tuple(fieldname) + (doctype,))
+				doctype=%s" % (', '.join(['%s']*len(fieldname)), '%s'), tuple(fieldname) + (doctype,), as_dict=False)
 			if as_dict:
-				return r and DictObj(r) or None
+				return r and webnotes.DictObj(r) or None
 			else:
 				return r and (len(r) > 1 and [i[0] for i in r] or r[0][1]) or None
 
@@ -254,8 +254,9 @@ class Database:
 			self.sql('insert into `tabDefaultValue` (name, defkey, defvalue, parent) values (%s,%s,%s,%s)', (user+'_'+key, key, str(val), user))
 
 	def get_global(self, key, user='__global'):
-		g = self.sql("select defvalue from tabDefaultValue where defkey=%s and parent=%s", (key, user))
-		return g and g[0][0] or None
+		g = self.sql("select defvalue from tabDefaultValue where defkey=%s and parent=%s", 
+			(key, user))
+		return g and g[0].defvalue or None
 
 	def set_default(self, key, val):
 		"""set control panel default (tabDefaultVal)"""
@@ -279,7 +280,7 @@ class Database:
 	def get_default(self, key):
 		"""get default value"""
 		ret = self.sql("""select defvalue from tabDefaultValue where defkey=%s""", key)
-		return ret and ret[0][0] or None
+		return ret and ret[0].defvalue or None
 		
 	def get_defaults(self, key=None):
 		"""get all defaults"""
@@ -290,7 +291,7 @@ class Database:
 				where parent = "Control Panel" """)
 			d = {}
 			for rec in res: 
-				d[rec[0]] = rec[1] or ''
+				d[rec.defkey] = rec.defvalue or ''
 			return d		
 
 	def begin(self):

@@ -31,6 +31,7 @@ wn.ui.make_control = function(opts) {
 		'Select': wn.ui.SelectControl,
 		'Table': wn.ui.GridControl,
 		'Text': wn.ui.TextControl,
+		'Small Text': wn.ui.TextControl,
 		'Text Editor': wn.ui.RichTextControl,
 		'Button': wn.ui.ButtonControl,
 		'Date': wn.ui.DateControl
@@ -93,8 +94,9 @@ wn.ui.Control = Class.extend({
 						val = new_val;
 					}
 				}
-				if(me.doc) 
-					me.doc.set(me.docfield.fieldname, val);
+				if(me.doc) {
+					me.doc.set(me.docfield.fieldname, val);					
+				}
 			});
 	},
 	set_events: function() {

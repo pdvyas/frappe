@@ -102,6 +102,7 @@ wn.views.FormPage = Class.extend({
 			<li><a href="#" class="action-email"><i class="icon icon-envelope"></i> Email...</a></li>\
 			<li><a href="#" class="action-copy"><i class="icon icon-file"></i> Copy</a></li>\
 			<li><a href="#" class="action-refresh"><i class="icon icon-refresh"></i> Refresh</a></li>\
+			<li><a href="#" class="action-delete"><i class="icon icon-remove"></i> Delete</a></li>\
 		</ul>\
 		</div>').appendTo(this.page.appframe.$w.find('.appframe-toolbar'));
 		this.action_btn_group.find('.dropdown-toggle').dropdown();
@@ -133,9 +134,6 @@ wn.views.FormPage = Class.extend({
 			wn.set_route('List', meta.get('name'));
 		}).addClass('btn-inverse');
 		this.doctype_btn.parent().css('float', 'right');
-	},
-	apply_permissions: function() {
-		
 	}
 });
 

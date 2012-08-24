@@ -235,7 +235,7 @@ def add_embedded_js(doc):
 def expand_selects(doclist):
 	for d in filter(lambda d: d.fieldtype=='Select' and (d.options or '').startswith('link:'), doclist):
 		doctype = d.options[5:]
-		d.options = '\n'.join([''] + [o[0] for o in webnotes.conn.sql("""select name from `tab%s` 
+		d.options = '\n'.join([''] + [o.name for o in webnotes.conn.sql("""select name from `tab%s` 
 			where docstatus<2 order by name asc""" % doctype)])
 
 def add_print_formats(doclist):
@@ -265,7 +265,7 @@ def get_link_fields(doctype):
 def add_validators(doctype, doclist):
 	for validator in webnotes.conn.sql("""select name from `tabDocType Validator` where
 		for_doctype=%s""", doctype):
-		doclist.extend(webnotes.model.get('DocType Validator', validator[0]))
+		doclist.extend(webnotes.model.get('DocType Validator', validator.name))
 		
 def add_search_fields(doclist):
 	"""add search fields found in the doctypes indicated by link fields' options"""

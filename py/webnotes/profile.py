@@ -57,7 +57,7 @@ class Profile:
 			
 		self.doctype_map = {}
 		for r in webnotes.conn.sql("""select name, in_create, issingle, istable, 
-			read_only, module from tabDocType""", as_dict=1):
+			read_only, module from tabDocType"""):
 			r['child_tables'] = []
 			self.doctype_map[r['name']] = r
 			
@@ -66,8 +66,8 @@ class Profile:
 			and parent not like "old_parent:%%" 
 			and ifnull(docstatus,0)=0
 			"""):
-			if r[0] in self.doctype_map:
-				self.doctype_map[r[0]]['child_tables'].append(r[1])
+			if r.parent in self.doctype_map:
+				self.doctype_map[r.parent]['child_tables'].append(r.options)
 	
 	def build_perm_map(self):
 		"""build map of permissions at level 0"""
@@ -142,9 +142,9 @@ class Profile:
 		self.defaults = {'owner': [self.name,]}
 
 		for rec in res: 
-			if not self.defaults.has_key(rec[0]): 
-				self.defaults[rec[0]] = []
-			self.defaults[rec[0]].append(rec[1] or '')
+			if not self.defaults.has_key(rec.defkey): 
+				self.defaults[rec.defkey] = []
+			self.defaults[rec.defkey].append(rec.defvalue or '')
 
 		return self.defaults
 
@@ -158,12 +158,12 @@ class Profile:
 
 	
 		# get list of child tables, so we know what not to add in the recent list
-		child_tables = [t[0] for t in conn.sql('select name from tabDocType where ifnull(istable,0) = 1')]
+		child_tables = [t.name for t in conn.sql('select name from tabDocType where ifnull(istable,0) = 1')]
 		
 		if not (dt in ['Print Format', 'Start Page', 'Event', 'ToDo', 'Search Criteria']) \
 			and not (dt in child_tables):
 			r = webnotes.conn.sql("select recent_documents from tabProfile where name=%s", \
-				self.name)[0][0] or ''
+				self.name)[0].recent_documents or ''
 
 			if '~~~' in r:
 				r = '[]'
@@ -200,10 +200,10 @@ class Profile:
 
 		d = {}
 		d['name'] = self.name
-		d['email'] = t[0] or ''
-		d['first_name'] = t[1] or ''
-		d['last_name'] = t[2] or ''
-		d['recent'] = t[3] or ''
+		d['email'] = t.email or ''
+		d['first_name'] = t.first_name or ''
+		d['last_name'] = t.last_name or ''
+		d['recent'] = t.recent_documents or ''
 				
 		d['roles'] = self.roles
 		d['defaults'] = self.get_defaults()

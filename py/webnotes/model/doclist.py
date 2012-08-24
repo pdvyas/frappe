@@ -94,12 +94,12 @@ def load_main(doctype, name):
 	"""retrieves doc from database"""
 	if webnotes.model.is_single(doctype):
 		doc = webnotes.conn.sql("""select field, value from `tabSingles`
-			where doctype=%s""", doctype)
+			where doctype=%s""", doctype, as_list=1)
 		doc = dict(doc)
 		doc["name"] = doctype
 	else:
 		doc  = webnotes.conn.sql("""select * from `tab%s` where name = %s""" % \
-			(doctype, "%s"), name, as_dict=1)
+			(doctype, "%s"), name)
 		if not doc:
 			webnotes.msgprint("""%s: "%s" does not exist""" % (doctype, name),
 				raise_exception=NameError)

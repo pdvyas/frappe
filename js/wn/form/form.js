@@ -76,9 +76,15 @@ wn.ui.Form = Class.extend({
 	listen: function() {
 		var me = this;
 		if(this.doclist) {
-			this.doclist.on('change', function(key, val) {
-				if(me.controls[key] && me.controls[key].get()!=val) 
-					me.controls[key].set_input(val);				
+			this.doclist.on('change', function(key, val, doc) {
+				if(doc.get('parentfield') && me.controls[doc.get('parentfield')]) {
+					// refresh grid data
+					me.controls[doc.get('parentfield')].set();
+				} else {
+					// reset control
+					if(me.controls[key] && me.controls[key].get()!=val) 
+						me.controls[key].set_input(val);					
+				}
 			});
 		}
 	}

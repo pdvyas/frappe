@@ -29,14 +29,6 @@ user_format = None
 no_value_fields = ['Section Break', 'Column Break', 'HTML', 'Table', 'FlexTable', 'Button', 'Image', 'Graph']
 default_fields = ['doctype','name','owner','creation','modified','modified_by','parent','parentfield','parenttype','idx','docstatus']
 
-class DictObj(dict):
-	"""dict like object that exposes keys as attributes"""
-	def __getattr__(self, key):
-		return self.get(key)
-	
-	def __setattr__(self, key, value):
-		self[key] = value
-
 def get_fullname(profile):
 	"""get the full name (first name + last name) of the user from Profile"""
 	p = webnotes.conn.sql("""select first_name, last_name from `tabProfile`
@@ -437,25 +429,13 @@ def clear_recycle_bin():
 
 	return "%s records deleted" % str(int(total_deleted))
 
-# Dictionary utils
-# ==============================================================================
-
-class DictObj(dict):
-	"""dict like object that exposes keys as attributes"""
-	def __getattr__(self, key):
-		if self.has_key(key):
-			return self.get(key)
-	
-		def __setattr__(self, key, value):
-			self[key] = value
-			
-def remove_blanks(d):
+def remove_nulls(d):
 	"""
 		Returns d with empty ('' or None) values stripped
 	"""
 	empty_keys = []
 	for key in d:
-		if d[key]=='' or d[key]==None:
+		if d[key]==None:
 			# del d[key] raises runtime exception, using a workaround
 			empty_keys.append(key)
 	for key in empty_keys:
@@ -470,7 +450,7 @@ def pprint_dict(d, level=1, no_blanks=True):
 	from datetime import datetime
 	
 	if no_blanks:
-		remove_blanks(d)
+		remove_nulls(d)
 		
 	# make indent
 	indent, ret = '', ''

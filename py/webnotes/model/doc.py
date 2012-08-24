@@ -208,7 +208,7 @@ class Document(dict):
 			self.idx = cint(webnotes.conn.sql("""select max(idx) from `tab%s`
 				where parent=%s and parenttype=%s and parentfield=%s""" % \
 				(self.doctype, "%s", "%s", "%s"), (self.parent, self.parenttype,
-				self.parentfield))[0][0])
+				self.parentfield), as_list=1)[0][0])
 
 		# set info
 		self.owner = self.owner or webnotes.session["user"]

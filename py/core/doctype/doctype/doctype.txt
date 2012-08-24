@@ -3,11 +3,11 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-07-03 13:30:34',
-		'docstatus': 0,
-		'modified': '2012-07-25 13:49:14',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
+		u'creation': '2012-07-03 13:30:34',
+		u'docstatus': 0,
+		u'modified': '2012-08-24 14:36:28',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
@@ -19,13 +19,14 @@
 		'autoname': u'Prompt',
 		'colour': u'White:FFF',
 		'description': u'The basic building block of wnframework is a **DocType**. A DocType represents both a table in the database and a form from which a user can enter data. Actions are also embedded in the DocType. Hence it is the Model, View and Controller.\n\nDocTypes can be single  tables or groups. For example, Quotation has a \u201cQuotation\u201d DocType and a \u201cQuotation Item\u201d doctype for the Items table, among others.  DocTypes contain a collection of fields called DocFields that form the basis of the columns in the database and the layout of the form.',
-		'doctype': 'DocType',
+		'doctype': u'DocType',
+		'document_type': u'Master',
 		'hide_heading': 0,
 		'hide_toolbar': 0,
 		'issingle': 0,
 		'istable': 0,
 		'module': u'Core',
-		'name': '__common__',
+		u'name': u'__common__',
 		'print_outline': u'Yes',
 		'read_only': 0,
 		'search_fields': u'autoname',
@@ -38,7 +39,7 @@
 	# These values are common for all DocField
 	{
 		'doctype': u'DocField',
-		'name': '__common__',
+		u'name': u'__common__',
 		'parent': u'DocType',
 		'parentfield': u'fields',
 		'parenttype': u'DocType',
@@ -48,7 +49,7 @@
 	# These values are common for all DocPerm
 	{
 		'doctype': u'DocPerm',
-		'name': '__common__',
+		u'name': u'__common__',
 		'parent': u'DocType',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
@@ -57,39 +58,13 @@
 
 	# DocType, DocType
 	{
-		'doctype': 'DocType',
+		u'doctype': u'DocType',
 		'name': u'DocType'
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'System Manager'
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'execute': 0,
-		'permlevel': 0,
-		'role': u'Administrator',
-		'submit': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Administrator'
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'sb0',
 		'fieldtype': u'Section Break',
 		'hidden': 0,
@@ -101,7 +76,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'module',
 		'fieldtype': u'Link',
 		'label': u'Module',
@@ -113,32 +88,32 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'cb01',
 		'fieldtype': u'Column Break'
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'document_type',
 		'fieldtype': u'Select',
 		'label': u'Document Type',
 		'oldfieldname': u'document_type',
 		'oldfieldtype': u'Select',
-		'options': u'\nMaster\nTransaction\nSystem\nOther'
+		'options': u'\nMaster\nTransaction\nTool\nSetup\nSystem\nOther'
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'sb0_5',
 		'fieldtype': u'Section Break'
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'description',
 		'fieldtype': u'Text',
 		'hidden': 0,
@@ -152,7 +127,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'fields_section_break',
 		'fieldtype': u'Section Break',
 		'hidden': 0,
@@ -164,7 +139,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'fields',
 		'fieldtype': u'Table',
 		'hidden': 0,
@@ -178,14 +153,14 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'sb1',
 		'fieldtype': u'Section Break'
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'cb10',
 		'fieldtype': u'Column Break',
 		'label': u'Database'
@@ -193,7 +168,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'issingle',
 		'fieldtype': u'Check',
 		'hidden': 0,
@@ -207,7 +182,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'istable',
 		'fieldtype': u'Check',
 		'hidden': 0,
@@ -220,7 +195,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'cb11',
 		'fieldtype': u'Column Break',
 		'label': u'Naming',
@@ -230,7 +205,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'autoname',
 		'fieldtype': u'Data',
 		'hidden': 0,
@@ -243,7 +218,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'name_case',
 		'fieldtype': u'Select',
 		'label': u'Name Case',
@@ -254,7 +229,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'search_fields',
 		'fieldtype': u'Data',
 		'hidden': 0,
@@ -267,7 +242,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'sb2',
 		'fieldtype': u'Section Break',
 		'label': u'Permission Rules'
@@ -276,7 +251,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'permissions',
 		'fieldtype': u'Table',
 		'hidden': 0,
@@ -290,14 +265,14 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'sb3',
 		'fieldtype': u'Section Break'
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'cb30',
 		'fieldtype': u'Column Break',
 		'label': u'Permissions Settings'
@@ -305,7 +280,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'in_create',
 		'fieldtype': u'Check',
 		'label': u'User Cannot Create',
@@ -315,7 +290,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'read_only',
 		'fieldtype': u'Check',
 		'hidden': 0,
@@ -328,7 +303,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'is_submittable',
 		'fieldtype': u'Check',
 		'label': u'Is Submittable'
@@ -336,7 +311,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'allow_rename',
 		'fieldtype': u'Check',
 		'label': u'Allow Rename',
@@ -346,7 +321,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'cb31',
 		'fieldtype': u'Column Break',
 		'label': u'Hide Actions'
@@ -354,7 +329,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'hide_heading',
 		'fieldtype': u'Check',
 		'hidden': 0,
@@ -367,7 +342,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'hide_toolbar',
 		'fieldtype': u'Check',
 		'hidden': 0,
@@ -380,7 +355,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'allow_print',
 		'fieldtype': u'Check',
 		'hidden': 0,
@@ -393,7 +368,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'allow_email',
 		'fieldtype': u'Check',
 		'hidden': 0,
@@ -406,7 +381,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'allow_copy',
 		'fieldtype': u'Check',
 		'hidden': 0,
@@ -419,7 +394,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'sb4',
 		'fieldtype': u'Section Break',
 		'hidden': 0,
@@ -431,7 +406,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'cb41',
 		'fieldtype': u'Column Break',
 		'label': u'Display'
@@ -439,7 +414,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'default_print_format',
 		'fieldtype': u'Data',
 		'label': u'Default Print Format'
@@ -447,7 +422,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'read_only_onload',
 		'fieldtype': u'Check',
 		'label': u'Show Print First',
@@ -457,7 +432,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'in_dialog',
 		'fieldtype': u'Check',
 		'label': u'In Dialog',
@@ -467,7 +442,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'cb42',
 		'fieldtype': u'Column Break',
 		'label': u'Attachments'
@@ -475,7 +450,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'allow_attach',
 		'fieldtype': u'Check',
 		'label': u'Allow Attach',
@@ -486,12 +461,38 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'max_attachments',
 		'fieldtype': u'Int',
 		'hidden': 1,
 		'label': u'Max Attachments',
 		'oldfieldname': u'max_attachments',
 		'oldfieldtype': u'Int'
+	},
+
+	# DocPerm
+	{
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'System Manager'
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'execute': 0,
+		'permlevel': 0,
+		'role': u'Administrator',
+		'submit': 0,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		u'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Administrator'
 	}
 ]

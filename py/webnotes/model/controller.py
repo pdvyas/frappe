@@ -157,13 +157,13 @@ class DocListController(object):
 			modified = webnotes.conn.sql("""select modified from `tab%s`
 				where name=%s for update""" % (self.doc.doctype, "%s"), self.doc.name or "")
 			
-			if modified and unicode(modified[0][0]) != unicode(self.doc.modified):
+			if modified and unicode(modified[0].modified) != unicode(self.doc.modified):
 				webnotes.msgprint("""\
 				Document has been modified after you have opened it.
 				To maintain the integrity of the data, you will not be able to save your changes.
 				Please refresh this document.
 				FYI: [%s / %s]""" % \
-				(modified[0][0], self.doc.modified), raise_exception=webnotes.IntegrityError)
+				(modified[0].modified, self.doc.modified), raise_exception=webnotes.IntegrityError)
 
 	def check_permission(self):
 		"""Raises exception if permission is not valid"""

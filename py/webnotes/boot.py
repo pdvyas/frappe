@@ -29,6 +29,8 @@ bootstrap client session
 def get_bootinfo():
 	"""build and return boot info"""
 	import webnotes
+	from webnotes.utils import remove_nulls
+	
 	bootinfo = {}	
 	doclist = []
 
@@ -72,6 +74,8 @@ def get_bootinfo():
 
 	webnotes.conn.commit()
 	
+	bootinfo['docs'] = [remove_nulls(d) for d in bootinfo['docs']]
+	
 	return bootinfo
 
 def get_fullnames():
@@ -81,7 +85,7 @@ def get_fullnames():
 		concat(ifnull(first_name, ''), 
 			if(ifnull(last_name, '')!='', ' ', ''), ifnull(last_name, '')), 
 			user_image, gender
-		from tabProfile where ifnull(enabled, 0)=1""", as_list=1)
+		from tabProfile where ifnull(enabled, 0)=1""", as_list=True)
 	d = {}
 	for r in ret:
 		if not r[2]:

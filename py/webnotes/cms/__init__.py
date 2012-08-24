@@ -10,6 +10,6 @@ def get_home_page(user=None):
 		and role in ('%s') order by idx asc limit 1""" % "', '".join(webnotes.get_roles(user)))
 		
 	if hpl:
-		return hpl[0][0]
+		return hpl[0].home_page
 	else:
 		return webnotes.conn.get_value('Control Panel',None,'home_page') or 'Login Page'	

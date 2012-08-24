@@ -26,6 +26,15 @@ globals attached to webnotes module
 + some utility functions that should probably be moved
 """
 
+
+class DictObj(dict):
+	"""dict like object that exposes keys as attributes"""
+	def __getattr__(self, key):
+		return self.get(key)
+	
+	def __setattr__(self, key, value):
+		self[key] = value
+
 code_fields_dict = {
 	'Page':[('script', 'js'), ('content', 'html'), ('style', 'css'), ('static_content', 'html'), ('server_code', 'py')],
 	'DocType':[('server_code_core', 'py'), ('client_script_core', 'js')],
@@ -48,7 +57,7 @@ catch_warning = False
 incoming_cookies = {}
 add_cookies = {} # append these to outgoing request
 cookies = {}
-response = {'message':'', 'exc':''}
+response = DictObj({'message':'', 'exc':''})
 debug_log = []
 message_log = []
 
@@ -70,6 +79,7 @@ class DocStatusError(ValidationError): pass
 class IntegrityError(ValidationError): pass
 class CircularLinkError(ValidationError): pass
 class DependencyError(ValidationError): pass
+
 
 def errprint(msg):
 	"""Append to the :data:`debug log`"""
@@ -107,7 +117,7 @@ def get_cgi_fields():
 	"""make webnotes.form from cgi field storage"""
 	import cgi
 	import conf
-	from webnotes.utils import cstr, DictObj
+	from webnotes.utils import cstr
 	
 	global request_form, auto_cache_clear, form
 
@@ -220,7 +230,7 @@ def get_roles(user=None, with_standard=True):
 	if user=='Guest':
 		return ['Guest']
 		
-	roles = [r[0] for r in conn.sql("""select role from tabUserRole 
+	roles = [r.role for r in conn.sql("""select role from tabUserRole 
 		where parent=%s and role!='All'""", user)] + ['All']
 		
 	# filter standard if required

@@ -41,7 +41,7 @@ function hide_loading() {
 function freeze() {
 	// blur
 	if(!dialog_back) {
-		dialog_back = $('<div class="dialog_back">').appendTo('#body-div').css('opacity', 0.6);
+		dialog_back = $('<div class="dialog_back">').appendTo('#body_div').css('opacity', 0.6);
 	}
 	dialog_back.toggle(true);
 	fcount++;

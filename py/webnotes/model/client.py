@@ -28,7 +28,7 @@ import webnotes.model
 @webnotes.whitelist()
 def get_doclist():
 	"""get bundle of doc"""	
-	doclist = webnotes.model.get(webnotes.form.doctype, webnotes.form.name)
+	doclist = webnotes.model.get(webnotes.form.doctype, webnotes.form.name, strip_nulls=True)
 
 	# add comments
 	doclist[0]['__comments'] = webnotes.conn.sql("""select * from tabComment where
@@ -39,8 +39,8 @@ def get_doclist():
 	todo = 	webnotes.conn.sql("""select owner from tabToDo where
 			parent=%s and reference_name=%s""", (doclist[0].doctype, doclist[0].name))
 	doclist[0]['__assigned_to'] = todo and todo[0][0] or ''
-
-	webnotes.response['docs'] = doclist
+	
+	webnotes.response['docs'] = doclist	
 	
 	webnotes.user.update_recent(webnotes.form.doctype, webnotes.form.name)
 
@@ -48,7 +48,7 @@ def get_doclist():
 def get_doctype():
 	"""get doctype, all child doctypes"""
 	docs = []
-	doctypelist = webnotes.model.get_doctype(webnotes.form.doctype, processed=True)
+	doctypelist = webnotes.model.get_doctype(webnotes.form.doctype, processed=True, strip_nulls=True)
 	docs = doctypelist
 	for d in doctypelist.get({"fieldtype":"Table", "doctype":"DocField"}):
 		docs.extend(webnotes.model.get_doctype(d.options, processed=True))

@@ -66,12 +66,12 @@ wn.model.Document = Class.extend({
 		if(this.fields[key] != new_val) {
 			this.fields[key] = new_val;
 			if(this.doclist) {
-				this.doclist.trigger('change', key, this.fields[key]);
+				this.doclist.trigger('change', key, this.fields[key], this);
 				if(this.get('parentfield')) {
 					this.doclist.trigger('change ' + this.get('parentfield') + '.' + key, 
-						this.fields[key]);					
+						key, this.fields[key], this);
 				} else {
-					this.doclist.trigger('change ' + key, this.fields[key]);
+					this.doclist.trigger('change ' + key, key, this.fields[key], this);
 				}
 			}
 		}

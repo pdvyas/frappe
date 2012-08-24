@@ -128,7 +128,7 @@ class DbTable:
 					f.get('search_index'), f.get('options'))
 	
 	def get_columns_from_db(self):
-		self.show_columns = webnotes.conn.sql("desc `%s`" % self.name)
+		self.show_columns = webnotes.conn.sql("desc `%s`" % self.name, as_list=1)
 		for c in self.show_columns:
 			self.current_columns[c[0]] = {'name': c[0], 'type':c[1], 'index':c[3], 'default':c[4]}
 	
@@ -294,13 +294,13 @@ class DbManager:
 		"""
 		Get variables that match the passed pattern regex
 		"""
-		return list(self.conn.sql("SHOW VARIABLES LIKE '%s'"%regex))
+		return list(self.conn.sql("SHOW VARIABLES LIKE '%s'" % regex, as_list=1))
 			
 	def get_table_schema(self,table):
 		"""
 		Just returns the output of Desc tables.
 		"""
-		return list(self.conn.sql("DESC `%s`"%table))
+		return list(self.conn.sql("DESC `%s`" % table, as_list=1))
 		
 			
 	def get_tables_list(self,target=None):
@@ -308,7 +308,7 @@ class DbManager:
 		if target:
 			self.conn.use(target)
 		
-		return [t[0] for t in self.conn.sql("SHOW TABLES")]
+		return [t[0] for t in self.conn.sql("SHOW TABLES", as_list=1)]
 
 	def create_user(self,user,password):
 		#Create user if it doesn't exist.
@@ -424,7 +424,7 @@ def updatedb(dt, archive=0):
 	if not res:
 		raise Exception, 'Wrong doctype "%s" in updatedb' % dt
 	
-	if not res[0][0]:
+	if not res[0].issingle:
 		webnotes.conn.commit()
 		tab = DbTable(dt)
 		tab.sync()
