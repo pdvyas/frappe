@@ -101,7 +101,7 @@ wn.ui.Listing = Class.extend({
 					</div>\
 					<div style="display:inline-block; width: 24px; margin-left: 4px">\
 						<img src="images/lib/ui/button-load.gif" \
-						class="img-load"/></div>\
+						class="img-load" style="display: none;"/></div>\
 				</div><div style="clear:both"></div>\
 				\
 				<div class="no-result help hide">\
@@ -222,15 +222,17 @@ wn.ui.Listing = Class.extend({
 		if(!a1 && !(a0 && a0.append)) 
 			this.start = 0;
 
-		me.set_working(true);
+		if(!this.opts.discreet)
+			this.set_working(true);
 		wn.call({
 			method: this.opts.method || 'webnotes.widgets.query_builder.runquery',
 			args: this.get_call_args(a0),
 			callback: function(r) { 
-				me.set_working(false);
+				if(!me.opts.discreet)
+					me.set_working(false);
 				me.render_results(r) 
 			},
-			no_spinner: this.opts.no_loading
+			no_spinner: this.opts.discreet
 		});
 	},
 	set_working: function(flag) {
