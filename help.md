@@ -19,3 +19,8 @@
 * `{controller_obj}.save()` - save the doclist [need to specify __islocal for individual docs if new]
 
 ### client-side
+
+
+### server-side testing
+
+* `webnotes.model.insert_test_data(doctype, sort_fn)` - inserts test data in db
