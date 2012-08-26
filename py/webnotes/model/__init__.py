@@ -53,7 +53,7 @@ def insert(doclist):
 
 	# can be used to retrieve name or any value after save
 	return doclistcon
-
+	
 def update(doclist):
 	if doclist and isinstance(doclist, dict):
 		doclist = [doclist]
@@ -77,6 +77,15 @@ def insert_variants(base, variants):
 		base_copy = base.copy()
 		base_copy.update(v)
 		insert(base_copy)
+		
+def insert_test_data(doctype, sort_fn=None):
+	from webnotes.modules.export import get_test_doclist
+	data = get_test_doclist(doctype)
+	if sort_fn:
+		data = sorted(data, key=sort_fn)
+	
+	for doclist in data:
+		webnotes.model.insert(doclist)
 
 def insert_child(fields):
 	"""insert a child, must specify parent, parenttype and doctype"""
