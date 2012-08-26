@@ -34,14 +34,18 @@ def get_items():
 		'setup': [],
 		'tool': [],
 		'other': [],
-		'report': []
+		'report': [],
+		'system': []
 	})
 	
 	# doctypes
-	for dt in webnotes.conn.sql("""select name, document_type from tabDocType where module=%s""",
+	for dt in webnotes.conn.sql("""select name, document_type, issingle from tabDocType where module=%s""",
 		webnotes.form.module):
 		if dt.document_type:
-			out[dt.document_type.lower()].append(["DocType", dt.name])
+			if dt.issingle:
+				out[dt.document_type.lower()].append(["Single", dt.name])
+			else:
+				out[dt.document_type.lower()].append(["DocType", dt.name])
 	
 	# pages
 	for page in webnotes.conn.sql("""select name from tabPage where module=%s""", 
