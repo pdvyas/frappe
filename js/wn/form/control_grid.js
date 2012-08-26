@@ -50,6 +50,7 @@ wn.ui.GridControl = wn.ui.Control.extend({
 			this.make_add_row_button();
 		}
 		this.set_edit_on_double_click();
+		this.set_resize_event();
 		this.$w.find('.vertical-label').toggle(false);
 	},
 	set_disabled: function() {
@@ -66,6 +67,9 @@ wn.ui.GridControl = wn.ui.Control.extend({
 			return false;
 		});
 	},
+	set_resize_event: function() {
+		wn.ui.grid_common.add_property_setter_on_resize(this.grid);
+	},
 	get_columns: function() {
 		var columns = $.map(wn.model.get('DocType', this.tabletype).get({doctype:'DocField'}), 
 			function(d) {
@@ -75,7 +79,8 @@ wn.ui.GridControl = wn.ui.Control.extend({
 						field: d.get('fieldname'),
 						name: d.get('label'),
 						width: wn.model.get_grid_width(d, 120),
-						cssClass: d.get('reqd') ? 'slick-mandatory-column' : null
+						cssClass: d.get('reqd') ? 'slick-mandatory-column' : null,
+						docfield: d
 					}
 				} else {
 					return null;
@@ -153,12 +158,16 @@ wn.ui.GridControl = wn.ui.Control.extend({
 		});
 	},
 	edit_row: function(d) {
-		var form_dialog = new wn.views.RowEditFormDialog({
+		var me = this;
+		this.form_dialog = new wn.views.RowEditFormDialog({
 			title: d.get('doctype') + ' in row #' + d.get('idx'),
 			doc: d,
 			control_grid: this
 		});
-		form_dialog.show();		
+		this.form_dialog.on('hide', function() {
+			me.form_dialog = null;
+		});
+		this.form_dialog.show();		
 	},
 	setup_drag_and_drop: function() {
 		// via http://mleibman.github.com/SlickGrid/examples/example9-row-reordering.html

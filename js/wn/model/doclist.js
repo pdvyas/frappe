@@ -129,7 +129,7 @@ wn.model.DocList = Class.extend({
 					// reset the doclist
 					me.reset(r.docs);					
 				}
-				callback(r);
+				callback && callback(r);
 			},
 			btn: btn
 		});
@@ -138,12 +138,15 @@ wn.model.DocList = Class.extend({
 		// validate mandatory and duplication?
 		var reqd = []
 		$.each(this.doclist, function(i, d) {
-			$.each(wn.model.get('DocType', d.get('doctype')).get({doctype:'DocField', reqd:1}), 
-				function(i, df) {
-					if(d.get(df.get('fieldname'))===null || d.get(df.get('fieldname'))===undefined) {
-						reqd.push([df, d]);
-					}
-				});
+			var meta = wn.model.get('DocType', d.get('doctype'));
+			if(meta) {
+				$.each(meta.get({doctype:'DocField', reqd:1}), 
+					function(i, df) {
+						if(d.get(df.get('fieldname'))===null || d.get(df.get('fieldname'))===undefined) {
+							reqd.push([df, d]);
+						}
+					});				
+			}
 		})
 		if(reqd.length) {
 			$.each(reqd, function(i, info) {

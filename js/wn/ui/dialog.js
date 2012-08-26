@@ -79,14 +79,13 @@ wn.ui.Dialog = Class.extend({
 
 		this.display = true;
 		wn.ui.cur_dialog = this;
-
-		// call onshow
-		if(this.onshow)this.onshow();
+		
+		this.trigger('show');
 	},
 
 	hide: function() {
 		// call onhide
-		if(this.onhide) this.onhide();
+		this.trigger('hide');
 
 		// hide
 		unfreeze();

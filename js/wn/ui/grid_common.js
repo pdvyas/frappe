@@ -20,48 +20,23 @@
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-wn.ui.FormDialog = wn.ui.Dialog.extend({
-	init: function(opts) {
-		$.extend(this, opts);
-		wn.get_or_set(this, 'width', 700);
-		wn.get_or_set(this, 'title', this.name);
-		wn.get_or_set(this, 'form_class', wn.ui.Form);
-
-		// init dialog
-		this._super();
-		
-		// options for form
-		opts.parent = this.body;
-		opts.dialog = this;
-		opts.appframe = this.appframe;
-		
-		this.form = new this.form_class(opts);		
-	}
-})
-
-wn.views.RowEditFormDialog = wn.ui.FormDialog.extend({
-	init: function(opts) {
-		opts.form_class = wn.ui.RowEditForm;
-		this._super(opts);
-		this.make_toolbar();
-	},
-	make_toolbar: function() {
-		var me = this;
-		var save_btn = this.appframe.add_button('Close', function() { 
-			me.hide();
+wn.ui.grid_common = {
+	add_property_setter_on_resize: function(grid) {
+		grid.onColumnsResized.subscribe(function(e, args) {
+			$.each(grid.getColumns(), function(i, col) {
+				if(col.docfield && col.previousWidth != col.width) {
+					wn.model.insert({
+						doctype:'Property Setter',
+						doctype_or_field: 'DocField',
+						doc_type: col.docfield.get('parent'),
+						field_name: col.docfield.get('fieldname'),
+						property: 'width',
+						value: col.width
+					});
+					col.previousWidth = col.width;
+					col.docfield.width = col.width;
+				}
+			});
 		});
-		save_btn.addClass('btn-info');
-		
-		var delete_btn = this.appframe.add_button('Delete', function() { 
-			// remove row from doclist
-			me.control_grid.doclist.remove_child(me.doc);
-			me.hide();
-		}, 'icon-remove');
-		
-		this.on('hide', function() {
-			me.control_grid.set(); // reset grid			
-		})
-		
-		delete_btn.parent().css('float', 'right');
 	}
-});
+}

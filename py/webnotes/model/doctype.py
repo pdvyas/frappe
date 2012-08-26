@@ -297,4 +297,4 @@ class DocTypeDocList(webnotes.model.doclist.DocList):
 		return self.get_field(fieldname, parent).label
 		
 	def get_table_fields(self):
-		return self.get({"doctype": "DocField", "fieldtype": "Table"})
+		return self.get({"doctype": "DocField", "fieldtype": "Table"})	

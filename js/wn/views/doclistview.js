@@ -97,7 +97,7 @@ wn.views.DocListView = wn.ui.Listing.extend({
 		var me = this;
 		if(wn.boot.profile.can_get_report.indexOf(this.doctype)!=-1) {
 			this.appframe.add_button('Build Report', function() {
-				wn.set_route('Report2', me.doctype);
+				wn.set_route('Report', me.doctype);
 			}, 'icon-th')
 		}
 	},

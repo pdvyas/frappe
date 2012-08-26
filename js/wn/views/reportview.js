@@ -20,34 +20,6 @@
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-wn.views.reportview = {
-	show: function(dt, rep_name) {
-		wn.require('js/report-legacy.js');
-		dt = get_label_doctype(dt);
-
-		if(!_r.rb_con) {
-			// first load
-			_r.rb_con = new _r.ReportContainer();
-		}
-
-		_r.rb_con.set_dt(dt, function(rb) { 
-			if(rep_name) {
-				var route_changed = (rb.current_route != wn.get_route_str())
-				rb.load_criteria(rep_name);
-
-				// if loaded, then run				
-				if(rb.dt && route_changed) {
-					rb.dt.run();
-				}
-			}
-
-			// show
-			if(!rb.forbidden) {
-				wn.container.change_to('Report Builder');
-			}
-		} );
-	}
-}
 
 // Routing Rules
 // --------------
@@ -56,7 +28,7 @@ wn.views.reportview = {
 // `Report/[doctype]` shows report for that doctype
 // `Report/[doctype]/[report_name]` loads report with that name
 
-wn.views.reportview2 = {
+wn.views.reportview = {
 	show: function(dt) {
 		var page_name = wn.get_route_str();
 		if(wn.pages[page_name]) {
@@ -276,6 +248,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		
 		this.grid.setSelectionModel(new Slick.RowSelectionModel());
 		this.set_edit();
+		wn.ui.grid_common.add_property_setter_on_resize(this.grid);
 	},
 	
 	set_edit: function() {
