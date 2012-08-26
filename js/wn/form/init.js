@@ -69,6 +69,9 @@ wn.ui.Control = Class.extend({
 		}
 		this.make_input();
 		this.make_label();
+		
+		// set tabIndex
+		this.$input && this.$input.attr("tabIndex", this.docfield.idx);
 	},
 	make_label: function() {
 		// label and description
