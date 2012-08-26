@@ -367,7 +367,7 @@ class DbManager:
 
 	def get_database_list(self):
 		"""get list of databases"""
-		return [d[0] for d in self.conn.sql("SHOW DATABASES")]
+		return [d[0] for d in self.conn.sql("SHOW DATABASES", as_dict=False)]
 
 	def restore_database(self,target,source,root_password):		
 		from webnotes.utils import make_esc

@@ -222,9 +222,11 @@ def update_add_node(doctype, name, parent, parent_field):
 
 	# get the last sibling of the parent
 	if parent:
-		right = webnotes.conn.sql("select rgt from `tab%s` where name='%s'" % (doctype, parent))[0][0]
+		right = webnotes.conn.sql("select rgt from `tab%s` where name='%s'" % \
+			(doctype, parent), as_dict=False)[0][0]
 	else: # root
-		right = webnotes.conn.sql("select ifnull(max(rgt),0)+1 from `tab%s` where ifnull(`%s`,'') =''" % (doctype, parent_field))[0][0]
+		right = webnotes.conn.sql("select ifnull(max(rgt),0)+1 from `tab%s` where ifnull(`%s`,'') =''" %  \
+			(doctype, parent_field), as_dict=False)[0][0]
 	right = right or 1
 		
 	# update all on the right
