@@ -82,7 +82,7 @@ wn.ui.Listing = Class.extend({
 		
 		$(this.parent).html(repl('\
 			<div class="wnlist">\
-				<h3 class="title hide">%(title)s</h3>\
+				<h4 class="title hide">%(title)s</h4>\
 				\
 				<div class="list-filters hide">\
 					<div class="show_filters well">\
@@ -160,7 +160,7 @@ wn.ui.Listing = Class.extend({
 		
 		// title
 		if(this.title) {
-			this.$w.find('h3').html(this.title).toggle(true);
+			this.$w.find('.title').html(this.title).toggle(true);
 		}
 	
 		// hide-refresh

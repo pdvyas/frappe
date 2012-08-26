@@ -44,15 +44,18 @@ def get_items():
 			out[dt.document_type.lower()].append(["DocType", dt.name])
 	
 	# pages
-	for page in webnotes.conn.sql("""select name from tabPage where module=%s""", webnotes.form.module):
-		out.tool.append(["Page", page.name])
+	for page in webnotes.conn.sql("""select name from tabPage where module=%s""", 
+		webnotes.form.module):
+		if not 'home' in page.name:
+			out.tool.append(["Page", page.name])
 		
 	# reports
-	for report in webnotes.conn.sql("""select tabReport.name from tabReport, tabDocType
+	for report in webnotes.conn.sql("""select tabReport.name, tabReport.ref_doctype 
+		from tabReport, tabDocType
 		where tabReport.ref_doctype = tabDocType.name and tabDocType.module = %s""",
 			webnotes.form.module):
 		
-		out.report.append(['Report', report.name])
+		out.report.append(['Report', report.name, report.ref_doctype])
 		
 	return out
 	
