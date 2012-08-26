@@ -178,7 +178,7 @@ def rebuild_tree(doctype, parent_field):
 	"""
 	# get all roots
 	right = 1
-	result = webnotes.conn.sql("SELECT name FROM `tab%s` WHERE `%s`='' or `%s` IS NULL ORDER BY name ASC" % (doctype, parent_field, parent_field))
+	result = webnotes.conn.sql("SELECT name FROM `tab%s` WHERE `%s`='' or `%s` IS NULL ORDER BY name ASC" % (doctype, parent_field, parent_field), as_dict=False)
 	for r in result:
 		right = rebuild_node(doctype, r[0], right, parent_field)
 		webnotes.conn.sql("commit")
@@ -195,7 +195,8 @@ def rebuild_node(doctype, parent, left, parent_field, cnt = 0):
 	right = left+1	
 
 	# get all children of this node
-	result = webnotes.conn.sql("SELECT name FROM `tab%s` WHERE `%s`='%s'" % (doctype, parent_field, parent))
+	result = webnotes.conn.sql("SELECT name FROM `tab%s` WHERE `%s`='%s'" % \
+		(doctype, parent_field, parent), as_dict=False)
 	for r in result:
 		right = rebuild_node(doctype, r[0], right, parent_field, cnt)
 
@@ -248,7 +249,8 @@ def update_remove_node(doctype, name):
 	from webnotes.utils import now
 	n = now()
 
-	left = webnotes.conn.sql("select lft from `tab%s` where name='%s'" % (doctype,name))
+	left = webnotes.conn.sql("select lft from `tab%s` where name='%s'" % \
+		(doctype,name), as_dict=False)
 	if left[0][0]:
 		# reset this node
 		webnotes.conn.sql("update `tab%s` set lft=0, rgt=0, modified='%s' where name='%s'" % (doctype,n,name))

@@ -149,20 +149,20 @@ def check_if_doc_is_linked(dt, dn):
 	ll = get_link_fields(dt)
 	for l in ll:
 		link_dt, link_field = l
-		issingle = sql("select issingle from tabDocType where name = '%s'" % link_dt)
+		issingle = sql("select issingle from tabDocType where name = '%s'" % link_dt, as_dict=False)
 
 		# no such doctype (?)
 		if not issingle: continue
 		
 		if issingle[0][0]:
-			item = sql("select doctype from `tabSingles` where field='%s' and value = '%s' and doctype = '%s' " % (link_field, dn, l[0]))
+			item = sql("select doctype from `tabSingles` where field='%s' and value = '%s' and doctype = '%s' " % (link_field, dn, l[0]), as_dict=False)
 			if item:
 				webnotes.msgprint("Cannot delete %s <b>%s</b> because it is linked in <b>%s</b>" % (dt, dn, item[0][0]), raise_exception=1)
 			
 		else:
 			item = None
 			try:
-				item = sql("select name, parent, parenttype from `tab%s` where `%s`='%s' and docstatus!=2 limit 1" % (link_dt, link_field, dn))
+				item = sql("select name, parent, parenttype from `tab%s` where `%s`='%s' and docstatus!=2 limit 1" % (link_dt, link_field, dn), as_dict=False)
 			except Exception, e:
 				if e.args[0]==1146: pass
 				else: raise e
@@ -192,7 +192,8 @@ def delete_doc(doctype=None, name=None, doclist = None, force=0):
 	tablefields = webnotes.model.meta.get_table_fields(doctype)
 	
 	# check if submitted
-	d = webnotes.conn.sql("select docstatus from `tab%s` where name=%s" % (doctype, '%s'), name)
+	d = webnotes.conn.sql("select docstatus from `tab%s` where name=%s" % \
+		(doctype, '%s'), name, as_dict=False)
 	if d and cint(d[0][0]) == 1:
 		webnotes.msgprint("Submitted Record '%s' '%s' cannot be deleted" % (doctype, name))
 		raise Exception
@@ -235,7 +236,7 @@ def get_search_criteria(dt):
 	# load search criteria for reports (all)
 	dl = []
 	try: # bc
-		sc_list = webnotes.conn.sql("select name from `tabSearch Criteria` where doc_type = '%s' or parent_doc_type = '%s' and (disabled!=1 OR disabled IS NULL)" % (dt, dt))
+		sc_list = webnotes.conn.sql("select name from `tabSearch Criteria` where doc_type = '%s' or parent_doc_type = '%s' and (disabled!=1 OR disabled IS NULL)" % (dt, dt), as_dict=False)
 		for sc in sc_list:
 			dl += webnotes.model.doc.get('Search Criteria', sc[0])
 	except Exception, e:
@@ -250,30 +251,3 @@ def get_link_fields(dt):
 	link_fields = webnotes.model.rename_doc.get_link_fields(dt)
 	link_fields = [[lf['parent'], lf['fieldname']] for lf in link_fields]
 	return link_fields
-	
-def clear_recycle_bin():
-	"""
-		Clears temporary records that have been deleted
-	"""
-	sql = webnotes.conn.sql
-
-	tl = sql('show tables')
-	total_deleted = 0
-	for t in tl:
-		fl = [i[0] for i in sql('desc `%s`' % t[0])]
-		
-		if 'name' in fl:
-			total_deleted += sql("select count(*) from `%s` where name like '__overwritten:%%'" % t[0])[0][0]
-			sql("delete from `%s` where name like '__overwritten:%%'" % t[0])
-
-		if 'parent' in fl:	
-			total_deleted += sql("select count(*) from `%s` where parent like '__oldparent:%%'" % t[0])[0][0]
-			sql("delete from `%s` where parent like '__oldparent:%%'" % t[0])
-	
-			total_deleted += sql("select count(*) from `%s` where parent like 'oldparent:%%'" % t[0])[0][0]
-			sql("delete from `%s` where parent like 'oldparent:%%'" % t[0])
-
-			total_deleted += sql("select count(*) from `%s` where parent like 'old_parent:%%'" % t[0])[0][0]
-			sql("delete from `%s` where parent like 'old_parent:%%'" % t[0])
-
-	webnotes.msgprint("%s records deleted" % str(int(total_deleted)))
