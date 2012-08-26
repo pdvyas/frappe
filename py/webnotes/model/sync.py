@@ -88,8 +88,8 @@ def sync(module_name, docname, force=0):
 	modified = doclist[0]['modified']
 	if not doclist:
 		raise Exception('DocList could not be evaluated')
-	if modified == str(webnotes.conn.get_value(doclist[0].get('doctype'), 
-		doclist[0].get('name'), 'modified')) and not force:
+	if not force and modified == str(webnotes.conn.get_value(doclist[0].get('doctype'), 
+		doclist[0].get('name'), 'modified')):
 		return
 	webnotes.conn.begin()
 	
@@ -163,12 +163,12 @@ def sync_core():
 	doctypelist["docperm"] = objectify(load_doctypelist("core", "docperm"))
 		
 	# sync required doctypes first
-	sync("core", "docperm")
-	sync("core", "docfield")
-	sync("core", "custom_field")
-	sync("core", "property_setter")
-	sync("core", "doctype_validator")
-	sync("core", "doctype")
+	sync("core", "docperm", 1)
+	sync("core", "docfield", 1)
+	sync("core", "custom_field", 1)
+	sync("core", "property_setter", 1)
+	sync("core", "doctype_validator", 1)
+	sync("core", "doctype", 1)
 	
 def sync_install(force=1):
 	# load required doctypes' doclist

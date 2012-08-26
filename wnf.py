@@ -228,6 +228,9 @@ def setup_options():
 	parser.add_option("--setup_test_stage", help="""Reset test database and commit data 
 		upto a stage. See tests/stages.py for list of stages""", 
 		metavar="STAGE", nargs=1)
+	parser.add_option("--with_tests", help="""to be used together with --setup_test_stage
+		such that it runs the tests along with the setup""", default=False,
+		action="store_true")
 
 	parser.add_option("--test_stage", help="""Run test modules specified in the stage. 
 		See tests/stages.py for list of stages""", 
@@ -388,7 +391,7 @@ def run():
 
 	elif options.setup_test_stage is not None:
 		import tests.stages
-		tests.stages.upto(options.setup_test_stage)
+		tests.stages.upto(options.setup_test_stage, with_tests=options.with_tests)
 
 	elif options.test_stage is not None:
 		import tests.stages

@@ -93,15 +93,15 @@ class DbTable:
 	
 		# create table
 		webnotes.conn.sql("""create table `%s` (
-			name varchar(120) not null primary key, 
+			name varchar(180) not null primary key, 
 			creation datetime,
 			modified datetime,
-			modified_by varchar(40), 
-			owner varchar(40),
+			modified_by varchar(180), 
+			owner varchar(180),
 			docstatus int(1) default '0', 
-			parent varchar(120),
-			parentfield varchar(120), 
-			parenttype varchar(120), 
+			parent varchar(180),
+			parentfield varchar(180), 
+			parenttype varchar(180), 
 			idx int(8),
 			%sindex parent(parent)) 
 			ENGINE=InnoDB 

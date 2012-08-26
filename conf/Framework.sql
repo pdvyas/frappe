@@ -4,95 +4,75 @@
 
 DROP TABLE IF EXISTS `__SessionCache`;
 CREATE TABLE `__SessionCache` (
-  `user` varchar(120) DEFAULT NULL,
-  `country` varchar(120) DEFAULT NULL,
-  `cache` longtext
+	`user` varchar(120) DEFAULT NULL,
+	`country` varchar(120) DEFAULT NULL,
+	`cache` longtext
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 
 DROP TABLE IF EXISTS `tabDocField`;
 CREATE TABLE `tabDocField` (
-  `name` varchar(120) NOT NULL,
-  `creation` datetime DEFAULT NULL,
-  `modified` datetime DEFAULT NULL,
-  `modified_by` varchar(40) DEFAULT NULL,
-  `owner` varchar(40) DEFAULT NULL,
-  `docstatus` int(1) DEFAULT '0',
-  `parent` varchar(120) DEFAULT NULL,
-  `parentfield` varchar(120) DEFAULT NULL,
-  `parenttype` varchar(120) DEFAULT NULL,
-  `idx` int(8) DEFAULT NULL,
-  `fieldname` varchar(180) DEFAULT NULL,
-  `label` varchar(180) DEFAULT NULL,
-  `oldfieldname` varchar(180) DEFAULT NULL,
-  `fieldtype` varchar(180) DEFAULT NULL,
-  `oldfieldtype` varchar(180) DEFAULT NULL,
-  `options` text,
-  `search_index` int(1) DEFAULT NULL,
-  `unique` int(1) DEFAULT NULL,
-  `hidden` int(1) DEFAULT NULL,
-  `print_hide` int(1) DEFAULT NULL,
-  `report_hide` int(1) DEFAULT NULL,
-  `reqd` int(1) DEFAULT NULL,
-  `no_copy` int(1) DEFAULT NULL,
-  `allow_on_submit` int(1) DEFAULT NULL,
-  `trigger` varchar(180) DEFAULT NULL,
-  `depends_on` varchar(180) DEFAULT NULL,
-  `permlevel` int(1) DEFAULT NULL,
-  `width` varchar(180) DEFAULT NULL,
-  `default` text,
-  `description` text,
-  `in_filter` int(1) DEFAULT NULL,
-  PRIMARY KEY (`name`),
-  KEY `parent` (`parent`),
-  KEY `label` (`label`),
-  KEY `fieldtype` (`fieldtype`),
-  KEY `fieldname` (`fieldname`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-DROP TABLE IF EXISTS `tabDocFormat`;
-CREATE TABLE `tabDocFormat` (
-  `name` varchar(120) NOT NULL,
-  `creation` datetime DEFAULT NULL,
-  `modified` datetime DEFAULT NULL,
-  `modified_by` varchar(40) DEFAULT NULL,
-  `owner` varchar(40) DEFAULT NULL,
-  `docstatus` int(1) DEFAULT '0',
-  `parent` varchar(120) DEFAULT NULL,
-  `parentfield` varchar(120) DEFAULT NULL,
-  `parenttype` varchar(120) DEFAULT NULL,
-  `idx` int(8) DEFAULT NULL,
-  `format` varchar(180) DEFAULT NULL,
-  PRIMARY KEY (`name`),
-  KEY `parent` (`parent`)
+	`name` varchar(120) NOT NULL,
+	`creation` datetime DEFAULT NULL,
+	`modified` datetime DEFAULT NULL,
+	`modified_by` varchar(40) DEFAULT NULL,
+	`owner` varchar(40) DEFAULT NULL,
+	`docstatus` int(1) DEFAULT '0',
+	`parent` varchar(120) DEFAULT NULL,
+	`parentfield` varchar(120) DEFAULT NULL,
+	`parenttype` varchar(120) DEFAULT NULL,
+	`idx` int(8) DEFAULT NULL,
+	`fieldname` varchar(180) DEFAULT NULL,
+	`label` varchar(180) DEFAULT NULL,
+	`fieldtype` varchar(180) DEFAULT NULL,
+	`options` text,
+	`search_index` int(1) DEFAULT NULL,
+	`unique` int(1) DEFAULT NULL,
+	`hidden` int(1) DEFAULT NULL,
+	`print_hide` int(1) DEFAULT NULL,
+	`report_hide` int(1) DEFAULT NULL,
+	`reqd` int(1) DEFAULT NULL,
+	`no_copy` int(1) DEFAULT NULL,
+	`allow_on_submit` int(1) DEFAULT NULL,
+	`trigger` varchar(180) DEFAULT NULL,
+	`depends_on` varchar(180) DEFAULT NULL,
+	`permlevel` int(1) DEFAULT NULL,
+	`width` varchar(180) DEFAULT NULL,
+	`default` text,
+	`description` text,
+	`in_filter` int(1) DEFAULT NULL,
+	PRIMARY KEY (`name`),
+	KEY `parent` (`parent`),
+	KEY `label` (`label`),
+	KEY `fieldtype` (`fieldtype`),
+	KEY `fieldname` (`fieldname`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 DROP TABLE IF EXISTS `tabDocPerm`;
 CREATE TABLE `tabDocPerm` (
-  `name` varchar(120) NOT NULL,
-  `creation` datetime DEFAULT NULL,
-  `modified` datetime DEFAULT NULL,
-  `modified_by` varchar(40) DEFAULT NULL,
-  `owner` varchar(40) DEFAULT NULL,
-  `docstatus` int(1) DEFAULT '0',
-  `parent` varchar(120) DEFAULT NULL,
-  `parentfield` varchar(120) DEFAULT NULL,
-  `parenttype` varchar(120) DEFAULT NULL,
-  `idx` int(8) DEFAULT NULL,
-  `permlevel` int(11) DEFAULT NULL,
-  `role` varchar(180) DEFAULT NULL,
-  `match` varchar(180) DEFAULT NULL,
-  `read` int(1) DEFAULT NULL,
-  `write` int(1) DEFAULT NULL,
-  `create` int(1) DEFAULT NULL,
-  `submit` int(1) DEFAULT NULL,
-  `cancel` int(1) DEFAULT NULL,
-  `amend` int(1) DEFAULT NULL,
-  `execute` int(1) DEFAULT NULL,
-  PRIMARY KEY (`name`),
-  KEY `parent` (`parent`)
+	`name` varchar(120) NOT NULL,
+	`creation` datetime DEFAULT NULL,
+	`modified` datetime DEFAULT NULL,
+	`modified_by` varchar(40) DEFAULT NULL,
+	`owner` varchar(40) DEFAULT NULL,
+	`docstatus` int(1) DEFAULT '0',
+	`parent` varchar(120) DEFAULT NULL,
+	`parentfield` varchar(120) DEFAULT NULL,
+	`parenttype` varchar(120) DEFAULT NULL,
+	`idx` int(8) DEFAULT NULL,
+	`permlevel` int(11) DEFAULT NULL,
+	`role` varchar(180) DEFAULT NULL,
+	`match` varchar(180) DEFAULT NULL,
+	`read` int(1) DEFAULT NULL,
+	`write` int(1) DEFAULT NULL,
+	`create` int(1) DEFAULT NULL,
+	`submit` int(1) DEFAULT NULL,
+	`cancel` int(1) DEFAULT NULL,
+	`amend` int(1) DEFAULT NULL,
+	`execute` int(1) DEFAULT NULL,
+	PRIMARY KEY (`name`),
+	KEY `parent` (`parent`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -101,7 +81,7 @@ CREATE TABLE `tabDocType` (
   `name` varchar(180) NOT NULL DEFAULT '',
   `creation` datetime DEFAULT NULL,
   `modified` datetime DEFAULT NULL,
-  `modified_by` varchar(40) DEFAULT NULL,
+  `modified_by` varchar(180) DEFAULT NULL,
   `owner` varchar(180) DEFAULT NULL,
   `docstatus` int(1) DEFAULT '0',
   `parent` varchar(120) DEFAULT NULL,
@@ -119,32 +99,19 @@ CREATE TABLE `tabDocType` (
   `colour` varchar(180) DEFAULT NULL,
   `read_only` int(1) DEFAULT NULL,
   `in_create` int(1) DEFAULT NULL,
-  `show_in_menu` int(1) DEFAULT NULL,
-  `menu_index` int(11) DEFAULT NULL,
-  `parent_node` varchar(180) DEFAULT NULL,
-  `smallicon` varchar(180) DEFAULT NULL,
   `allow_print` int(1) DEFAULT NULL,
   `allow_email` int(1) DEFAULT NULL,
   `allow_copy` int(1) DEFAULT NULL,
   `allow_rename` int(1) DEFAULT NULL,
-  `hide_toolbar` int(1) DEFAULT NULL,
-  `hide_heading` int(1) DEFAULT NULL,
   `allow_attach` int(1) DEFAULT NULL,
-  `use_template` int(1) DEFAULT NULL,
   `max_attachments` int(11) DEFAULT NULL,
-  `section_style` varchar(180) DEFAULT NULL,
-  `client_script` text,
-  `client_script_core` text,
-  `server_code` text,
-  `server_code_core` text,
-  `server_code_compiled` text,
-  `client_string` text,
-  `server_code_error` varchar(180) DEFAULT NULL,
-  `print_outline` varchar(180) DEFAULT NULL,
-  `dt_template` text,
-  `is_transaction_doc` int(1) DEFAULT NULL,
-  `change_log` text,
+  `is_submittable` int(1) DEFAULT NULL,
+  `in_dialog` int(1) DEFAULT NULL,
+  `hide_heading` int(1) DEFAULT NULL,
   `read_only_onload` int(1) DEFAULT NULL,
+  `document_type` varchar(180) DEFAULT NULL,
+  `default_print_format` varchar(180) DEFAULT NULL,
+  `hide_toolbar` int(1) DEFAULT NULL,
   PRIMARY KEY (`name`),
   KEY `parent` (`parent`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -152,27 +119,27 @@ CREATE TABLE `tabDocType` (
 
 DROP TABLE IF EXISTS `tabSeries`;
 CREATE TABLE `tabSeries` (
-  `name` varchar(40) DEFAULT NULL,
-  `current` int(10) DEFAULT NULL
+	`name` varchar(40) DEFAULT NULL,
+	`current` int(10) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 DROP TABLE IF EXISTS `tabSessions`;
 CREATE TABLE `tabSessions` (
-  `user` varchar(40) DEFAULT NULL,
-  `sid` varchar(120) DEFAULT NULL,
-  `sessiondata` longtext,
-  `ipaddress` varchar(16) DEFAULT NULL,
-  `lastupdate` datetime DEFAULT NULL,
-  `status` varchar(20) DEFAULT NULL
+	`user` varchar(40) DEFAULT NULL,
+	`sid` varchar(120) DEFAULT NULL,
+	`sessiondata` longtext,
+	`ipaddress` varchar(16) DEFAULT NULL,
+	`lastupdate` datetime DEFAULT NULL,
+	`status` varchar(20) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 
 DROP TABLE IF EXISTS `tabSingles`;
 CREATE TABLE `tabSingles` (
-  `doctype` varchar(40) DEFAULT NULL,
-  `field` varchar(40) DEFAULT NULL,
-  `value` text,
-  KEY `doctype` (`doctype`)
+	`doctype` varchar(40) DEFAULT NULL,
+	`field` varchar(40) DEFAULT NULL,
+	`value` text,
+	KEY `doctype` (`doctype`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

@@ -19,164 +19,108 @@
 # CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
-
 from __future__ import unicode_literals
 import webnotes
-
-from webnotes.utils import now, cint
-msgprint = webnotes.msgprint
-
+import webnotes.model
+from webnotes.utils import cint
 from webnotes.model.controller import DocListController
 
+class DuplicateSeriesError(webnotes.ValidationError): pass
 
-class DocType(DocListController):
-	def change_modified_of_parent(self):
-		sql = webnotes.conn.sql
-		parent_list = sql('SELECT parent from tabDocField where fieldtype="Table" and options="%s"' % self.doc.name)
-		for p in parent_list:
-			sql('UPDATE tabDocType SET modified="%s" WHERE `name`="%s"' % (now(), p[0]))
-
-	def scrub_field_names(self):
-		restricted = ('name','parent','idx','owner','creation','modified','modified_by','parentfield','parenttype')
-		for d in self.doclist:
-			if d.parent and d.fieldtype:
-				if (not d.fieldname):
-					if not d.label:
-						webnotes.msgprint("Must specify Fieldname or Label for row %s" % d.idx,
-							raise_exception=1)
-					d.fieldname = d.label.strip().lower().replace(' ','_')
-					if d.fieldname in restricted:
-						d.fieldname = d.fieldname + '1'
-	
-	def validate_series(self, autoname=None, name=None):
-		sql = webnotes.conn.sql
-		if not autoname: autoname = self.doc.autoname
-		if not name: name = self.doc.name
-		
-		if autoname and (not autoname.startswith('field:')) and (not autoname.startswith('eval:')) and (not autoname=='Prompt') and (not autoname == 'naming_series'):
-			prefix = autoname.split('.')[0]
-			used_in = sql('select name from tabDocType where substring_index(autoname, ".", 1) = %s and name!=%s', (prefix, name))
-			if used_in:
-				msgprint('<b>Series already in use:</b> The series "%s" is already used in "%s"' % (prefix, used_in[0][0]), raise_exception=1)
-
-	def validate_fields(self):
-		"validates fields for incorrect properties and double entries"
-		fieldnames = {}
-		illegal = ['.', ',', ' ', '-', '&', '%', '=', '"', "'", '*', '$']
-		for d in self.doclist.get({"doctype": "DocField"}):
-			if not d.permlevel: d.permlevel = 0
-			if d.parent and d.fieldtype and d.parent == self.doc.name:
-				# check if not double
-				if d.fieldname:
-					if fieldnames.get(d.fieldname):
-						webnotes.msgprint('Fieldname <b>%s</b> appears twice (rows %s and %s). Please rectify' \
-						 	% (d.fieldname, str(d.idx + 1), str(fieldnames[d.fieldname] + 1)), raise_exception=1)
-					fieldnames[d.fieldname] = d.idx
-					
-					# check bad characters
-					for c in illegal:
-						if c in d.fieldname:
-							webnotes.msgprint('"%s" not allowed in fieldname' % c)
-				
-				else:
-					webnotes.msgprint("Fieldname is mandatory in row %s" % str(d.idx+1), raise_exception=1)
-				
-				# check illegal mandatory
-				if d.fieldtype in ('HTML', 'Button', 'Section Break', 'Column Break') and d.reqd:
-					webnotes.msgprint('%(lable)s [%(fieldtype)s] cannot be mandatory', raise_exception=1)
-		
+class DocTypeController(DocListController):
 	def validate(self):
 		self.validate_series()
-		self.scrub_field_names()
+		if self.doc.is_submittable:
+			self.add_amend_fields()
 		self.validate_fields()
-
-	def on_update(self):
-		self.make_amendable()
-		self.make_file_list()
 		
-		sql = webnotes.conn.sql
-		# make schma changes
+	def on_update(self):
+		# make schema changes
 		from webnotes.model.db_schema import updatedb
 		updatedb(self.doc.name)
-
-		# self.change_modified_of_parent()
 		
+		# export doc
 		import conf
-		from webnotes.utils.transfer import in_transfer
-
-		if (not in_transfer) and getattr(conf,'developer_mode', 0):
+		if getattr(conf,'developer_mode', 0):
 			self.export_doc()
-
+		
+		# clear cache
 		from webnotes.model.doctype import clear_cache
 		clear_cache(self.doc.name)
-		
+	
 	def export_doc(self):
 		from webnotes.modules.export import export_to_files
 		export_to_files(record_list=[['DocType', self.doc.name]])
 		
-	def import_doc(self):
-		from webnotes.modules.import_module import import_from_files
-		import_from_files(record_list=[[self.doc.module, 'doctype', self.doc.name]])		
+	def validate_series(self, autoname=None, doctype=None):
+		if not autoname: autoname = self.doc.autoname
+		if not doctype: doctype = self.doc.name
+		
+		if autoname and not (autoname == "naming_series" or autoname.startswith("field:")
+			or autoname.lower() == "prompt"):
+			prefix = autoname.split(".")[0]
+			exists = webnotes.conn.sql("""select name from `tabDocType`
+				where substring_index(autoname, ".", 1) = %s and name != %s""", 
+				(prefix, doctype))
+			if exists:
+				webnotes.msgprint("""Series %s is already in use in DocType %s""" % \
+					(autoname, exists[0]["name"]), raise_exception=DuplicateSeriesError)
+		
+	def validate_fields(self):
+		def scrub(s):
+			s = s.strip().lower().replace(" ", "_")
+			# replace illegal characters with blank char
+			for c in "'\".,-&%=*$":
+				s.replace(c, "")
+			return s
+		
+		# used for checking duplicate fieldname entries
+		fieldnames = {}
+		
+		for doc in self.doclist.get({"doctype": "DocField"}):
+			if not (doc.fieldname or doc.label):
+				webnotes.msgprint("""Must specify Field Name or Label for row # %d""" % \
+					doc.idx, raise_exception=True)
+			doc.fieldname = scrub(doc.fieldname or doc.label)
+			
+			# validate if fieldname exists and is not one of reserved field names
+			if not doc.fieldname or doc.fieldname in webnotes.model.default_fields:
+				webnotes.msgprint("""Invalid Field Name "%s" for row # %d""" % \
+					(doc.fieldname, doc.idx), raise_exception=True)
+			
+			# set permlevel
+			doc.permlevel = cint(doc.permlevel)
+			
+			# fieldtypes [HTML, Button, Section Break] cannot be mandatory
+			if cint(doc.reqd) and doc.fieldtype in ["HTML", "Button", "Section Break"]:
+				webnotes.msgprint("""%s [%s] cannot be mandatory""" % \
+					(doc.label, doc.fieldname), raise_exception=True)
+			
+			# validate if fieldname appears more than once
+			if doc.fieldname in fieldnames:
+				webnotes.msgprint("""Field Name "%s" appears twice (rows %d and %d).
+					Please rectify.""" % (doc.fieldname, fieldnames[doc.fieldname],
+						doc.idx), raise_exception=True)
+				
+			fieldnames[doc.fieldname] = doc.idx
 	
-	def make_file_list(self):
-		"""
-			if allow_attach is checked and the column file_list doesn't exist,
-			create a new field 'file_list'
-		"""
-		if self.doc.allow_attach:
-			import webnotes.model.doctype
-			temp_doclist = webnotes.model.doctype.get(self.doc.name)
-			if 'file_list' not in [d.fieldname for d in temp_doclist if \
-					d.doctype=='DocField']:
-				new = self.doc.addchild('fields', 'DocField', 1, self.doclist)
-				new.label = 'File List'
-				new.fieldtype = 'Text'
-				new.fieldname = 'file_list'
-				new.hidden = 1
-				new.permlevel = 0
-				new.print_hide = 1
-				new.no_copy = 1
-				idx_list = [d.idx for d in temp_doclist if d.idx]
-				max_idx = idx_list and max(idx_list) or 0
-				new.idx = max_idx + 1
-				new.save()
-
-	def make_amendable(self):
-		"""
-			if is_submittable is set, add amendment_date and amended_from
-			docfields
-		"""
+	def add_amend_fields(self):
+		"""add amendment_date and amended_from"""
 		if self.doc.is_submittable:
-			import webnotes.model.doctype
-			temp_doclist = webnotes.model.doctype.get(self.doc.name)
-			max_idx = max([d.idx for d in temp_doclist if d.idx])
-			max_idx = max_idx and max_idx or 0
-			if 'amendment_date' not in [d.fieldname for d in temp_doclist if \
-					d.doctype=='DocField']:
-				new = self.doc.addchild('fields', 'DocField', 1, self.doclist)
-				new.label = 'Amendment Date'
-				new.fieldtype = 'Date'
-				new.fieldname = 'amendment_date'
-				new.permlevel = 0
-				new.print_hide = 1
-				new.no_copy = 1
-				new.idx = max_idx + 1
-				new.description = "The date at which current entry is corrected in the system."
-				new.depends_on = "eval:doc.amended_from"
-				new.save()
-				max_idx += 1
-			if 'amended_from' not in [d.fieldname for d in temp_doclist if \
-					d.doctype=='DocField']:
-				new = self.doc.addchild('fields', 'DocField', 1, self.doclist)
-				new.label = 'Amended From'
-				new.fieldtype = 'Link'
-				new.fieldname = 'amended_from'
-				new.options = "Sales Invoice"
-				new.permlevel = 1
-				new.print_hide = 1
-				new.no_copy = 1
-				new.idx = max_idx + 1
-				new.save()
-				max_idx += 1
-
-
+			if not self.doclist.get({"fieldname": "amended_from"}):
+				self.add_child({"__islocal": 1,
+					"doctype": "DocField", "parentfield": "fields",
+					"fieldname": "amended_from", "label": "Amended From",
+					"fieldtype": "Link", "options": self.doc.name,
+					"permlevel": 1, "print_hide": 1, "no_copy": 1,
+					"idx": max((d.idx for d in self.doclist.get({"doctype": "DocField"})))
+				})
+				
+			if not self.doclist.get({"fieldname": "amendment_date"}):
+				self.add_child({"__islocal": 1,
+					"doctype": "DocField", "parentfield": "fields",
+					"fieldname": "amendment_date", "label": "Amendment Date",
+					"fieldtype": "Date", "depends_on": "eval:doc.amended_from",
+					"permlevel": 0, "print_hide": 1, "no_copy": 1,
+					"idx": max((d.idx for d in self.doclist.get({"doctype": "DocField"})))
+				})
