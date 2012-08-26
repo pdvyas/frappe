@@ -239,6 +239,9 @@ def setup_options():
 	
 	parser.add_option("--append_future_import", default=False, action="store_true",
 		help="adds from __future__ import unicode_literals in py files, if required")
+		
+	parser.add_option("-r", "--run_method", nargs=2, metavar="MODULE METHOD",
+		help="Run given method of given module")
 
 	return parser.parse_args()
 	
@@ -401,6 +404,20 @@ def run():
 				export_for_test(webnotes.model.get(options.test_export[0], d[0]))
 		else:
 			export_for_test(webnotes.model.get(options.test_export[0], options.test_export[1]))
+	
+	elif options.run_method:
+		module = __import__(options.run_method[0], 
+			fromlist = [options.run_method[0].split(".")[-1]])
+		if hasattr(module, options.run_method[1]):
+			try:
+				webnotes.conn.begin()
+				getattr(module, options.run_method[1])()
+				webnotes.conn.commit()
+				print "executed method", options.run_method[1], "of", \
+					options.run_method[0]
+			except Exception, e:
+				print e
+				webnotes.conn.rollback()
 
 if __name__=='__main__':
 	run()
