@@ -145,8 +145,8 @@ class Installer:
 		import webnotes
 		self.dbman.drop_table('__SessionCache')
 		webnotes.conn.sql("""create table `__SessionCache` ( 
-			user VARCHAR(120), 
-			country VARCHAR(120), 
+			user VARCHAR(180), 
+			country VARCHAR(180), 
 			cache LONGTEXT) ENGINE=InnoDB""")
 
 	def create_cache_item(self):

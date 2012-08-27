@@ -67,6 +67,9 @@ class DocListController(object):
 
 	def save(self):
 		"""Save the doclist"""
+		# if docstatus is null, set it as 0
+		self.doc.docstatus = self.doc.docstatus or 0
+		
 		self.prepare_for_save()
 		self.run('validate')
 		self.doctype_validate()
@@ -126,6 +129,9 @@ class DocListController(object):
 			if d.has_key('parentfield'):
 				d.parent = self.doc.name # rename if reqd
 				d.parenttype = self.doc.doctype
+				
+				# set docstatus of children as that of parent
+				d.docstatus = self.doc.docstatus
 
 				d.save(new = cint(d.get('__islocal')))
 			

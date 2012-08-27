@@ -143,3 +143,9 @@ CREATE TABLE `tabSingles` (
 	KEY `doctype` (`doctype`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `__PatchLog`;
+CREATE TABLE `__PatchLog` (
+	`patch` TEXT,
+	`applied_on` DATETIME
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+

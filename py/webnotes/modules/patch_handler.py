@@ -139,10 +139,6 @@ def block_user(block):
 	webnotes.conn.set_global('__session_status_message', block and msg or None)
 	webnotes.conn.commit()
 
-def setup():
-	webnotes.conn.sql("""CREATE TABLE IF NOT EXISTS `__PatchLog` (
-			patch TEXT, applied_on DATETIME) engine=InnoDB""")
-		
 log_list = []
 has_errors = False
 def log(msg):
