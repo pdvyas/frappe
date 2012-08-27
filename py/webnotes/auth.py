@@ -285,11 +285,11 @@ class Session:
 	def get_session_record(self):
 		"""get session record, or return the standard Guest Record"""
 		r = webnotes.conn.sql("""select user, sessiondata, status from 
-			tabSessions where sid='%s'""" % self.sid)
+			tabSessions where sid=%s""", self.sid)
 		if not r:
 			self.sid = 'Guest'
 			r = webnotes.conn.sql("""select user, sessiondata, status from 
-				tabSessions where sid='%s'""" % self.sid)
+				tabSessions where sid=%s""", self.sid)
 			
 		return r and r[0] or None
 	

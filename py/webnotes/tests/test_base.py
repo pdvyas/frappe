@@ -35,8 +35,8 @@ class TestBase(unittest.TestCase):
 					cl.append('%s=%s' % (k, '%s'))
 					vl.append(d[k])
 
-			self.assertTrue(webnotes.conn.sql("select name from `tab%s` \
-				where %s limit 1" % (d['doctype'], ' and '.join(cl)), vl))
+			self.assertTrue(webnotes.conn.sql("""select name from `tab%s`
+				where %s limit 1""" % (d['doctype'], ' and '.join(cl)), vl))
 
 	def assertCount(self, lst):
 		"""assert all values"""
@@ -47,25 +47,29 @@ class TestBase(unittest.TestCase):
 					cl.append('%s=%s' % (k, '%s'))
 					vl.append(d[0][k])
 
-			self.assertTrue(webnotes.conn.sql("select count(name) from `tab%s` \
-				where %s limit 1" % (d[0]['doctype'], ' and '.join(cl)), vl)[0][0] == d[1])
+			self.assertEqual(webnotes.conn.sql("""select count(name) from `tab%s`
+				where %s limit 1""" % (d[0]['doctype'], ' and '.join(cl)), vl,
+				as_dict=False)[0][0], d[1])
 
 	def assertNsm(self, dt, parent_fld, group_fld):
 		# check nested set model
-		roots = webnotes.conn.sql("select name, lft, rgt from `tab%s` \
-			where ifnull(%s, '') = '' and docstatus < 2" % (dt, parent_fld))
+		roots = webnotes.conn.sql("""select name, lft, rgt from `tab%s`
+			where ifnull(`%s`, '') = '' and docstatus < 2""" % (dt, parent_fld),
+			as_dict=False)
 			
 		# root's lft, rgt
 		for d in roots:
-			node_count = webnotes.conn.sql("select count(name) from `tab%s` \
-				where lft >= %s and rgt <= %s and docstatus < 2" % (dt, d[1], d[2]))[0][0]
+			node_count = webnotes.conn.sql("""select count(name) from `tab%s`
+				where lft >= %s and rgt <= %s and docstatus < 2""" % \
+				(dt, d[1], d[2]), as_dict=False)[0][0]
 				
 			self.assertEqual(cint(d[2]), cint(d[1])+(node_count*2)-1)
 			
 		# ledger's lft, rgt
-		self.assertTrue(webnotes.conn.sql("select name from `tab%s` \
-			where ifnull(%s, '') = '%s' and rgt = lft+1" % \
-			(dt, group_fld, (group_fld == 'is_group' and 'No' or 'Ledger'))))
+		self.assertTrue(webnotes.conn.sql("""select name from `tab%s`
+			where ifnull(%s, '') = '%s' and rgt = lft+1""" % \
+			(dt, group_fld, (group_fld == 'is_group' and 'No' or 'Ledger')),
+			as_dict=False))
 				
 	def create_docs(self, records):
 		import webnotes.model
@@ -76,5 +80,6 @@ class TestBase(unittest.TestCase):
 		obj = self.submit_doc(data, validate, on_update)
 		obj.on_cancel()
 		for d in data:
-			webnotes.conn.sql("update `tab%s` set docstatus=2 where name = '%s'" % (d['doctype'], d['name']))
+			webnotes.conn.sql("update `tab%s` set docstatus=2 where name = %s" % \
+				(d['doctype'], "%s"), d['name'], as_dict=False)
 		return obj

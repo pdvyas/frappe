@@ -234,13 +234,15 @@ class Database:
 
 	def set_value(self, dt, dn, field, val, modified = None):
 		from webnotes.utils import now
-		if dn and dt!=dn:
-			self.sql("update `tab"+dt+"` set `"+field+"`=%s, modified=%s where name=%s", (val, modified or now(), dn))
+		if dt and dt!=dn:
+			self.sql("""update `tab%s` set `%s`=%s, `modified`=%s
+				where name=%s""" % (dt, field, "%s", "%s", "%s"),
+				(val, modified or now(), dn))
 		else:
-			if self.sql("select value from tabSingles where field=%s and doctype=%s", (field, dt)):
-				self.sql("update tabSingles set value=%s where field=%s and doctype=%s", (val, field, dt))
-			else:
-				self.sql("insert into tabSingles(doctype, field, value) values (%s, %s, %s)", (dt, field, val))
+			self.sql("""delete from `tabSingles` where `doctype`=%s and 
+				`field`=%s""", (dt, field))
+			self.sql("""insert into `tabSingles`(`doctype`, `field`, `value`)
+				values(%s, %s, %s)""", (dt, field, val))
 				
 	def set(self, doc, field, val):
 		self.set_value(doc.doctype, doc.name, field, val, doc.modified)
@@ -301,8 +303,8 @@ class Database:
 	def commit(self):
 		self.sql("commit")
 
-
 	def rollback(self):
+		print "rollback"
 		self.sql("ROLLBACK")
 
 	def field_exists(self, dt, fn):
