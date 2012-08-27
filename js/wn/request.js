@@ -39,10 +39,10 @@ wn.request.prepare = function(opts) {
 	}
 	
 	// navbar indicator
-	if(opts.show_spinner) set_loading();
+	if(opts.show_spinner) wn.set_loading();
 	
 	// freeze page
-	if(opts.freeze) freeze();
+	if(opts.freeze) wn.freeze();
 	
 	// no cmd?
 	if(!opts.args.cmd) {
@@ -64,10 +64,10 @@ wn.request.cleanup = function(opts, r) {
 	}
 	
 	// hide button indicator
-	if(opts.show_spinner) hide_loading();
+	if(opts.show_spinner) wn.hide_loading();
 
 	// un-freeze page
-	if(opts.freeze) unfreeze();
+	if(opts.freeze) wn.unfreeze();
 
 	// session expired?
 	if(wn.boot && wn.boot.sid && wn.get_cookie('sid') != wn.boot.sid) { 

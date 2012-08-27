@@ -65,9 +65,9 @@ wn.views.FormPage = Class.extend({
 	make_save_btn: function() {
 		var me = this;
 		this.save_btn = this.page.appframe.add_button('Save', function() { 
-			freeze();
+			wn.freeze();
 			me.doclist.save(function(r) {
-				unfreeze();
+				wn.unfreeze();
 				if(!r.exc) {
 					var doc = me.doclist.doc;
 					if(doc.get('name') != wn.get_route()[2]) {

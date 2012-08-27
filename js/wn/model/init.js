@@ -128,9 +128,9 @@ $.extend(wn.model, {
 		if(doctypelist) {
 			doctypelist.each({doctype:'DocField'}, function(df) {
 				var def = wn.model.get_default(df);
-				if(def!==null)
+				if(def!==null && df.fieldname)
 					doc.set(df.fieldname, def)
-			});			
+			});
 		}
 	},
 	get_default: function(df) {

@@ -59,8 +59,7 @@ wn.ui.Dialog = Class.extend({
         this.wrapper.style.top = ($(window).scrollTop() + 60) + 'px';
 
 		// place it on top
-		top_index++;
-		$(this.wrapper).css('z-index', top_index);	
+		$(this.wrapper).css('z-index', wn.get_top_z_index());	
 	},
 	
 	/** show the dialog */
@@ -75,7 +74,7 @@ wn.ui.Dialog = Class.extend({
 		$(this.wrapper).toggle(true);
 
 		// hide background
-		freeze();
+		wn.freeze();
 
 		this.display = true;
 		wn.ui.cur_dialog = this;
@@ -88,7 +87,7 @@ wn.ui.Dialog = Class.extend({
 		this.trigger('hide');
 
 		// hide
-		unfreeze();
+		wn.unfreeze();
 		$(this.wrapper).toggle(false);
 
 		// flags

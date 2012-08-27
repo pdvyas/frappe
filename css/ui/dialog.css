@@ -4,7 +4,7 @@ div.dialog_wrapper {
 	position: absolute;
 	width: 440px;
 	display: none;
-	z-index: 90;
+	z-index: 2;
 	background-color: #FFF;
 	box-shadow:1px 1px 8px #444;
 	-moz-box-shadow: 1px 1px 8px #444;
@@ -40,39 +40,6 @@ div.dialog_back {
 	right: 0px;
 	background-color: #aaa;
 	opacity: 0.6;
-	z-index: 50;
+	z-index: 1;
 	text-align: center;
-}
-
-div.dialog_message {
-	display: none;
-	position: absolute;
-	width: 250px;
-	font-size: 12px;
-	z-index: 91;
-	background-color:#FFF;
-	padding: 12px;
-	border: 1px solid #444;
-}
-
-div.dialog_row {
-	padding: 8px 8px 0px 8px;
-}
-
-div.dialog_row table {
-	width: 100%;
-}
-
-div.dialog_row table td {
-}
-
-div.dialog_row input[type="text"], div.dialog_row input[type="password"], div.dialog_row textarea, div.dialog_row select {
-	width: 80%;
-	font-size: 14px;
-}
-
-div.dialog_row table td textarea {
-	width: 80%;
-	height: 200px;
-	font-size: 12px;
 }
