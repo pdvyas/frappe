@@ -163,12 +163,12 @@ def sync_core():
 	doctypelist["docperm"] = objectify(load_doctypelist("core", "docperm"))
 		
 	# sync required doctypes first
-	sync("core", "docperm", 1)
-	sync("core", "docfield", 1)
-	sync("core", "custom_field", 1)
-	sync("core", "property_setter", 1)
-	sync("core", "doctype_validator", 1)
-	sync("core", "doctype", 1)
+	sync("core", "docperm")
+	sync("core", "docfield")
+	sync("core", "custom_field")
+	sync("core", "property_setter")
+	sync("core", "doctype_validator")
+	sync("core", "doctype")
 	
 def sync_install(force=1):
 	# load required doctypes' doclist
