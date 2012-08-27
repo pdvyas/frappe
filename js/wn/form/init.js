@@ -52,8 +52,8 @@ wn.ui.Control = Class.extend({
 		this.apply_disabled();
 		this.apply_hidden();
 		this.apply_mandatory();
-		this.set_init_value();
 		this.set_change_event();
+		this.set_init_value();
 	},
 	setup_perm: function() {
 		this.perm = this.doclist ? this.doclist.get_perm()[this.docfield.permlevel] : [1,1];
@@ -202,7 +202,7 @@ wn.ui.Control = Class.extend({
 		var me = this;
 		if(this.docfield.reqd) {
 			this.$input.change(function() {
-				$(me.$w).toggleClass('error', !$(this).val())
+				$(me.$w).toggleClass('error', !me.get());
 			});
 		}
 	},

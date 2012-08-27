@@ -43,12 +43,12 @@ function msgprint(msg, title) {
 	if(!msg_dialog) {
 		msg_dialog = new wn.ui.Dialog({
 			title:"Message",
-			onhide: function() {
-				msg_dialog.msg_area.empty();
-			}
 		});
 		msg_dialog.msg_area = $('<div class="msgprint">')
 			.appendTo(msg_dialog.body);
+		msg_dialog.on('hide', function() {
+			msg_dialog.msg_area.empty();
+		})
 	}
 
 	if(msg.search(/<br>|<p>|<li>/)==-1)

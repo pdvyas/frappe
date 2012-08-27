@@ -129,7 +129,6 @@ wn.ui.GridControl = wn.ui.Control.extend({
 	},
 	set: function() {
 		// refresh values from doclist
-		console.log(this.get_data())
 		this.grid.setData(this.get_data());
 		this.grid.render();
 		this.set_height();
