@@ -30,7 +30,7 @@ wn.ui.Form = Class.extend({
 			this.fields = $.map(this.meta.get('DocField', {}), function(d) { return d.fields; });
 			if(this.doc.get('__islocal') && this.meta.doc.get('autoname')=='Prompt') {
 				this.doc.set('name', '');
-				this.fields = [{"fieldtype":"Data", "fieldname":"name", 
+				this.fields = [{"fieldtype":"Data", "fieldname":"name", permlevel: 0, 
 					"label":"New " + this.doc.get('doctype') + " Name", reqd:1}].concat(this.fields);
 			}
 		}
@@ -60,10 +60,13 @@ wn.ui.Form = Class.extend({
 					docfield: df,
 					parent: me.last_fieldset,
 					doc: me.doc,
-					doclist: me.doclist
+					doclist: me.doclist,
+					$form: me.$form
 				});
 			}
 		});
+		
+		this.$form.find(':input:first').focus();
 	},
 	make_fieldset: function(name, legend) {
 		var $fset = $('<fieldset data-name="'+name+'"></fieldset>').appendTo(this.$form);

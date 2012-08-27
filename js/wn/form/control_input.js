@@ -22,21 +22,22 @@
 
 wn.ui.IntControl = wn.ui.Control.extend({
 	validate: function(val) {
-		return cint(val);
+		if(val) return cint(val);
+		else return val;
 	}
 });
 
 wn.ui.FloatControl = wn.ui.Control.extend({
 	validate: function(val) {
-		if(val===null) val=0;
-		return parseFloat(val).toFixed(6);
+		if(val) return parseFloat(val).toFixed(6);
+		else return val;
 	}
 });
 
 wn.ui.CurrencyControl = wn.ui.Control.extend({
 	validate: function(val) {
-		if(val===null) val=0;
-		return parseFloat(val).toFixed(6);
+		if(val) return parseFloat(val).toFixed(2);
+		else return val;
 	}
 });
 
@@ -71,6 +72,16 @@ wn.ui.SelectControl = wn.ui.Control.extend({
 		if(this.docfield.options) {
 			this.$input.add_options(this.docfield.options.split('\n'));			
 		}
+	},
+	validate: function(val) {
+		// value must be of options
+		if(this.docfield.options) {
+			var options = this.docfield.options.split('\n');
+			if(!in_list(options, val)) {
+				val = options[0];
+			}
+		}
+		return val		
 	}
 });
 

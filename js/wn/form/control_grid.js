@@ -52,6 +52,12 @@ wn.ui.GridControl = wn.ui.Control.extend({
 		this.set_edit_on_double_click();
 		this.set_resize_event();
 		this.$w.find('.vertical-label').toggle(false);
+		
+		$(window).on('resize', function() { 
+			$grid = me.$w.find('.ui-widget:first');
+			$grid.css('width', me.$form.width());
+			me.grid.resizeCanvas(); 
+		});
 	},
 	set_disabled: function() {
 		
@@ -129,7 +135,6 @@ wn.ui.GridControl = wn.ui.Control.extend({
 	},
 	set: function() {
 		// refresh values from doclist
-		console.log(this.get_data())
 		this.grid.setData(this.get_data());
 		this.grid.render();
 		this.set_height();
@@ -163,6 +168,7 @@ wn.ui.GridControl = wn.ui.Control.extend({
 		this.form_dialog = new wn.views.RowEditFormDialog({
 			title: d.get('doctype') + ' in row #' + d.get('idx'),
 			doc: d,
+			doclist: this.doclist,
 			control_grid: this
 		});
 		this.form_dialog.on('hide', function() {
@@ -223,7 +229,8 @@ wn.ui.GridControl = wn.ui.Control.extend({
 
 			// reset idx
 			$.each(data, function(idx, row) {
-				row.idx = idx+1
+				//row.idx = idx+1
+				wn.model.get(row.parenttype, row.parent).get({name: row.name})[0].set('idx', idx+1);
 			});
 			
 			grid.resetActiveCell();
@@ -246,7 +253,7 @@ wn.ui.GridControl = wn.ui.Control.extend({
 			}
 
 			dd.row = cell.row;
-			if (!data[dd.row]) {
+			if (!data || !data[dd.row]) {
 				return;
 			}
 

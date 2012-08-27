@@ -123,7 +123,7 @@ def build_conditions(filters):
 	
 	# docstatus condition
 	docstatus = json.loads(data['docstatus'])
-	if docstatus:
+	if docstatus and len(docstatus):
 		conditions = [tables[0] + '.docstatus in (' + ','.join(docstatus) + ')']
 	else:
 		# default condition
