@@ -34,7 +34,8 @@ wn.ui.make_control = function(opts) {
 		'Small Text': wn.ui.TextControl,
 		'Text Editor': wn.ui.RichTextControl,
 		'Button': wn.ui.ButtonControl,
-		'Date': wn.ui.DateControl
+		'Date': wn.ui.DateControl,
+		'Code': wn.ui.CodeControl
 	}
 	if(control_map[opts.docfield.fieldtype]) {
 		return new control_map[opts.docfield.fieldtype](opts);
@@ -89,18 +90,16 @@ wn.ui.Control = Class.extend({
 		var me = this;
 		if(this.$input) 
 			this.$input.change(function() {
-				var val = me.get();
-				if(me.validate) {
-					var new_val = me.validate(val);
-					if(new_val != val) {
-						me.set_input(new_val);
-						val = new_val;
-					}
-				}
-				if(me.doc) {
-					me.doc.set(me.docfield.fieldname, val);					
-				}
+				me.set(me.get())
 			});
+	},
+	set: function(val) {
+		if(this.validate) {
+			var val = this.validate(val);
+		}
+		if(this.doc) {
+			this.doc.set(this.docfield.fieldname, val);					
+		}		
 	},
 	set_events: function() {
 		var me = this;
@@ -137,14 +136,7 @@ wn.ui.Control = Class.extend({
 		this.$w.find('div').css('display', 'inline');
 	},
 	set_static: function(val) {
-		this.$w.find('.control-static').html(val || '<i style="color: #888">Click to set</i>');		
-	},
-	set: function(val) {
-		if(this.doc) {
-			this.doc.set(this.docfield.fieldname, val);
-		} else {
-			this.set_input(val);
-		}		
+		this.$w.find('.control-static').html(val);		
 	},
 	get: function() {
 		return this.$input.val();
@@ -181,7 +173,7 @@ wn.ui.Control = Class.extend({
 		if(!this.$w.find('.help-block').length) {
 			this.$w.find('.controls').append('<div class="help-block">');
 		}
-		this.$w.find('.help-block').text(text);
+		this.$w.find('.help-block').html(text);
 	},
 	apply_hidden: function() {
 		this.$w.toggle(!this.get_hidden());

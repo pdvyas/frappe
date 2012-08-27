@@ -64,6 +64,8 @@ wn.ui.Form = Class.extend({
 				});
 			}
 		});
+		
+		this.$form.find(':input:first').focus();
 	},
 	make_fieldset: function(name, legend) {
 		var $fset = $('<fieldset data-name="'+name+'"></fieldset>').appendTo(this.$form);

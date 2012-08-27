@@ -162,6 +162,7 @@ wn.ui.GridControl = wn.ui.Control.extend({
 		this.form_dialog = new wn.views.RowEditFormDialog({
 			title: d.get('doctype') + ' in row #' + d.get('idx'),
 			doc: d,
+			doclist: this.doclist,
 			control_grid: this
 		});
 		this.form_dialog.on('hide', function() {
@@ -222,7 +223,8 @@ wn.ui.GridControl = wn.ui.Control.extend({
 
 			// reset idx
 			$.each(data, function(idx, row) {
-				row.idx = idx+1
+				//row.idx = idx+1
+				wn.model.get(row.parenttype, row.parent).get({name: row.name})[0].set('idx', idx+1);
 			});
 			
 			grid.resetActiveCell();
@@ -245,7 +247,7 @@ wn.ui.GridControl = wn.ui.Control.extend({
 			}
 
 			dd.row = cell.row;
-			if (!data[dd.row]) {
+			if (!data || !data[dd.row]) {
 				return;
 			}
 
