@@ -69,6 +69,10 @@ wn.ui.LinkControl = wn.ui.Control.extend({
 					}
 				});
 			},
+			open: function() {
+				$(this).autocomplete('widget').css('z-index', wn.get_top_z_index());
+				return false;				
+			},
 			select: function(event, ui) {
 				me.set_input(ui.item.value);
 			}

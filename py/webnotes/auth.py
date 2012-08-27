@@ -150,7 +150,7 @@ class LoginManager:
 		if not user:
 			self.fail('Incorrect password')
 		else:
-			return user[0][0] # in correct case
+			return user[0].user # in correct case
 	
 	def fail(self, message):
 		webnotes.response['message'] = message

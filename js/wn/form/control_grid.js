@@ -94,7 +94,7 @@ wn.ui.GridControl = wn.ui.Control.extend({
 	  	}
 		
 		return [
-			{id: "#", name: "", width: 40, behavior: "selectAndMove", selectable: false,
+			{id: "_select", name: "", width: 40, behavior: "selectAndMove", selectable: false,
 				resizable: false, cssClass: "cell-reorder dnd" },
 			//{id:'_edit', field:'_edit', name:'', width: 55, 
 			//	formatter:EditButtonFormatter},
@@ -129,6 +129,7 @@ wn.ui.GridControl = wn.ui.Control.extend({
 	},
 	set: function() {
 		// refresh values from doclist
+		console.log(this.get_data())
 		this.grid.setData(this.get_data());
 		this.grid.render();
 		this.set_height();
