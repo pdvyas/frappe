@@ -60,7 +60,8 @@ wn.ui.Form = Class.extend({
 					docfield: df,
 					parent: me.last_fieldset,
 					doc: me.doc,
-					doclist: me.doclist
+					doclist: me.doclist,
+					$form: me.$form
 				});
 			}
 		});

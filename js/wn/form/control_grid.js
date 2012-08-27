@@ -52,6 +52,12 @@ wn.ui.GridControl = wn.ui.Control.extend({
 		this.set_edit_on_double_click();
 		this.set_resize_event();
 		this.$w.find('.vertical-label').toggle(false);
+		
+		$(window).on('resize', function() { 
+			$grid = me.$w.find('.ui-widget:first');
+			$grid.css('width', me.$form.width());
+			me.grid.resizeCanvas(); 
+		});
 	},
 	set_disabled: function() {
 		
