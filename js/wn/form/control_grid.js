@@ -55,7 +55,7 @@ wn.ui.GridControl = wn.ui.Control.extend({
 		
 		$(window).on('resize', function() { 
 			$grid = me.$w.find('.ui-widget:first');
-			$grid.css('width', me.$form.width());
+			$grid.css('width', me.form.$form.width());
 			me.grid.resizeCanvas(); 
 		});
 	},
@@ -169,7 +169,8 @@ wn.ui.GridControl = wn.ui.Control.extend({
 			title: d.get('doctype') + ' in row #' + d.get('idx'),
 			doc: d,
 			doclist: this.doclist,
-			control_grid: this
+			control_grid: this,
+			parent_form: this.form
 		});
 		this.form_dialog.on('hide', function() {
 			me.form_dialog = null;

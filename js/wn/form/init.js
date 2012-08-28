@@ -74,6 +74,18 @@ wn.ui.Control = Class.extend({
 		// set tabIndex
 		this.$input && this.$input.attr("tabIndex", this.docfield.idx);
 	},
+	trigger_make_event: function() {
+		var ev_name = "";
+		if(this.doc && this.form && this.doc.get('parent')) {
+			// trigger event on parent form
+			ev_name = 'make ' + this.doc.get('parentfield') + ' ' + this.docfield.fieldname;
+			this.form.parent_form.trigger(ev_name, this);
+		} else if(this.doc) {
+			// trigger event on this form
+			ev_name = 'make ' + this.docfield.fieldname;
+			this.form.trigger(ev_name, this);
+		}
+	},
 	make_label: function() {
 		// label and description
 		if(this.docfield.label)
