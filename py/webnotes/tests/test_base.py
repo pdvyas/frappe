@@ -75,11 +75,3 @@ class TestBase(unittest.TestCase):
 		import webnotes.model
 		for record in records:
 			webnotes.model.insert(record)
-		
-	def cancel_doc(self, data, validate=0, on_update=0):
-		obj = self.submit_doc(data, validate, on_update)
-		obj.on_cancel()
-		for d in data:
-			webnotes.conn.sql("update `tab%s` set docstatus=2 where name = %s" % \
-				(d['doctype'], "%s"), d['name'], as_dict=False)
-		return obj

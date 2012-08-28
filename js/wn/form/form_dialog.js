@@ -25,7 +25,6 @@ wn.ui.FormDialog = wn.ui.Dialog.extend({
 		$.extend(this, opts);
 		wn.get_or_set(this, 'width', 700);
 		wn.get_or_set(this, 'title', this.name);
-		wn.get_or_set(this, 'form_class', wn.ui.Form);
 
 		// init dialog
 		this._super();
@@ -35,7 +34,7 @@ wn.ui.FormDialog = wn.ui.Dialog.extend({
 		opts.dialog = this;
 		opts.appframe = this.appframe;
 		
-		this.form = new this.form_class(opts);		
+		this.form = wn.ui.new_form(opts);		
 	}
 })
 

@@ -65,16 +65,21 @@ wn.model.Document = Class.extend({
 		var new_val = this.convert_type(key, val);
 		if(this.fields[key] != new_val) {
 			this.fields[key] = new_val;
-			if(this.doclist) {
-				this.doclist.trigger('change', key, this.fields[key], this);
-				if(this.get('parentfield')) {
-					this.doclist.trigger('change ' + this.get('parentfield') + '.' + key, 
-						key, this.fields[key], this);
-				} else {
-					this.doclist.trigger('change ' + key, key, this.fields[key], this);
-				}
+			this.trigger_change_event(key)
+		}
+	},
+	trigger_change_event: function(key) {
+		if(this.doclist) {
+			var val = this.fields[key];
+			this.doclist.trigger('change', key, val, this);
+			if(this.get('parentfield')) {
+				this.doclist.trigger('change ' + this.get('parentfield') + ' ' + key, 
+					key, val, this);
+			} else {
+				this.doclist.trigger('change ' + key, key, val, this);
 			}
 		}
+		
 	},
 	copy_from: function(doc) {
 		var meta = wn.model.get('DocType', this.get('doctype'));

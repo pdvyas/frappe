@@ -35,7 +35,13 @@ wn.views.formview = {
 					return;
 				}
 				
-				if(wn.model.get('DocType', dt).get_value('in_dialog')) {
+				var meta = wn.model.get('DocType', dt).doc;
+				
+				// load custom js and css
+				if(meta.get('__js')) { wn.dom.eval(meta.get('__js')); }
+				if(meta.get('__css')) { wn.dom.set_style(meta.get('__css')); }
+				
+				if(meta.get('in_dialog')) {
 					// dialog
 					var form_dialog = new wn.ui.FormDialog({
 						doc: wn.model.get(dt, dn).doc

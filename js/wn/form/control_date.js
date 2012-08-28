@@ -34,11 +34,13 @@ wn.ui.DateControl = wn.ui.Control.extend({
 		})
 	},
 	set_input: function(val) {
-		if(val==null) val='';
+		if(!val) val='';
 		else val = dateutil.str_to_user(val);
-		$(this.$input).val(val);		
+		this._super(val);
 	},
 	get: function() {
-		return dateutil.user_to_str($(this.$input).val());
+		var val = $(this.$input).val()
+		if(val) return dateutil.user_to_str(val);
+		else return val;
 	}
 })

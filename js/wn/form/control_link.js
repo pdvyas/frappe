@@ -35,7 +35,7 @@ wn.ui.LinkControl = wn.ui.Control.extend({
 					with_filters: me.filters,
 					df: me.docfield,
 					callback: function(val) {
-						me.set(val);
+						me.set_input(val);
 					}});				
 				
 				return false;

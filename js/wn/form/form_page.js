@@ -29,7 +29,7 @@ wn.views.FormPage = Class.extend({
 		this.doclist = wn.model.get(doctype, name);
 		this.make_page();
 		this.set_breadcrumbs(doctype, name);
-		this.form = new wn.ui.Form({
+		this.form = wn.ui.new_form({
 			doclist: this.doclist,
 			doc: this.doclist.doc,
 			parent: this.$w,
