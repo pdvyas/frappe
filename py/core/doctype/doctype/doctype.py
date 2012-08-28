@@ -39,19 +39,13 @@ class DocTypeController(DocListController):
 		from webnotes.model.db_schema import updatedb
 		updatedb(self.doc.name)
 		
-		# export doc
-		import conf
-		if getattr(conf,'developer_mode', 0):
-			self.export_doc()
+		# export
+		self.export()
 		
 		# clear cache
 		from webnotes.model.doctype import clear_cache
 		clear_cache(self.doc.name)
 	
-	def export_doc(self):
-		from webnotes.modules.export import export_to_files
-		export_to_files(record_list=[['DocType', self.doc.name]])
-		
 	def validate_series(self, autoname=None, doctype=None):
 		if not autoname: autoname = self.doc.autoname
 		if not doctype: doctype = self.doc.name

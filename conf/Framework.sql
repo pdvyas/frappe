@@ -56,7 +56,7 @@ CREATE TABLE `tabDocPerm` (
 	`modified` datetime DEFAULT NULL,
 	`modified_by` varchar(40) DEFAULT NULL,
 	`owner` varchar(40) DEFAULT NULL,
-	`docstatus` int(1) DEFAULT '0',
+	`docstatus` int(1) DEFAULT 0,
 	`parent` varchar(120) DEFAULT NULL,
 	`parentfield` varchar(120) DEFAULT NULL,
 	`parenttype` varchar(120) DEFAULT NULL,
