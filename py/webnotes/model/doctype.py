@@ -287,8 +287,11 @@ class DocTypeDocList(webnotes.model.doclist.DocList):
 			filters["parent"] = parent
 		return self.getone(filters)
 		
-	def get_fieldnames(self):
-		return map(lambda f: f.fieldname, self.get({"doctype": "DocField"}))
+	def get_fieldnames(self, filters=None):
+		if not filters: filters = {}
+		filters.update({"doctype": "DocField"})
+			
+		return map(lambda df: df.fieldname, self.get(filters))
 	
 	def get_options(self, fieldname, parent=None):
 		return self.get_field(fieldname, parent).options

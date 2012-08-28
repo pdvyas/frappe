@@ -29,7 +29,7 @@ from webnotes.utils import cstr
 
 class DocList(list):
 	"""DocList object as a wrapper around a list"""
-	def get(self, filters, max=0):
+	def get(self, filters, limit=0):
 		"""pass filters as:
 			{"key":"val", "key":"!val", "key": "^val", "key": "[val]", "key": "![val]" }"""
 		out = []
@@ -37,19 +37,26 @@ class DocList(list):
 			add = True
 			for f in filters:
 				fval = filters[f]
-				if cstr(fval).startswith('['):
+				if isinstance(fval, list):
+					if fval[0] == "==" and d.get(f) != fval[1]:
+						add = False
+						break
+					elif fval[0] == "!=" and d.get(f) == fval[1]:
+						add = False
+						break
+				elif cstr(fval).startswith('['):
 					if d.get(f) not in [v.strip() for v in fval[1:-1].split(",")]:
 						add = False
 						break
-				if cstr(fval).startswith('!['):
+				elif cstr(fval).startswith('!['):
 					if d.get(f) in [v.strip() for v in fval[2:-1].split(",")]:
 						add = False
 						break
-				if cstr(fval).startswith('!'): 
+				elif cstr(fval).startswith('!'):
 					if d.get(f) == fval[1:]:
 						add = False
 						break
-				if cstr(fval).startswith('^'):
+				elif cstr(fval).startswith('^'):
 					if not (d.get(f) or '').startswith(fval[1:]):
 						add = False
 						break
@@ -57,14 +64,15 @@ class DocList(list):
 					add = False
 					break
 
-			if add: 
+			if add:
 				out.append(d)
-				if max and len(out)-1==max:
+				if limit and (len(out)-1)==limit:
 					break
+		
 		return DocList(out)
 
 	def getone(self, filters):
-		return self.get(filters, max=1)[0]
+		return self.get(filters, limit=1)[0]
 
 	def extend(self, n):
 		list.extend(self, n)
