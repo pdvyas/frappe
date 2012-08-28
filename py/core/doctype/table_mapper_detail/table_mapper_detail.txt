@@ -5,7 +5,7 @@
 	{
 		u'creation': '2012-05-10 13:55:07',
 		u'docstatus': 0,
-		u'modified': '2012-08-08 12:45:53',
+		u'modified': '2012-08-28 11:07:38',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -14,7 +14,7 @@
 	{
 		'autoname': u'TMD/.#######',
 		'colour': u'White:FFF',
-		u'doctype': u'DocType',
+		'doctype': u'DocType',
 		'document_type': u'System',
 		'istable': 1,
 		'module': u'Core',
@@ -27,7 +27,7 @@
 
 	# These values are common for all DocField
 	{
-		u'doctype': u'DocField',
+		'doctype': u'DocField',
 		u'name': u'__common__',
 		'parent': u'Table Mapper Detail',
 		'parentfield': u'fields',
@@ -38,7 +38,7 @@
 	# DocType, Table Mapper Detail
 	{
 		u'doctype': u'DocType',
-		u'name': u'Table Mapper Detail'
+		'name': u'Table Mapper Detail'
 	},
 
 	# DocField
@@ -100,37 +100,5 @@
 		'oldfieldname': u'to_field',
 		'oldfieldtype': u'Data',
 		'width': u'140px'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'validation_logic',
-		'fieldtype': u'Small Text',
-		'label': u'Validation Logic',
-		'oldfieldname': u'validation_logic',
-		'oldfieldtype': u'Small Text',
-		'reqd': 1,
-		'width': u'150px'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'reference_doctype_key',
-		'fieldtype': u'Data',
-		'label': u'Reference DocType Key',
-		'oldfieldname': u'reference_doctype_key',
-		'oldfieldtype': u'Data'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'reference_key',
-		'fieldtype': u'Data',
-		'label': u'Reference Docname Key',
-		'oldfieldname': u'reference_key',
-		'oldfieldtype': u'Data'
 	}
 ]

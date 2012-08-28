@@ -60,10 +60,10 @@ def update(doclist):
 	
 	doclistcon = get_controller(doclist[0]["doctype"], doclist[0]["name"])
 	existing_names = map(lambda d: d.name, doclistcon.doclist)
-	
+
 	for d in doclist:
 		if d.get("name") in existing_names:
-			filter(lambda ed: ed.name == d["name"], doclistcon.doclist)[0].update(d)
+			doclistcon.doclist.getone({"name": d["name"]}).update(d)
 		else:
 			d["__islocal"] = 1
 			doclistcon.doclist.append(d)
@@ -98,6 +98,12 @@ def insert_child(fields):
 
 	# save
 	parent.save()
+	
+def dt_map(mapper=None, from_docname=None):
+	"""form should contain {"mapper_name": "", "from_docname": ""}"""
+	mapper = mapper or webnotes.form.get("mapper_name")
+	from_docname = from_docname or webnotes.form.get("from_docname")
+	return get_controller("DocType Mapper", mapper).map(from_docname)
 
 controllers = {}
 def get_controller(doctype, name=None, module=None):

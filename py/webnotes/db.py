@@ -234,7 +234,7 @@ class Database:
 
 	def set_value(self, dt, dn, field, val, modified = None):
 		from webnotes.utils import now
-		if dt and dt!=dn:
+		if dt and dn and dt!=dn:
 			self.sql("""update `tab%s` set `%s`=%s, `modified`=%s
 				where name=%s""" % (dt, field, "%s", "%s", "%s"),
 				(val, modified or now(), dn))
@@ -304,7 +304,6 @@ class Database:
 		self.sql("commit")
 
 	def rollback(self):
-		print "rollback"
 		self.sql("ROLLBACK")
 
 	def field_exists(self, dt, fn):
