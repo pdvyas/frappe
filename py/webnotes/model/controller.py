@@ -281,7 +281,7 @@ class DocListController(object):
 		import conf
 		if getattr(conf,'developer_mode', 0):
 			from webnotes.modules.export import export_to_files
-			export_to_files(record_list=[[self.doc.doctype, self.doc.name]])
+			export_to_files(record_list=self.doclist)
 	
 	# TODO: should this method be here?
 	def get_csv_from_attachment(self):
