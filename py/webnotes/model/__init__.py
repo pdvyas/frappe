@@ -189,7 +189,6 @@ def delete_doc(doctype=None, name=None, doclist = None, force=0):
 	"""
 		Deletes a doc(dt, dn) and validates if it is not submitted and not linked in a live record
 	"""
-	import webnotes.model.meta
 	sql = webnotes.conn.sql
 
 	# get from form
@@ -204,7 +203,7 @@ def delete_doc(doctype=None, name=None, doclist = None, force=0):
 	if not webnotes.conn.exists(doctype, name):
 		return
 
-	tablefields = webnotes.model.meta.get_table_fields(doctype)
+	tablefields = get_table_fields(doctype)
 	
 	# check if submitted
 	d = webnotes.conn.sql("select docstatus from `tab%s` where name=%s" % \
@@ -266,3 +265,10 @@ def get_link_fields(dt):
 	link_fields = webnotes.model.rename_doc.get_link_fields(dt)
 	link_fields = [[lf['parent'], lf['fieldname']] for lf in link_fields]
 	return link_fields
+	
+def get_parent_dt(dt):
+	"""get first parent table of this table"""
+	parent_dt = webnotes.conn.sql("""select parent from tabDocField 
+		where fieldtype="Table" and options="%s" and (parent not like "old_parent:%%") 
+		limit 1""" % dt)
+	return parent_dt and parent_dt[0].parent or ''

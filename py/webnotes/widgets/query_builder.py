@@ -46,8 +46,8 @@ def get_sql_tables(q):
 def get_parent_dt(dt):
 	pdt = ''
 	if sql('select name from `tabDocType` where istable=1 and name="%s"' % dt):
-		import webnotes.model.meta
-		return webnotes.model.meta.get_parent_dt(dt)
+		import webnotes.model
+		return webnotes.model.get_parent_dt(dt)
 	return pdt
 
 def get_sql_meta(tl):
