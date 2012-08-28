@@ -81,7 +81,14 @@ wn.ui.SelectControl = wn.ui.Control.extend({
 				val = options[0];
 			}
 		}
-		return val		
+		return val;
+	},
+	set_options: function(options) {
+		this.$input.empty().add_options(options);
+		// see if current value is on options? if not, set it
+		if(this.doc_initialized && (this.get_doc_val() != this.get())) {
+			this.set(this.get());
+		}
 	}
 });
 

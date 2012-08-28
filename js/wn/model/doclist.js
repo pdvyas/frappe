@@ -142,10 +142,11 @@ wn.model.DocList = Class.extend({
 			if(meta) {
 				$.each(meta.get({doctype:'DocField', reqd:1}), 
 					function(i, df) {
-						if(d.get(df.get('fieldname'))===null || d.get(df.get('fieldname'))===undefined) {
+						var val = d.get(df.get('fieldname'));
+						if(val===null || val===undefined) {
 							reqd.push([df, d]);
 						}
-					});				
+					});
 			}
 		})
 		if(reqd.length) {
@@ -234,5 +235,14 @@ wn.model.DocList = Class.extend({
 			this.perm = wn.model.perm.get(this.doc.get('doctype'), this.doc.get('name'));
 		}
 		return this.perm;
+	},
+	trigger_change_event: function(key, val, doc) {
+		this.trigger('change', key, val, doc);
+		if(doc.get('parentfield')) {
+			this.trigger('change ' + doc.get('parentfield') + ' ' + key, 
+				key, val, doc);
+		} else {
+			this.trigger('change ' + key, key, val, doc);
+		}		
 	}
 });

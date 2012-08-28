@@ -35,10 +35,12 @@ wn.model.Document = Class.extend({
 		this.fields = fields;
 	},
 	get: function(key, ifnull) {
-		return this.fields[key] || ifnull;
+		var val = this.fields[key];
+		if(val===null || val===undefined) return ifnull
+		else return val;
 	},
 	convert_type: function(key, val) {
-		if(val===null) return val;
+		if(!val) return val;
 		// check fieldtype and set value
 		var df = wn.model.get('DocType', this.get('doctype'))
 			.get({fieldname:key, doctype:"DocField"});
@@ -63,23 +65,15 @@ wn.model.Document = Class.extend({
 	// "change fieldname" or "change parentfield.fieldname"
 	set: function(key, val) {
 		var new_val = this.convert_type(key, val);
-		if(this.fields[key] != new_val) {
+		if(this.fields[key] !== new_val) {
 			this.fields[key] = new_val;
 			this.trigger_change_event(key)
 		}
 	},
 	trigger_change_event: function(key) {
 		if(this.doclist) {
-			var val = this.fields[key];
-			this.doclist.trigger('change', key, val, this);
-			if(this.get('parentfield')) {
-				this.doclist.trigger('change ' + this.get('parentfield') + ' ' + key, 
-					key, val, this);
-			} else {
-				this.doclist.trigger('change ' + key, key, val, this);
-			}
+			this.doclist.trigger_change_event(key, this.fields[key], this)
 		}
-		
 	},
 	copy_from: function(doc) {
 		var meta = wn.model.get('DocType', this.get('doctype'));
