@@ -77,9 +77,17 @@ wn.views.FormPage = Class.extend({
 		});
 	},
 	
-	save: function(btn) {
+	save: function(btn, to_docstatus) {
 		var me = this;
 		wn.freeze();
+		
+		// set docstatus
+		me.from_docstatus = null;
+		if(to_docstatus!=null && to_docstatus != me.doclist.doc.get('docstatus')) {
+			me.from_docstatus = me.doclist.doc.get('docstatus');
+			me.doclist.doc.set('docstatus', to_docstatus);
+		}
+		
 		me.doclist.save(function(r) {
 			wn.unfreeze();
 			if(!r.exc) {
@@ -90,8 +98,12 @@ wn.views.FormPage = Class.extend({
 					wn.set_route('Form', doc.get('doctype'), doc.get('name'));
 				}				
 			} else {
+				// revert docstatus back to original if there was an error
+				if(me.from_docstatus)
+					me.doclist.doc.set('docstatus', me.from_docstatus);
 				msgprint('Did not save.');
 			}
+			me.apply_status();
 		}, btn);
 	},
 
@@ -147,19 +159,16 @@ wn.views.FormPage = Class.extend({
 		this.docstatus_btns = {};
 		
 		this.docstatus_btns[0] = this.page.appframe.add_button(ds_labels[0], function() {
-			me.doclist.doc.set('docstatus', 0);
-			me.save(this);
+			me.save(this, 0);
 		});
 		this.docstatus_btns[1] = $('<button class="btn btn-small"></button>').html(ds_labels[1])
 			.appendTo(this.docstatus_btns[0].parent()).click(function() {
-				me.doclist.doc.set('docstatus', 1);
-				me.save(this);				
+				me.save(this, 1);
 			});
 
 		this.docstatus_btns[2] = $('<button class="btn btn-small"></button>').html(ds_labels[2])
 			.appendTo(this.docstatus_btns[0].parent()).click(function() {
-				me.doclist.doc.set('docstatus', 2);
-				me.save(this);				
+				me.save(this, 2);
 			});
 
 		this.docstatus_btns[0].parent().css('float', 'right');
@@ -177,10 +186,10 @@ wn.views.FormPage = Class.extend({
 	apply_status: function() {
 		var ds = this.doclist.doc.get('docstatus', 0);
 		var me = this;
-		$.each([0,1,2], function(i, v) {
-			me.docstatus_btns[v].removeClass(me.docstatus_btn_class[v])
-		})
-		this.docstatus_btns[ds].addClass(this.docstatus_btn_class[ds]);
+		$.each.call(this, [0,1,2], function(i, v) {
+			me.docstatus_btns[v].removeClass(me.docstatus_btn_class[v]).attr('disabled', null);
+		});
+		this.docstatus_btns[ds].addClass(this.docstatus_btn_class[ds]).attr('disabled', 'disabled');
 	}
 });
 

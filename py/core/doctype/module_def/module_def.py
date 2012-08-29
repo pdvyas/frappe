@@ -39,13 +39,14 @@ def get_items():
 	})
 	
 	# doctypes
-	for dt in webnotes.conn.sql("""select name, document_type, issingle from tabDocType where module=%s""",
+	for dt in webnotes.conn.sql("""select name, document_type, issingle	
+		from tabDocType where module=%s""",
 		webnotes.form.module):
 		if dt.document_type:
 			if dt.issingle:
 				out[dt.document_type.lower()].append(["Single", dt.name])
 			else:
-				out[dt.document_type.lower()].append(["DocType", dt.name])
+				out[dt.document_type.lower()].append(["DocType", dt.name, get_data(dt.name)])
 	
 	# pages
 	for page in webnotes.conn.sql("""select name from tabPage where module=%s""", 
@@ -63,3 +64,10 @@ def get_items():
 		
 	return out
 	
+def get_data(dt):
+	"""get docstatus numbers"""
+	ret = []
+	for i in xrange(3):
+		ret.append(webnotes.conn.sql("""select count(*) from `tab%s` where 
+			ifnull(docstatus,0) = %s""" % (dt, '%s'), i, as_list=1)[0][0])
+	return ret

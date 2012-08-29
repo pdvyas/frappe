@@ -140,13 +140,13 @@ wn.ui.Control = Class.extend({
 				// validated by control
 				this.set(this.get())
 			} else {
-				this.doclist.trigger_change_event(this.docfield.fieldname, this.get(), this.doc);				
+				this.doclist.trigger_change_event(this.docfield.fieldname, this.get(), this.doc);	
 			}
 			this.doc_initialized = true;
 		}
 	},
 	hide_label: function() {
-		this.$w.find('.control-label').toggle(false);		
+		this.$w.find('.control-label').toggle(false);
 	},
 	set_input: function(val) {
 		this.$input.val(val).change();
@@ -157,7 +157,7 @@ wn.ui.Control = Class.extend({
 		this.$w.find('div.controls').css('display', 'inline');
 	},
 	set_static: function(val) {
-		this.$w.find('.control-static').html(val);		
+		this.$w.find('.control-static').html(val);
 	},
 	get: function() {
 		return this.$input.val();
