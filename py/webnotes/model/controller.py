@@ -34,7 +34,7 @@ import webnotes.model.doc
 import webnotes.model.doclist
 import webnotes.utils.cache
 
-from webnotes.utils import cint, cstr, now, comma_and
+from webnotes.utils import cint, cstr, now, comma_and, cast
 
 class DocListController(object):
 	"""
@@ -115,6 +115,7 @@ class DocListController(object):
 		self.check_if_latest()
 		self.check_permission()
 		self.check_links()
+		self.check_mandatory()
 		self.update_metadata()
 
 	def save_main(self):
@@ -233,6 +234,20 @@ class DocListController(object):
 				comma_and(["%s: \"%s\" (specified in field: %s)" % err for err in error_list]),
 				raise_exception=webnotes.InvalidLinkError)
 
+	def check_mandatory(self):
+		"""check if all required fields have value"""
+		reqd = []
+		for doc in self.doclist:
+			for df in webnotes.model.get_doctype(doc.doctype).get({
+					"parent": doc.doctype, "doctype": "DocField", "reqd": 1}):
+				if doc.get(df.fieldname) is None:
+					reqd.append("""\"%s\" is a Mandatory field [in %s%s]""" % \
+						(df.label, df.parent, doc.idx and " - %d" % doc.idx or ""))
+		if reqd:
+			webnotes.msgprint("In %s - %s\n" % (self.doc.doctype, self.doc.name or "") +
+				"\n".join(reqd),
+				raise_exception=webnotes.MandatoryError)
+
 	def update_metadata(self):
 		"""Update owner, creation, modified_by, modified, docstatus"""
 		ts = now()
@@ -284,13 +299,23 @@ class DocListController(object):
 			from webnotes.modules.export import export_to_files
 			export_to_files(record_list=self.doclist)
 	
-	def set_default(self, filters=None):
+	def set_as_default(self, filters=None):
 		"""sets is_default to 0 in rest of the related documents"""
 		if self.doc.is_default:
+			conditions, filters = webnotes.conn.build_conditions(filters)
+			filters.update({"name": self.doc.name})
 			webnotes.conn.sql("""update `tab%s` set `is_default`=0
-				where %s and name!=%s""" % (self.doc.doctype, " and ".join([
-				"`%s`=%s" % (key, "%s") for key in filters]), "%s"),
-				(tuple(filters.values()), self.doc.name))
+				where %s and name!=%s""" % (self.doc.doctype, conditions, "%(name)s"),
+				filters)
+				
+	def set_default_values(self):
+		"""set's default values in doclist"""
+		import webnotes.model.utils
+		for doc in self.doclist:
+			for df in webnotes.model.get_doctype(doc.doctype).get({
+					"parent": doc.doctype, "doctype": "DocField"}):
+				if doc.get(df.fieldname) in [None, ""] and df.default:
+					doc[df.fieldname] = cast(df, df.default)
 	
 	# TODO: should this method be here?
 	def get_csv_from_attachment(self):
