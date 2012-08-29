@@ -110,7 +110,8 @@ wn.ui.Control = Class.extend({
 		}
 		if(this.doc) {
 			this.doc.set(this.docfield.fieldname, val);					
-		}		
+		}
+		this.set_static(val);
 	},
 	get_doc_val: function() {
 		if(this.doc && this.docfield.fieldname) {
@@ -123,17 +124,12 @@ wn.ui.Control = Class.extend({
 			me.toggle_editable(true);
 		});
 	},
-	toggle_editable: function(editable) {
-		if(this.docfield.reqd) 
-			editable = true;
-		if(editable===undefined)
-			editable = !this.editable
-		this.toggle_input(editable);
-		this.$w.find('.control-static').toggle(!editable);
-		this.editable = editable;
-	},
 	toggle_input: function(show) {
 		this.$input && this.$input.toggle(show);
+		this.toggle_static(!show);
+	},
+	toggle_static: function(show) {
+		this.$w.find('.control-static').toggle(show);
 	},
 	set_init_value: function() {
 		if(this.doc) {
@@ -158,7 +154,7 @@ wn.ui.Control = Class.extend({
 	},
 	as_inline: function() {
 		this.$w.css('display', 'inline');
-		this.$w.find('div').css('display', 'inline');
+		this.$w.find('div.controls').css('display', 'inline');
 	},
 	set_static: function(val) {
 		this.$w.find('.control-static').html(val);		
@@ -210,7 +206,8 @@ wn.ui.Control = Class.extend({
 		this.set_disabled(this.get_disabled());
 	},
 	get_disabled: function() {
-		return this.docfield.disabled || (!this.perm[WRITE]);
+		return this.docfield.disabled || (!this.perm[WRITE]) 
+			|| (this.doclist && this.doclist.doc.get('docstatus',0) > 0);
 	},
 	set_disabled: function(disabled) {
 		this.$input.attr('disabled', disabled ? 'disabled' : null);

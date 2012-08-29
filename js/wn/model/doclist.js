@@ -31,14 +31,18 @@ wn.model.DocList = Class.extend({
 		}
 	},
 	add: function(doc) {
-		if(!(doc instanceof wn.model.Document)) {
-			var doc = new wn.model.Document(doc);
-		}
-		doc.doclist = this;
+		doc = this.objectify(doc);
 		this.doclist.push(doc);
 		if(this.doclist.length==1) {
 			this.setup(doc);
 		}
+	},
+	objectify: function(doc) {
+		if(!(doc instanceof wn.model.Document)) {
+			var doc = new wn.model.Document(doc);
+		}
+		doc.doclist = this;
+		return doc;
 	},
 	setup: function(doc) {
 		// first doc, setup and add to dicts
@@ -170,7 +174,15 @@ wn.model.DocList = Class.extend({
 	reset: function(doclist) {
 		// clear
 		var oldname = this.doc.get('name');
-		this.doclist.splice(0, this.doclist.length);
+
+		// new main doc
+		this.doc.fields = doclist[0];
+		this.name = this.doc.get('name');
+
+		// for children
+		this.doclist.splice(1);
+		doclist = doclist.splice(1);
+		
 		for(i in doclist) {
 			this.add(doclist[i]);
 		}

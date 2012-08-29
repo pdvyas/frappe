@@ -20,35 +20,64 @@
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-wn.ui.RichTextControl = wn.ui.Control.extend({
+wn.ui.CodeControl = wn.ui.Control.extend({
 	init: function(opts) {
 		opts.docfield.vertical = true;
 		this._super(opts);
 	},
 	make_input: function() {
 		var me = this;
-		this.$input_wrap = $('<div>').appendTo(this.$w.find('.controls'));
-		this.$input = $('<textarea class="span8">').css('font-size','12px').css('height', '300px')
-			.appendTo(this.$input_wrap);
-		
-		this.myid = wn.dom.set_unique_id(this.$input.get(0));
+		this.$input_wrap = $('<div style="border: 1px solid #aaa">')
+			.appendTo(this.$w.find('.controls'));
 			
-		wn.lib.import_wysihtml5();
-		this.$input.wysihtml5({
-			"events": {
-				change: function() {
-					me.set(me.get());
-				}
-			}
-		});
+
+		this.$pre = $('<pre style="position: relative; height: 400px;\
+			padding: 0px; margin: 0px; background-color: #fff; border: 0px;">')
+			.appendTo(this.$input_wrap);
+
+		this.myid = wn.dom.set_unique_id(this.$pre.get(0));
+
+		wn.require('js/lib/ace/ace.js');
+		this.editor = ace.edit(this.myid);
+		this.set_ace_mode();
+	},
+	set_ace_mode: function() {
+		if(this.docfield.options=='Markdown' || this.docfield.options=='HTML') {
+			wn.require('js/lib/ace/mode-html.js');	
+			var HTMLMode = require("ace/mode/html").Mode;
+		    this.editor.getSession().setMode(new HTMLMode());
+		}
+
+		else if(this.docfield.options=='Javascript') {
+			wn.require('js/lib/ace/mode-javascript.js');	
+			var JavascriptMode = require("ace/mode/javascript").Mode;
+		    this.editor.getSession().setMode(new JavascriptMode());
+		}
+
+		else if(this.docfield.options=='Python') {
+			wn.require('js/lib/ace/mode-python.js');	
+			var PythonMode = require("ace/mode/python").Mode;
+		    this.editor.getSession().setMode(new PythonMode());
+		}		
 	},
 	set_input: function(val) {
-		$('#' + this.myid).val(val);
-		this.set(this.get());
+		this.setting_value = true;
+		this.editor.getSession().setValue(val || '');
+		this.set_static(val);
+		this.setting_value = false;
 	},
 	get: function() {
-		return $('#' + this.myid).val().replace(/&nbsp;/g, ' ');
+		return this.editor.getSession().getValue();
 	},
+	set_change_event: function() {
+		var me = this;
+		this.editor.resize();
+		this.editor.getSession().on('change', function() {
+			if(me.setting_value) return; // recursive ??
+			me.set(me.get());
+		})
+
+	},	
 	toggle_input: function(show) {
 		this.$input_wrap.toggle(show);
 	},
