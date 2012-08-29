@@ -280,9 +280,17 @@ class DocListController(object):
 		"""export current doc to file system"""
 		import conf
 		if (getattr(conf,'developer_mode', 0) and not getattr(webnotes, 'syncing', False)
-				and not getattr(webnotes, "test_mode", False)):
+				and not getattr(webnotes, "testing", False)):
 			from webnotes.modules.export import export_to_files
 			export_to_files(record_list=self.doclist)
+	
+	def set_default(self, filters=None):
+		"""sets is_default to 0 in rest of the related documents"""
+		if self.doc.is_default:
+			webnotes.conn.sql("""update `tab%s` set `is_default`=0
+				where %s and name!=%s""" % (self.doc.doctype, " and ".join([
+				"`%s`=%s" % (key, "%s") for key in filters]), "%s"),
+				(tuple(filters.values()), self.doc.name))
 	
 	# TODO: should this method be here?
 	def get_csv_from_attachment(self):

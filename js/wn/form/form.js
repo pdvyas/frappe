@@ -83,7 +83,7 @@ wn.ui.Form = Class.extend({
 		
 		// set values on controllers
 		$.each(me.controls, function(i, control) {
-			control.set_init_value && control.set_init_value();
+			control && control.set_init_value && control.set_init_value();
 		})
 		
 		this.$form.find(':input:first').focus();
