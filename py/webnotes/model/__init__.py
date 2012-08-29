@@ -99,11 +99,19 @@ def insert_child(fields):
 	# save
 	parent.save()
 	
-def dt_map(mapper=None, from_docname=None):
+def dt_map(from_doctype=None, to_doctype=None, from_docname=None):
 	"""form should contain {"mapper_name": "", "from_docname": ""}"""
-	mapper = mapper or webnotes.form.get("mapper_name")
+	from_doctype = from_doctype or webnotes.form.get("from_doctype")
+	to_doctype = from_doctype or webnotes.form.get("to_doctype")
 	from_docname = from_docname or webnotes.form.get("from_docname")
-	return get_controller("DocType Mapper", mapper).map(from_docname)
+	
+	mapper = webnotes.conn.sql("""select name from `tabDocType Mapper`
+		where from_doctype=%s and to_doctype=%s and is_default=1""")
+	if mapper:
+		return get_controller("DocType Mapper", mapper[0]["name"]).map(from_docname)
+	else:
+		webnotes.msgprint("""Default DocType Mapper not found for mapping
+			"%s" to "%s" """ % (from_doctype, to_doctype), raise_exception=NameError)
 
 controllers = {}
 def get_controller(doctype, name=None, module=None):
