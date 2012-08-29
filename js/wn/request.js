@@ -28,15 +28,7 @@ wn.request.url = 'server.py';
 // call execute serverside request
 wn.request.prepare = function(opts) {
 	// btn indicator
-	if(opts.btn) {
-		if($(opts.btn).data('progress_html')) {
-			$(opts.btn).data('original_html', $(opts.btn).html())
-				.attr('disabled', 'disabled')
-				.html($(opts.btn).data('progress_html'));
-		} else {
-			$(opts.btn).set_working();			
-		}
-	}
+	wn.request.update_btn(opts.btn, true);
 	
 	// navbar indicator
 	if(opts.show_spinner) wn.set_loading();
@@ -51,17 +43,35 @@ wn.request.prepare = function(opts) {
 	}
 }
 
-wn.request.cleanup = function(opts, r) {
-	// stop button indicator
-	if(opts.btn) {
-		if($(opts.btn).data('original_html')) {
-			$(opts.btn)
-				.attr('disabled', null)
-				.html($(opts.btn).data('original_html'));
+// show feedback on button that request is being processed
+// if progress_html is set, the this will be shown and button will be disabled
+// else if in btn-group only disable
+// else disable and show loading image on the side
+
+wn.request.update_btn = function(btn, start) {
+	var text_var = start ? 'progress_html' : 'original_html';
+	if(btn) {
+		if($(btn).data(text_var)) {
+			$(btn)
+				.attr('disabled', start)
+				.html($(btn).data(text_var));
+			
+			// save original html if set
+			if(start) { $(opts.btn).data('original_html', $(opts.btn).html()); }
 		} else {
-			$(opts.btn).done_working();
+			if($(btn).parent().hasClass('btn-group')) {
+				$(btn)
+					.attr('disabled', start)
+			} else {
+				start ? $(btn).set_working() : $(btn).done_working();
+			}
 		}
 	}
+	
+}
+
+wn.request.cleanup = function(opts, r) {
+	wn.request.update_btn(opts.btn, null);
 	
 	// hide button indicator
 	if(opts.show_spinner) wn.hide_loading();

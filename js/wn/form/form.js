@@ -100,9 +100,16 @@ wn.ui.Form = Class.extend({
 		var me = this;
 		if(this.doclist) {
 			this.doclist.on('change', function(key, val, doc) {
-				// if applicable to current form
+				// update control on change of doclist
 				me.reset_value(key, val, doc);
 			});
+			this.doclist.on('change docstatus', function(key, val, doc) {
+				// update disabled if docstatus changes
+				// set values on controllers
+				$.each(me.controls, function(i, control) {
+					control && control.apply_disabled && control.apply_disabled();
+				});				
+			})
 		}
 	},
 	reset_value: function(key, val, doc) {

@@ -52,42 +52,59 @@ wn.views.FormPage = Class.extend({
 	},
 	make_toolbar: function() {
 		this.make_save_btn();
+		this.make_help_buttons();
 		
 		if(!this.doclist.doc.get('__islocal')) {
 			this.make_action_buttons();
 			this.assign_to = new wn.ui.AssignTo({form_page: this});
 			this.comments = new wn.ui.Comments({form_page: this});
 			this.tags = new wn.ui.TagEditor({form_page: this});	
+			this.make_status_buttons();
 		}
-
-		this.make_help_buttons();
 	},
 	make_save_btn: function() {
 		var me = this;
 		this.save_btn = this.page.appframe.add_button('Save', function() { 
-			wn.freeze();
-			me.doclist.save(function(r) {
-				wn.unfreeze();
-				if(!r.exc) {
-					var doc = me.doclist.doc;
-					if(doc.get('name') != wn.get_route()[2]) {
-						wn.re_route[window.location.hash] = 
-							wn.make_route_str(['Form', doc.get('doctype'), doc.get('name')])
-						wn.set_route('Form', doc.get('doctype'), doc.get('name'));
-					}				
-				}
-			}, me.save_btn);
+			me.save(me.save_btn);
 		});
-		
-		$(this.save_btn).data('progress_html', 'Saving...')
-		
+				
 		this.doclist.on('change', function() {
 			me.save_btn.addClass('btn-warning').attr('title', 'Not Saved');
 		});
 		
 		this.doclist.on('reset', function() {
 			me.save_btn.removeClass('btn-warning').attr('title', 'Saved');
-		});			
+		});
+	},
+	
+	save: function(btn, to_docstatus) {
+		var me = this;
+		wn.freeze();
+		
+		// set docstatus
+		me.from_docstatus = null;
+		if(to_docstatus!=null && to_docstatus != me.doclist.doc.get('docstatus')) {
+			me.from_docstatus = me.doclist.doc.get('docstatus');
+			me.doclist.doc.set('docstatus', to_docstatus);
+		}
+		
+		me.doclist.save(function(r) {
+			wn.unfreeze();
+			if(!r.exc) {
+				var doc = me.doclist.doc;
+				if(doc.get('name') != wn.get_route()[2]) {
+					wn.re_route[window.location.hash] = 
+						wn.make_route_str(['Form', doc.get('doctype'), doc.get('name')])
+					wn.set_route('Form', doc.get('doctype'), doc.get('name'));
+				}				
+			} else {
+				// revert docstatus back to original if there was an error
+				if(me.from_docstatus)
+					me.doclist.doc.set('docstatus', me.from_docstatus);
+				msgprint('Did not save.');
+			}
+			me.apply_status();
+		}, btn);
 	},
 
 	make_action_buttons: function() {
@@ -128,12 +145,51 @@ wn.views.FormPage = Class.extend({
 		if(meta.get('description')) {
 			this.page.appframe.add_help_button(meta.get('description'));			
 		}
-		
-		// doctype button
+	},
+	make_doctype_button: function() {
 		this.doctype_btn = this.page.appframe.add_button(meta.get('name'), function() {
 			wn.set_route('List', meta.get('name'));
 		}).addClass('btn-inverse');
-		this.doctype_btn.parent().css('float', 'right');
+		this.doctype_btn.parent().css('float', 'right');		
+	},
+	make_status_buttons: function() {
+		var me = this;
+		var ds_labels = this.form.meta.doc.get('docstatus_labels', "Draft, Submitted, Cancelled")
+			.split(',');
+		this.docstatus_btns = {};
+		
+		this.docstatus_btns[0] = this.page.appframe.add_button(ds_labels[0], function() {
+			me.save(this, 0);
+		});
+		this.docstatus_btns[1] = $('<button class="btn btn-small"></button>').html(ds_labels[1])
+			.appendTo(this.docstatus_btns[0].parent()).click(function() {
+				me.save(this, 1);
+			});
+
+		this.docstatus_btns[2] = $('<button class="btn btn-small"></button>').html(ds_labels[2])
+			.appendTo(this.docstatus_btns[0].parent()).click(function() {
+				me.save(this, 2);
+			});
+
+		this.docstatus_btns[0].parent().css('float', 'right');
+		this.docstatus_btn_class = {
+			0: 'btn-info',
+			1: 'btn-success',
+			2: 'btn-danger'
+		};
+		this.apply_status();
+		
+		this.doclist.on('change docstatus', function() {
+			me.apply_status();
+		});		
+	},
+	apply_status: function() {
+		var ds = this.doclist.doc.get('docstatus', 0);
+		var me = this;
+		$.each.call(this, [0,1,2], function(i, v) {
+			me.docstatus_btns[v].removeClass(me.docstatus_btn_class[v]).attr('disabled', null);
+		});
+		this.docstatus_btns[ds].addClass(this.docstatus_btn_class[ds]).attr('disabled', 'disabled');
 	}
 });
 

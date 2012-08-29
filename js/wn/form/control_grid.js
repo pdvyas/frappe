@@ -45,10 +45,8 @@ wn.ui.GridControl = wn.ui.Control.extend({
 		this.grid = new Slick.Grid(this.$input_wrapper.get(0), [], 
 			this.get_columns(), options);
 			
-		if(!this.get_disabled()) {
-			this.setup_drag_and_drop();
-			this.make_add_row_button();
-		}
+		this.setup_drag_and_drop();
+		this.make_add_row_button();
 		this.set_edit_on_double_click();
 		this.set_resize_event();
 		this.$w.find('.vertical-label').toggle(false);
@@ -59,12 +57,14 @@ wn.ui.GridControl = wn.ui.Control.extend({
 			me.grid.resizeCanvas(); 
 		});
 	},
-	set_disabled: function() {
-		
+	set_disabled: function(disabled) {
+		this.$w.find('.add-row-btn').toggle(!disabled);
 	},
 	set_edit_on_double_click: function() {
 		var me = this;
 		this.grid.onClick.subscribe(function(e, args) {
+			if(me.get_disabled())
+				return false;
 			if(me.selected_row == args.row) {
 				me.edit_row(me.doclist.get({parentfield:me.docfield.fieldname, 
 					idx: args.row + 1})[0]);
@@ -109,7 +109,7 @@ wn.ui.GridControl = wn.ui.Control.extend({
 	},
 	make_add_row_button: function() {
 		var me = this;
-		this.add_row_button = $('<button class="btn btn-small" style="margin-top: 5px;">\
+		this.add_row_button = $('<button class="btn btn-small add-row-btn" style="margin-top: 5px;">\
 			<i class="icon-plus"></i>\
 			Add Row</button>').click(function() {
 				var d = me.doclist.add_child(me.docfield.fieldname);
@@ -186,6 +186,9 @@ wn.ui.GridControl = wn.ui.Control.extend({
 		var moveRowsPlugin = new Slick.RowMoveManager();
 
 		moveRowsPlugin.onBeforeMoveRows.subscribe(function (e, data) {
+			if(me.get_disabled()) {
+				return false;
+			}
 			for (var i = 0; i < data.rows.length; i++) {
 				// no point in moving before or after itself
 				if (data.rows[i] == data.insertBefore || data.rows[i] == data.insertBefore - 1) {
@@ -252,7 +255,7 @@ wn.ui.GridControl = wn.ui.Control.extend({
 			if (!cell) {
 				return;
 			}
-
+			
 			dd.row = cell.row;
 			if (!data || !data[dd.row]) {
 				return;
