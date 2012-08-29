@@ -66,8 +66,8 @@ class PageController(DocListController):
 			it will write out a .html file
 		"""
 		import conf
-		from webnotes.utils.transfer import in_transfer
-		if not in_transfer and getattr(conf,'developer_mode', 0) and self.doc.standard=='Yes':
+		if not getattr(webnotes, 'syncing', False) and getattr(conf,'developer_mode', 0) \
+			and self.doc.standard=='Yes':
 			from webnotes.modules.export import export_to_files
 			from webnotes.modules import get_module_path, scrub
 			import os

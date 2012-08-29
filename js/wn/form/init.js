@@ -54,7 +54,6 @@ wn.ui.Control = Class.extend({
 		this.apply_hidden();
 		this.apply_mandatory();
 		this.set_change_event();
-		this.set_init_value();
 	},
 	setup_perm: function() {
 		this.perm = this.doclist ? this.doclist.get_perm()[this.docfield.permlevel] : [1,1];
@@ -113,6 +112,11 @@ wn.ui.Control = Class.extend({
 			this.doc.set(this.docfield.fieldname, val);					
 		}		
 	},
+	get_doc_val: function() {
+		if(this.doc && this.docfield.fieldname) {
+			return this.doc.get(this.doc.fieldname);
+		}
+	},
 	set_events: function() {
 		var me = this;
 		this.$w.find('.control-static').click(function() {
@@ -133,7 +137,16 @@ wn.ui.Control = Class.extend({
 	},
 	set_init_value: function() {
 		if(this.doc) {
-			this.set_input(this.doc.get(this.docfield.fieldname));
+			var val = this.doc.get(this.docfield.fieldname);
+			this.set_input(val);
+			
+			if(this.get() != val) {
+				// validated by control
+				this.set(this.get())
+			} else {
+				this.doclist.trigger_change_event(this.docfield.fieldname, this.get(), this.doc);				
+			}
+			this.doc_initialized = true;
 		}
 	},
 	hide_label: function() {

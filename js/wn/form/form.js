@@ -81,6 +81,11 @@ wn.ui.Form = Class.extend({
 			}
 		});
 		
+		// set values on controllers
+		$.each(me.controls, function(i, control) {
+			control.set_init_value && control.set_init_value();
+		})
+		
 		this.$form.find(':input:first').focus();
 	},
 	make_fieldset: function(name, legend) {
@@ -108,7 +113,7 @@ wn.ui.Form = Class.extend({
 			}
 		} else {
 			// reset control
-			if(this.controls[key] && this.controls[key].get()!=val) 
+			if(this.controls[key] && this.controls[key].get()!==val) 
 				this.controls[key].set_input(val);				
 		}
 	}
