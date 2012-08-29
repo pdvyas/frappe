@@ -220,9 +220,10 @@ class Document(dict):
 			return valid_fields.get(self.doctype)
 
 		if cint(doctypelist[0].issingle):
-			doctype_fieldnames = map(lambda f: f.fieldname, doctypelist.get({"doctype": "DocField", 
-				"fieldtype": "![%s]" % ",".join(webnotes.model.no_value_fields)}))
-			valid_fields[self.doctype] = filter(lambda f: f in doctype_fieldnames, self.keys())
+			doctype_fieldnames = doctypelist.get_fieldnames({
+				"fieldtype": ["not in", webnotes.model.no_value_fields]})
+			valid_fields[self.doctype] = filter(lambda f: f in doctype_fieldnames,
+				self.keys())
 		else:
 			valid_fields[self.doctype] = webnotes.conn.get_table_columns(self.doctype)
 
