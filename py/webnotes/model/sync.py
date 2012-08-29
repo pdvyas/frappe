@@ -64,7 +64,6 @@ def walk_and_sync(start_path, force=0):
 				else:
 					sync_doc(module_name, doctype, name, force)
 
-	import webnotes.model
 	for m in modules:
 		if not webnotes.conn.exists("Module Def", m):
 			webnotes.model.insert({"doctype": "Module Def", "module_name": m})
