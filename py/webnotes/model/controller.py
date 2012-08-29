@@ -279,8 +279,8 @@ class DocListController(object):
 	def export(self):
 		"""export current doc to file system"""
 		import conf
-		if not getattr(webnotes, 'syncing', False) and 
-			getattr(conf,'developer_mode', 0) and not getattr(webnotes, "test_mode", 0):
+		if (getattr(conf,'developer_mode', 0) and not getattr(webnotes, 'syncing', False)
+				and not getattr(webnotes, "test_mode", False)):
 			from webnotes.modules.export import export_to_files
 			export_to_files(record_list=self.doclist)
 	

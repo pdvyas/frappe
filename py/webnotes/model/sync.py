@@ -37,6 +37,7 @@ def sync_modules(force=0):
 def walk_and_sync(start_path, force=0):
 	"""walk and sync all doctypes and pages"""
 	import os
+	import webnotes
 	from webnotes.modules import reload_doc
 
 	webnotes.syncing = True
