@@ -5,7 +5,7 @@
 	{
 		u'creation': u'2012-08-08 11:28:04',
 		u'docstatus': 0,
-		u'modified': '2012-08-28 14:48:40',
+		u'modified': '2012-08-29 12:20:54',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -13,14 +13,20 @@
 	# These values are common for all DocType
 	{
 		u'_last_update': u'1307624201',
+		u'autoname': u'',
 		u'colour': u'White:FFF',
+		u'default_print_format': u'',
+		u'description': u'',
 		'doctype': u'DocType',
 		u'document_type': u'System',
 		u'issingle': 0,
+		u'max_attachments': u'',
 		u'menu_index': 12,
-		'modifed': '2012-08-28 14:48:40',
+		u'modifed': '2012-08-29 12:20:54',
 		u'module': u'Core',
 		u'name': u'__common__',
+		u'name_case': u'',
+		u'search_fields': u'',
 		u'section_style': u'Simple',
 		u'server_code_error': u' ',
 		u'show_in_menu': 0,
@@ -30,7 +36,7 @@
 	# These values are common for all DocField
 	{
 		'doctype': u'DocField',
-		'modifed': '2012-08-28 14:48:40',
+		u'modifed': '2012-08-29 12:20:54',
 		u'name': u'__common__',
 		u'parent': u'DocType Mapper',
 		u'parentfield': u'fields',
@@ -41,7 +47,7 @@
 	# These values are common for all DocPerm
 	{
 		'doctype': u'DocPerm',
-		'modifed': '2012-08-28 14:48:40',
+		u'modifed': '2012-08-29 12:20:54',
 		u'name': u'__common__',
 		u'parent': u'DocType Mapper',
 		u'parentfield': u'permissions',
@@ -95,23 +101,49 @@
 
 	# DocField
 	{
+		u'default': u'',
+		u'depends_on': u'',
+		u'description': u'Set as the default Mapper',
 		u'doctype': u'DocField',
-		u'fieldname': u'ref_doc_submitted',
+		u'fieldname': u'is_default',
 		u'fieldtype': u'Check',
-		u'label': u'Ref Doc should be submitted?',
-		u'oldfieldname': u'ref_doc_submitted',
-		u'oldfieldtype': u'Check'
+		u'label': u'Default',
+		u'no_copy': 1,
+		u'oldfieldname': u'',
+		u'oldfieldtype': u'',
+		u'options': u'',
+		u'unique': 0,
+		u'width': u''
 	},
 
 	# DocField
 	{
+		u'default': u'',
+		u'depends_on': u'',
+		u'description': u'',
+		u'doctype': u'DocField',
+		u'fieldname': u'ref_doc_submitted',
+		u'fieldtype': u'Check',
+		u'label': u'Stop me if referenced document is not submitted',
+		u'oldfieldname': u'ref_doc_submitted',
+		u'oldfieldtype': u'Check',
+		u'options': u'',
+		u'width': u''
+	},
+
+	# DocField
+	{
+		u'default': u'',
+		u'depends_on': u'',
+		u'description': u'',
 		u'doctype': u'DocField',
 		u'fieldname': u'table_mapper_details',
 		u'fieldtype': u'Table',
 		u'label': u'Table Mapper Details',
 		u'oldfieldname': u'table_mapper_details',
 		u'oldfieldtype': u'Table',
-		u'options': u'Table Mapper Detail'
+		u'options': u'Table Mapper Detail',
+		u'width': u''
 	},
 
 	# DocField
@@ -147,6 +179,8 @@
 		u'cancel': 0,
 		u'create': 1,
 		u'doctype': u'DocPerm',
+		u'match': u'',
+		u'permlevel': u'',
 		u'role': u'System Manager',
 		u'submit': 0,
 		u'write': 1
@@ -154,13 +188,83 @@
 
 	# DocField
 	{
-		u'description': u'Set as the default Mapper',
+		u'default': u'',
+		u'depends_on': u'',
+		u'description': u'Is this a customized Mapper?',
 		u'doctype': u'DocField',
-		u'fieldname': u'is_default',
+		u'fieldname': u'is_custom',
 		u'fieldtype': u'Check',
-		u'label': u'Default',
-		'localname': u'New DocField 1',
+		u'label': u'Custom',
+		u'localname': u'New DocField 1',
 		u'no_copy': 1,
-		u'unique': 0
+		u'oldfieldname': u'',
+		u'oldfieldtype': u'',
+		u'options': u'',
+		u'print_hide': 0,
+		u'width': u''
+	},
+
+	# DocField
+	{
+		u'default': u'',
+		u'depends_on': u'',
+		u'description': u'',
+		u'doctype': u'DocField',
+		u'fieldname': u'basic_info',
+		u'fieldtype': u'Section Break',
+		u'label': u'Basic Info',
+		u'localname': u'New DocField 2',
+		u'oldfieldname': u'',
+		u'oldfieldtype': u'',
+		u'options': u'',
+		u'width': u''
+	},
+
+	# DocField
+	{
+		u'default': u'',
+		u'depends_on': u'',
+		u'description': u'',
+		u'doctype': u'DocField',
+		u'fieldname': u'more_info',
+		u'fieldtype': u'Section Break',
+		u'label': u'More Info',
+		u'localname': u'New DocField 3',
+		u'oldfieldname': u'',
+		u'oldfieldtype': u'',
+		u'options': u'',
+		u'width': u''
+	},
+
+	# DocField
+	{
+		u'default': u'',
+		u'depends_on': u'',
+		u'description': u'',
+		u'doctype': u'DocField',
+		u'fieldname': u'table_mapping_section',
+		u'fieldtype': u'Section Break',
+		u'label': u'Table Mapping',
+		u'localname': u'New DocField 4',
+		u'oldfieldname': u'',
+		u'oldfieldtype': u'',
+		u'options': u'',
+		u'width': u''
+	},
+
+	# DocField
+	{
+		u'default': u'',
+		u'depends_on': u'',
+		u'description': u'',
+		u'doctype': u'DocField',
+		u'fieldname': u'field_mapping_section',
+		u'fieldtype': u'Section Break',
+		u'label': u'Field Mapping',
+		u'localname': u'New DocField 5',
+		u'oldfieldname': u'',
+		u'oldfieldtype': u'',
+		u'options': u'',
+		u'width': u''
 	}
 ]

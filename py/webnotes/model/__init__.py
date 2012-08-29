@@ -33,7 +33,7 @@ def get(doctype, name, strip_nulls = False):
 		[remove_nulls(d) for d in doclist]
 	return doclist
 	
-def get_doctype(doctype, processed=False, strip_nulls = False):
+def get_doctype(doctype, processed=False, strip_nulls=False):
 	"""returns doclist identified by doctype, from tabDocType with its children"""
 	import webnotes.model.doctype
 	doclist = webnotes.model.doctype.get(doctype, processed)
@@ -98,20 +98,11 @@ def insert_child(fields):
 
 	# save
 	parent.save()
-	
-def dt_map(from_doctype=None, to_doctype=None, from_docname=None):
-	"""form should contain {"mapper_name": "", "from_docname": ""}"""
-	from_doctype = from_doctype or webnotes.form.get("from_doctype")
-	to_doctype = from_doctype or webnotes.form.get("to_doctype")
-	from_docname = from_docname or webnotes.form.get("from_docname")
-	
-	mapper = webnotes.conn.sql("""select name from `tabDocType Mapper`
-		where from_doctype=%s and to_doctype=%s and is_default=1""")
-	if mapper:
-		return get_controller("DocType Mapper", mapper[0]["name"]).map(from_docname)
-	else:
-		webnotes.msgprint("""Default DocType Mapper not found for mapping
-			"%s" to "%s" """ % (from_doctype, to_doctype), raise_exception=NameError)
+
+@webnotes.whitelist()
+def map_doc(from_doctype, to_doctype, from_docname):
+	from core.doctype.doctype_mapper.doctype_mapper import map_doc
+	return map_doc(from_doctype, to_doctype, from_docname)
 
 controllers = {}
 def get_controller(doctype, name=None, module=None):

@@ -32,10 +32,14 @@ class DocTypeMapperController(DocListController):
 				self.doc.to_doctype)
 
 	def validate(self):
-		self.check_fields()
+		if not getattr(webnotes, 'syncing', False):
+			self.check_fields()
 		
 	def on_update(self):
 		self.export()
+		if self.doc.is_custom:
+			self.set_as_default({"from_doctype": self.doc.from_doctype,
+				"to_doctype": self.doc.to_doctype, "is_custom[0]": 1})
 		
 	def check_fields(self):
 		def _warn(fieldname, doctype):
@@ -59,27 +63,29 @@ class DocTypeMapperController(DocListController):
 		# validate children
 		for table_map in self.doclist.get({"parentfield": "table_mapper_details"}):
 			_validate(table_map.from_table, table_map.to_table, table_map.match_id)
-
+	
 	def get_fieldnames(self, doctype, filters=None):
 		"""get fieldnames excluding default fields and no value fields"""
 		doctypelist = webnotes.model.get_doctype(doctype)
 		
 		if not filters: filters = {}
 		filters.update({
-			"fieldtype": """![%s]""" % ", ".join(webnotes.model.no_value_fields),
-			"fieldname": """![%s]""" % ", ".join(webnotes.model.default_fields)
+			"fieldtype": ["not in", webnotes.model.no_value_fields],
+			"fieldname": ["not in", webnotes.model.default_fields],
 		})
 		
 		return doctypelist.get_fieldnames(filters)
 		
-	def map(self, from_docname):
-		from_doclist = webnotes.model.get(self.doc.from_doctype, from_docname)
+	def map(self, from_doclist, newcon=None):
+		if isinstance(from_doclist, basestring):
+			from_doclist = webnotes.model.get(self.doc.from_doctype, from_doclist)
 		
 		# check if submitted
 		self.is_submitted(from_doclist)
 		
 		# get controller with new doclist
-		newcon = webnotes.model.get_controller([{"doctype": self.doc.to_doctype}])
+		if not newcon:
+			newcon = webnotes.model.get_controller([{"doctype": self.doc.to_doctype}])
 		
 		# map parent
 		newcon.doc.update(self._map_fields(0, from_doclist[0], self.doc.to_doctype))
@@ -91,7 +97,7 @@ class DocTypeMapperController(DocListController):
 				newcon.add_child(self._map_fields(tab.match_id, doc, 
 					tab.to_table, tab.to_field))
 		
-		return newcon.doclist
+		return from_doclist, newcon
 			
 	def _map_fields(self, match_id, from_doc, to_doctype, parentfield=None):
 		# fields except no copy fields
@@ -100,7 +106,7 @@ class DocTypeMapperController(DocListController):
 		# map matching fields
 		new_doc = dict([[key, from_doc[key]] for key in from_doc
 			if key in to_fieldnames])
-		
+			
 		# map specified fields
 		field_mappings = map(lambda d: [d.from_field, d.to_field, d.map], 
 			self.doclist.get({"parentfield": "field_mapper_details",
@@ -134,3 +140,20 @@ class DocTypeMapperController(DocListController):
 				Cannot create a new %s""" % (self.doc.from_doctype,
 				from_doclist[0].name, self.doc.to_doctype),
 				raise_exception=webnotes.DocStatusError)
+
+def map_doc(from_doctype, to_doctype, from_docname):
+	"""form should contain {"mapper_name": "", "from_docname": ""}"""
+	mapper = webnotes.conn.sql("""select name, ifnull(is_custom, 0) as is_custom,
+		ifnull(is_default, 0) as is_default from `tabDocType Mapper`
+		where from_doctype=%s and to_doctype=%s
+		order by is_custom asc, is_default desc""", (from_doctype, to_doctype))
+	if mapper:
+		from_doclist, newcon = from_docname, None
+		for mapping in mapper:
+			if not mapping["is_custom"] or mapping["is_default"]:
+				from_doclist, newcon = webnotes.model.get_controller("DocType Mapper",
+					mapping["name"]).map(from_doclist, newcon)
+		return newcon.doclist
+	else:
+		webnotes.msgprint("""DocType Mapper not found for mapping 
+			"%s" to "%s" """ % (from_doctype, to_doctype), raise_exception=NameError)
