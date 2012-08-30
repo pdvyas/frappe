@@ -41,6 +41,7 @@ wn.provide('wn.lib');
 wn.lib.import_slickgrid = function() {
 	wn.require('js/lib/slickgrid/slick.grid.css');
 	wn.require('js/lib/slickgrid/slick-default-theme.css');
+	wn.require('js/lib/jquery/jquery.ui.interactions.min.js');
 	wn.require('js/slickgrid.bundle.js');
 	wn.dom.set_style('.slick-cell { font-size: 12px; }');
 }

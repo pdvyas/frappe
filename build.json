@@ -86,7 +86,7 @@
 	
 	{
 		"public/js/all-app.js": [
-			"lib/js/lib/jquery/jquery.ui.core.js",
+			"lib/js/lib/jquery/jquery.ui.core.min.js",
 			"lib/js/lib/jquery/jquery.ui.datepicker.min.js",
 			"lib/js/lib/jquery/jquery.ui.autocomplete.min.js",
 			"lib/js/lib/mousetrap.min.js",
@@ -111,7 +111,6 @@
 	
 	{
 		"public/js/slickgrid.bundle.js": [
-			'lib/js/lib/slickgrid/jquery.event.drag.min.js',
 			'lib/js/lib/slickgrid/plugins/slick.cellrangeselector.js',
 			'lib/js/lib/slickgrid/plugins/slick.cellselectionmodel.js',
 			'lib/js/lib/slickgrid/plugins/slick.rowselectionmodel.js',
