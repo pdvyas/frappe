@@ -111,6 +111,7 @@
 	
 	{
 		"public/js/slickgrid.bundle.js": [
+			'lib/js/lib/slickgrid/jquery.event.drag.min.js',
 			'lib/js/lib/slickgrid/plugins/slick.cellrangeselector.js',
 			'lib/js/lib/slickgrid/plugins/slick.cellselectionmodel.js',
 			'lib/js/lib/slickgrid/plugins/slick.rowselectionmodel.js',
