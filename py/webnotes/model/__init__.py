@@ -33,7 +33,7 @@ def get(doctype, name, strip_nulls = False):
 		[remove_nulls(d) for d in doclist]
 	return doclist
 	
-def get_doctype(doctype, processed=False, strip_nulls = False):
+def get_doctype(doctype, processed=False, strip_nulls=False):
 	"""returns doclist identified by doctype, from tabDocType with its children"""
 	import webnotes.model.doctype
 	doclist = webnotes.model.doctype.get(doctype, processed)
@@ -98,12 +98,11 @@ def insert_child(fields):
 
 	# save
 	parent.save()
-	
-def dt_map(mapper=None, from_docname=None):
-	"""form should contain {"mapper_name": "", "from_docname": ""}"""
-	mapper = mapper or webnotes.form.get("mapper_name")
-	from_docname = from_docname or webnotes.form.get("from_docname")
-	return get_controller("DocType Mapper", mapper).map(from_docname)
+
+@webnotes.whitelist()
+def map_doc(from_doctype, to_doctype, from_docname):
+	from core.doctype.doctype_mapper.doctype_mapper import map_doc
+	return map_doc(from_doctype, to_doctype, from_docname)
 
 controllers = {}
 def get_controller(doctype, name=None, module=None):

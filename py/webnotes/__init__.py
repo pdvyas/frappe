@@ -68,6 +68,7 @@ class AuthenticationError(Exception): pass
 class PermissionError(Exception): pass
 class UnknownDomainError(Exception): pass
 class SessionStopped(Exception): pass
+class HandlerError(Exception): pass
 class OutgoingEmailError(ValidationError): pass
 class DuplicateEntryError(ValidationError): pass
 class InvalidLinkError(ValidationError): pass
@@ -205,21 +206,20 @@ def whitelist(allow_guest=False, allow_roles=[]):
 				# only methods explicitly flagged as "allow_guest"
 				# to be added if user is "Guest"
 				if allow_guest:
-					whitelisted.append(fn)		
-			else:
-				if allow_roles:
-					# if specific roles are mentioned,
-					# add to whitelist only if user has that role
-					roles = get_roles()
-					for role in allow_roles:
-						if role in roles:
-							whitelisted.append(fn)
-							break
-				else:
 					whitelisted.append(fn)
-
+			elif allow_roles:
+				# if specific roles are mentioned,
+				# add to whitelist only if user has that role
+				roles = get_roles()
+				for role in allow_roles:
+					if role in roles:
+						whitelisted.append(fn)
+						break
+			else:
+				whitelisted.append(fn)
+		
 		return fn
-
+		
 	return innerfn
 	
 def get_roles(user=None, with_standard=True):

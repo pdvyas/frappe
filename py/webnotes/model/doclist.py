@@ -31,35 +31,29 @@ class DocList(list):
 	"""DocList object as a wrapper around a list"""
 	def get(self, filters, limit=0):
 		"""pass filters as:
-			{"key":"val", "key":"!val", "key": "^val", "key": "[val]", "key": "![val]" }"""
+			{"key": "val", "key": ["!=", "val"],
+			"key": ["in", "val"], "key": ["not in", "val"], "key": "^val"}"""
+		# map reverse operations to set add = False
+		import operator
+		ops_map = {
+			"!=": lambda (a, b): operator.eq(a, b),
+			"in": lambda (a, b): not operator.contains(b, a),
+			"not in": lambda (a, b): operator.contains(b, a),
+		}
+			
 		out = []
 		for d in self:
 			add = True
 			for f in filters:
 				fval = filters[f]
 				if isinstance(fval, list):
-					if fval[0] == "==" and d.get(f) != fval[1]:
+					if fval[0] in ops_map and ops_map[fval[0]]((d.get(f), fval[1])):
 						add = False
 						break
-					elif fval[0] == "!=" and d.get(f) == fval[1]:
-						add = False
-						break
-				elif cstr(fval).startswith('['):
-					if d.get(f) not in [v.strip() for v in fval[1:-1].split(",")]:
-						add = False
-						break
-				elif cstr(fval).startswith('!['):
-					if d.get(f) in [v.strip() for v in fval[2:-1].split(",")]:
-						add = False
-						break
-				elif cstr(fval).startswith('!'):
-					if d.get(f) == fval[1:]:
-						add = False
-						break
-				elif cstr(fval).startswith('^'):
-					if not (d.get(f) or '').startswith(fval[1:]):
-						add = False
-						break
+				elif isinstance(fval, basestring) and fval.startswith("^") and \
+						not (d.get(f) or "").startswith(fval[1:]):
+					add = False
+					break
 				elif d.get(f)!=fval:
 					add = False
 					break

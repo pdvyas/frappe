@@ -117,7 +117,7 @@ def sort_fields(doclist):
 		d.idx = idx
 		idx += 1
 
-	doclist.get({"doctype":"!DocField"}).extend(newlist)
+	doclist.get({"doctype":["!=", "DocField"]}).extend(newlist)
 			
 def apply_property_setters(doctype, doclist):		
 	from webnotes.utils import cint
@@ -260,7 +260,7 @@ def get_link_fields(doctype):
 	doctypelist = get(doctype)
 	
 	return doctypelist.get({"fieldtype":"Link"}).extend(doctypelist.get({"fieldtype":"Select", 
-		"options":"^link:"}))
+		"options": "^link:"}))
 		
 def add_validators(doctype, doclist):
 	for validator in webnotes.conn.sql("""select name from `tabDocType Validator` where
@@ -285,6 +285,7 @@ class DocTypeDocList(webnotes.model.doclist.DocList):
 
 		if parent:
 			filters["parent"] = parent
+		
 		return self.getone(filters)
 		
 	def get_fieldnames(self, filters=None):

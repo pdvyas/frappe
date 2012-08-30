@@ -37,6 +37,7 @@ def sync_modules(force=0):
 def walk_and_sync(start_path, force=0):
 	"""walk and sync all doctypes and pages"""
 	import os
+	import webnotes
 	from webnotes.modules import reload_doc
 
 	webnotes.syncing = True
@@ -52,6 +53,9 @@ def walk_and_sync(start_path, force=0):
 				module_name = path.split(os.sep)[-3]
 				if not module_name in modules:
 					modules.append(module_name)
+					if not webnotes.conn.exists("Module Def", module_name):
+						webnotes.model.insert({"doctype": "Module Def",
+							"module_name": module_name})
 				
 				# grand parent folder is doctype
 				doctype = path.split(os.sep)[-2]
@@ -64,10 +68,6 @@ def walk_and_sync(start_path, force=0):
 				else:
 					sync_doc(module_name, doctype, name, force)
 
-	for m in modules:
-		if not webnotes.conn.exists("Module Def", m):
-			webnotes.model.insert({"doctype": "Module Def", "module_name": m})
-	
 	webnotes.syncing = False
 	
 	return modules
@@ -204,26 +204,36 @@ def sync_core():
 	sync_doctype("core", "property_setter")
 	sync_doctype("core", "doctype_validator")
 	sync_doctype("core", "doctype")
+	sync_doctype("core", "role")
+	sync_doctype("core", "defaultvalue")
+	sync_doctype("core", "module_def")
+	sync_doctype("core", "profile")
+	sync_doctype("core", "userrole")
 	
 def sync_install(force=1):
 	# load required doctypes' doclist
 	sync_core()
 	
+	# install default core records
+	load_install_docs(["core"])
+	run_startup_install("execute_core")
+	
 	# sync all doctypes
 	modules = sync_all(force)
 	
 	# load install docs
+	if "core" in modules: del modules[modules.index("core")]
 	load_install_docs(modules)
 	
 	# run startup install
 	run_startup_install()
 	
-def run_startup_install():
+def run_startup_install(method="execute"):
 	print "executing startup install"
 	from startup import install
-	if hasattr(install, 'execute'):
+	if hasattr(install, method):
 		webnotes.conn.begin()
-		install.execute()
+		getattr(install, method)()
 		webnotes.conn.commit()
 	
 

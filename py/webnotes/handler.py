@@ -155,17 +155,14 @@ def execute_cmd(cmd):
 	method = get_method(cmd)
 	if not method in webnotes.whitelisted:
 		webnotes.response['403'] = 1
-		webnotes.msgprint('Not Allowed, %s' % str(method))
-		raise Exception, 'Not Allowed, %s' % str(method)
+		webnotes.msgprint('Not Allowed, %s' % method.__name__,
+			raise_exception=webnotes.HandlerError)
 		
 	if not webnotes.conn.in_transaction:
 		webnotes.conn.begin()
 
-	if 'arg' in webnotes.form:
-		# direct method call
-		ret = method(webnotes.form.get('arg'))
-	else:
-		ret = method()
+	# pass form as arguments
+	ret = call(method, webnotes.form)
 
 	# returns with a message
 	if ret:
@@ -176,6 +173,14 @@ def execute_cmd(cmd):
 
 	if webnotes.conn.in_transaction:
 		webnotes.conn.commit()
+		
+def call(fn, args):
+	import inspect
+	fnargs, varargs, varkw, defaults = inspect.getargspec(fn)
+	newargs = {}
+	for a in fnargs:
+		newargs[a] = args.get(a) or (defaults and defaults[fnargs.index(a)]) or None
+	return fn(**newargs)
 
 def get_method(cmd):
 	"""get method object from cmd"""
