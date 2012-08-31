@@ -77,39 +77,6 @@ class DocListController(object):
 		self.save_children()
 		self.run('on_update')
 
-	def submit(self):
-		"""
-			Save & Submit - set docstatus = 1, run "on_submit"
-		"""
-		self.doc.docstatus = 1 # remove this line after form revamp
-		
-		if self.doc.docstatus != 1:
-			webnotes.msgprint("""Cannot Submit if DocStatus is not set to 1""",
-				raise_exception=webnotes.DocStatusError)
-		self.save()
-		self.run('on_submit')
-
-	def cancel(self):
-		"""
-			Cancel - set docstatus 2, run "on_cancel"
-		"""
-		self.doc.docstatus = 2 # remove this line after form revamp
-		
-		if self.doc.docstatus != 2:
-			webnotes.msgprint("""Cannot Cancel if DocStatus is not set to 2""",
-				raise_exception=webnotes.DocStatusError)
-		self.save()
-		self.run('on_cancel')
-
-	def update_after_submit(self):
-		"""
-			Update after submit - some values changed after submit
-		"""
-		if self.doc.docstatus != 1:
-			webnotes.msgprint("Cannot Update if Document is not Submitted", raise_exception=webnotes.DocStatusError)
-		self.save()
-		self.run('on_update_after_submit')
-
 	def prepare_for_save(self):
 		"""Set owner, modified etc before saving"""
 		self.check_if_latest()
@@ -133,6 +100,8 @@ class DocListController(object):
 				
 				# set docstatus of children as that of parent
 				d.docstatus = self.doc.docstatus
+				d.modified = self.doc.modified
+				d.modified_by = self.doc.modified_by
 
 				d.save(new = cint(d.get('__islocal')))
 			

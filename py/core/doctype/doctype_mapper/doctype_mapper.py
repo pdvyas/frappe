@@ -72,6 +72,7 @@ class DocTypeMapperController(DocListController):
 		filters.update({
 			"fieldtype": ["not in", webnotes.model.no_value_fields],
 			"fieldname": ["not in", webnotes.model.default_fields],
+			"parent": doctype,
 		})
 		
 		return doctypelist.get_fieldnames(filters)
