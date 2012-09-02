@@ -246,6 +246,10 @@ def setup_options():
 	parser.add_option("-r", "--run_method", nargs=2, metavar="MODULE METHOD",
 		help="Run given method of given module")
 
+	parser.add_option("--build_message_files", default=False, action="store_true",
+		help="Build message files for translation")
+
+
 	return parser.parse_args()
 	
 def run():
@@ -421,6 +425,10 @@ def run():
 			except Exception, e:
 				print e
 				webnotes.conn.rollback()
+				
+	elif options.build_message_files:
+		import webnotes.utils.translate
+		webnotes.utils.translate.build_message_files()
 
 if __name__=='__main__':
 	run()

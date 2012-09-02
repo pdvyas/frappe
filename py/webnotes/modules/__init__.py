@@ -45,7 +45,10 @@ def get_module_path(module):
 		return os.path.join(path_to_lib, 'lib', 'py', 'core')
 	else:
 		return os.path.join(conf.modules_path, m)
-	
+
+def get_doc_path(dt, dn, module):
+	import os
+	return os.path.join(get_module_path(module), dt, dn)
 
 def reload_doc(module, dt=None, dn=None):
 	"""reload single / list of records"""

@@ -60,6 +60,7 @@ cookies = {}
 response = DictObj({'message':'', 'exc':''})
 debug_log = []
 message_log = []
+lang = 'en'
 
 # exceptions
 class ProgrammingError(Exception): pass
@@ -81,7 +82,11 @@ class IntegrityError(ValidationError): pass
 class CircularLinkError(ValidationError): pass
 class DependencyError(ValidationError): pass
 
-
+def _(msg):
+	"""translate object in current lang, if exists"""
+	from webnotes.utils.translate import messages
+	return messages.get(lang, {}).get(msg, msg)
+	
 def errprint(msg):
 	"""Append to the :data:`debug log`"""
 	from utils import cstr
