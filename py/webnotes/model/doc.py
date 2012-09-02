@@ -221,8 +221,7 @@ class Document(dict):
 
 		if cint(doctypelist[0].issingle):
 			doctype_fieldnames = doctypelist.get_fieldnames({
-				"fieldtype": ["not in", webnotes.model.no_value_fields],
-				"parent": doctypelist[0].name})
+				"fieldtype": ["not in", webnotes.model.no_value_fields]})
 			valid_fields[self.doctype] = filter(lambda f: f in doctype_fieldnames,
 				self.keys())
 		else:

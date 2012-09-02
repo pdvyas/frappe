@@ -73,9 +73,20 @@ class DocListController(object):
 		self.prepare_for_save()
 		self.run('validate')
 		self.doctype_validate()
+		
+		# get the old doclist
+		try:
+			oldlist = webnotes.model.get(self.doc.doctype, self.doc.name)
+		except NameError, e:
+			oldlist = None
+		
 		self.save_main()
 		self.save_children()
 		self.run('on_update')
+		
+		# version is saved after save, because we need names
+		if oldlist:
+			self.save_version(oldlist)
 
 	def prepare_for_save(self):
 		"""Set owner, modified etc before saving"""
@@ -109,7 +120,27 @@ class DocListController(object):
 		
 		# delete all children in database that are not in the child_map
 		self.remove_children(child_map)
-
+		
+	def save_version(self, oldlist):
+		"""create a new version of given difflist"""
+		difflist = webnotes.model.diff(oldlist, self.doclist,
+			["name", "doctype", "idx", "docstatus"])
+		
+		# save json to tabVersion
+		# import json
+		# webnotes.model.insert([{
+		# 	"doctype": "Version", "__islocal": 1,
+		# 	"modified": self.doc.modified, "creation": self.doc.modified,
+		# 	"doc_type": self.doc.doctype, "doc_name": self.doc.name,
+		# 	"doc_modified_by": oldlist[0].modified_by,
+		# 	"doc_modified": oldlist[0].modified,
+		# 	"diff": json.dumps(difflist)
+		# }])
+		
+		# TODO: remove this after testing
+		import pprint
+		pprint.pprint(difflist)
+		
 	def remove_children(self, child_map):
 		"""delete children from database if they do not exist in the doclist"""
 		# get all children types
