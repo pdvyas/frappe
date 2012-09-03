@@ -1,0 +1,17 @@
+[
+ "DocType Mapper", 
+ "Module", 
+ "From DocType", 
+ "To DocType", 
+ "Default", 
+ "Set as the default Mapper", 
+ "Stop me if referenced document is not submitted", 
+ "Table Mapper Details", 
+ "Field Mapper Details", 
+ "Custom", 
+ "Is this a customized Mapper?", 
+ "Basic Info", 
+ "More Info", 
+ "Table Mapping", 
+ "Field Mapping"
+]

@@ -1,0 +1,13 @@
+[
+ "DocPerm", 
+ "Level", 
+ "Role", 
+ "Read", 
+ "Write", 
+ "Create", 
+ "Submit", 
+ "Cancel", 
+ "Execute", 
+ "Amend", 
+ "Match"
+]

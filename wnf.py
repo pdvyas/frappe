@@ -235,6 +235,9 @@ def setup_options():
 	parser.add_option("--test_stage", help="""Run test modules specified in the stage. 
 		See tests/stages.py for list of stages""", 
 		metavar="STAGE", nargs=1)
+		
+	parser.add_option("-v", "--verbose", help="""show verbose output""",
+		default=False, action="store_true")
 
 	parser.add_option("--test_export", help="""Export data for tests at conf.test_data_path
 		If name is *, all records are exported""", 
@@ -245,6 +248,13 @@ def setup_options():
 		
 	parser.add_option("-r", "--run_method", nargs=2, metavar="MODULE METHOD",
 		help="Run given method of given module")
+
+	parser.add_option("--build_message_files", default=False, action="store_true",
+		help="Build message files for translation")
+		
+	parser.add_option('--export_messages', nargs=1, metavar="FILENAME", 
+		help="Export all messages for translation in a csv file")
+
 
 	return parser.parse_args()
 	
@@ -390,12 +400,17 @@ def run():
 		unittest.main()
 
 	elif options.setup_test_stage is not None:
+		if options.verbose:
+			import conf
+			conf.test_verbosity = 2
 		import tests.stages
 		tests.stages.upto(options.setup_test_stage, with_tests=options.with_tests)
 
 	elif options.test_stage is not None:
+		if options.verbose:
+			import conf
+			conf.test_verbosity = 2
 		import tests.stages
-		del sys.argv[1:]
 		tests.stages.test_stage(options.test_stage)
 
 	elif options.test_export is not None:
@@ -421,6 +436,15 @@ def run():
 			except Exception, e:
 				print e
 				webnotes.conn.rollback()
+				
+	elif options.build_message_files:
+		import webnotes.utils.translate
+		webnotes.utils.translate.build_message_files()
+		
+	elif options.export_messages:
+		import webnotes.utils.translate
+		webnotes.utils.translate.all_messages(options.export_messages)
+		
 
 if __name__=='__main__':
 	run()

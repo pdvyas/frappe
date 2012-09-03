@@ -1,0 +1,15 @@
+[
+ "Property Setter", 
+ "Property Setter overrides a standard DocType or Field property", 
+ "DocType or Field", 
+ "Property overridden in main (DocType) or field (DocField)", 
+ "DocField", 
+ "DocType", 
+ "DocType", 
+ "Field Name", 
+ "\"fieldname\" of the entity whose property is to be set if DocField property is being overridden.", 
+ "Property", 
+ "Property Type", 
+ "Set Value", 
+ "New value to be set"
+]

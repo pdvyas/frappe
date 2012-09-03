@@ -24,6 +24,7 @@ import webnotes
 import webnotes.model
 from webnotes.utils import cint
 from webnotes.model.controller import DocListController
+from webnotes import _
 
 class DuplicateSeriesError(webnotes.ValidationError): pass
 
@@ -55,7 +56,7 @@ class DocTypeController(DocListController):
 				where substring_index(autoname, ".", 1) = %s and name != %s""", 
 				(prefix, doctype))
 			if exists:
-				webnotes.msgprint("""Series %s is already in use in DocType %s""" % \
+				webnotes.msgprint(_("""Series %s is already in use in DocType %s""") % \
 					(autoname, exists[0]["name"]), raise_exception=DuplicateSeriesError)
 		
 	def validate_fields(self):
@@ -71,13 +72,13 @@ class DocTypeController(DocListController):
 		
 		for doc in self.doclist.get({"doctype": "DocField"}):
 			if not (doc.fieldname or doc.label):
-				webnotes.msgprint("""Must specify Field Name or Label for row # %d""" % \
+				webnotes.msgprint(_("""Must specify Field Name or Label for row # %d""") % \
 					doc.idx, raise_exception=True)
 			doc.fieldname = scrub(doc.fieldname or doc.label)
 			
 			# validate if fieldname exists and is not one of reserved field names
 			if not doc.fieldname or doc.fieldname in webnotes.model.default_fields:
-				webnotes.msgprint("""Invalid Field Name "%s" for row # %d""" % \
+				webnotes.msgprint(_("""Invalid Field Name "%s" for row # %d""") % \
 					(doc.fieldname, doc.idx), raise_exception=True)
 			
 			# set permlevel
@@ -85,13 +86,13 @@ class DocTypeController(DocListController):
 			
 			# fieldtypes [HTML, Button, Section Break] cannot be mandatory
 			if cint(doc.reqd) and doc.fieldtype in ["HTML", "Button", "Section Break"]:
-				webnotes.msgprint("""%s [%s] cannot be mandatory""" % \
+				webnotes.msgprint(_("""%s [%s] cannot be mandatory""") % \
 					(doc.label, doc.fieldname), raise_exception=True)
 			
 			# validate if fieldname appears more than once
 			if doc.fieldname in fieldnames:
-				webnotes.msgprint("""Field Name "%s" appears twice (rows %d and %d).
-					Please rectify.""" % (doc.fieldname, fieldnames[doc.fieldname],
+				webnotes.msgprint(_("""Field Name "%s" appears twice (rows %d and %d).
+					Please rectify.""") % (doc.fieldname, fieldnames[doc.fieldname],
 						doc.idx), raise_exception=True)
 				
 			fieldnames[doc.fieldname] = doc.idx

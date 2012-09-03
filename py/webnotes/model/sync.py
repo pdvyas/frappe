@@ -132,9 +132,11 @@ def load_doctypelist(module_name, doctype, docname):
 		print 'Bad txt file:' + get_file_path(module_name, doctype, docname)
 
 def is_unchanged(doclist, force):
-	modified = doclist[0]['modified']
 	if not doclist:
+		print doclist
 		raise Exception('DocList could not be evaluated')
+		
+	modified = doclist[0]['modified']
 	if not force and modified == str(webnotes.conn.get_value(doclist[0].get('doctype'), 
 		doclist[0].get('name'), 'modified')):
 		return True

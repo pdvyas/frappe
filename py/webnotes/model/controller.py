@@ -73,42 +73,20 @@ class DocListController(object):
 		self.prepare_for_save()
 		self.run('validate')
 		self.doctype_validate()
+		
+		# get the old doclist
+		try:
+			oldlist = webnotes.model.get(self.doc.doctype, self.doc.name)
+		except NameError, e:
+			oldlist = None
+		
 		self.save_main()
 		self.save_children()
 		self.run('on_update')
-
-	def submit(self):
-		"""
-			Save & Submit - set docstatus = 1, run "on_submit"
-		"""
-		self.doc.docstatus = 1 # remove this line after form revamp
 		
-		if self.doc.docstatus != 1:
-			webnotes.msgprint("""Cannot Submit if DocStatus is not set to 1""",
-				raise_exception=webnotes.DocStatusError)
-		self.save()
-		self.run('on_submit')
-
-	def cancel(self):
-		"""
-			Cancel - set docstatus 2, run "on_cancel"
-		"""
-		self.doc.docstatus = 2 # remove this line after form revamp
-		
-		if self.doc.docstatus != 2:
-			webnotes.msgprint("""Cannot Cancel if DocStatus is not set to 2""",
-				raise_exception=webnotes.DocStatusError)
-		self.save()
-		self.run('on_cancel')
-
-	def update_after_submit(self):
-		"""
-			Update after submit - some values changed after submit
-		"""
-		if self.doc.docstatus != 1:
-			webnotes.msgprint("Cannot Update if Document is not Submitted", raise_exception=webnotes.DocStatusError)
-		self.save()
-		self.run('on_update_after_submit')
+		# version is saved after save, because we need names
+		if oldlist:
+			self.save_version(oldlist)
 
 	def prepare_for_save(self):
 		"""Set owner, modified etc before saving"""
@@ -133,6 +111,8 @@ class DocListController(object):
 				
 				# set docstatus of children as that of parent
 				d.docstatus = self.doc.docstatus
+				d.modified = self.doc.modified
+				d.modified_by = self.doc.modified_by
 
 				d.save(new = cint(d.get('__islocal')))
 			
@@ -140,7 +120,27 @@ class DocListController(object):
 		
 		# delete all children in database that are not in the child_map
 		self.remove_children(child_map)
-
+		
+	def save_version(self, oldlist):
+		"""create a new version of given difflist"""
+		difflist = webnotes.model.diff(oldlist, self.doclist,
+			["name", "doctype", "idx", "docstatus"])
+		
+		# save json to tabVersion
+		# import json
+		# webnotes.model.insert([{
+		# 	"doctype": "Version", "__islocal": 1,
+		# 	"modified": self.doc.modified, "creation": self.doc.modified,
+		# 	"doc_type": self.doc.doctype, "doc_name": self.doc.name,
+		# 	"doc_modified_by": oldlist[0].modified_by,
+		# 	"doc_modified": oldlist[0].modified,
+		# 	"diff": json.dumps(difflist)
+		# }])
+		
+		# TODO: remove this after testing
+		import pprint
+		pprint.pprint(difflist)
+		
 	def remove_children(self, child_map):
 		"""delete children from database if they do not exist in the doclist"""
 		# get all children types

@@ -1,0 +1,15 @@
+[
+ "DocType Validator", 
+ "DocType Validator allows setting of various validation rules that are checked before a document is saved.", 
+ "For DocType", 
+ "Set validation rules for this DocType and all its children DocTypes.", 
+ "Link Validation", 
+ "Link Filters", 
+ "Set additional filters for Link Fields", 
+ "Conditional Validation", 
+ "Conditional Properties", 
+ "Check property values based on conditions", 
+ "Unique Validation", 
+ "Unique Rows", 
+ "Define rows unique based on columns."
+]
