@@ -30,8 +30,6 @@ class DuplicateSeriesError(webnotes.ValidationError): pass
 class DocTypeController(DocListController):
 	def validate(self):
 		self.validate_series()
-		if self.doc.is_submittable:
-			self.add_amend_fields()
 		self.validate_fields()
 		
 	def on_update(self):
@@ -97,24 +95,3 @@ class DocTypeController(DocListController):
 						doc.idx), raise_exception=True)
 				
 			fieldnames[doc.fieldname] = doc.idx
-	
-	def add_amend_fields(self):
-		"""add amendment_date and amended_from"""
-		if self.doc.is_submittable:
-			if not self.doclist.get({"fieldname": "amended_from"}):
-				self.add_child({"__islocal": 1,
-					"doctype": "DocField", "parentfield": "fields",
-					"fieldname": "amended_from", "label": "Amended From",
-					"fieldtype": "Link", "options": self.doc.name,
-					"permlevel": 1, "print_hide": 1, "no_copy": 1,
-					"idx": max((d.idx for d in self.doclist.get({"doctype": "DocField"})))
-				})
-				
-			if not self.doclist.get({"fieldname": "amendment_date"}):
-				self.add_child({"__islocal": 1,
-					"doctype": "DocField", "parentfield": "fields",
-					"fieldname": "amendment_date", "label": "Amendment Date",
-					"fieldtype": "Date", "depends_on": "eval:doc.amended_from",
-					"permlevel": 0, "print_hide": 1, "no_copy": 1,
-					"idx": max((d.idx for d in self.doclist.get({"doctype": "DocField"})))
-				})
