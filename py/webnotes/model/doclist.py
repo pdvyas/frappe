@@ -71,8 +71,26 @@ class DocList(list):
 	def extend(self, n):
 		list.extend(self, n)
 		return self
-
-
+		
+	def copy(self):
+		from webnotes.model.doc import Document
+		out = []
+		for d in self:
+			out.append(Document(fielddata = d))
+		return DocList(out)
+		
+	def filter_valid_fields(self):
+		import webnotes.model
+		fieldnames = {}
+		for d in self:
+			remove = []
+			for f in d:
+				if f not in fieldnames.setdefault(d.doctype,
+						webnotes.model.get_fieldnames(d.doctype)):
+					remove.append(f)
+			for f in remove:
+				del d[f]
+		
 def load(doctype, name):
 	# from cache?
 	doclist = webnotes.utils.cache.get(doctype + '/' + name)
