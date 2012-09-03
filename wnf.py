@@ -252,8 +252,16 @@ def setup_options():
 	parser.add_option("--build_message_files", default=False, action="store_true",
 		help="Build message files for translation")
 		
-	parser.add_option('--export_messages', nargs=1, metavar="FILENAME", 
-		help="Export all messages for translation in a csv file")
+	parser.add_option('--export_messages', nargs=2, metavar="LANG FILENAME", 
+		help="""Export all messages for a language to translation in a csv file. 
+		Example, lib/wnf.py --export_messages hi hindi.csv""")
+
+	parser.add_option('--import_messages', nargs=2, metavar="LANG FILENAME", 
+		help="""Import messages for a language and make language files. 
+		Example, lib/wnf.py --export_messages hi hindi.csv""")
+
+	parser.add_option('--google_translate', nargs=3, metavar="LANG INFILE OUTFILE", 
+		help="""Auto translate using Google Translate API""")
 
 
 	return parser.parse_args()
@@ -443,8 +451,15 @@ def run():
 		
 	elif options.export_messages:
 		import webnotes.utils.translate
-		webnotes.utils.translate.all_messages(options.export_messages)
-		
+		webnotes.utils.translate.export_messages(*options.export_messages)
+
+	elif options.import_messages:
+		import webnotes.utils.translate
+		webnotes.utils.translate.import_messages(*options.import_messages)
+	
+	elif options.google_translate:
+		from webnotes.utils.translate import google_translate
+		google_translate(*options.google_translate)
 
 if __name__=='__main__':
 	run()

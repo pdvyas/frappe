@@ -122,13 +122,18 @@ def get_controller(doctype, name=None, module=None):
 	if doctype in controllers:
 		return controllers[doctype](doclist, name)
 
-	import os
-	from webnotes.modules import get_module_path, scrub
+	import webnotes, os
+	from webnotes.modules import get_doc_path, scrub
 	from webnotes.model.controller import DocListController
 	
 	module_name = module or webnotes.conn.get_value("DocType", doctype, "module") or "Core"
-	module_path = os.path.join(get_module_path(module_name), 'doctype',
-		scrub(doctype), scrub(doctype)+'.py')
+	doc_path = get_doc_path(module_name, 'doctype', doctype)
+	module_path = os.path.join(doc_path, scrub(doctype)+'.py')
+
+	# load translations
+	if webnotes.can_translate():
+		from webnotes.utils.translate import get_lang_data
+		webnotes._messages.update(get_lang_data(doc_path, None, 'py'))
 
 	# check if path exists
 	if os.path.exists(module_path):

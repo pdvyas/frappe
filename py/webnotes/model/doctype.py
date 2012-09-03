@@ -32,6 +32,7 @@ Get metadata (main doctype with fields and permissions with all table doctypes)
 """
 # imports
 from __future__ import unicode_literals
+import conf
 import webnotes
 import webnotes.model
 import webnotes.model.doc
@@ -66,6 +67,7 @@ def get(doctype, processed=False):
 		expand_selects(doclist)
 		add_print_formats(doclist)
 		add_search_fields(doclist)
+		update_language(doclist)
 
 	# add validators
 	add_validators(doctype, doclist)
@@ -73,6 +75,30 @@ def get(doctype, processed=False):
 	to_cache(doctype, processed, doclist)
 		
 	return DocTypeDocList(doclist)
+
+def update_language(doclist):
+	"""update language"""
+	if webnotes.can_translate():
+		from webnotes import _
+		from webnotes.modules import get_doc_path
+
+		# load languages for each doctype
+		from webnotes.utils.translate import get_lang_data, update_lang_js
+		_messages = {}
+	
+		for d in doclist:
+			if d.doctype=='DocType':
+				_messages.update(get_lang_data(get_doc_path(d.module, d.doctype, d.name), 
+					webnotes.lang, 'doc'))
+
+		doc = doclist[0]
+	
+		# attach translations to client
+		doc["__messages"] = _messages
+				
+		# update translations in js
+		if doc.get("__js"):
+			doc["__js"] = update_lang_js(doc["__js"], get_doc_path(doc.module, doc.doctype, doc.name))		
 
 def load_docfield_types():
 	global docfield_types

@@ -49,18 +49,23 @@ code_fields_dict = {
 auto_cache_clear = False
 auth_obj = None
 conn = None
-request_form = None
-form = None
 session = None
 user = None
 catch_warning = False
+
+# request / response
+form = None
+request_form = None
 incoming_cookies = {}
 add_cookies = {} # append these to outgoing request
 cookies = {}
 response = DictObj({'message':'', 'exc':''})
 debug_log = []
 message_log = []
+
+# translate
 lang = 'en'
+_messages = {}
 
 # exceptions
 class ProgrammingError(Exception): pass
@@ -85,8 +90,18 @@ class DependencyError(ValidationError): pass
 def _(msg):
 	"""translate object in current lang, if exists"""
 	from webnotes.utils.translate import messages
-	return messages.get(lang, {}).get(msg, msg)
-	
+	return _messages.get(lang, {}).get(msg, msg)
+
+def can_translate():
+	"""return True if translation has to be loaded"""
+	if lang=='en': 
+		return False
+	import conf
+	if lang in conf.accept_languages:
+		return True
+	else:
+		return False
+
 def errprint(msg):
 	"""Append to the :data:`debug log`"""
 	from utils import cstr
