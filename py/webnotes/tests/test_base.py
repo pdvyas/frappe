@@ -70,6 +70,26 @@ class TestBase(unittest.TestCase):
 			where ifnull(%s, '') = '%s' and rgt = lft+1""" % \
 			(dt, group_fld, (group_fld == 'is_group' and 'No' or 'Ledger')),
 			as_dict=False))
+			
+	def assertEqualDoclist(self, doclist1, doclist2, ignore_fields=None):
+		import webnotes.model
+		if not ignore_fields: ignore_fields = []
+		fieldnames = {}
+		not_equal = []
+		for d1 in doclist1:
+			for d2 in doclist2:
+				if d1["doctype"] == d2["doctype"] and d1["name"] == d2["name"]:
+					for f in fieldnames.setdefault(d1["doctype"],
+							webnotes.model.get_fieldnames(d1["doctype"])):
+						if f not in ignore_fields and d1.get(f) != d2.get(f):
+							not_equal.append([d1["doctype"], d1["name"], d1.get(f),
+								d2.get(f)])
+							
+		if not_equal:
+			self.fail("""DocLists are not equal. Mismatch in fields: \n%s""" % \
+				"\n".join(["%s: %s --> %s != %s" % (ne[0], ne[1], unicode(ne[2]),
+				unicode(ne[3])) for ne in not_equal]))
+		
 				
 	def create_docs(self, records):
 		import webnotes.model
