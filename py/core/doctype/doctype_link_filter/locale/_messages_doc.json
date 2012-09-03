@@ -1,0 +1,17 @@
+[
+ "DocType Link Filter", 
+ "Filters for Link Fields", 
+ "Table Field", 
+ "Link Field", 
+ "Fieldname", 
+ "Condition", 
+ "=", 
+ "in", 
+ ">", 
+ "<", 
+ "!=", 
+ ">=", 
+ "<=", 
+ "Begins With", 
+ "Value"
+]

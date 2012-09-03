@@ -59,17 +59,21 @@ def build_from_database():
 	from webnotes.modules import get_doc_path
 	
 	for doctype in webnotes.conn.sql("""select name, description, module from tabDocType"""):
-		if doctype.module:
+		doctype_path = get_doc_path(doctype.module, 'DocType', doctype.name)
+		
+		# if module and doctype folder exists
+		if doctype.module and os.path.exists(doctype_path):
 			messages = [doctype.name, doctype.description]
 				
 			for docfield in webnotes.conn.sql("""select label, description, options, fieldtype 
 				from tabDocField where parent=%s""", doctype.name):
 				messages += [docfield.label, docfield.description]
 				if docfield.fieldtype=='Select' and docfield.options \
-					and not docfield.options.startswith("link:"):
+					and not docfield.options.startswith("link:") \
+					and not docfield.options.startswith("attach_files:"):
 					messages += docfield.options.split('\n')
 				
-			write_locale_file(get_doc_path('DocType', doctype.name, doctype.module), messages, 'doc')
+			write_locale_file(doctype_path, messages, 'doc')
 
 def build_for_framework(path, mtype):
 	"""make locale files for framework py and js (all)"""
@@ -101,7 +105,7 @@ def build_from_doctypes(path):
 			write_locale_file(base_path, messagesjs, 'js')
 
 def get_message_list(path):
-	"""get list of messages in file"""
+	"""get list of messages from a code file"""
 	import re
 	messages = []
 	with open(path, 'r') as sourcefile:
@@ -121,10 +125,24 @@ def write_locale_file(path, messages, mtype):
 		msgfile.write(json.dumps(filter(None, messages), indent=1))
 		
 	print fname
-		
 
-def all_messages():
+def all_messages(outfile):
 	"""get list of all messages"""
+	messages = []
+	for (base_path, folders, files) in os.walk('.'):
+		for fname in files:
+			if fname.startswith('_messages_'):
+				with open(os.path.join(base_path, fname), 'r') as msgfile:
+					messages += json.loads(msgfile.read())
+					
+	messages = list(set(messages))
+	messages.sort()
+	if outfile:
+		from csv import writer
+		with open(outfile, 'w') as msgfile:
+			w = writer(msgfile)
+			for m in messages:
+				w.writerow([m.encode('utf-8')])
 	
 def load_messages(messages, lang):
 	"""make individual message files for each language"""

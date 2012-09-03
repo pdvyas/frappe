@@ -1,0 +1,5 @@
+[
+ "Series %s is already in use in DocType %s", 
+ "Must specify Field Name or Label for row # %d", 
+ "%s [%s] cannot be mandatory"
+]

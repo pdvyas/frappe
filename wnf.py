@@ -248,6 +248,9 @@ def setup_options():
 
 	parser.add_option("--build_message_files", default=False, action="store_true",
 		help="Build message files for translation")
+		
+	parser.add_option('--export_messages', nargs=1, metavar="FILENAME", 
+		help="Export all messages for translation in a csv file")
 
 
 	return parser.parse_args()
@@ -429,6 +432,11 @@ def run():
 	elif options.build_message_files:
 		import webnotes.utils.translate
 		webnotes.utils.translate.build_message_files()
+		
+	elif options.export_messages:
+		import webnotes.utils.translate
+		webnotes.utils.translate.all_messages(options.export_messages)
+		
 
 if __name__=='__main__':
 	run()

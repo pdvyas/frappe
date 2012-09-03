@@ -46,9 +46,10 @@ def get_module_path(module):
 	else:
 		return os.path.join(conf.modules_path, m)
 
-def get_doc_path(dt, dn, module):
+def get_doc_path(module, dt, dn):
 	import os
-	return os.path.join(get_module_path(module), dt, dn)
+	if not module: return None
+	return os.path.join(get_module_path(module), scrub(dt), scrub(dn))
 
 def reload_doc(module, dt=None, dn=None):
 	"""reload single / list of records"""

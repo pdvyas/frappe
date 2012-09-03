@@ -1,0 +1,15 @@
+[
+ "Field Mapper Detail", 
+ "Match Id", 
+ "From Field", 
+ "To Field", 
+ "Map", 
+ "Yes", 
+ "No", 
+ "Checking Operator (To Fld, Operator, From Fld)", 
+ "=", 
+ ">", 
+ ">=", 
+ "<", 
+ "<="
+]
