@@ -235,6 +235,9 @@ def setup_options():
 	parser.add_option("--test_stage", help="""Run test modules specified in the stage. 
 		See tests/stages.py for list of stages""", 
 		metavar="STAGE", nargs=1)
+		
+	parser.add_option("-v", "--verbose", help="""show verbose output""",
+		default=False, action="store_true")
 
 	parser.add_option("--test_export", help="""Export data for tests at conf.test_data_path
 		If name is *, all records are exported""", 
@@ -397,12 +400,17 @@ def run():
 		unittest.main()
 
 	elif options.setup_test_stage is not None:
+		if options.verbose:
+			import conf
+			conf.test_verbosity = 2
 		import tests.stages
 		tests.stages.upto(options.setup_test_stage, with_tests=options.with_tests)
 
 	elif options.test_stage is not None:
+		if options.verbose:
+			import conf
+			conf.test_verbosity = 2
 		import tests.stages
-		del sys.argv[1:]
 		tests.stages.test_stage(options.test_stage)
 
 	elif options.test_export is not None:

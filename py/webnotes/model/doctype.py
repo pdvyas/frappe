@@ -290,7 +290,7 @@ class DocTypeDocList(webnotes.model.doclist.DocList):
 		
 	def get_fieldnames(self, filters=None):
 		if not filters: filters = {}
-		filters.update({"doctype": "DocField"})
+		filters.update({"doctype": "DocField", "parent": self[0].name})
 			
 		return map(lambda df: df.fieldname, self.get(filters))
 	
