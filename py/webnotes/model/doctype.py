@@ -247,13 +247,13 @@ def add_print_formats(doclist):
 	for pf in print_formats:
 		doclist.append(webnotes.model.doc.Document('Print Format', fielddata=pf))
 
-def get_property(dt, property, fieldname=None):
+def get_property(dt, prop, fieldname=None):
 	"""get a doctype property"""
 	doctypelist = get(dt)
 	if fieldname:
-		doctypelist.getone({"fieldname":fieldname}).get(property)
+		return doctypelist.getone({"fieldname":fieldname}).get(prop)
 	else:
-		doctypelist[0].get(property)
+		return doctypelist[0].get(prop)
 		
 def get_link_fields(doctype):
 	"""get docfields of links and selects with "link:" """
