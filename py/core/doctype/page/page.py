@@ -113,7 +113,12 @@ class PageController(DocListController):
 		if os.path.exists(fpath):
 			with open(fpath, 'r') as f:
 				self.doc.script = f.read()
-
+				
+				if webnotes.can_translate():
+					from webnotes.utils.translate import update_lang_js
+					self.doc.script = update_lang_js(self.doc.script, path)
+				
+					
 		# css
 		fpath = os.path.join(path, scrub(self.doc.name) + '.css')
 		if os.path.exists(fpath):

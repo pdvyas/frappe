@@ -83,7 +83,7 @@ wn.ui.GridControl = wn.ui.Control.extend({
 					return {
 						id: d.get('fieldname'),
 						field: d.get('fieldname'),
-						name: d.get('label'),
+						name: wn._(d.get('label')),
 						width: wn.model.get_grid_width(d, 120),
 						cssClass: d.get('reqd') ? 'slick-mandatory-column' : null,
 						docfield: d

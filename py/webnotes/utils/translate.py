@@ -21,28 +21,32 @@
 #
 
 # source:
-# 1. in doctype / page - walk modules (core / modules_path)- js, controllers
-# 2. in database
-# 3. framework - one common locale folder for all framework code
+# 1. in doctype / page - walk modules (core / modules_path)- js, controllers [x]
+# 2. in database [x]
+# 3. framework - one common locale folder for all framework code [x]
 
 # translation files:
-# 1. put in locale folder in doctype/locale, page/locale, py/webnotes/locale, js/wn/locale
-# 2. one json file for each language
+# 1. put in locale folder in doctype/locale, page/locale, py/webnotes/locale, js/wn/locale [x]
+# 2. one json file for each language [x]
 
 # when loading
-# 1. doctype (attach language files)
-# 2. page
-# 3. boot (attach language files for js)
+# 1. doctype (attach language files) [x]
+# 2. page [x]
+# 3. boot (framework js)
+# 4. add while loading controller [x]
+# 5. start of request (framework py)
 
 # methods
-# 1. _ in webnotes
-# 2. _ in wn
+# 1. _ in webnotes [x]
+# 2. _ in wn [x]
 
 from __future__ import unicode_literals
 
 import webnotes, conf
 import os
+import codecs
 import json
+import requests
 
 messages = {}
 
@@ -78,31 +82,30 @@ def build_from_database():
 def build_for_framework(path, mtype):
 	"""make locale files for framework py and js (all)"""
 	messages = []
-	for (base_path, folders, files) in os.walk(path):
+	for (basepath, folders, files) in os.walk(path):
 		for fname in files:
 			if fname.endswith('.' + mtype):
-				messages += get_message_list(os.path.join(base_path, fname))
+				messages += get_message_list(os.path.join(basepath, fname))
 				
 	if messages:
 		write_locale_file(path, messages, mtype)
 	
-	
 def build_from_doctypes(path):
 	"""walk and make locale files in all folders"""
-	for (base_path, folders, files) in os.walk(path):
+	for (basepath, folders, files) in os.walk(path):
 		messagespy = []
 		messagesjs = []
 		for fname in files:
 			if fname.endswith('py'):
-				messagespy += get_message_list(os.path.join(base_path, fname))
+				messagespy += get_message_list(os.path.join(basepath, fname))
 			if fname.endswith('js'):
-				messagesjs += get_message_list(os.path.join(base_path, fname))
+				messagesjs += get_message_list(os.path.join(basepath, fname))
 
 		if messagespy:
-			write_locale_file(base_path, messagespy, 'py')
+			write_locale_file(basepath, messagespy, 'py')
 
 		if messagespy:
-			write_locale_file(base_path, messagesjs, 'js')
+			write_locale_file(basepath, messagesjs, 'js')
 
 def get_message_list(path):
 	"""get list of messages from a code file"""
@@ -126,23 +129,136 @@ def write_locale_file(path, messages, mtype):
 		
 	print fname
 
-def all_messages(outfile):
+def export_messages(lang, outfile):
 	"""get list of all messages"""
-	messages = []
-	for (base_path, folders, files) in os.walk('.'):
-		for fname in files:
-			if fname.startswith('_messages_'):
-				with open(os.path.join(base_path, fname), 'r') as msgfile:
-					messages += json.loads(msgfile.read())
-					
-	messages = list(set(messages))
-	messages.sort()
+	messages = {}
+	# extract messages
+	for (basepath, folders, files) in os.walk('.'):
+		def _get_messages(messages, basepath, mtype):
+			mlist = get_messages(basepath, mtype)
+			if not mlist:
+				return
+								
+			# update messages with already existing translations
+			langdata = get_lang_data(basepath, lang, mtype)
+			for m in mlist:
+				if not messages.get(m):
+					messages[m] = langdata.get(m, "")
+		
+		if os.path.basename(basepath)=='locale':
+			_get_messages(messages, basepath, 'doc')
+			_get_messages(messages, basepath, 'py')
+			_get_messages(messages, basepath, 'js')
+				
+	# remove duplicates
 	if outfile:
 		from csv import writer
 		with open(outfile, 'w') as msgfile:
 			w = writer(msgfile)
-			for m in messages:
-				w.writerow([m.encode('utf-8')])
+			keys = messages.keys()
+			keys.sort()
+			for m in keys:
+				w.writerow([m.encode('utf-8'), messages.get(m, '').encode('utf-8')])
 	
-def load_messages(messages, lang):
+def import_messages(lang, infile):
 	"""make individual message files for each language"""
+	data = dict(get_all_messages_from_file(infile))
+		
+	for (basepath, folders, files) in os.walk('.'):
+		def _update_lang_file(mtype):
+			"""create a langauge file for the given message type"""
+			messages = get_messages(basepath, mtype)
+			if not messages: return
+
+			# read existing
+			langdata = get_lang_data(basepath, lang, mtype)
+							
+			# update fresh
+			for m in messages:
+				if data.get(m):
+					langdata[m] = data.get(m)
+			
+			if langdata:
+				# write new langfile
+				langfilename = os.path.join(basepath, lang + '-' + mtype + '.json')
+				with open(langfilename, 'w') as langfile:
+					langfile.write(json.dumps(langdata, indent=1, sort_keys=True).encode('utf-8'))
+				print 'wrote ' + langfilename
+				
+		if os.path.basename(basepath)=='locale':
+			# make / update lang files for each type of message file (doc, js, py)
+			# example: hi-doc.json, hi-js.json, hi-py.json
+			_update_lang_file('doc')
+			_update_lang_file('js')
+			_update_lang_file('py')
+
+def get_messages(basepath, mtype):
+	"""load list of messages from _message files"""
+	# get message list
+	path = os.path.join(basepath, '_messages_' + mtype + '.json')
+	messages = []
+	if os.path.exists(path):
+		with open(path, 'r') as msgfile:
+			messages = json.loads(msgfile.read())
+			
+	return messages
+
+def get_lang_data(basepath, lang, mtype):
+	"""get language dict from langfile"""
+
+	# add "locale" folder if reqd
+	if os.path.basename(basepath) != 'locale':
+		basepath = os.path.join(basepath, 'locale')
+	
+	if not lang: lang = webnotes.lang
+	
+	path = os.path.join(basepath, lang + '-' + mtype + '.json')
+	
+	langdata = {}
+	if os.path.exists(path):
+		with codecs.open(path, 'r', 'utf-8') as langfile:
+			langdata = json.loads(langfile.read())
+
+	return langdata
+
+def update_lang_js(jscode, path):
+	return jscode + "\n\n$.extend(wn._messages, %s)" % \
+		json.dumps(get_lang_data(path, webnotes.lang, 'js'))
+		
+def get_all_messages_from_file(path):
+	with codecs.open(path, 'r', 'utf-8') as msgfile:
+		from csv import reader
+		data = msgfile.read()
+		data = reader([r.encode('utf-8') for r in data.splitlines()])
+		newdata = []
+		for row in data:
+			newrow = []
+			for val in row:
+				newrow.append(unicode(val, 'utf-8'))
+			newdata.append(newrow)
+
+	return newdata
+
+def google_translate(lang, infile, outfile):
+	"""translate objects using Google API. Add you own API key for translation"""
+	
+	data = get_all_messages_from_file(infile)
+	
+	with open(outfile, 'w') as msgfile:
+		from csv import writer
+		w = writer(msgfile)
+		for row in data:
+			if not row[1]:
+				print 'translating: ' + row[0]
+				response = requests.get("""https://www.googleapis.com/language/translate/v2""",
+					params = {
+						"key": conf.google_api_key,
+						"source": "en",
+						"target": lang,
+						"q": row[0]
+					})
+			
+				row[1] = response.json["data"]["translations"][0]["translatedText"].encode('utf-8')
+				row[0] = row[0].encode('utf-8')
+			w.writerow(row)
+
