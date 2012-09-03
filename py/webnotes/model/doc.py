@@ -28,7 +28,7 @@ Contains the Document class representing an object / record
 import webnotes
 import webnotes.model
 import webnotes.model.doclist
-from webnotes.utils import cint, cstr, now, now_datetime
+from webnotes.utils import cint, cstr, get_datetime, now_datetime
 
 valid_fields = {}
 
@@ -211,8 +211,9 @@ class Document(dict):
 		# set info
 		self.owner = self.owner or webnotes.session["user"]
 		self.modified_by = webnotes.session["user"]
-		self.creation = self.creation or now()
-		self.modifed = now()
+		ts = get_datetime(now_datetime())
+		self.creation = self.creation or ts
+		self.modified = self.modified or ts
 
 	def get_valid_fields(self, doctypelist):
 		global valid_fields

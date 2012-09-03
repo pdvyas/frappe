@@ -34,7 +34,7 @@ import webnotes.model.doc
 import webnotes.model.doclist
 import webnotes.utils.cache
 
-from webnotes.utils import cint, cstr, now, comma_and, cast
+from webnotes.utils import cint, cstr, now_datetime, get_datetime, get_datetime_str, comma_and, cast
 
 class DocListController(object):
 	"""
@@ -74,10 +74,14 @@ class DocListController(object):
 		self.run('validate')
 		self.doctype_validate()
 		
-		# get the old doclist
-		try:
-			oldlist = webnotes.model.get(self.doc.doctype, self.doc.name)
-		except NameError, e:
+		from webnotes.model.doctype import get_property
+		if get_property(self.doc.doctype, "document_type") in ["Master", "Transaction"]:
+			# get the old doclist
+			try:
+				oldlist = webnotes.model.get(self.doc.doctype, self.doc.name)
+			except NameError, e:
+				oldlist = None
+		else:
 			oldlist = None
 		
 		self.save_main()
@@ -123,23 +127,8 @@ class DocListController(object):
 		
 	def save_version(self, oldlist):
 		"""create a new version of given difflist"""
-		difflist = webnotes.model.diff(oldlist, self.doclist,
-			["name", "doctype", "idx", "docstatus"])
-		
-		# save json to tabVersion
-		# import json
-		# webnotes.model.insert([{
-		# 	"doctype": "Version", "__islocal": 1,
-		# 	"modified": self.doc.modified, "creation": self.doc.modified,
-		# 	"doc_type": self.doc.doctype, "doc_name": self.doc.name,
-		# 	"doc_modified_by": oldlist[0].modified_by,
-		# 	"doc_modified": oldlist[0].modified,
-		# 	"diff": json.dumps(difflist)
-		# }])
-		
-		# TODO: remove this after testing
-		import pprint
-		pprint.pprint(difflist)
+		from webnotes.model.versions import save_version
+		save_version(oldlist, self.doclist)
 		
 	def remove_children(self, child_map):
 		"""delete children from database if they do not exist in the doclist"""
@@ -160,17 +149,20 @@ class DocListController(object):
 
 	def check_if_latest(self):
 		"""Raises exception if the modified time is not the same as in the database"""
-		if not (webnotes.model.is_single(self.doc.doctype) or cint(self.doc.get('__islocal'))):
+		if not (webnotes.model.is_single(self.doc.doctype) or \
+				cint(self.doc.get('__islocal'))):
 			modified = webnotes.conn.sql("""select modified from `tab%s`
-				where name=%s for update""" % (self.doc.doctype, "%s"), self.doc.name or "")
+				where name=%s for update""" % (self.doc.doctype, "%s"),
+				self.doc.name or "")
 			
-			if modified and unicode(modified[0].modified) != unicode(self.doc.modified):
+			if modified and get_datetime_str(modified[0].modified) != \
+					get_datetime_str(self.doc.modified):
 				webnotes.msgprint("""\
-				Document has been modified after you have opened it.
-				To maintain the integrity of the data, you will not be able to save your changes.
-				Please refresh this document.
-				FYI: [%s / %s]""" % \
-				(modified[0].modified, self.doc.modified), raise_exception=webnotes.IntegrityError)
+					Document has been modified after you have opened it.
+					To maintain the integrity of the data, you will not be able to save
+					your changes. Please refresh this document. FYI: [%s / %s]""" % \
+					(modified[0].modified, self.doc.modified),
+					raise_exception=webnotes.IntegrityError)
 
 	def check_permission(self):
 		"""Raises exception if permission is not valid"""
@@ -250,7 +242,7 @@ class DocListController(object):
 
 	def update_metadata(self):
 		"""Update owner, creation, modified_by, modified, docstatus"""
-		ts = now()
+		ts = get_datetime(now_datetime())
 
 		for d in self.doclist:
 			if self.doc.get('__islocal'):
