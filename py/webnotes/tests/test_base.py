@@ -71,9 +71,11 @@ class TestBase(unittest.TestCase):
 			(dt, group_fld, (group_fld == 'is_group' and 'No' or 'Ledger')),
 			as_dict=False))
 			
-	def assertEqualDoclist(self, doclist1, doclist2, ignore_fields=None):
+	def assertEqualDoclist(self, doclist1, doclist2, ignore=None):
+		""" compares two doclists for inequality based on valid fields
+			with exception of fields mentioned in ignore list"""
 		import webnotes.model
-		if not ignore_fields: ignore_fields = []
+		if not ignore: ignore = []
 		fieldnames = {}
 		not_equal = []
 		for d1 in doclist1:
@@ -81,7 +83,7 @@ class TestBase(unittest.TestCase):
 				if d1["doctype"] == d2["doctype"] and d1["name"] == d2["name"]:
 					for f in fieldnames.setdefault(d1["doctype"],
 							webnotes.model.get_fieldnames(d1["doctype"])):
-						if f not in ignore_fields and d1.get(f) != d2.get(f):
+						if f not in ignore and d1.get(f) != d2.get(f):
 							not_equal.append([d1["doctype"], d1["name"], d1.get(f),
 								d2.get(f)])
 							

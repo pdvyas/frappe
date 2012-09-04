@@ -41,10 +41,12 @@ def get_doctype(doctype, processed=False, strip_nulls=False):
 		[remove_nulls(d) for d in doclist]
 	return doclist
 	
-def get_fieldnames(doctype, filters=None):
+def get_fieldnames(doctype, filters=None, additional_fields=None):
 	if not filters: filters = {}
+	if not additional_fields: additional_fields = default_fields
+	
 	filters.update({"fieldtype": ["not in", no_value_fields]})
-	return get_doctype(doctype).get_fieldnames(filters) + default_fields
+	return get_doctype(doctype).get_fieldnames(filters) + additional_fields
 
 def insert(doclist):
 	"""insert a new doclist"""
