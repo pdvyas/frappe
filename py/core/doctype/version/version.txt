@@ -5,7 +5,7 @@
 	{
 		u'creation': u'2012-09-03 15:41:07',
 		u'docstatus': 0,
-		u'modified': '2012-09-03 16:03:26',
+		u'modified': '2012-09-04 12:17:01',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -31,7 +31,6 @@
 		u'issingle': 0,
 		u'istable': 0,
 		u'max_attachments': 0,
-		u'modifed': '2012-09-03 16:03:26',
 		u'module': u'Core',
 		u'name': u'__common__',
 		u'name_case': u'',
@@ -48,7 +47,6 @@
 		'doctype': u'DocField',
 		u'hidden': 0,
 		u'in_filter': 0,
-		u'modifed': '2012-09-03 16:03:26',
 		u'name': u'__common__',
 		u'no_copy': 1,
 		u'oldfieldname': u'',
@@ -72,7 +70,6 @@
 		'doctype': u'DocPerm',
 		u'execute': 0,
 		u'match': u'',
-		u'modifed': '2012-09-03 16:03:26',
 		u'name': u'__common__',
 		u'parent': u'Version',
 		u'parentfield': u'permissions',
@@ -86,16 +83,6 @@
 	{
 		u'doctype': u'DocType',
 		'name': u'Version'
-	},
-
-	# DocField
-	{
-		u'description': u'Stores the diff as a json',
-		u'doctype': u'DocField',
-		u'fieldname': u'diff',
-		u'fieldtype': u'Text',
-		u'label': u'Diff',
-		u'options': u''
 	},
 
 	# DocField
@@ -115,7 +102,6 @@
 		u'fieldname': u'doc_name',
 		u'fieldtype': u'Data',
 		u'label': u'Name',
-		u'localname': u'New DocField 1',
 		u'options': u''
 	},
 
@@ -126,7 +112,6 @@
 		u'fieldname': u'doc_modified_by',
 		u'fieldtype': u'Link',
 		u'label': u'Modified By',
-		u'localname': u'New DocField 2',
 		u'options': u'Profile'
 	},
 
@@ -137,7 +122,26 @@
 		u'fieldname': u'doc_modified',
 		u'fieldtype': u'Data',
 		u'label': u'Modified On',
-		u'localname': u'New DocField 3',
+		u'options': u''
+	},
+
+	# DocField
+	{
+		u'description': u'',
+		u'doctype': u'DocField',
+		u'fieldname': u'version',
+		u'fieldtype': u'Int',
+		u'label': u'Version',
+		u'options': u''
+	},
+
+	# DocField
+	{
+		u'description': u'Stores the diff as a json',
+		u'doctype': u'DocField',
+		u'fieldname': u'diff',
+		u'fieldtype': u'Text',
+		u'label': u'Diff',
 		u'options': u''
 	},
 
@@ -145,7 +149,6 @@
 	{
 		u'create': 1,
 		u'doctype': u'DocPerm',
-		u'localname': u'New DocPerm 1',
 		u'permlevel': 0,
 		u'write': 1
 	},
@@ -154,7 +157,6 @@
 	{
 		u'create': 0,
 		u'doctype': u'DocPerm',
-		u'localname': u'New DocPerm 2',
 		u'permlevel': 1,
 		u'write': 0
 	}
