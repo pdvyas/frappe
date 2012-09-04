@@ -57,6 +57,7 @@ def build_message_files():
 	build_from_database()
 	build_for_framework('lib/py/webnotes', 'py')
 	build_for_framework('lib/js/wn', 'js')
+	build_for_framework(os.path.join(conf.modules_path, 'startup'), 'js')
 	
 def build_from_database():
 	"""make doctype labels, names, options, descriptions"""
@@ -87,6 +88,10 @@ def build_for_framework(path, mtype):
 			if fname.endswith('.' + mtype):
 				messages += get_message_list(os.path.join(basepath, fname))
 				
+				
+	# append module names
+	messages += [m.name for m in webnotes.conn.sql("""select name from `tabModule Def`""")]
+	
 	if messages:
 		write_locale_file(path, messages, mtype)
 	
@@ -127,7 +132,7 @@ def write_locale_file(path, messages, mtype):
 	with open(fname, 'w') as msgfile:
 		msgfile.write(json.dumps(filter(None, messages), indent=1))
 		
-	print fname
+	#print fname
 
 def export_messages(lang, outfile):
 	"""get list of all messages"""
@@ -183,7 +188,7 @@ def import_messages(lang, infile):
 				langfilename = os.path.join(basepath, lang + '-' + mtype + '.json')
 				with open(langfilename, 'w') as langfile:
 					langfile.write(json.dumps(langdata, indent=1, sort_keys=True).encode('utf-8'))
-				print 'wrote ' + langfilename
+				#print 'wrote ' + langfilename
 				
 		if os.path.basename(basepath)=='locale':
 			# make / update lang files for each type of message file (doc, js, py)
@@ -258,7 +263,11 @@ def google_translate(lang, infile, outfile):
 						"q": row[0]
 					})
 			
-				row[1] = response.json["data"]["translations"][0]["translatedText"].encode('utf-8')
-				row[0] = row[0].encode('utf-8')
+				row[1] = response.json["data"]["translations"][0]["translatedText"]
+				if not row[1]:
+					row[1] = row[0] # google unable to translate!
+			
+			row[0] = row[0].encode('utf-8')
+			row[1] = row[1].encode('utf-8')
 			w.writerow(row)
 

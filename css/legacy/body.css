@@ -7,14 +7,14 @@ body {
 	margin: 0px;
 	padding: 0px;
 	color: #000;
-	font-family: Arial, sans-serif;
+	font-family: "Open Sans", Arial, sans-serif;
 	background-color: #eee;
 }
 
 /* font settings */
 
 h1, h2, h3, h4, h5 {
-	font-family: Arial, sans-serif;
+	font-family: "Open Sans", Arial, sans-serif;
 }
 
 footer {
