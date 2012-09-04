@@ -29,6 +29,8 @@ bootstrap client session
 def get_bootinfo():
 	"""build and return boot info"""
 	import webnotes
+	import conf
+	import os
 	from webnotes.utils import remove_nulls
 	
 	bootinfo = {}	
@@ -59,6 +61,13 @@ def get_bootinfo():
 	# ipinfo
 	if webnotes.session['data'].get('ipinfo'):
 		bootinfo['ipinfo'] = webnotes.session['data']['ipinfo']
+	
+	# translations
+	if webnotes.can_translate():
+		from webnotes.utils.translate import get_lang_data
+		bootinfo["__messages"] = get_lang_data("../lib/js/wn", None, "js")
+		bootinfo["__messages"].update(get_lang_data(os.path.join(conf.modules_path, 'startup'), 
+			None, "js"))
 	
 	# add docs
 	bootinfo['docs'] = doclist

@@ -67,11 +67,11 @@ wn.ui.toolbar.Toolbar = Class.extend({
 				onclick="return false;">%(document)s<b class="caret"></b></a>\
 			<ul class="dropdown-menu" id="toolbar-document">\
 				<li><a href="#" onclick="return wn.ui.toolbar.new_dialog.show();">\
-					<i class="icon-plus"></i>%(new)s</a></li>\
+					<i class="icon-plus"></i> %(new)s</a></li>\
 				<li><a href="#" onclick="return wn.ui.toolbar.search.show();">\
-					<i class="icon-search"></i>%(search)s</a></li>\
+					<i class="icon-search"></i> %(search)s</a></li>\
 				<li><a href="#" onclick="return wn.ui.toolbar.report.show();">\
-					<i class="icon-list"></i>%(report)s</a></li>\
+					<i class="icon-list"></i> %(report)s</a></li>\
 			</ul>\
 		</li>', {
 			"document": wn._("Document"),
@@ -89,10 +89,10 @@ wn.ui.toolbar.Toolbar = Class.extend({
 				<li><a href="#" onclick="return wn.ui.toolbar.clear_cache();">%(clear_cache)s</a></li>\
 				<li><a href="#" onclick="return wn.ui.toolbar.show_about();">%(about)s</a></li>\
 			</ul>\
-		</li>'), {
+		</li>', {
 			"clear_cache": wn._("Clear Cache & Refresh"),
 			"about": wn._("About")
-		});
+		}));
 		
 		if(has_common(user_roles,['Administrator','System Manager'])) {
 			$('#toolbar-tools').append(repl('<li><a href="#" \
