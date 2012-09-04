@@ -136,7 +136,7 @@ wn.dom.set_box_shadow = function(ele, spread) {
 			var v = options_list[i];
 			value = v.value || v;
 			label = v.label || v;
-			$('<option>').html(label).attr('value', value).appendTo(this);
+			$('<option>').html(wn._(label)).attr('value', value).appendTo(this);
 		}
 		// select the first option
 		$(this).val(options_list[0].value || options_list[0]);

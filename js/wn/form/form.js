@@ -91,7 +91,7 @@ wn.ui.Form = Class.extend({
 	make_fieldset: function(name, legend) {
 		var $fset = $('<fieldset data-name="'+name+'"></fieldset>').appendTo(this.$form);
 		if(legend) {
-			$('<legend>').text(legend).appendTo($fset);
+			$('<legend>').text(wn._(legend)).appendTo($fset);
 		}
 		this.last_fieldset = $fset;
 	},

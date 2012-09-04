@@ -64,16 +64,16 @@ wn.views.FormPage = Class.extend({
 	},
 	make_save_btn: function() {
 		var me = this;
-		this.save_btn = this.page.appframe.add_button('Save', function() { 
+		this.save_btn = this.page.appframe.add_button(wn._("Save"), function() { 
 			me.save(me.save_btn);
 		});
 				
 		this.doclist.on('change', function() {
-			me.save_btn.addClass('btn-warning').attr('title', 'Not Saved');
+			me.save_btn.addClass('btn-warning').attr('title', wn._("Not Saved"));
 		});
 		
 		this.doclist.on('reset', function() {
-			me.save_btn.removeClass('btn-warning').attr('title', 'Saved');
+			me.save_btn.removeClass('btn-warning').attr('title', wn._("Saved"));
 		});
 	},
 	
@@ -101,27 +101,36 @@ wn.views.FormPage = Class.extend({
 				// revert docstatus back to original if there was an error
 				if(me.from_docstatus)
 					me.doclist.doc.set('docstatus', me.from_docstatus);
-				msgprint('Did not save.');
+				msgprint(wn._("Did not save."));
 			}
 			me.apply_status();
 		}, btn);
 	},
 
 	make_action_buttons: function() {
-		this.action_btn_group = $('<div class="btn-group">\
+		this.action_btn_group = $(repl('<div class="btn-group">\
 		<button class="btn dropdown-toggle btn-small" data-toggle="dropdown">\
-			Actions\
+			%(actions)s\
 			<span class="caret"></span>\
 		</button>\
 		<ul class="dropdown-menu">\
-			<li><a href="#" class="action-new"><i class="icon icon-plus"></i> New</a></li>\
-			<li><a href="#" class="action-print"><i class="icon icon-print"></i> Print...</a></li>\
-			<li><a href="#" class="action-email"><i class="icon icon-envelope"></i> Email...</a></li>\
-			<li><a href="#" class="action-copy"><i class="icon icon-file"></i> Copy</a></li>\
-			<li><a href="#" class="action-refresh"><i class="icon icon-refresh"></i> Refresh</a></li>\
-			<li><a href="#" class="action-delete"><i class="icon icon-remove"></i> Delete</a></li>\
+			<li><a href="#" class="action-new"><i class="icon icon-plus"></i> %(new)s</a></li>\
+			<li><a href="#" class="action-print"><i class="icon icon-print"></i> %(print)s</a></li>\
+			<li><a href="#" class="action-email"><i class="icon icon-envelope"></i> %(email)s...</a></li>\
+			<li><a href="#" class="action-copy"><i class="icon icon-file"></i> %(copy)s</a></li>\
+			<li><a href="#" class="action-refresh"><i class="icon icon-refresh"></i> %(refresh)s</a></li>\
+			<li><a href="#" class="action-delete"><i class="icon icon-remove"></i> %(delete)s</a></li>\
 		</ul>\
-		</div>').appendTo(this.page.appframe.$w.find('.appframe-toolbar'));
+		</div>', {
+			"actions": wn._("Actions"),
+			"new": wn._("New"),
+			"print": wn._("Print"),
+			"email": wn._("Email"),
+			"copy": wn._("Copy"),
+			"refresh": wn._("Refresh"),
+			"delete": wn._("Delete")
+			
+		})).appendTo(this.page.appframe.$w.find('.appframe-toolbar'));
 		this.action_btn_group.find('.dropdown-toggle').dropdown();
 		
 		var me = this;
@@ -143,7 +152,7 @@ wn.views.FormPage = Class.extend({
 		var meta = this.form.meta.doc;
 		var me = this;
 		if(meta.get('description')) {
-			this.page.appframe.add_help_button(meta.get('description'));			
+			this.page.appframe.add_help_button(wn._(meta.get('description')));
 		}
 	},
 	make_doctype_button: function() {
@@ -154,19 +163,19 @@ wn.views.FormPage = Class.extend({
 	},
 	make_status_buttons: function() {
 		var me = this;
-		var ds_labels = this.form.meta.doc.get('docstatus_labels', "Draft, Submitted, Cancelled")
-			.split(',');
+		var ds_labels = wn.model.get_docstatus_labels(this.form.meta.doc.get('name'));
+		console.log(ds_labels)
 		this.docstatus_btns = {};
 		
-		this.docstatus_btns[0] = this.page.appframe.add_button(ds_labels[0], function() {
+		this.docstatus_btns[0] = this.page.appframe.add_button(wn._(ds_labels[0]), function() {
 			me.save(this, 0);
 		});
-		this.docstatus_btns[1] = $('<button class="btn btn-small"></button>').html(ds_labels[1])
+		this.docstatus_btns[1] = $('<button class="btn btn-small"></button>').html(wn._(ds_labels[1]))
 			.appendTo(this.docstatus_btns[0].parent()).click(function() {
 				me.save(this, 1);
 			});
 
-		this.docstatus_btns[2] = $('<button class="btn btn-small"></button>').html(ds_labels[2])
+		this.docstatus_btns[2] = $('<button class="btn btn-small"></button>').html(wn._(ds_labels[2]))
 			.appendTo(this.docstatus_btns[0].parent()).click(function() {
 				me.save(this, 2);
 			});

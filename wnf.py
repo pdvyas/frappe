@@ -263,6 +263,9 @@ def setup_options():
 	parser.add_option('--google_translate', nargs=3, metavar="LANG INFILE OUTFILE", 
 		help="""Auto translate using Google Translate API""")
 
+	parser.add_option('--translate', nargs=1, metavar="LANG", 
+		help="""Rebuild translation for the given langauge and 
+		use Google Translate to tranlate untranslated messages""")
 
 	return parser.parse_args()
 	
@@ -460,6 +463,21 @@ def run():
 	elif options.google_translate:
 		from webnotes.utils.translate import google_translate
 		google_translate(*options.google_translate)
+	
+	elif options.translate:
+		from webnotes.utils.translate import build_message_files, \
+			export_messages, google_translate, import_messages
+		print "Extracting messages..."
+		build_message_files()
+		print "Compiling messages in one file..."
+		export_messages(options.translate, '_lang_tmp.csv')
+		print "Translating via Google Translate..."
+		google_translate(options.translate, '_lang_tmp.csv', '_lang_tmp1.csv')
+		print "Updating language files..."
+		import_messages(options.translate, '_lang_tmp1.csv')
+		print "Deleting temp files..."
+		os.remove('_lang_tmp.csv')
+		os.remove('_lang_tmp1.csv')
 
 if __name__=='__main__':
 	run()

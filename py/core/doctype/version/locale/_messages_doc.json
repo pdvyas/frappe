@@ -1,0 +1,11 @@
+[
+ "Version", 
+ "Store a difference history of a document", 
+ "Diff", 
+ "Stores the diff as a json", 
+ "DocType", 
+ "Name", 
+ "Modified By", 
+ "The one who had modified this version", 
+ "Modified On"
+]

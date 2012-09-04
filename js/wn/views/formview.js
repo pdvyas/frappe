@@ -40,7 +40,6 @@ wn.views.formview = {
 				// load custom js and css
 				if(meta.get('__js')) { wn.dom.eval(meta.get('__js')); }
 				if(meta.get('__css')) { wn.dom.set_style(meta.get('__css')); }
-				if(meta.get('__messages')) { $.extend(wn._messages, meta.get('__messages')); }
 				
 				if(meta.get('in_dialog')) {
 					// dialog

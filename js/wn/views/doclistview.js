@@ -43,9 +43,9 @@ wn.views.doclistview.show = function(doctype) {
 wn.views.DocListView = wn.ui.Listing.extend({
 	init: function(doctype) {
 		this.doctype = doctype;
-		this.label = get_doctype_label(doctype);
+		this.label = wn._(doctype);
 		this.label = (this.label.toLowerCase().substr(-4) == 'list') ?
-		 	this.label : (this.label + ' List');
+		 	this.label : (this.label + ' ' + wn._("List"));
 		this.meta = wn.model.get('DocType', this.doctype).doc;
 		this.make_page();
 		this.setup();
@@ -56,26 +56,36 @@ wn.views.DocListView = wn.ui.Listing.extend({
 		var page_name = wn.get_route_str();
 		var page = wn.container.add_page(page_name);
 		wn.container.change_to(page_name);
+		this.ds_labels = wn.model.get_docstatus_labels(this.doctype);
 		this.$page = $(page);
 		
-		this.$page.html('<div class="layout-wrapper layout-wrapper-background">\
+		this.$page.html(repl('<div class="layout-wrapper layout-wrapper-background">\
 			<div class="appframe-area"></div>\
 			<div class="layout-main-section">\
-				<div class="wnlist-area"><div class="help">Loading...</div></div>\
+				<div class="wnlist-area"><div class="help">%(loading)s...</div></div>\
 			</div>\
 			<div class="layout-side-section">\
 				<div class="show-docstatus hide" style="margin-bottom: 19px">\
-					<h4>Show</h4>\
+					<h4>%(show)s</h4>\
 					<label class="checkbox">\
-						<input data-docstatus="0" type="checkbox" checked="checked" /> Drafts</label>\
+						<input data-docstatus="0" type="checkbox" checked="checked" /> \
+							%(ds0)s</label>\
 					<label class="checkbox">\
-						<input data-docstatus="1" type="checkbox" checked="checked" /> Submitted</label>\
+						<input data-docstatus="1" type="checkbox" checked="checked" /> \
+							%(ds1)s</label>\
 					<label class="checkbox">\
-						<input data-docstatus="2" type="checkbox" /> Cancelled</label>\
+						<input data-docstatus="2" type="checkbox" /> \
+							%(ds2)s</label>\
 				</div>\
 			</div>\
 			<div style="clear: both"></div>\
-		</div>');
+		</div>', {
+			'show': wn._("Show"),
+			'loading': wn._("Loading"),
+			'ds0': wn._(this.ds_labels[0]),
+			'ds1': wn._(this.ds_labels[1]),
+			'ds2': wn._(this.ds_labels[2])
+		}));
 		
 		this.appframe = new wn.ui.AppFrame(this.$page.find('.appframe-area'));
 		wn.views.breadcrumbs(this.appframe, this.meta.get('module'), this.doctype);
@@ -96,7 +106,7 @@ wn.views.DocListView = wn.ui.Listing.extend({
 	make_report_button: function() {
 		var me = this;
 		if(wn.boot.profile.can_get_report.indexOf(this.doctype)!=-1) {
-			this.appframe.add_button('Build Report', function() {
+			this.appframe.add_button(wn._("Build Report"), function() {
 				wn.set_route('Report', me.doctype);
 			}, 'icon-th')
 		}
@@ -158,12 +168,14 @@ wn.views.DocListView = wn.ui.Listing.extend({
 	
 	make_no_result: function() {
 		var no_result_message = repl('<div class="well">\
-		<p>No %(doctype_label)s found</p>\
+		<p>%(not_found)s: %(doctype_label)s</p>\
 		<hr>\
 		<p><button class="btn btn-info btn-small" list_view_doc="%(doctype)s">\
-			Make a new %(doctype_label)s</button>\
+			%(new)s %(doctype_label)s</button>\
 		</p></div>', {
-			doctype_label: get_doctype_label(this.doctype),
+			"new": wn._("New"),
+			not_found: wn._("Not Found"),
+			doctype_label: wn._(this.doctype),
 			doctype: this.doctype
 		});
 		
@@ -190,9 +202,11 @@ wn.views.DocListView = wn.ui.Listing.extend({
 	add_delete_option: function() {
 		var me = this;
 		if(this.can_delete) {
-			this.add_button('Delete', function() { me.delete_items(); }, 'icon-remove');
-			$('<label class="checkbox"><input type="checkbox" name="select-all" />\
-			 	Select all</label>').insertBefore(this.$page.find('.result-list'));
+			this.add_button(wn._("Delete"), function() { me.delete_items(); }, 'icon-remove');
+			$(repl('<label class="checkbox"><input type="checkbox" name="select-all" />\
+			 	%(select_all)s</label>', {
+					select_all: wn._("Select All")
+			})).insertBefore(this.$page.find('.result-list'));
 			this.$page.find('[name="select-all"]').click(function() {
 				me.$page.find('.list-delete').attr('checked', $(this).attr('checked') || false);
 			})
@@ -205,7 +219,7 @@ wn.views.DocListView = wn.ui.Listing.extend({
 		});
 		if(!dl.length) 
 			return;
-		if(!confirm('This is PERMANENT action and you cannot undo. Continue?')) {
+		if(!confirm(wn._("This is PERMANENT action and you cannot undo. Continue?"))) {
 			return;
 		}
 		
@@ -238,7 +252,8 @@ wn.views.DocListView = wn.ui.Listing.extend({
 				
 				// reload button at the end
 				if(me.listview.stats.length) {
-					$('<button class="btn btn-small"><i class="refresh"></i> Refresh</button>')
+					$(repl('<button class="btn btn-small"><i class="refresh">\
+						</i> %(refresh)s</button>', {refresh: wn._("Refresh")}))
 						.click(function() {
 							me.reload_stats();
 						}).appendTo($('<div class="stat-wrapper">')
@@ -254,21 +269,22 @@ wn.views.DocListView = wn.ui.Listing.extend({
 		if(!stat || !stat.length) {
 			if(field=='_user_tags') {
 				this.$page.find('.layout-side-section')
-					.append('<div class="stat-wrapper"><h4>Tags</h4>\
-						<div class="help small"><i>No records tagged.</i><br><br> \
-						To add a tag, open the document and click on \
-						"Add Tag" on the sidebar</div></div>');
+					.append(repl('<div class="stat-wrapper"><h4>%(tags)s</h4>\
+						<div class="help small"><i>%(no_tags)s.</i></div></div>', {
+							no_tags: wn._("No records tagged"),
+							tags: wn._("Tags")
+						}));
 			}
 			return;
 		}
 		
 		var docfield = wn.model.get('DocType', this.doctype).get({fieldname:field});
 		var label = docfield.length ? docfield[0].get('label') : field;
-		if(label=='_user_tags') label = 'Tags';
+		if(label=='_user_tags') label = wn._("Tags");
 		
 		// grid
 		var $w = $('<div class="stat-wrapper">\
-			<h4>'+ label +'</h4>\
+			<h4>'+ wn._(label) +'</h4>\
 			<div class="stat-grid">\
 			</div>\
 		</div>');
@@ -288,7 +304,8 @@ wn.views.DocListView = wn.ui.Listing.extend({
 	render_stat_item: function(i, v, max, field) {
 		var me = this;
 		var args = {}
-		args.label = v[0];
+		args.value = v[0],
+		args.label = wn._(v[0]);
 		args.width = flt(v[1]) / max * 100;
 		args.count = v[1];
 		args.field = field;
@@ -296,7 +313,7 @@ wn.views.DocListView = wn.ui.Listing.extend({
 		$item = $(repl('<div class="progress">\
 			<div class="bar" style="width: %(width)s%"></div></div>\
 			<div style="text-align: center; margin-top: -20px; font-size: 90%;">\
-				<a href="#" data-label="%(label)s" data-field="%(field)s">\
+				<a href="#" data-label="%(value)s" data-field="%(field)s">\
 				%(label)s (%(count)s)</a></div>', args));
 		
 		this.setup_stat_item_click($item);
@@ -441,19 +458,20 @@ wn.views.ListView = Class.extend({
 	prepare_data: function(data) {
 		data.fullname = wn.user_info(data.owner).fullname;
 		data.avatar = wn.user_info(data.owner).image;
+		var ds_list = wn.model.get_docstatus_labels(this.doctype);
 		
 		this.prepare_when(data, data.modified);
 		
 		// docstatus
 		if(data.docstatus==0 || data.docstatus==null) {
 			data.docstatus_icon = 'icon-pencil';
-			data.docstatus_title = 'Editable';
+			data.docstatus_title = wn._(ds_list[0]);
 		} else if(data.docstatus==1) {
 			data.docstatus_icon = 'icon-lock';			
-			data.docstatus_title = 'Submitted';
+			data.docstatus_title = wn._(ds_list[1]);
 		} else if(data.docstatus==2) {
 			data.docstatus_icon = 'icon-remove';			
-			data.docstatus_title = 'Cancelled';
+			data.docstatus_title = wn._(ds_list[2]);
 		}
 		
 		// nulls as strings
@@ -473,10 +491,10 @@ wn.views.ListView = Class.extend({
 			data.when = dateutil.comment_when(date_str);
 		}
 		if(diff == 1) {
-			data.when = 'Yesterday'
+			data.when = wn._("Yesterday")
 		}
 		if(diff == 2) {
-			data.when = '2 days ago'
+			data.when = "2 " + wn._("days ago")
 		}
 	},
 	
@@ -507,7 +525,7 @@ wn.views.ListView = Class.extend({
 		var args = {
 			percent: data[field],
 			fully_delivered: (data[field] > 99 ? 'bar-complete' : ''),
-			label: label
+			label: wn._(label)
 		}
 		$(parent).append(repl('<span class="bar-outer" style="width: 30px; float: right" \
 			title="%(percent)s% %(label)s">\

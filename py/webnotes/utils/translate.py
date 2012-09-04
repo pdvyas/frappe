@@ -63,12 +63,15 @@ def build_from_database():
 	"""make doctype labels, names, options, descriptions"""
 	from webnotes.modules import get_doc_path
 	
-	for doctype in webnotes.conn.sql("""select name, description, module from tabDocType"""):
+	for doctype in webnotes.conn.sql("""select name, description, module, docstatus_labels
+		from tabDocType"""):
 		doctype_path = get_doc_path(doctype.module, 'DocType', doctype.name)
 		
 		# if module and doctype folder exists
 		if doctype.module and os.path.exists(doctype_path):
 			messages = [doctype.name, doctype.description]
+			if doctype.docstatus_labels:
+				messages += [l.strip() for l in doctype.docstatus_labels.split(",")]
 				
 			for docfield in webnotes.conn.sql("""select label, description, options, fieldtype 
 				from tabDocField where parent=%s""", doctype.name):
@@ -78,7 +81,7 @@ def build_from_database():
 					and not docfield.options.startswith("attach_files:"):
 					messages += docfield.options.split('\n')
 				
-			write_locale_file(doctype_path, messages, 'doc')
+			write_messages_file(doctype_path, messages, 'doc')
 
 def build_for_framework(path, mtype):
 	"""make locale files for framework py and js (all)"""
@@ -89,11 +92,12 @@ def build_for_framework(path, mtype):
 				messages += get_message_list(os.path.join(basepath, fname))
 				
 				
-	# append module names
+	# append module & doctype names
 	messages += [m.name for m in webnotes.conn.sql("""select name from `tabModule Def`""")]
+	messages += [m.name for m in webnotes.conn.sql("""select name from `tabDocType`""")]
 	
 	if messages:
-		write_locale_file(path, messages, mtype)
+		write_messages_file(path, messages, mtype)
 	
 def build_from_doctypes(path):
 	"""walk and make locale files in all folders"""
@@ -107,10 +111,10 @@ def build_from_doctypes(path):
 				messagesjs += get_message_list(os.path.join(basepath, fname))
 
 		if messagespy:
-			write_locale_file(basepath, messagespy, 'py')
+			write_messages_file(basepath, messagespy, 'py')
 
 		if messagespy:
-			write_locale_file(basepath, messagesjs, 'js')
+			write_messages_file(basepath, messagesjs, 'js')
 
 def get_message_list(path):
 	"""get list of messages from a code file"""
@@ -123,14 +127,15 @@ def get_message_list(path):
 		
 	return messages
 	
-def write_locale_file(path, messages, mtype):
+def write_messages_file(path, messages, mtype):
 	"""write messages to translation file"""
 	if not os.path.exists(os.path.join(path, 'locale')):
 		os.makedirs(os.path.join(path, 'locale'))
 	
 	fname = os.path.join(path, 'locale', '_messages_' + mtype + '.json')
+	messages = [m.replace("\n", "") for m in filter(None, messages)]
 	with open(fname, 'w') as msgfile:
-		msgfile.write(json.dumps(filter(None, messages), indent=1))
+		msgfile.write(json.dumps(messages, indent=1))
 		
 	#print fname
 
@@ -179,7 +184,7 @@ def import_messages(lang, infile):
 			langdata = get_lang_data(basepath, lang, mtype)
 							
 			# update fresh
-			for m in messages:
+			for m in messages:				
 				if data.get(m):
 					langdata[m] = data.get(m)
 			
@@ -196,17 +201,6 @@ def import_messages(lang, infile):
 			_update_lang_file('doc')
 			_update_lang_file('js')
 			_update_lang_file('py')
-
-def get_messages(basepath, mtype):
-	"""load list of messages from _message files"""
-	# get message list
-	path = os.path.join(basepath, '_messages_' + mtype + '.json')
-	messages = []
-	if os.path.exists(path):
-		with open(path, 'r') as msgfile:
-			messages = json.loads(msgfile.read())
-			
-	return messages
 
 def get_lang_data(basepath, lang, mtype):
 	"""get language dict from langfile"""
@@ -225,6 +219,17 @@ def get_lang_data(basepath, lang, mtype):
 			langdata = json.loads(langfile.read())
 
 	return langdata
+
+def get_messages(basepath, mtype):
+	"""load list of messages from _message files"""
+	# get message list
+	path = os.path.join(basepath, '_messages_' + mtype + '.json')
+	messages = []
+	if os.path.exists(path):
+		with open(path, 'r') as msgfile:
+			messages = json.loads(msgfile.read())
+			
+	return messages
 
 def update_lang_js(jscode, path):
 	return jscode + "\n\n$.extend(wn._messages, %s)" % \

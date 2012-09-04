@@ -1,6 +1,6 @@
 [
  "DocType", 
- "The basic building block of wnframework is a **DocType**. A DocType represents both a table in the database and a form from which a user can enter data. Actions are also embedded in the DocType. Hence it is the Model, View and Controller.\n\nDocTypes can be single  tables or groups. For example, Quotation has a \u201cQuotation\u201d DocType and a \u201cQuotation Item\u201d doctype for the Items table, among others.  DocTypes contain a collection of fields called DocFields that form the basis of the columns in the database and the layout of the form.", 
+ "The basic building block of wnframework is a **DocType**. A DocType represents both a table in the database and a form from which a user can enter data. Actions are also embedded in the DocType. Hence it is the Model, View and Controller.DocTypes can be single  tables or groups. For example, Quotation has a \u201cQuotation\u201d DocType and a \u201cQuotation Item\u201d doctype for the Items table, among others.  DocTypes contain a collection of fields called DocFields that form the basis of the columns in the database and the layout of the form.", 
  "DocType Details", 
  "Module", 
  "Document Type", 
