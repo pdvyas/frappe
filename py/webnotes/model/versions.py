@@ -27,9 +27,12 @@ def save_version(oldlist, newlist):
 	if difflist:
 		# save difflist to tabVersion
 		webnotes.model.insert([{
-			"doctype": "Version", "diff": serialize(difflist),
-			"modified": newlist[0].modified, "creation": newlist[0].modified,
-			"doc_type": newlist[0].doctype, "doc_name": newlist[0].name,
+			"doctype": "Version", 
+			"diff": serialize(difflist),
+			"modified": newlist[0].modified, 
+			"creation": newlist[0].modified,
+			"doc_type": newlist[0].doctype, 
+			"doc_name": newlist[0].name,
 			"doc_modified_by": oldlist[0].modified_by,
 			"doc_modified": oldlist[0].modified,
 			"version": get_next_version_no(newlist[0].doctype, newlist[0].name),
