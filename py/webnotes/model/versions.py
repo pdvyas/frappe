@@ -32,24 +32,29 @@ def save_version(oldlist, newlist):
 			"doc_type": newlist[0].doctype, "doc_name": newlist[0].name,
 			"doc_modified_by": oldlist[0].modified_by,
 			"doc_modified": oldlist[0].modified,
+			"version": get_next_version_no(newlist[0].doctype, newlist[0].name),
 		}])
+		
+def get_next_version_no(doctype, name):
+	res = webnotes.conn.sql("""select ifnull(max(version), 0) as version from `tabVersion`
+		where doc_type=%s and doc_name=%s""", (doctype, name))
+	res = res and res[0]["version"] or 0
+	return res + 1
 	
-def get_version(doctype, name, modified):
+def get_version(doctype, name, version):
 	"""returns a specified version (modified) of a doclist"""
 	doclist = webnotes.model.get(doctype, name)
 	
 	# get a list of all versions upto given modified datetime
 	versions = webnotes.conn.sql("""select diff from `tabVersion`
-		where doc_type=%s and doc_name=%s and doc_modified >= %s
-		order by modified desc, name desc""",
-		(doclist[0]["doctype"], doclist[0]["name"], modified))
+		where doc_type=%s and doc_name=%s and version >= %s
+		order by version desc""",
+		(doclist[0]["doctype"], doclist[0]["name"], version))
 
 	if not versions:
 		# aha! looks like the version does not exist
-		webnotes.msgprint("""No version exists for %s: "%s"
-			which was modified on %s at %s""" % \
-			(doclist[0]["doctype"], doclist[0]["name"], formatdate(modified),
-			modified.strftime('%H:%M')))
+		webnotes.msgprint("""No version exists for %s: "%s" """ % \
+			(doclist[0]["doctype"], doclist[0]["name"]), raise_exception=NameError)
 	
 	# apply versions in descending chronological order to get the mentioned version
 	for diff in versions:
