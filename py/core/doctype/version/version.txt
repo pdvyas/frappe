@@ -1,0 +1,161 @@
+# DocType, Version
+[
+
+	# These values are common in all dictionaries
+	{
+		u'creation': u'2012-09-03 15:41:07',
+		u'docstatus': 0,
+		u'modified': '2012-09-03 16:03:26',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		u'allow_attach': 0,
+		u'allow_copy': 0,
+		u'allow_email': 0,
+		u'allow_print': 0,
+		u'allow_rename': 0,
+		u'autoname': u'',
+		u'default_print_format': u'',
+		u'description': u'Store a difference history of a document',
+		u'docstatus_labels': u'',
+		'doctype': u'DocType',
+		u'document_type': u'System',
+		u'hide_heading': 0,
+		u'hide_toolbar': 0,
+		u'in_create': 0,
+		u'in_dialog': 0,
+		u'is_submittable': 0,
+		u'issingle': 0,
+		u'istable': 0,
+		u'max_attachments': 0,
+		u'modifed': '2012-09-03 16:03:26',
+		u'module': u'Core',
+		u'name': u'__common__',
+		u'name_case': u'',
+		u'read_only': 0,
+		u'read_only_onload': 0,
+		u'search_fields': u''
+	},
+
+	# These values are common for all DocField
+	{
+		u'allow_on_submit': 0,
+		u'default': u'',
+		u'depends_on': u'',
+		'doctype': u'DocField',
+		u'hidden': 0,
+		u'in_filter': 0,
+		u'modifed': '2012-09-03 16:03:26',
+		u'name': u'__common__',
+		u'no_copy': 1,
+		u'oldfieldname': u'',
+		u'oldfieldtype': u'',
+		u'parent': u'Version',
+		u'parentfield': u'fields',
+		u'parenttype': u'DocType',
+		u'permlevel': 1,
+		u'print_hide': 0,
+		u'report_hide': 0,
+		u'reqd': 1,
+		u'search_index': 0,
+		u'unique': 0,
+		u'width': u''
+	},
+
+	# These values are common for all DocPerm
+	{
+		u'amend': 0,
+		u'cancel': 0,
+		'doctype': u'DocPerm',
+		u'execute': 0,
+		u'match': u'',
+		u'modifed': '2012-09-03 16:03:26',
+		u'name': u'__common__',
+		u'parent': u'Version',
+		u'parentfield': u'permissions',
+		u'parenttype': u'DocType',
+		u'read': 1,
+		u'role': u'All',
+		u'submit': 0
+	},
+
+	# DocType, Version
+	{
+		u'doctype': u'DocType',
+		'name': u'Version'
+	},
+
+	# DocField
+	{
+		u'description': u'Stores the diff as a json',
+		u'doctype': u'DocField',
+		u'fieldname': u'diff',
+		u'fieldtype': u'Text',
+		u'label': u'Diff',
+		u'options': u''
+	},
+
+	# DocField
+	{
+		u'description': u'',
+		u'doctype': u'DocField',
+		u'fieldname': u'doc_type',
+		u'fieldtype': u'Link',
+		u'label': u'DocType',
+		u'options': u'DocType'
+	},
+
+	# DocField
+	{
+		u'description': u'',
+		u'doctype': u'DocField',
+		u'fieldname': u'doc_name',
+		u'fieldtype': u'Data',
+		u'label': u'Name',
+		u'localname': u'New DocField 1',
+		u'options': u''
+	},
+
+	# DocField
+	{
+		u'description': u'The one who had modified this version',
+		u'doctype': u'DocField',
+		u'fieldname': u'doc_modified_by',
+		u'fieldtype': u'Link',
+		u'label': u'Modified By',
+		u'localname': u'New DocField 2',
+		u'options': u'Profile'
+	},
+
+	# DocField
+	{
+		u'description': u'',
+		u'doctype': u'DocField',
+		u'fieldname': u'doc_modified',
+		u'fieldtype': u'Data',
+		u'label': u'Modified On',
+		u'localname': u'New DocField 3',
+		u'options': u''
+	},
+
+	# DocPerm
+	{
+		u'create': 1,
+		u'doctype': u'DocPerm',
+		u'localname': u'New DocPerm 1',
+		u'permlevel': 0,
+		u'write': 1
+	},
+
+	# DocPerm
+	{
+		u'create': 0,
+		u'doctype': u'DocPerm',
+		u'localname': u'New DocPerm 2',
+		u'permlevel': 1,
+		u'write': 0
+	}
+]

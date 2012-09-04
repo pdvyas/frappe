@@ -41,8 +41,12 @@ def get_doctype(doctype, processed=False, strip_nulls=False):
 		[remove_nulls(d) for d in doclist]
 	return doclist
 	
-def get_fieldnames(doctype, filters=None):
-	return get_doctype(doctype).get_fieldnames(filters)
+def get_fieldnames(doctype, filters=None, additional_fields=None):
+	if not filters: filters = {}
+	if not additional_fields: additional_fields = default_fields
+	
+	filters.update({"fieldtype": ["not in", no_value_fields]})
+	return get_doctype(doctype).get_fieldnames(filters) + additional_fields
 
 def insert(doclist):
 	"""insert a new doclist"""
@@ -280,59 +284,3 @@ def get_parent_dt(dt):
 		where fieldtype="Table" and options="%s" and (parent not like "old_parent:%%") 
 		limit 1""" % dt)
 	return parent_dt and parent_dt[0].parent or ''
-
-def diff(oldlist, newlist, additional_fields=None):
-	"""
-		returns a diff list between old and new doclists
-		diff docs only consist of valid fields and doctype, name, [idx, docstatus]
-	"""
-	if not additional_fields: additional_fields = default_fields
-	# fieldnames is used as a cache
-	fieldnames = {}
-	def filter_valid_fields(doc):
-		new = {}
-		for key in doc:
-			if key in fieldnames.setdefault(doc["doctype"], get_fieldnames(doc["doctype"],
-					{"fieldtype": ["not in", no_value_fields]}) + additional_fields):
-				new[key] = doc[key]
-		return new
-		
-	def get_diff(old, new):
-		"""returns diff of two docs"""
-		diff = {"doctype": new["doctype"], "name": new["name"]}
-		
-		# find values different than old ones
-		diff.update(dict(([key, old.get(key)] for key in old
-			if old.get(key) != new.get(key))))
-		
-		# find new values and store it as None
-		diff.update(dict(([key, None] for key in new if not old.has_key(key))))
-		
-		return filter_valid_fields(diff)
-	
-	# get diff of parent
-	difflist = [get_diff(oldlist[0], newlist[0])]
-	
-	# get values different in existing children or the ones deleted in the new
-	for old in oldlist[1:]:
-		removed = True
-		for new in newlist[1:]:
-			if old.doctype == new.doctype and old.name == new.name:
-				removed = False
-				difflist.append(get_diff(old, new))
-				break
-		if removed:
-			difflist.append(filter_valid_fields(old))
-	
-	# get new children
-	for new in newlist[1:]:
-		added = True
-		for old in oldlist[1:]:
-			if new.doctype == old.doctype and new.name == old.name:
-				added = False
-				break
-		if added:
-			difflist.append({"doctype": new.doctype, "name": new.name,
-				"docstatus": -1})
-	
-	return difflist
