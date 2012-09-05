@@ -36,7 +36,7 @@ wn.model.Document = Class.extend({
 	},
 	get: function(key, ifnull) {
 		var val = this.fields[key];
-		if(val===null || val===undefined) return ifnull
+		if(!val && ifnull) return ifnull
 		else return val;
 	},
 	convert_type: function(key, val) {

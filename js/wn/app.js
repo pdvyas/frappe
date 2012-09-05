@@ -90,6 +90,9 @@ wn.Application = Class.extend({
 		if(wn.boot) {
 			wn.model.sync(wn.boot.docs);
 			wn.control_panel = wn.boot.control_panel;
+			if(wn.boot.__messages) {
+				$.extend(wn._messages, wn.boot.__messages);
+			}
 
 			this.set_globals();		
 		} else {

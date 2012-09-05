@@ -1,0 +1,17 @@
+{
+ "!=": "=!", 
+ "<": "&lt;", 
+ "<=": "&lt;=", 
+ "=": "=", 
+ ">": "&gt;", 
+ ">=": "=&gt;", 
+ "Begins With": "\u0915\u0947 \u0938\u093e\u0925 \u0936\u0941\u0930\u0942 \u0939\u094b\u0924\u093e \u0939\u0948", 
+ "Condition": "\u0936\u0930\u094d\u0924", 
+ "DocType Link Filter": "DOCTYPE \u0932\u093f\u0902\u0915 \u092b\u093c\u093f\u0932\u094d\u091f\u0930", 
+ "Fieldname": "FIELDNAME", 
+ "Filters for Link Fields": "\u0932\u093f\u0902\u0915 \u092b\u093c\u0940\u0932\u094d\u0921 \u0915\u0947 \u0932\u093f\u090f \u092b\u093c\u093f\u0932\u094d\u091f\u0930", 
+ "Link Field": "\u0932\u093f\u0902\u0915 \u092b\u093c\u0940\u0932\u094d\u0921", 
+ "Table Field": "\u091f\u0947\u092c\u0932 \u092b\u0940\u0932\u094d\u0921", 
+ "Value": "\u092e\u0942\u0932\u094d\u092f", 
+ "in": "\u092e\u0947\u0902"
+}

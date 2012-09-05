@@ -3,125 +3,144 @@
 
 	# These values are common in all dictionaries
 	{
-		u'creation': '2012-07-27 14:58:41',
+		u'creation': u'2012-08-02 15:00:18',
 		u'docstatus': 0,
-		u'modified': '2012-07-27 15:33:37',
+		u'modified': '2012-09-04 15:30:02',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': u'field:for_doctype',
-		'description': u'DocType Validator allows setting of various validation rules that are checked before a document is saved.',
-		u'doctype': u'DocType',
-		'document_type': u'System',
-		'module': u'Core',
+		u'allow_attach': 0,
+		u'allow_copy': 0,
+		u'allow_email': 0,
+		u'allow_print': 0,
+		u'allow_rename': 0,
+		u'autoname': u'field:for_doctype',
+		u'default_print_format': u'',
+		u'description': u'DocType Validator allows setting of various validation rules that are checked before a document is saved.',
+		u'docstatus_labels': u'',
+		'doctype': u'DocType',
+		u'document_type': u'System',
+		u'hide_heading': 0,
+		u'hide_toolbar': 0,
+		u'in_create': 0,
+		u'in_dialog': 0,
+		u'is_submittable': 0,
+		u'issingle': 0,
+		u'istable': 0,
+		u'max_attachments': u'',
+		u'module': u'Core',
 		u'name': u'__common__',
-		'version': 1
+		u'name_case': u'',
+		u'read_only': 0,
+		u'read_only_onload': 0,
+		u'search_fields': u'',
+		u'version': 1
 	},
 
 	# These values are common for all DocField
 	{
-		u'doctype': u'DocField',
+		'doctype': u'DocField',
 		u'name': u'__common__',
-		'parent': u'DocType Validator',
-		'parentfield': u'fields',
-		'parenttype': u'DocType',
-		'permlevel': 0
+		u'parent': u'DocType Validator',
+		u'parentfield': u'fields',
+		u'parenttype': u'DocType',
+		u'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
 	{
-		'create': 1,
-		u'doctype': u'DocPerm',
+		u'create': 1,
+		'doctype': u'DocPerm',
 		u'name': u'__common__',
-		'parent': u'DocType Validator',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'permlevel': 0,
-		'read': 1,
-		'role': u'Administrator',
-		'write': 1
+		u'parent': u'DocType Validator',
+		u'parentfield': u'permissions',
+		u'parenttype': u'DocType',
+		u'permlevel': 0,
+		u'read': 1,
+		u'role': u'Administrator',
+		u'write': 1
 	},
 
 	# DocType, DocType Validator
 	{
 		u'doctype': u'DocType',
-		u'name': u'DocType Validator'
+		'name': u'DocType Validator'
+	},
+
+	# DocField
+	{
+		u'colour': u'White:FFF',
+		u'description': u'Set validation rules for this DocType and all its children DocTypes.',
+		u'doctype': u'DocField',
+		u'fieldname': u'for_doctype',
+		u'fieldtype': u'Link',
+		u'label': u'For DocType',
+		u'options': u'DocType',
+		u'reqd': 1
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		u'fieldname': u'link_validation',
+		u'fieldtype': u'Section Break',
+		u'label': u'Link Validation'
+	},
+
+	# DocField
+	{
+		u'colour': u'White:FFF',
+		u'description': u'Set additional filters for Link Fields',
+		u'doctype': u'DocField',
+		u'fieldname': u'link_filters',
+		u'fieldtype': u'Table',
+		u'label': u'Link Filters',
+		u'options': u'DocType Link Filter'
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		u'fieldname': u'conditional_validation',
+		u'fieldtype': u'Section Break',
+		u'label': u'Conditional Validation'
+	},
+
+	# DocField
+	{
+		u'colour': u'White:FFF',
+		u'description': u'Check property values based on conditions',
+		u'doctype': u'DocField',
+		u'fieldname': u'conditional_properties',
+		u'fieldtype': u'Table',
+		u'label': u'Conditional Properties',
+		u'options': u'DocType Conditional Property'
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		u'fieldname': u'unique_validation',
+		u'fieldtype': u'Section Break',
+		u'label': u'Unique Validation'
+	},
+
+	# DocField
+	{
+		u'colour': u'White:FFF',
+		u'description': u'Define rows unique based on columns.',
+		u'doctype': u'DocField',
+		u'fieldname': u'unique_rows',
+		u'fieldtype': u'Table',
+		u'label': u'Unique Rows',
+		u'options': u'DocType Unique Row'
 	},
 
 	# DocPerm
 	{
 		u'doctype': u'DocPerm'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Set validation rules for this DocType and all its children DocTypes.',
-		u'doctype': u'DocField',
-		'fieldname': u'for_doctype',
-		'fieldtype': u'Link',
-		'label': u'For DocType',
-		'options': u'DocType',
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'link_validation',
-		'fieldtype': u'Section Break',
-		'label': u'Link Validation'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Set additional filters for Link Fields',
-		u'doctype': u'DocField',
-		'fieldname': u'link_filters',
-		'fieldtype': u'Table',
-		'label': u'Link Filters',
-		'options': u'DocType Link Filter'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'conditional_validation',
-		'fieldtype': u'Section Break',
-		'label': u'Conditional Validation'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Check property values based on conditions',
-		u'doctype': u'DocField',
-		'fieldname': u'conditional_properties',
-		'fieldtype': u'Table',
-		'label': u'Conditional Properties',
-		'options': u'DocType Conditional Property'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'unique_validation',
-		'fieldtype': u'Section Break',
-		'label': u'Unique Validation'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Define rows unique based on columns.',
-		u'doctype': u'DocField',
-		'fieldname': u'unique_rows',
-		'fieldtype': u'Table',
-		'label': u'Unique Rows',
-		'options': u'DocType Unique Row'
 	}
 ]

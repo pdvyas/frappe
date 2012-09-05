@@ -185,7 +185,20 @@ def now_datetime():
 
 	# convert to user time zone
 	return utcnow.astimezone(timezone(user_time_zone))
-
+	
+def get_datetime(datetime_str):
+	from datetime import datetime
+	if isinstance(datetime_str, datetime):
+		return datetime_str.replace(microsecond=0, tzinfo=None)
+	
+	return datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S')
+	
+def get_datetime_str(datetime_obj):
+	if isinstance(datetime_obj, basestring):
+		datetime_obj = get_datetime(datetime_obj)
+	
+	return datetime_obj.strftime('%Y-%m-%d %H:%M:%S')
+	
 def now():
 	"""return current datetime as yyyy-mm-dd hh:mm:ss"""
 	return now_datetime().strftime('%Y-%m-%d %H:%M:%S')

@@ -79,6 +79,9 @@ $.extend(wn.model, {
 				doclistobj.add(doc);
 			} else {
 				new wn.model.DocList([doc]);
+				if(doc.__messages) {
+					$.extend(wn._messages, doc.__messages);
+				}
 			}
 		}
 	},
@@ -157,5 +160,11 @@ $.extend(wn.model, {
 			return 240
 		else
 			return def_width || 140
+	},
+	get_docstatus_labels: function(doctype) {
+		var ds_list = wn.model.get("DocType", doctype).doc.get('docstatus_labels', 
+			wn._("Draft") + ", " + wn._("Submitted") + ", " + wn._("Cancelled"))
+			.split(',');
+		return $.map(ds_list, function(v) { return strip(v); });
 	}
 });

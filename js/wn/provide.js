@@ -37,3 +37,9 @@ wn.provide = function(namespace) {
 
 wn.provide('wn.settings');
 wn.provide('wn.ui');
+wn.provide('wn._messages');
+
+wn._ = function(txt) {
+	if(!txt) return txt;
+	return wn._messages[txt.replace(/\n/g, "")] || txt;
+}

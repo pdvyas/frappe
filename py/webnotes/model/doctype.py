@@ -32,6 +32,7 @@ Get metadata (main doctype with fields and permissions with all table doctypes)
 """
 # imports
 from __future__ import unicode_literals
+import conf
 import webnotes
 import webnotes.model
 import webnotes.model.doc
@@ -66,6 +67,7 @@ def get(doctype, processed=False):
 		expand_selects(doclist)
 		add_print_formats(doclist)
 		add_search_fields(doclist)
+		update_language(doclist)
 
 	# add validators
 	add_validators(doctype, doclist)
@@ -73,6 +75,28 @@ def get(doctype, processed=False):
 	to_cache(doctype, processed, doclist)
 		
 	return DocTypeDocList(doclist)
+
+def update_language(doclist):
+	"""update language"""
+	if webnotes.can_translate():
+		from webnotes import _
+		from webnotes.modules import get_doc_path
+
+		# load languages for each doctype
+		from webnotes.utils.translate import get_lang_data, update_lang_js
+		_messages = {}
+
+		for d in doclist:
+			if d.doctype=='DocType':
+				_messages.update(get_lang_data(get_doc_path(d.module, d.doctype, d.name), 
+					webnotes.lang, 'doc'))
+				_messages.update(get_lang_data(get_doc_path(d.module, d.doctype, d.name), 
+					webnotes.lang, 'js'))
+
+		doc = doclist[0]
+
+		# attach translations to client
+		doc["__messages"] = _messages
 
 def load_docfield_types():
 	global docfield_types
@@ -247,13 +271,13 @@ def add_print_formats(doclist):
 	for pf in print_formats:
 		doclist.append(webnotes.model.doc.Document('Print Format', fielddata=pf))
 
-def get_property(dt, property, fieldname=None):
+def get_property(dt, prop, fieldname=None):
 	"""get a doctype property"""
 	doctypelist = get(dt)
 	if fieldname:
-		doctypelist.getone({"fieldname":fieldname}).get(property)
+		return doctypelist.getone({"fieldname":fieldname}).get(prop)
 	else:
-		doctypelist[0].get(property)
+		return doctypelist[0].get(prop)
 		
 def get_link_fields(doctype):
 	"""get docfields of links and selects with "link:" """
@@ -297,8 +321,8 @@ class DocTypeDocList(webnotes.model.doclist.DocList):
 	def get_options(self, fieldname, parent=None):
 		return self.get_field(fieldname, parent).options
 		
-	def get_label(self, fieldname, parent=None):
-		return self.get_field(fieldname, parent).label
+	def get_label(self, fieldname, parent=None, parentfield=None):
+		return self.get_field(fieldname, parent, parentfield).label
 		
 	def get_table_fields(self):
 		return self.get({"doctype": "DocField", "fieldtype": "Table"})	

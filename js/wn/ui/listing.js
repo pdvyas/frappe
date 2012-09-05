@@ -70,7 +70,7 @@ wn.ui.Listing = Class.extend({
 			}
 		}
 		if(!this.opts.no_result_message) {
-			this.opts.no_result_message = 'Nothing to show'
+			this.opts.no_result_message = wn._("Nothing to show");
 		}
 	},
 	make: function(opts) {
@@ -165,7 +165,7 @@ wn.ui.Listing = Class.extend({
 	
 		// hide-refresh
 		if(!(this.hide_refresh || this.no_refresh)) {
-			this.add_button('Refresh', function() {
+			this.add_button(wn._("Refresh"), function() {
 				me.run();
 			}, 'icon-refresh');
 			
@@ -173,14 +173,14 @@ wn.ui.Listing = Class.extend({
 				
 		// new
 		if(this.new_doctype) {
-			this.add_button('New ' + this.new_doctype, function() { 
+			this.add_button(wn._("New") + ' ' + wn._(this.new_doctype), function() { 
 				me.make_new_doc(me.new_doctype);
 			}, 'icon-plus');
 		} 
 		
 		// hide-filter
 		if(me.show_filters) {
-			this.add_button('Show Filters', function() {
+			this.add_button(wn._("Show Filters"), function() {
 				me.filter_list.show_filters();
 			}, 'icon-search').addClass('btn-filter');
 		}

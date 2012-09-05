@@ -88,12 +88,13 @@ wn.ui.Control = Class.extend({
 	make_label: function() {
 		// label and description
 		if(this.docfield.label)
-			this.$w.find('label:first').text(this.docfield.label).attr("title", this.docfield.fieldname);
+			this.$w.find('label:first').text(wn._(this.docfield.label))
+				.attr("title", this.docfield.fieldname);
 		if(this.no_label) {
 			this.hide_label();
 		} else {
 			if(this.docfield.description) {
-				this.help_block(this.docfield.description);
+				this.help_block(wn._(this.docfield.description));
 			}
 		}		
 	},

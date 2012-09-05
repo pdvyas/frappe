@@ -252,9 +252,20 @@ def setup_options():
 	parser.add_option("--build_message_files", default=False, action="store_true",
 		help="Build message files for translation")
 		
-	parser.add_option('--export_messages', nargs=1, metavar="FILENAME", 
-		help="Export all messages for translation in a csv file")
+	parser.add_option('--export_messages', nargs=2, metavar="LANG FILENAME", 
+		help="""Export all messages for a language to translation in a csv file. 
+		Example, lib/wnf.py --export_messages hi hindi.csv""")
 
+	parser.add_option('--import_messages', nargs=2, metavar="LANG FILENAME", 
+		help="""Import messages for a language and make language files. 
+		Example, lib/wnf.py --export_messages hi hindi.csv""")
+
+	parser.add_option('--google_translate', nargs=3, metavar="LANG INFILE OUTFILE", 
+		help="""Auto translate using Google Translate API""")
+
+	parser.add_option('--translate', nargs=1, metavar="LANG", 
+		help="""Rebuild translation for the given langauge and 
+		use Google Translate to tranlate untranslated messages""")
 
 	return parser.parse_args()
 	
@@ -380,7 +391,7 @@ def run():
 		
 	elif options.build_web_cache:
 		import website.web_cache
-		website.web_cache.refresh_cache(True)
+		website.web_cache.refresh_cache(["blog"])
 		
 	elif options.append_future_import:
 		append_future_import()
@@ -443,8 +454,30 @@ def run():
 		
 	elif options.export_messages:
 		import webnotes.utils.translate
-		webnotes.utils.translate.all_messages(options.export_messages)
-		
+		webnotes.utils.translate.export_messages(*options.export_messages)
+
+	elif options.import_messages:
+		import webnotes.utils.translate
+		webnotes.utils.translate.import_messages(*options.import_messages)
+	
+	elif options.google_translate:
+		from webnotes.utils.translate import google_translate
+		google_translate(*options.google_translate)
+	
+	elif options.translate:
+		from webnotes.utils.translate import build_message_files, \
+			export_messages, google_translate, import_messages
+		print "Extracting messages..."
+		build_message_files()
+		print "Compiling messages in one file..."
+		export_messages(options.translate, '_lang_tmp.csv')
+		print "Translating via Google Translate..."
+		google_translate(options.translate, '_lang_tmp.csv', '_lang_tmp1.csv')
+		print "Updating language files..."
+		import_messages(options.translate, '_lang_tmp1.csv')
+		print "Deleting temp files..."
+		os.remove('_lang_tmp.csv')
+		os.remove('_lang_tmp1.csv')
 
 if __name__=='__main__':
 	run()
