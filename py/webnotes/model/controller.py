@@ -217,7 +217,8 @@ class DocListController(object):
 			for lf in link_fields.setdefault(doc.doctype, get_link_fields(doc.doctype)):
 				options = (lf.options or "").split("\n")[0].strip()
 				options = options.startswith("link:") and options[5:] or options
-				if doc.get(lf.fieldname) and not webnotes.conn.exists(options, doc[lf.fieldname]):
+				if doc.get(lf.fieldname) and options and \
+						not webnotes.conn.exists(options, doc[lf.fieldname]):
 					error_list.append((options, doc[lf.fieldname], lf.label))
 
 		if error_list:
