@@ -18,6 +18,11 @@ wn.form_classes['DocType Validator'] = wn.ui.Form.extend({
 	setup: function() {
 		var me = this;
 		
+		// add export button
+		if (wn.boot.developer_mode) {
+			this.add_export_button();
+		}
+		
 		// load doctype when for_doctype is changed
 		this.doclist.on('change for_doctype', function(key, val) {
 			wn.model.with_doctype(val, function() {
@@ -39,10 +44,11 @@ wn.form_classes['DocType Validator'] = wn.ui.Form.extend({
 		
 		// set fieldname options (from link field)
 		this.doclist.on("change link_filters link_field", function(key, val, doc) {
-
+			if (!val) return;
+			
 			var link_field_df = wn.model.get('DocType', me.link_filter_on_doctype)
 				.get({doctype:'DocField', fieldname: val})[0];
-				
+			
 			wn.model.with_doctype(link_field_df.get('options'), function() {
 				var fieldnames = $.map(wn.model.get('DocType', link_field_df.get('options'))
 					.get({doctype:'DocField'}), 
@@ -54,7 +60,7 @@ wn.form_classes['DocType Validator'] = wn.ui.Form.extend({
 		});
 
 		this.on("make conditional_properties if_table_field", function(control) {
-			control.set_options(this.get_parent_fields());			
+			control.set_options(this.get_parent_fields());
 		});
 
 		this.on("make conditional_properties then_table_field", function(control) {
@@ -111,68 +117,33 @@ wn.form_classes['DocType Validator'] = wn.ui.Form.extend({
 		all_fields.sort();
 		
 		doc.form.controls[fieldname].set_options([""].concat(all_fields));
+	},
+	add_export_button: function() {
+		var me = this;
+		var get_module = function() {
+			var module = wn.model.get("DocType", 
+				me.doc.get("for_doctype")).doclist[0].get("module");
+			if(!module) {
+				msgprint(wn._("Error: ") + wn._("Module missing"), null, 1);
+			}
+			return module;
+		}
+		this.export_button = $(this.appframe.add_button(wn._("Export"), function() {
+			wn.call({
+				method: "webnotes.modules.export_doc",
+				args: {
+					doctype: me.doc.get("doctype"),
+					name: me.doc.get("name"),
+					module: get_module()
+				}
+			});
+		}));
+		
+		// on change hide the button
+		this.doclist.on('change', function() {
+			me.export_button.toggle(!me.doclist.doc.get('__islocal') &&
+				!me.doclist.dirty);
+		});
+		
 	}
-})
-
-
-
-// cur_frm.cscript.refresh = function(doc) {
-// 	if(doc.for_doctype) {
-// 		cur_frm.cscript.for_doctype(doc);
-// 	}
-// 	if(!doc.__islocal) {
-// 		cur_frm.add_custom_button('Export', function() {
-// 			var module = wn.model.getone({"doctype":"DocType", "name":doc.for_doctype}).module;
-// 			if(!module) {
-// 				msgprint("Module missing");
-// 				return;
-// 			}
-// 			wn.call({
-// 				method:'webnotes.modules.export_doc',
-// 				args: {
-// 					doctype:'DocType Validator',
-// 					name: cur_frm.docname,
-// 					module: module
-// 				}
-// 			})
-// 		})
-// 	}
-// }
-// 
-// 
-// // automatically set link fields of main doc
-// cur_frm.fields_dict.conditional_properties.grid.onrowadd = function(doc, cdt, cdn) {
-// 	cur_frm.cscript.if_table_field(doc, cdt, cdn);
-// 	cur_frm.cscript.then_table_field(doc, cdt, cdn);
-// }
-// 
-// 
-// // set the if and then fields based on the table field selected or the main doc
-// cur_frm.cscript.if_table_field = function(doc, cdt, cdn) {
-// 	cur_frm.cscript.set_if_then_fields(doc, cdt, cdn, 'if_table_field', 'if_field');
-// }
-// 
-// cur_frm.cscript.then_table_field = function(doc, cdt, cdn) {
-// 	cur_frm.cscript.set_if_then_fields(doc, cdt, cdn, 'then_table_field', 'then_field');
-// }
-// 
-// // set the if and then fields based on the table field selected or the main doc
-// cur_frm.cscript.set_if_then_fields = function(doc, cdt, cdn, table_fieldname, fieldname) {
-// 	var d = locals[cdt][cdn];
-// 
-// 	if(d[table_fieldname]) {
-// 		var table_df = wn.model.get({"doctype":"DocField", "fieldname":d[table_fieldname], 
-// 			"parent": doc.for_doctype})[0];
-// 		var doctype = table_df.options;
-// 	} else {
-// 		var doctype = doc.for_doctype;
-// 	}
-// 
-// 	var all_fields =$.map(wn.model.get({"doctype":"DocField", "parent":doctype}), 
-// 		function(d) { return d.fieldname; } );
-// 	all_fields.sort();
-// 	
-// 	cur_frm.set_child_df_property("DocType Conditional Property", fieldname, "options",
-// 		[""].concat(all_fields).join('\n'))
-// }
-// 
+});
