@@ -66,7 +66,7 @@ wn.ui.Form = Class.extend({
 		$.each(this.fields, function(i, df) {
 			// change section
 			if(df.fieldtype=='Section Break') {
-				me.make_fieldset(df.fieldname, df.label);
+				me.make_fieldset(df.fieldname, df.label, df.description);
 			} else {
 				// make control 
 				me.controls[df.fieldname] = wn.ui.make_control({
@@ -88,10 +88,13 @@ wn.ui.Form = Class.extend({
 		
 		this.$form.find(':input:first').focus();
 	},
-	make_fieldset: function(name, legend) {
+	make_fieldset: function(name, legend, description) {
 		var $fset = $('<fieldset data-name="'+name+'"></fieldset>').appendTo(this.$form);
 		if(legend) {
 			$('<legend>').text(wn._(legend)).appendTo($fset);
+		}
+		if(description) {
+			$('<div class="help-block">'+description+'</div>').appendTo($fset);
 		}
 		this.last_fieldset = $fset;
 	},

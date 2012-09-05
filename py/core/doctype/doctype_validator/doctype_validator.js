@@ -45,18 +45,10 @@ wn.form_classes['DocType Validator'] = wn.ui.Form.extend({
 		// set fieldname options (from link field)
 		this.doclist.on("change link_filters link_field", function(key, val, doc) {
 			if (!val) return;
-			
-			var link_field_df = wn.model.get('DocType', me.link_filter_on_doctype)
-				.get({doctype:'DocField', fieldname: val})[0];
-			
-			wn.model.with_doctype(link_field_df.get('options'), function() {
-				var fieldnames = $.map(wn.model.get('DocType', link_field_df.get('options'))
-					.get({doctype:'DocField'}), 
-					function(d) { return d.get('fieldname'); });
-								
-				doc.form.controls.fieldname.set_options(fieldnames);
+			me.set_link_fieldnames(me.link_filter_on_doctype, val, null,
+				function(fieldnames) {
+					doc.form.controls.fieldname.set_options(fieldnames);
 			});
-	
 		});
 
 		this.on("make conditional_properties if_table_field", function(control) {
@@ -77,6 +69,16 @@ wn.form_classes['DocType Validator'] = wn.ui.Form.extend({
 
 		this.doclist.on("change conditional_properties then_table_field", function(key, val, doc) {
 			me.set_if_then_fields(doc, key, 'then_field');
+		});
+		
+		// for conditions on linked document
+		this.doclist.on("change conditional_properties if_field",
+			function(key, val, doc) {
+				me.set_if_then_ref_fields(doc, "if");
+		});
+		this.doclist.on("change conditional_properties then_field",
+			function(key, val, doc) {
+				me.set_if_then_ref_fields(doc, "then");
 		});
 
 		if(this.doc.get('for_doctype'))
@@ -117,6 +119,32 @@ wn.form_classes['DocType Validator'] = wn.ui.Form.extend({
 		all_fields.sort();
 		
 		doc.form.controls[fieldname].set_options([""].concat(all_fields));
+	},
+	set_if_then_ref_fields: function(doc, type) {
+		var me = this;
+		var doctype = me.get_doctype_from_table_field(doc.get(type+"_table_field"));
+		if (doctype) {
+			me.set_link_fieldnames(doctype, doc.get(type+"_field"),
+				doc.get(type+"_table_field"), function(fieldnames) {
+					doc.form.controls[type+"_reference_field"].set_options(
+					[""].concat(fieldnames));
+			});
+		}
+	},
+	set_link_fieldnames: function(doctype, fieldname, parent, callback) {
+		var link_field_df = wn.model.get('DocType', doctype).get({
+			doctype: 'DocField', fieldname: fieldname, fieldtype: 'Link'});
+
+		if (link_field_df && link_field_df[0]) {
+			link_field_df = link_field_df[0];
+			wn.model.with_doctype(link_field_df.get('options'), function() {
+				var fieldnames = $.map(wn.model.get('DocType',
+					link_field_df.get('options')).get({doctype:'DocField'}),
+					function(d) { return d.get('fieldname'); });
+
+				callback(fieldnames);
+			});
+		}
 	},
 	add_export_button: function() {
 		var me = this;
