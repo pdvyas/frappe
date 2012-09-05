@@ -98,21 +98,30 @@ wn.ui.Filter = Class.extend({
 		this.set_events();
 	},
 	make: function() {
-		this.flist.$w.find('.filter_area').append('<div class="list_filter">\
+		this.flist.$w.find('.filter_area').append(repl('<div class="list_filter">\
 		<span class="fieldname_select_area"></span>\
 		<select class="condition">\
-			<option value="=">Equals</option>\
-			<option value="like">Like</option>\
-			<option value=">=">Greater or equals</option>\
-			<option value="<=">Less or equals</option>\
-			<option value=">">Greater than</option>\
-			<option value="<">Less than</option>\
-			<option value="in">In</option>\
-			<option value="!=">Not equals</option>\
+			<option value="=">%(equals)s</option>\
+			<option value="like">%(like)s</option>\
+			<option value=">=">%(greater_or)s</option>\
+			<option value="<=">%(less_or)s</option>\
+			<option value=">">%(greater)s</option>\
+			<option value="<">%(less)s</option>\
+			<option value="in">%(in)s</option>\
+			<option value="!=">%(not_equals)s</option>\
 		</select>\
 		<span class="filter_field"></span>\
 		<a class="close">&times;</a>\
-		</div>');
+		</div>', {
+			equals: wn._("Equals"),
+			like: wn._("Like"),
+			greater_or: wn._("Greater or equals"),
+			less_or: wn._("Less or equals"),
+			greater: wn._("Greater than"),
+			less: wn._("Less than"),
+			"in": wn._("In"),
+			not_equals: wn._("Not Equals")
+		}));
 		this.$w = this.flist.$w.find('.list_filter:last-child');
 	},
 	make_select: function() {
@@ -346,7 +355,7 @@ wn.ui.FieldSelect = Class.extend({
 			this.$select.append($('<option>', {
 				value: df.fieldname,
 				table: table
-			}).text(label));
+			}).text(wn._(label)));
 			me.fields_by_name[df.fieldname] = df;						
 		}
 	}

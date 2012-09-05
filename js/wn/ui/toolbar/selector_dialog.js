@@ -72,6 +72,7 @@ wn.ui.toolbar.SelectorDialog = Class.extend({
 	set_values: function(lst) {
 		// set values
 		var $sel = this.dialog.form.controls.doctype.$input;
+		var lst = $.map(lst, function(v)  { return wn._(v); })
 		$sel.empty().add_options(lst.sort());	
 	}
 })

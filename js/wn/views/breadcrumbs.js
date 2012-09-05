@@ -11,7 +11,7 @@ wn.views.breadcrumbs = function(appframe, module, doctype, name) {
 	}
 
 	if(name && doctype && (!wn.model.get('DocType', doctype).issingle)) {
-		appframe.add_breadcrumb(repl(' in <a href="#!List/%(doctype)s">%(doctype_label)s</a>',
+		appframe.add_breadcrumb(repl(' &rarr; <a href="#!List/%(doctype)s">%(doctype_label)s</a>',
 			{
 				doctype: doctype,
 				doctype_label: wn._(doctype) + " " + wn._("List")
@@ -19,7 +19,7 @@ wn.views.breadcrumbs = function(appframe, module, doctype, name) {
 	};
 	
 	if(doctype && module && wn.modules && wn.modules[module]) {
-		appframe.add_breadcrumb(repl(' in <a href="#!%(module_page)s">%(module)s</a>',
+		appframe.add_breadcrumb(repl(' &rarr; <a href="#!%(module_page)s">%(module)s</a>',
 			{module: wn._(module), module_page: wn.modules[module] }))
 	}
 }

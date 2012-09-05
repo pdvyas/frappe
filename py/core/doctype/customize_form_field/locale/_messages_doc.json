@@ -26,7 +26,7 @@
  "Password", 
  "Name", 
  "Options", 
- "For Links, enter the DocType as range\nFor Select, enter list of Options separated by comma", 
+ "For Links, enter the DocType as rangeFor Select, enter list of Options separated by comma", 
  "Perm Level", 
  "Width", 
  "Reqd", 
@@ -36,7 +36,7 @@
  "Report Hide", 
  "Allow on Submit", 
  "Depends On", 
- "This field will appear only if the fieldname defined here has value OR the rules are true (examples): <br>\nmyfield\neval:doc.myfield=='My Value'<br>\neval:doc.age>18", 
+ "This field will appear only if the fieldname defined here has value OR the rules are true (examples): <br>myfieldeval:doc.myfield=='My Value'<br>eval:doc.age>18", 
  "Description", 
  "Default"
 ]

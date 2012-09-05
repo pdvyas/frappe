@@ -85,20 +85,18 @@ def update_language(doclist):
 		# load languages for each doctype
 		from webnotes.utils.translate import get_lang_data, update_lang_js
 		_messages = {}
-	
+
 		for d in doclist:
 			if d.doctype=='DocType':
 				_messages.update(get_lang_data(get_doc_path(d.module, d.doctype, d.name), 
 					webnotes.lang, 'doc'))
+				_messages.update(get_lang_data(get_doc_path(d.module, d.doctype, d.name), 
+					webnotes.lang, 'js'))
 
 		doc = doclist[0]
-	
+
 		# attach translations to client
 		doc["__messages"] = _messages
-				
-		# update translations in js
-		if doc.get("__js"):
-			doc["__js"] = update_lang_js(doc["__js"], get_doc_path(doc.module, doc.doctype, doc.name))		
 
 def load_docfield_types():
 	global docfield_types
