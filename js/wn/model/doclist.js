@@ -190,6 +190,7 @@ wn.model.DocList = Class.extend({
 			// remove old reference
 			delete wn.doclists[this.doctype][oldname];
 		}
+		this.dirty = false;
 		this.trigger('reset');
 	},
 	get_docs: function() {
@@ -239,7 +240,6 @@ wn.model.DocList = Class.extend({
 
 			new_doclist.add(new_doc);
 		});
-		console.log(new_doclist);
 		return new_doclist;
 	},
 	get_perm: function() {

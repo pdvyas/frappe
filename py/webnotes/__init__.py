@@ -97,7 +97,7 @@ def can_translate():
 	if lang=='en': 
 		return False
 	import conf
-	if lang in conf.accept_languages:
+	if lang in getattr(conf, "accept_languages", []):
 		return True
 	else:
 		return False

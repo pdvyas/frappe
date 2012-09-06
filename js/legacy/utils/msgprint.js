@@ -22,7 +22,7 @@
 
 var msg_dialog;
 
-function msgprint(msg, title) {
+function msgprint(msg, title, exc) {
 	if(!msg) return;
 	
 	if(msg instanceof Array) {
@@ -58,6 +58,7 @@ function msgprint(msg, title) {
 	msg_dialog.msg_area.append('<p>'+msg+'</p>');
 	msg_dialog.show();
 	
+	if(exc) throw msg;
 }
 
 // Floating Message

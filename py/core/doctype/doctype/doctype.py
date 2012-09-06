@@ -31,8 +31,6 @@ class DuplicateSeriesError(webnotes.ValidationError): pass
 class DocTypeController(DocListController):
 	def validate(self):
 		self.validate_series()
-		if self.doc.is_submittable:
-			self.add_amend_fields()
 		self.validate_fields()
 		
 	def on_update(self):

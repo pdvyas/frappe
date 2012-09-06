@@ -26,7 +26,7 @@ from webnotes.model.controller import DocListController
 def validate(controller):
 	"""validate doctype based on DocType Validator"""
 	import webnotes.model
-	
+
 	# load validators
 	doctypelist = webnotes.model.get_doctype(controller.doclist[0].doctype)
 	
@@ -78,7 +78,7 @@ def filter_link(doclist, link_filter, doctypelist):
 				webnotes.msgprint("""%s: "%s" is not a valid "%s" """ % (link_df.label, val, 
 					link_df.options), raise_exception=webnotes.InvalidLinkError)
 					
-			if not check_filters(valdoc[0].get(link_filter.fieldname), link_filter.condition, 
+			if not check(valdoc[0].get(link_filter.fieldname), link_filter.condition, 
 					link_filter.value):
 					
 				# need this meta for the label
@@ -95,7 +95,7 @@ def filter_link(doclist, link_filter, doctypelist):
 	else:
 		_check(doclist[0])
 
-def check_filters(val1, condition, val2):
+def check(val1, condition, val2):
 	"""
 		check based on condition
 			* val1 is the actual value
@@ -145,51 +145,111 @@ def no_duplicate(doclist, parentfield, keys):
 def check_condition(doclist, condition, doctypelist):
 	"""check if-then type of conditions"""
 	import webnotes
-	from webnotes.utils import cint, flt
-	
-	def _get_doclist(if_then):
-		return doclist.get({"parentfield": _fvalue(if_then, "table_field")})
-	
-	def _get_field(if_then):
-		return doctypelist.get_field(_fvalue(if_then, "field"),
-			parentfield=_fvalue(if_then, "table_field") or None)
-			
-	def _check(doc, if_then):
-		return check_filters(doc.get(_fvalue(if_then, "field")), 
-			_fvalue(if_then, "condition"), _fvalue(if_then, "value"))
-	
-	def _fvalue(if_then, fname):
-		return condition.get(if_then + "_" + fname)
-		
-	# filter records from doclist
-	if_doclist = _get_doclist('if')
-	then_doclist = _get_doclist('then')
-	
-	# convert type if Int, Float, Currency
 	from webnotes.utils import cast
-	if_field = _get_field("if")
-	condition.if_value = cast(if_field, condition.if_value)
-	
-	then_field = _get_field("then")
-	condition.then_value = cast(then_field, condition.then_value)
-		
-	# for each, check if "if" condition is true
-	for if_doc in if_doclist:
-		if _check(if_doc, 'if'):
+	def _getval1(_type, doc):
+		# compare with the value in linked document's field
+		field = condition.get(_type+"_field")
+		parentfield = condition.get(_type+"_table_field") or None
+		ref_field = condition.get(_type+"_reference_field")
+		if ref_field:
+			link_field_dt = doctypelist.get_options(field, parentfield=parentfield)
+			val1 = webnotes.model.get(link_field_dt, doc.get(field))[0].get(ref_field)
+		else:
+			val1 = doc.get(field)
+		df = doctypelist.get_field(field, parentfield=parentfield)
+		return cast(df, val1)
 			
-			# for each, check if "then" condition is false
-			for then_doc in then_doclist:
-				if not _check(then_doc, 'then'):
-					
-					# get labels for displaying error message
-					condition.update({
-						"if_label": if_field.label,
-						"then_label": then_field.label
-					})
-					
-					webnotes.msgprint("""If "%(if_label)s" %(if_condition)s "%(if_value)s", 
-						then "%(then_label)s" should be %(then_condition)s "%(then_value)s" """ \
-						% condition, raise_exception=webnotes.ConditionalPropertyError)
+	
+	def _getval2(_type, idoc, tdoc=None):
+		parentfield = condition.get(_type+"_table_field") or None
+		field = condition.get(_type+"_field")
+		val2 = condition.get(_type+"_value")
+		
+		# if the value is specified as field:if/then:fieldname
+		if (val2 or "").startswith("field:"):
+			try:
+				ref, ref_field = val2[6:].split(".")
+				if ref == "if":
+					return cast(doctypelist.get_field(ref_field,
+						parentfield=idoc.parentfield or None), idoc.get(ref_field))
+				elif ref == "then":
+					return cast(doctypelist.get_field(ref_field,
+						parentfield=tdoc.parentfield or None), tdoc.get(ref_field))
+				else:
+					raise ValueError
+			except ValueError, e:
+				# for development
+				# looks like the if or then part is missing!
+				webnotes.msgprint("""Invalid field specified in 
+					Conditional Property # %d of DocType Validator: %s""" % \
+					(condition.idx, doclist[0].doctype),
+					raise_exception=webnotes.ConditionalPropertyError)
+		else:
+			return cast(doctypelist.get_field(field, parentfield=parentfield), val2)
+	
+	def _raise_error(idoc, tdoc):
+		ifield = doctypelist.get_label(condition.if_field, 
+			parentfield=condition.if_table_field or None)
+		tfield = doctypelist.get_label(condition.then_field,
+			parentfield=condition.then_table_field or None)
+		ival = condition.get("if_value")
+		tval = condition.get("then_value")
+			
+		def _get_ref_msg(_type):
+			doc = _type=="if" and idoc or tdoc
+			field = condition.get(_type+"_field")
+			parentfield = condition.get(_type+"_table_field") or None
+			field_label = doctypelist.get_label(condition.if_field,
+				parentfield=condition.if_table_field or None)
+			ref_field_label = webnotes.model.get_doctype(doctypelist.get_options(field,
+				parentfield=parentfield)).get_label(condition.if_reference_field)
+			return """%s [%s], %s""" % (field_label, doc.get(condition.if_field),
+				ref_field_label)
+				
+		def _get_field_msg(_type):
+			condition_type, field = condition.get(_type+"_value")[6:].split(".")
+			parentfield = condition.get(_type+"_table_field") or None
+			field_label = doctypelist.get_label(field, parentfield=parentfield)
+			doc = condition_type=="if" and idoc or tdoc
+			return """%s [%s]""" % (field_label, doc.get(field))
+			
+		if condition.if_reference_field:
+			ifield = _get_ref_msg("if")
+		if (condition.if_value or "").startswith("field:"):
+			ival = _get_field_msg("if")
+		if condition.then_reference_field:
+			tfield = _get_ref_msg("then")
+		if (condition.then_value or "").startswith("field:"):
+			tval = _get_field_msg("then")
+		
+		# hopefully, an elaborate message!
+		webnotes.msgprint("""%(if)s %(ifield)s %(icond)s%(ival)s,
+			%(then)s %(tfield)s %(should_be)s %(tcond)s%(tval)s""" % {
+				"if": webnotes._("if"),
+				"ifield": ifield,
+				"icond": condition.if_condition,
+				"ival": ival and " "+ival or "",
+				"then": webnotes._("then"),
+				"tfield": tfield,
+				"should_be": webnotes._("should be"),
+				"tcond": condition.then_condition,
+				"tval": tval and " "+tval or "",
+			}, raise_exception=webnotes.ConditionalPropertyError)
+	
+	if_doclist = doclist.get({"parentfield": condition.if_table_field or None})
+	then_doclist = doclist.get({"parentfield": condition.then_table_field or None})
+
+	for idoc in if_doclist:
+		# check if "if" part of the condition is true
+		ival1 = _getval1("if", idoc)
+		ival2 = _getval2("if", idoc)
+		if check(ival1, condition.if_condition, ival2):
+			for tdoc in then_doclist:
+				# check if "then" part of the condition is false
+				tval1 = _getval1("then", tdoc)
+				tval2 = _getval2("then", idoc, tdoc)
+				if not check(tval1, condition.then_condition, tval2):
+					_raise_error(idoc, tdoc)
 
 class DocTypeValidator(DocListController):
 	pass

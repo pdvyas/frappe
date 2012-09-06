@@ -3,109 +3,176 @@
 
 	# These values are common in all dictionaries
 	{
-		u'creation': '2012-07-31 11:10:43',
+		u'creation': u'2012-07-31 11:10:43',
 		u'docstatus': 0,
-		u'modified': '2012-08-01 14:44:57',
+		u'modified': '2012-09-05 15:18:06',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'description': u'Set condition based property rules',
-		u'doctype': u'DocType',
-		'document_type': u'System',
-		'istable': 1,
-		'module': u'Core',
+		u'allow_attach': 0,
+		u'allow_copy': 0,
+		u'allow_email': 0,
+		u'allow_print': 0,
+		u'allow_rename': 0,
+		u'autoname': u'',
+		u'default_print_format': u'',
+		u'description': u'Set condition based property rules',
+		u'docstatus_labels': u'',
+		'doctype': u'DocType',
+		u'document_type': u'System',
+		u'hide_heading': 0,
+		u'hide_toolbar': 0,
+		u'in_create': 0,
+		u'in_dialog': 0,
+		u'is_submittable': 0,
+		u'issingle': 0,
+		u'istable': 1,
+		u'max_attachments': 0,
+		u'module': u'Core',
 		u'name': u'__common__',
-		'version': 1
+		u'name_case': u'',
+		u'read_only': 0,
+		u'read_only_onload': 0,
+		u'search_fields': u'',
+		u'version': 1
 	},
 
 	# These values are common for all DocField
 	{
-		u'doctype': u'DocField',
+		'doctype': u'DocField',
 		u'name': u'__common__',
-		'parent': u'DocType Conditional Property',
-		'parentfield': u'fields',
-		'parenttype': u'DocType',
-		'permlevel': 0
+		u'parent': u'DocType Conditional Property',
+		u'parentfield': u'fields',
+		u'parenttype': u'DocType',
+		u'permlevel': 0
 	},
 
 	# DocType, DocType Conditional Property
 	{
 		u'doctype': u'DocType',
-		u'name': u'DocType Conditional Property'
+		'name': u'DocType Conditional Property'
 	},
 
 	# DocField
 	{
 		u'doctype': u'DocField',
-		'fieldname': u'if_table_field',
-		'fieldtype': u'Select',
-		'label': u'If Table Field'
+		u'fieldname': u'if_table_field',
+		u'fieldtype': u'Select',
+		u'label': u'If Table Field'
 	},
 
 	# DocField
 	{
 		u'doctype': u'DocField',
-		'fieldname': u'if_field',
-		'fieldtype': u'Select',
-		'label': u'If Field',
-		'reqd': 1
+		u'fieldname': u'if_field',
+		u'fieldtype': u'Select',
+		u'label': u'If Field',
+		u'reqd': 1
+	},
+
+	# DocField
+	{
+		u'allow_on_submit': 0,
+		u'default': u'',
+		u'depends_on': u'',
+		u'description': u'',
+		u'doctype': u'DocField',
+		u'fieldname': u'if_reference_field',
+		u'fieldtype': u'Select',
+		u'hidden': 0,
+		u'in_filter': 0,
+		u'label': u'If Reference Field',
+		u'no_copy': 0,
+		u'oldfieldname': u'',
+		u'oldfieldtype': u'',
+		u'options': u'',
+		u'print_hide': 0,
+		u'report_hide': 0,
+		u'reqd': 0,
+		u'search_index': 0,
+		u'unique': 0,
+		u'width': u''
 	},
 
 	# DocField
 	{
 		u'doctype': u'DocField',
-		'fieldname': u'if_condition',
-		'fieldtype': u'Select',
-		'label': u'If Condition',
-		'options': u'=\nin\n>\n<\n!=\n>=\n<=\nBegins With\nFilled',
-		'reqd': 1
+		u'fieldname': u'if_condition',
+		u'fieldtype': u'Select',
+		u'label': u'If Condition',
+		u'options': u'=\nin\n>\n<\n!=\n>=\n<=\nBegins With\nFilled',
+		u'reqd': 1
 	},
 
 	# DocField
 	{
 		u'doctype': u'DocField',
-		'fieldname': u'if_value',
-		'fieldtype': u'Data',
-		'label': u'If Value',
-		'reqd': 0
+		u'fieldname': u'if_value',
+		u'fieldtype': u'Data',
+		u'label': u'If Value',
+		u'reqd': 0
 	},
 
 	# DocField
 	{
 		u'doctype': u'DocField',
-		'fieldname': u'then_table_field',
-		'fieldtype': u'Select',
-		'label': u'Then Table Field'
+		u'fieldname': u'then_table_field',
+		u'fieldtype': u'Select',
+		u'label': u'Then Table Field'
 	},
 
 	# DocField
 	{
 		u'doctype': u'DocField',
-		'fieldname': u'then_field',
-		'fieldtype': u'Select',
-		'label': u'Then Field',
-		'reqd': 1
+		u'fieldname': u'then_field',
+		u'fieldtype': u'Select',
+		u'label': u'Then Field',
+		u'reqd': 1
+	},
+
+	# DocField
+	{
+		u'allow_on_submit': 0,
+		u'default': u'',
+		u'depends_on': u'',
+		u'description': u'',
+		u'doctype': u'DocField',
+		u'fieldname': u'then_reference_field',
+		u'fieldtype': u'Select',
+		u'hidden': 0,
+		u'in_filter': 0,
+		u'label': u'Then Reference Field',
+		u'no_copy': 0,
+		u'oldfieldname': u'',
+		u'oldfieldtype': u'',
+		u'options': u'',
+		u'print_hide': 0,
+		u'report_hide': 0,
+		u'reqd': 0,
+		u'search_index': 0,
+		u'unique': 0,
+		u'width': u''
 	},
 
 	# DocField
 	{
 		u'doctype': u'DocField',
-		'fieldname': u'then_condition',
-		'fieldtype': u'Select',
-		'label': u'Then Condition',
-		'options': u'=\nin\n>\n<\n!=\n>=\n<=\nBegins With\nFilled',
-		'reqd': 1
+		u'fieldname': u'then_condition',
+		u'fieldtype': u'Select',
+		u'label': u'Then Condition',
+		u'options': u'=\nin\n>\n<\n!=\n>=\n<=\nBegins With\nFilled',
+		u'reqd': 1
 	},
 
 	# DocField
 	{
 		u'doctype': u'DocField',
-		'fieldname': u'then_value',
-		'fieldtype': u'Data',
-		'label': u'Then Value',
-		'reqd': 0
+		u'fieldname': u'then_value',
+		u'fieldtype': u'Data',
+		u'label': u'Then Value',
+		u'reqd': 0
 	}
 ]
