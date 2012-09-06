@@ -80,6 +80,9 @@ wn.ui.Listing = Class.extend({
 		this.prepare_opts();
 		$.extend(this, this.opts);
 		
+		this.opts.str_add_filter = wn._("Add Filter")
+		this.opts.str_search = wn._("Search")
+		
 		$(this.parent).html(repl('\
 			<div class="wnlist">\
 				<h4 class="title hide">%(title)s</h4>\
@@ -89,9 +92,9 @@ wn.ui.Listing = Class.extend({
 						<div class="filter_area"></div>\
 						<div>\
 							<button class="btn btn-small btn-info search-btn">\
-								<i class="icon-refresh icon-white"></i> Search</button>\
+								<i class="icon-refresh icon-white"></i> %(str_search)s</button>\
 							<button class="btn btn-small add-filter-btn">\
-								<i class="icon-plus"></i> Add Filter</button>\
+								<i class="icon-plus"></i> %(str_add_filter)s</button>\
 						</div>\
 					</div>\
 				</div>\

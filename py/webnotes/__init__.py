@@ -64,7 +64,7 @@ debug_log = []
 message_log = []
 
 # translate
-lang = 'hi'
+lang = 'en'
 _messages = {}
 
 # exceptions

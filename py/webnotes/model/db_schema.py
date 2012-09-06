@@ -40,6 +40,7 @@ type_map = {
 	,'code':		('text', '')
 	,'text editor':	('text', '')
 	,'date':		('date', '')
+	,'date time':	('datetime', '')
 	,'time':		('time', '')
 	,'text':		('text', '')
 	,'data':		('varchar', '180')
