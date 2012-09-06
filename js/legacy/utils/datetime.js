@@ -115,42 +115,36 @@ wn.datetime = {
 		return t;
 	},
 	
+	get_date_and_time_str: function(val) {
+		if(val.search(":")==-1) {
+			return [val, '']; // only date
+		} else {
+			return val.split(' ');
+		}
+	},
+	
 	str_to_user: function(val, no_time_str) {
 		var user_fmt = dateutil.get_user_fmt();
-		var time_str = '';
-		//alert(user_fmt);
-		
-		
-		if(val==null||val=='')return null;
-		
-		// separate time string if there
-		if(val.search(':')!=-1) {
-			var tmp = val.split(' ');
-			if(tmp[1])
-				time_str = ' ' + tmp[1];
-			var d = tmp[0];
-		} else {
-			var d = val;
-		}
+		if(!val)return val;
 
-		if(no_time_str)time_str = '';
-
+		[datestr, timestr] = dateutil.get_date_and_time_str(val);
+		
 		// set to user fmt
-		d = d.split('-');
+		d = datestr.split('-');
 		if(d.length==3) {
 			if(user_fmt=='dd-mm-yyyy')
-				val =  d[2]+'-'+d[1]+'-'+d[0] + time_str;
+				val =  d[2]+'-'+d[1]+'-'+d[0];
 			else if(user_fmt=='dd/mm/yyyy')
-				val =  d[2]+'/'+d[1]+'/'+d[0] + time_str;
+				val =  d[2]+'/'+d[1]+'/'+d[0];
 			else if(user_fmt=='yyyy-mm-dd')
-				val =  d[0]+'-'+d[1]+'-'+d[2] + time_str;
+				val =  d[0]+'-'+d[1]+'-'+d[2];
 			else if(user_fmt=='mm/dd/yyyy')
-				val =  d[1]+'/'+d[2]+'/'+d[0] + time_str;
+				val =  d[1]+'/'+d[2]+'/'+d[0];
 			else if(user_fmt=='mm-dd-yyyy')
-				val =  d[1]+'-'+d[2]+'-'+d[0] + time_str;
+				val =  d[1]+'-'+d[2]+'-'+d[0];
 		}
 
-		return val;
+		return val + (timestr ? (' ' + timestr) : "");
 	},
 	
 	full_str: function() { 
@@ -159,28 +153,33 @@ wn.datetime = {
 		+ d.getHours()  + ':' + d.getMinutes()   + ':' + d.getSeconds();
 	},
 	
-	user_to_str: function(d) {
+	user_to_str: function(val) {
 		var user_fmt = this.get_user_fmt();
+		if(!val)return val;
+
+		[datestr, timestr] = dateutil.get_date_and_time_str(val);
 		
 		if(user_fmt=='dd-mm-yyyy') {
-			var d = d.split('-');
-			return  d[2]+'-'+d[1]+'-'+d[0];
+			var d = datestr.split('-');
+			var val = d[2]+'-'+d[1]+'-'+d[0];
 		}
 		else if(user_fmt=='dd/mm/yyyy') {
-			var d = d.split('/');
-			return  d[2]+'-'+d[1]+'-'+d[0];
+			var d = datestr.split('/');
+			var val = d[2]+'-'+d[1]+'-'+d[0];
 		}
 		else if(user_fmt=='yyyy-mm-dd') {
-			return d;
+			var val = datestr;
 		}
 		else if(user_fmt=='mm/dd/yyyy') {
-			var d = d.split('/');
-			return  d[2]+'-'+d[0]+'-'+d[1];
+			var d = datestr.split('/');
+			var val = d[2]+'-'+d[0]+'-'+d[1];
 		}
 		else if(user_fmt=='mm-dd-yyyy') {
-			var d = d.split('-');
-			return  d[2]+'-'+d[0]+'-'+d[1];
+			var d = datestr.split('-');
+			var val = d[2]+'-'+d[0]+'-'+d[1];
 		}
+		
+		return val + (timestr ? (' ' + timestr) : ""); 
 	},
 	
 	global_date_format: function(d) {

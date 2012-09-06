@@ -189,11 +189,12 @@ wn.views.FormPage = Class.extend({
 		
 		this.doclist.on('change docstatus', function() {
 			me.apply_status();
-		});		
+		});
 	},
 	apply_status: function() {
 		var ds = this.doclist.doc.get('docstatus', 0);
 		var me = this;
+		if(!me.docstatus_btns) return;
 		$.each.call(this, [0,1,2], function(i, v) {
 			me.docstatus_btns[v].removeClass(me.docstatus_btn_class[v]).attr('disabled', null);
 		});

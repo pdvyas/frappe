@@ -35,6 +35,7 @@ wn.ui.make_control = function(opts) {
 		'Text Editor': wn.ui.RichTextControl,
 		'Button': wn.ui.ButtonControl,
 		'Date': wn.ui.DateControl,
+		'Date Time': wn.ui.DateTimeControl,
 		'Code': wn.ui.CodeControl
 	}
 	if(control_map[opts.docfield.fieldtype]) {
@@ -102,7 +103,7 @@ wn.ui.Control = Class.extend({
 		var me = this;
 		if(this.$input) 
 			this.$input.change(function() {
-				me.set(me.get())
+				me.set(me.get());
 			});
 	},
 	set: function(val) {

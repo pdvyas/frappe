@@ -121,8 +121,7 @@ def load_main(doctype, name):
 		doc  = webnotes.conn.sql("""select * from `tab%s` where name = %s""" % \
 			(doctype, "%s"), name)
 		if not doc:
-			webnotes.msgprint("""%s: "%s" does not exist""" % (doctype, name),
-				raise_exception=NameError)
+			raise NameError, """%s: "%s" does not exist""" % (doctype, name)
 		doc = doc[0]
 
 	doc["doctype"] = doctype

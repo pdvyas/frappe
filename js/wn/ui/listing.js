@@ -80,8 +80,8 @@ wn.ui.Listing = Class.extend({
 		this.prepare_opts();
 		$.extend(this, this.opts);
 		
-		opts.str_add_filter = wn._("Add Filter")
-		opts.str_search = wn._("Search")
+		this.opts.str_add_filter = wn._("Add Filter")
+		this.opts.str_search = wn._("Search")
 		
 		$(this.parent).html(repl('\
 			<div class="wnlist">\

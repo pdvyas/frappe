@@ -59,6 +59,7 @@
 			"lib/css/ui/views.css",
 			"lib/css/ui/fonts.css",
 			"lib/js/lib/Aristo/aristo.selected.css",
+			"lib/js/lib/jquery/jquery.ui.timepicker-addon.css",
 			"lib/js/lib/tag-it/jquery.tagit.css",
 		]
 	},
@@ -88,15 +89,17 @@
 			"lib/js/lib/jquery/jquery.ui.core.min.js",
 			"lib/js/lib/jquery/jquery.ui.datepicker.min.js",
 			"lib/js/lib/jquery/jquery.ui.autocomplete.min.js",
-			"lib/js/lib/mousetrap.min.js",
+			'lib/js/lib/jquery/jquery.ui.slider.min.js',
+			'lib/js/lib/jquery/jquery.ui.timepicker-addon.js',
+			'lib/js/lib/jquery/jquery.ui.sliderAccess.js',
 			"lib/js/lib/bootstrap.min.js",
+			"lib/js/lib/mousetrap.min.js",
 			"lib/js/lib/tag-it/tag-it.js",
 			"lib/js/core.min.js",
 			"lib/js/legacy/globals.js",
 			"lib/js/legacy/utils/datatype.js",
 			"lib/js/legacy/utils/datetime.js",
 			"lib/js/legacy/utils/msgprint.js",
-			"lib/js/legacy/utils/printElement.js",
 			"lib/js/wn/ui/",
 			"lib/js/wn/upload.js",
 			"lib/js/wn/views/",
@@ -120,7 +123,7 @@
 			'lib/js/lib/slickgrid/slick.grid.js'
 		]
 	},
-	
+
 	{
 		"public/js/fields.js": ["lib/js/legacy/widgets/form/fields.js"]
 	},

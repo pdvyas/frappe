@@ -43,4 +43,31 @@ wn.ui.DateControl = wn.ui.Control.extend({
 		if(val) return dateutil.user_to_str(val);
 		else return val;
 	}
+});
+
+wn.ui.DateTimeControl = wn.ui.Control.extend({
+	make_input: function() {
+		this.$input = $('<input type="text">')
+			.appendTo(this.$w.find('.controls'));
+
+		var user_fmt = sys_defaults.date_format || 'yy-mm-dd';
+
+		this.$input.datetimepicker({
+			dateFormat: user_fmt.replace('yyyy','yy'), 
+			altFormat:'yy-mm-dd', 
+			timeFormat: 'hh:mm:ss',
+			changeYear: true,
+			showSecond: true
+		})
+	},
+	set_input: function(val) {
+		if(!val) val='';
+		else val = dateutil.str_to_user(val);
+		this._super(val);
+	},
+	get: function() {
+		var val = $(this.$input).val();
+		if(val) return dateutil.user_to_str(val);
+		else return val;
+	}
 })

@@ -76,9 +76,10 @@ class DocListController(object):
 		
 		from webnotes.model.doctype import get_property
 		if get_property(self.doc.doctype, "document_type") in ["Master", "Transaction"]:
+			from webnotes.model.doclist import load
 			# get the old doclist
 			try:
-				oldlist = webnotes.model.get(self.doc.doctype, self.doc.name)
+				oldlist = load(self.doc.doctype, self.doc.name)
 			except NameError, e:
 				oldlist = None
 		else:
