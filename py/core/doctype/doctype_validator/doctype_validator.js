@@ -48,6 +48,7 @@ wn.form_classes['DocType Validator'] = wn.ui.Form.extend({
 			me.set_link_fieldnames(me.link_filter_on_doctype, val, null,
 				function(fieldnames) {
 					doc.form.controls.fieldname.set_options(fieldnames);
+					doc.form.controls["fieldname"].set_init_value()
 			});
 		});
 
@@ -60,7 +61,7 @@ wn.form_classes['DocType Validator'] = wn.ui.Form.extend({
 		});
 
 		this.on("make unique_validation unique_table_field", function(control) {
-			control.set_options(this.get_parent_fields());			
+			control.set_options(this.get_parent_fields());
 		});
 
 		this.doclist.on("change conditional_properties if_table_field", function(key, val, doc) {
@@ -75,11 +76,11 @@ wn.form_classes['DocType Validator'] = wn.ui.Form.extend({
 		this.doclist.on("change conditional_properties if_field",
 			function(key, val, doc) {
 				me.set_if_then_ref_fields(doc, "if");
-		});
+			});
 		this.doclist.on("change conditional_properties then_field",
 			function(key, val, doc) {
 				me.set_if_then_ref_fields(doc, "then");
-		});
+			});
 
 		if(this.doc.get('for_doctype'))
 			this.doc.trigger_change_event('for_doctype');
@@ -126,8 +127,9 @@ wn.form_classes['DocType Validator'] = wn.ui.Form.extend({
 		if (doctype) {
 			me.set_link_fieldnames(doctype, doc.get(type+"_field"),
 				doc.get(type+"_table_field"), function(fieldnames) {
-					doc.form.controls[type+"_reference_field"].set_options(
-					[""].concat(fieldnames));
+					var ref_field = type+"_reference_field";
+					doc.form.controls[ref_field].set_options([""].concat(fieldnames));
+					doc.form.controls[ref_field].set_init_value()
 			});
 		}
 	},
