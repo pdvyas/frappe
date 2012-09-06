@@ -10,13 +10,15 @@ wn.ui.AssignTo = Class.extend({
 		}
 	},
 	make_button: function() {
-		this.$w = $('<div class="btn-group">\
+		this.$w = $(repl('<div class="btn-group">\
 			<span class="label dropdown-toggle" \
 				style="width: 180px; overflow: hidden; text-align: left; display: inline-block;" \
-				data-toggle="dropdown">Not Assigned</span>\
+				data-toggle="dropdown">%(not_assigned)s</span>\
 			<ul class="dropdown-menu">\
 			</ul>\
-		</div>').appendTo(this.form_page.$sidebar);		
+		</div>', {
+			not_assigned: wn._("Not Assigned")
+		})).appendTo(this.form_page.$sidebar);		
 	},
 	make_dropdown: function() {
 		this.assign_btn = this.$w.find('.dropdown-toggle');
@@ -28,7 +30,7 @@ wn.ui.AssignTo = Class.extend({
 				if(v) {
 					var ui = $.extend(wn.boot.user_info[v], {id: v});
 				} else {
-					var ui = {fullname:'Not Assigned', id: null};
+					var ui = {fullname: wn._("Not Assigned"), id: null};
 					$('<li class="divider"></li>').appendTo(ul);
 				}
 	

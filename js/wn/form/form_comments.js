@@ -11,13 +11,16 @@ wn.ui.Comments = Class.extend({
 	},
 	make_body: function() {
 		var me = this;
-		this.$w = $('<div class="comments-area"><br>\
-			<b>Comments:</b><br>\
+		this.$w = $(repl('<div class="comments-area"><br>\
+			<b>%(comments)s:</b><br>\
 			<textarea style="width: 190px; height: 36px;" \
 				class="comment comment-text"></textarea>\
-			<button class="btn btn-small">Add Comment</button>\
+			<button class="btn btn-small">%(add_comment)s</button>\
 			<div class="comment-list" style="margin-top: 17px;"></div>\
-			</div>').appendTo(this.form_page.$sidebar);
+			</div>', {
+				comments: wn._("Comments"),
+				add_comment: wn._("Add Comment")
+			})).appendTo(this.form_page.$sidebar);
 		this.$w.find('.btn').click(function() {
 			me.add_comment(me.$w.find('textarea').val());
 		})

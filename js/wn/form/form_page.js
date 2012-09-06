@@ -164,7 +164,6 @@ wn.views.FormPage = Class.extend({
 	make_status_buttons: function() {
 		var me = this;
 		var ds_labels = wn.model.get_docstatus_labels(this.form.meta.doc.get('name'));
-		console.log(ds_labels)
 		this.docstatus_btns = {};
 		
 		this.docstatus_btns[0] = this.page.appframe.add_button(wn._(ds_labels[0]), function() {
