@@ -92,11 +92,6 @@ class DocList(list):
 				del d[f]
 		
 def load(doctype, name):
-	# from cache?
-	doclist = webnotes.utils.cache.get(doctype + '/' + name)
-	if doclist:
-		return json.loads(doclist)
-	
 	# load main doc
 	doclist = [load_main(doctype, name)]
 	
@@ -119,7 +114,7 @@ def load_main(doctype, name):
 		doc["name"] = doctype
 	else:
 		doc  = webnotes.conn.sql("""select * from `tab%s` where name = %s""" % \
-			(doctype, "%s"), name)
+			(doctype, "%s"), (name,))
 		if not doc:
 			raise NameError, """%s: "%s" does not exist""" % (doctype, name)
 		doc = doc[0]
