@@ -143,22 +143,28 @@ class DocTypeMapperController(DocListController):
 				from_doclist[0].name, self.doc.to_doctype),
 				raise_exception=webnotes.DocStatusError)
 
-def get_mapper(from_doctype, to_doctype):
-	mapper = webnotes.conn.sql("""select name from `tabDocType Mapper`
-		where from_doctype=%s and to_doctype=%s and 
-		(ifnull(is_custom, 0) = 0 or ifnull(is_default, 0) = 1)
-		order by is_custom asc, is_default desc""", (from_doctype, to_doctype))
-	if not mapper:
+def get_mapper_list(from_doctype, to_doctype=None):
+	if to_doctype:
+		condition = "from_doctype=%s and to_doctype=%s"
+	else:
+		condition = "from_doctype=%s"
+		
+	mapper_list = webnotes.conn.sql("""select name from `tabDocType Mapper`
+		where %s and (ifnull(is_custom, 0) = 0 or ifnull(is_default, 0) = 1)
+		order by is_custom asc, is_default desc""" % condition, 
+		(from_doctype, to_doctype))
+
+	if not mapper_list:
 		webnotes.msgprint("""DocType Mapper not found for mapping 
 			"%s" to "%s" """ % (from_doctype, to_doctype), raise_exception=NameError)
-	return mapper
+	return mapper_list
 
 def map_doc(from_doctype, to_doctype, from_docname):
-	mapper = get_mapper(from_doctype, to_doctype)
+	mapper_list = get_mapper_list(from_doctype, to_doctype)
 	from_doclist, newcon = from_docname, None
-	for mapping in mapper:
+	for mapper in mapper_list:
 		from_doclist, newcon = webnotes.model.get_controller("DocType Mapper",
-			mapping["name"]).map(from_doclist, newcon)
+			mapper["name"]).map(from_doclist, newcon)
 	return newcon.doclist
 
 def get_conditions(mapper):
@@ -193,9 +199,9 @@ def validate_prev_doclist(from_doctype, to_doctype, to_doclist):
 	from core.doctype.doctype_validator.doctype_validator import check
 	from webnotes.modules import scrub
 	
-	mapper = get_mapper(from_doctype, to_doctype)
+	mapper_list = get_mapper_list(from_doctype, to_doctype)
 	condition_dict = get_conditions(mapper)
-	mapper_doclist = webnotes.model.get("DocType Mapper", mapper[0]["name"])
+	mapper_doclist = webnotes.model.get("DocType Mapper", mapper_list[0]["name"])
 	
 	prev_doclist_cache = {}
 	def get_prev_doclist(name):
@@ -271,5 +277,42 @@ def validate_prev_doclist(from_doctype, to_doctype, to_doclist):
 						
 						validate_prev_children(prev_doclist.get({
 							"parentfield": mapping.from_field}), child, mapping.match_id)
+
+def is_next_submitted(from_doctype, from_docname):
+	"""for given doctype and docname, check if there exists a submitted record of a 
+		mapped doctype"""
+	from webnotes.modules import scrub
+	mapper_list = get_mapper_list(from_doctype)
+	checked = []
+	msg_list = []
 	
+	for mapper in mapper_list:
+		mapper_doclist = webnotes.model.get("DocType Mapper", mapper)
+		to_doctype = mapper_doclist[0].to_doctype
+		to_doctypelist = webnotes.model.get_doctype(to_doctype)
+		
+		for mapping in mapper_doclist.get({"parentfield": "table_mapper_details"}):
+			if mapping.to_table not in checked and to_doctypelist.get(
+					{"doctype": "DocField", "parent": mapping.to_table,
+					"fieldname": scrub(mapper.from_doctype)}):
+				exists = webnotes.conn.sql("""select distinct parent from `tab%s` 
+					where docstatus=1 and `%s`=%s""" % (mapping.to_table,
+					scrub(mapper.from_doctype), "%s"), (from_docname, ))
+				if exists:
+				# store a message for given to doc
+				msg_list.append(_("""Submitted %(to_doctype)s: "%(to_docname)s" 
+					exists against %(from_doctype)s: "%(from_docname)s" """) % \
+					{
+						"to_doctype": _(to_doctype),
+						"to_docname": '", "'.join((e["parent"] for e in exists)),
+						"from_doctype": from_doctype,
+						"from_docname": from_docname,
+					})
+				
+				# since we have custom mappers, we don't want to check twice
+				checked.append(mapping.to_table)
+				
+				# found - so just break
+				break
 	
+	msgprint("""%s""" % "<br>".join(msg_list), raise_exception=webnotes.IntegrityError)
