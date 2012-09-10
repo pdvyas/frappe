@@ -31,73 +31,72 @@
 	
 	where patch1, patch2 is module name
 """
-import webnotes
 import webnotes.utils
 
-def run_all(patch_dict=None):
+def run_all(session, patch_dict=None):
 	"""run all pending patches"""
 	import patches.patch_list
 	patch_dict = patch_dict or patches.patch_list.patch_dict
 	
 	# special patch: version 00_00 executed first
 	if patch_dict.get('00_00'):
-		executed = get_executed_patches()
-		run_single_version('00_00', patch_dict['00_00'], executed)
+		executed = get_executed_patches(session)
+		run_single_version(session, '00_00', patch_dict['00_00'], executed)
 		
 	# execute pending patches
-	executed = get_executed_patches()
+	executed = get_executed_patches(session)
 	for version in sorted(patch_dict):
-		if version >= webnotes.conn.get_default('patch_version'):
-			ret = run_single_version(version, patch_dict[version], executed)
+		if version >= session.db.get_default('patch_version'):
+			ret = run_single_version(session, version, patch_dict[version], executed)
 			if ret == 'error': return
 			
 	
-def run_single_version(version, patch_list, executed):
+def run_single_version(session, version, patch_list, executed):
 	for p in patch_list:
 		pn = 'patches.' + version + '.' + p
 		if pn not in executed:
-			if not run_single(patchmodule = pn):
+			if not run_single(session, patchmodule = pn):
 				log(pn + ': failed: STOPPED')
 				return 'error'
 	if version != '00_00':
-		webnotes.conn.set_default('patch_version', version)	
+		session.db.set_default('patch_version', version)	
 	
-def reload_doc(args):
+def reload_doc(session, args):
 	"""relaod a doc args {module, doctype, docname}"""	
 	import webnotes.modules
-	run_single(method = webnotes.modules.reload_doc, methodargs = args)
+	run_single(session, method = webnotes.modules.reload_doc, methodargs = args)
 
-def run_single(patchmodule=None, method=None, methodargs=None, force=False):
+def run_single(session, patchmodule=None, method=None, methodargs=None, force=False):
 	"""run a single patch"""
 	import conf
 	
 	# don't write txt files
 	conf.developer_mode = 0
 	
-	if force or method or not get_executed_patches(patchmodule):
-		return execute_patch(patchmodule, method, methodargs)
+	if force or method or not get_executed_patches(session, patchmodule):
+		return execute_patch(session, patchmodule, method, methodargs)
 	else:
 		return True
 		
-def execute_patch(patchmodule, method=None, methodargs=None):
+def execute_patch(session, patchmodule, method=None, methodargs=None):
 	"""execute the patch"""
 	success = False
-	block_user(True)
-	webnotes.conn.begin()
-	log('Executing %s in %s' % (patchmodule or str(methodargs), webnotes.conn.cur_db_name))
+	block_user(session, True)
+	session.db.begin()
+	log('Executing %s in %s' % (patchmodule or str(methodargs), session.db.cur_db_name))
 	try:
 		if patchmodule:
 			patch = __import__(patchmodule, fromlist=[patchmodule.split(".")[-1]])
 			getattr(patch, 'execute')()
-			update_patch_log(patchmodule)
+			update_patch_log(session, patchmodule)
 			log('Success')
 		elif method:
 			method(**methodargs)
 			
-		webnotes.conn.commit()
+		session.db.commit()
 		success = True
 	except Exception, e:
-		webnotes.conn.rollback()
+		session.db.rollback()
 		global has_errors
 		has_errors = True
 		tb = webnotes.utils.getTraceback()
@@ -106,7 +105,7 @@ def execute_patch(patchmodule, method=None, methodargs=None):
 		if os.environ.get('HTTP_HOST'):
 			add_to_patch_log(tb)
 
-	block_user(False)
+	block_user(session, False)
 	return success
 
 def add_to_patch_log(tb):
@@ -115,28 +114,28 @@ def add_to_patch_log(tb):
 	with open(os.path.join(conf.modules_path,'erpnext','patches','patch.log'),'a') as patchlog:
 		patchlog.write('\n\n' + tb)
 	
-def update_patch_log(patchmodule):
+def update_patch_log(session, patchmodule):
 	"""update patch_file in patch log"""
-	webnotes.conn.sql("""INSERT INTO `__PatchLog` VALUES (%s, now())""", \
+	session.db.sql("""INSERT INTO `__PatchLog` VALUES (%s, now())""", \
 		patchmodule)
 
-def get_executed_patches(patchmodule=None):
+def get_executed_patches(session, patchmodule=None):
 	"""return True if is executed"""
 	if patchmodule:
-		p = webnotes.conn.sql("""select patch from __PatchLog where patch=%s""", patchmodule)
+		p = session.db.sql("""select patch from __PatchLog where patch=%s""", patchmodule)
 		if p:
-			print "Patch %s already executed in %s" % (patchmodule, webnotes.conn.cur_db_name)
+			print "Patch %s already executed in %s" % (patchmodule, session.db.cur_db_name)
 		return p
 	else:
-		return [p.patch for p in webnotes.conn.sql("""select distinct patch from __PatchLog""")]
+		return [p.patch for p in session.db.sql("""select distinct patch from __PatchLog""")]
 	
-def block_user(block):
-	"""stop/start execution till patch is run"""
-	webnotes.conn.begin()
+def block_user(session, block):
+	"""stop/start execution till patch are run"""
+	session.db.begin()
 	msg = "Patches are being executed in the system. Please try again in a few moments."
-	webnotes.conn.set_global('__session_status', block and 'stop' or None)
-	webnotes.conn.set_global('__session_status_message', block and msg or None)
-	webnotes.conn.commit()
+	session.db.set_global('__session_status', block and 'stop' or None)
+	session.db.set_global('__session_status_message', block and msg or None)
+	session.db.commit()
 
 log_list = []
 has_errors = False

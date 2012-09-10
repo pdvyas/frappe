@@ -385,14 +385,16 @@ def run():
 			import conf
 			conf.test_verbosity = 2
 		import tests.stages
-		tests.stages.upto(session, options.setup_test_stage, with_tests=options.with_tests)
+		tests.stages.upto(Session(None, None, 'Administrator', conf.test_db_name), 
+			options.setup_test_stage, with_tests=options.with_tests)
 
 	elif options.test_stage is not None:
 		if options.verbose:
 			import conf
 			conf.test_verbosity = 2
 		import tests.stages
-		tests.stages.test_stage(options.test_stage)
+		tests.stages.test_stage(Session(None, None, 'Administrator', conf.test_db_name),
+			options.test_stage)
 
 	elif options.test_export is not None:
 		from webnotes.modules.export import export_for_test

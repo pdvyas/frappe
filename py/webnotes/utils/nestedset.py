@@ -35,14 +35,14 @@ import webnotes, unittest
 class TestNSM(unittest.TestCase):
 	
 	def setUp(self):
-		webnotes.connect()
+		session.dbect()
 		from webnotes.model.doc import Document
 		self.root = Document(fielddata={'doctype':'nsmtest', 'name':'T001', 'parent':None})
 		self.first_child = Document(fielddata={'doctype':'nsmtest', 'name':'C001', 'parent_node':'T001'})
 		self.first_sibling = Document(fielddata={'doctype':'nsmtest', 'name':'C002', 'parent_node':'T001'})
 		self.grand_child = Document(fielddata={'doctype':'nsmtest', 'name':'GC001', 'parent_node':'C001'}) 
 
-		webnotes.conn.sql("""
+		session.db.sql("""
 			create table `tabnsmtest` (
 				name varchar(120) not null primary key, 
 				creation datetime,
@@ -134,129 +134,124 @@ class TestNSM(unittest.TestCase):
 		
 
 	def tearDown(self):
-		webnotes.conn.sql("drop table tabnsmtest")
+		session.db.sql("drop table tabnsmtest")
 
 
 
 # called in the on_update method
-def update_nsm(doc_obj):
+def update_nsm(con):
 	# get fields, data from the DocType
 	
 	pf, opf = 'parent_node', 'old_parent'
 
-	if str(doc_obj.__class__)=='webnotes.model.doc.Document':
-		# passed as a Document object
-		d = doc_obj
-	else:
-		# passed as a DocType object
-		d = doc_obj.doc
-		if hasattr(doc_obj,'nsm_parent_field'):
-			pf = doc_obj.nsm_parent_field
-		if hasattr(doc_obj,'nsm_oldparent_field'):
-			opf = doc_obj.nsm_oldparent_field
+	d = con.doc
+	if hasattr(con,'nsm_parent_field'):
+		pf = con.nsm_parent_field
+	if hasattr(con,'nsm_oldparent_field'):
+		opf = con.nsm_oldparent_field
 
 	p, op = d.get(pf, ''), d.get(opf, '')
 
 	# has parent changed (?) or parent is None (root)
 	if not d.lft and not d.rgt:
-		update_add_node(d.doctype, d.name, p or '', pf)
+		update_add_node(con.session, d.doctype, d.name, p or '', pf)
 	elif op != p:
-		update_remove_node(d.doctype, d.name)
+		update_remove_node(con.session, d.doctype, d.name)
 		update_add_node(d.doctype, d.name, p or '', pf)
 		
 	# set old parent
-	webnotes.conn.set(d, opf, p or '')
+	con.session.db.set(d, opf, p or '')
 
 	# reload
 	from webnotes.model.doclist import load_main
-	d = load_main(d.doctype, d.name)
+	d = load_main(con.session, d.doctype, d.name)
 	
-def rebuild_tree(doctype, parent_field):
+def rebuild_tree(session, doctype, parent_field):
 	"""
 		call rebuild_node for all root nodes
 	"""
 	# get all roots
 	right = 1
-	result = webnotes.conn.sql("SELECT name FROM `tab%s` WHERE `%s`='' or `%s` IS NULL ORDER BY name ASC" % (doctype, parent_field, parent_field), as_dict=False)
+	result = session.db.sql("SELECT name FROM `tab%s` WHERE `%s`='' or `%s` IS NULL ORDER BY name ASC" % (doctype, parent_field, parent_field), as_dict=False)
 	for r in result:
 		right = rebuild_node(doctype, r[0], right, parent_field)
-		webnotes.conn.sql("commit")
-		webnotes.conn.sql("start transaction")
+		session.db.sql("commit")
+		session.db.sql("start transaction")
 		
-def rebuild_node(doctype, parent, left, parent_field, cnt = 0):
+def rebuild_node(session, doctype, parent, left, parent_field, cnt = 0):
 	"""
 		reset lft, rgt and recursive call for all children
 	"""
 	from webnotes.utils import now
-	n = now()
+	n = now(session)
 	
 	# the right value of this node is the left value + 1
 	right = left+1	
 
 	# get all children of this node
-	result = webnotes.conn.sql("SELECT name FROM `tab%s` WHERE `%s`='%s'" % \
+	result = session.db.sql("SELECT name FROM `tab%s` WHERE `%s`='%s'" % \
 		(doctype, parent_field, parent), as_dict=False)
 	for r in result:
 		right = rebuild_node(doctype, r[0], right, parent_field, cnt)
 
 	# we've got the left value, and now that we've processed
 	# the children of this node we also know the right value
-	webnotes.conn.sql("UPDATE `tab%s` SET lft=%s, rgt=%s, modified='%s' WHERE name='%s'" % (doctype,left,right,n,parent))
+	session.db.sql("UPDATE `tab%s` SET lft=%s, rgt=%s, modified='%s' WHERE name='%s'" % (doctype,left,right,n,parent))
 
 	# commit after every 100
 	cnt += 1
 	if cnt % 100 == 0:
 		cnt = 0
-		webnotes.conn.sql("commit")
-		webnotes.conn.sql("start transaction")
+		session.db.sql("commit")
+		session.db.sql("start transaction")
 
 	#return the right value of this node + 1
 	return right+1
 	
-def update_add_node(doctype, name, parent, parent_field):
+def update_add_node(session, doctype, name, parent, parent_field):
 	"""
 		insert a new node
 	"""
 	from webnotes.utils import now
-	n = now()
+	n = now(session)
 
 	# get the last sibling of the parent
 	if parent:
-		right = webnotes.conn.sql("select rgt from `tab%s` where name='%s'" % \
+		right = session.db.sql("select rgt from `tab%s` where name='%s'" % \
 			(doctype, parent), as_dict=False)[0][0]
 	else: # root
-		right = webnotes.conn.sql("select ifnull(max(rgt),0)+1 from `tab%s` where ifnull(`%s`,'') =''" %  \
+		right = session.db.sql("select ifnull(max(rgt),0)+1 from `tab%s` where ifnull(`%s`,'') =''" %  \
 			(doctype, parent_field), as_dict=False)[0][0]
 	right = right or 1
 		
 	# update all on the right
-	webnotes.conn.sql("update `tab%s` set rgt = rgt+2, modified='%s' where rgt >= %s" %(doctype,n,right))
-	webnotes.conn.sql("update `tab%s` set lft = lft+2, modified='%s' where lft >= %s" %(doctype,n,right))
+	session.db.sql("update `tab%s` set rgt = rgt+2, modified='%s' where rgt >= %s" %(doctype,n,right))
+	session.db.sql("update `tab%s` set lft = lft+2, modified='%s' where lft >= %s" %(doctype,n,right))
 	
 	# update index of new node
-	if webnotes.conn.sql("select * from `tab%s` where lft=%s or rgt=%s"% (doctype, right, right+1)):
+	if session.db.sql("select * from `tab%s` where lft=%s or rgt=%s"% (doctype, right, right+1)):
 		webnotes.msgprint("Nested set error. Please send mail to support")
 		raise Exception
 
-	webnotes.conn.sql("update `tab%s` set lft=%s, rgt=%s, modified='%s' where name='%s'" % (doctype,right,right+1,n,name))
+	session.db.sql("update `tab%s` set lft=%s, rgt=%s, modified='%s' where name='%s'" % (doctype,right,right+1,n,name))
 	return right
 
-def update_remove_node(doctype, name):
+def update_remove_node(session, doctype, name):
 	"""
 		remove a node
 	"""
 	from webnotes.utils import now
-	n = now()
+	n = now(session)
 
-	left = webnotes.conn.sql("select lft from `tab%s` where name='%s'" % \
+	left = session.db.sql("select lft from `tab%s` where name='%s'" % \
 		(doctype,name), as_dict=False)
 	if left[0][0]:
 		# reset this node
-		webnotes.conn.sql("update `tab%s` set lft=0, rgt=0, modified='%s' where name='%s'" % (doctype,n,name))
+		session.db.sql("update `tab%s` set lft=0, rgt=0, modified='%s' where name='%s'" % (doctype,n,name))
 
 		# update all on the right
-		webnotes.conn.sql("update `tab%s` set rgt = rgt-2, modified='%s' where rgt > %s" %(doctype,n,left[0][0]))
-		webnotes.conn.sql("update `tab%s` set lft = lft-2, modified='%s' where lft > %s" %(doctype,n,left[0][0]))
+		session.db.sql("update `tab%s` set rgt = rgt-2, modified='%s' where rgt > %s" %(doctype,n,left[0][0]))
+		session.db.sql("update `tab%s` set lft = lft-2, modified='%s' where lft > %s" %(doctype,n,left[0][0]))
 
 from webnotes.model.controller import DocListController
 class NestedSetController(DocListController):

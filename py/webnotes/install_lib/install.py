@@ -41,7 +41,7 @@ class Installer:
 		from webnotes.model.db_schema import DbManager
 		
 		self.conn = webnotes.db.Database(user=root_login, password=root_password)			
-		self.session.db = self.conn
+		self.session._db = self.conn
 		self.session.user = "Administrator"
 		self.dbman = DbManager(self.session)
 
@@ -99,6 +99,8 @@ class Installer:
 
 		# set administrator password
 		self.set_admin_password()
+		
+		self.conn.close()
 		
 		return target	
 

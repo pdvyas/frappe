@@ -31,13 +31,15 @@ class Session:
 	"""session object is created when a new request starts"""
 	controllers = {}
 
-	def __init__(self, request=None, response=None, user=None):
+	def __init__(self, request=None, response=None, user=None, db_name=None):
 		self.request = request or Request.blank('/')
 		self.response = response or Response()
+		self.db_name = db_name
+		self.user = user
 		self.lang = 'en'
+
 		self._db = None
 		self._memc = None
-		self.user = user
 		self.sid = self.request.cookies.get('sid') or self.request.params.get('sid') or 'Guest'
 		self.json = {}
 		
@@ -54,7 +56,14 @@ class Session:
 	def error(self, txt): self.errors.append(txt)
 	def write(self, txt): self.messages.append(txt)
 	def log(self, txt): self.logs.append(txt)
-	def msgprint(self, txt): self.msgprints.append(txt)
+	def msgprint(self, txt, raise_exception=None): 
+		self.msgprints.append(txt)
+		import inspect
+		if raise_exception:
+			if inspect.isclass(raise_exception) and issubclass(raise_exception, Exception):
+				raise raise_exception, txt
+			else:
+				raise webnotes.ValidationError, txt
 			
 	def resume(self):
 		self.user = self.bootinfo.user
@@ -103,7 +112,7 @@ class Session:
 		"""database connection"""
 		if not self._db:
 			import webnotes.db
-			self._db = webnotes.db.Database()
+			self._db = webnotes.db.Database(self.db_name)
 		return self._db
 
 	def non_english(self):
@@ -146,6 +155,27 @@ class Session:
 
 		# can be used to retrieve name or any value after save
 		return doclistcon
+		
+	def update(self, doclist):
+		"""update doclist"""
+		if doclist and isinstance(doclist, dict):
+			doclist = [doclist]
+
+		doclistcon = session.controller(doclist[0]["doctype"], doclist[0]["name"])
+		existing_names = map(lambda d: d.name, doclistcon.doclist)
+
+		for d in doclist:
+			if d.get("name") in existing_names:
+				# update row
+				doclistcon.doclist.getone({"name": d["name"]}).update(d)
+			else:
+				# add row
+				d["__islocal"] = 1
+				doclistcon.doclist.append(d)
+
+		doclistcon.save()
+
+		return doclistcon		
 		
 	def load_bootinfo(self):
 		"""build and return boot info"""

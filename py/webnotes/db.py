@@ -266,14 +266,11 @@ class Database:
 			self.sql("""update `tabDefaultValue` set defvalue=%s 
 				where parent = "Control Panel" and defkey=%s""", (val, key))
 		else:
-			from webnotes.model.doc import Document
-			d = Document('DefaultValue')
-			d.parent = 'Control Panel'
-			d.parenttype = 'Control Panel'
-			d.parentfield = 'system_defaults'
-			d.defkey = key
-			d.defvalue = val
-			d.save(1)
+			# can't use Document here
+			self.sql("""insert into tabDefaultValue 
+				(name, parent, parenttype, parentfield, defkey, defvalue) values
+				(%s, %s, %s, %s, %s, %s)""", ('control_panel:' + key, 'Control Panel', 
+					'Control Panel', 'sys_defaults', key, val))
 	
 	def get_default(self, key):
 		"""get default value"""

@@ -25,7 +25,6 @@ from webnotes.utils import cint, remove_nulls
 no_value_fields = ['Section Break', 'Column Break', 'HTML', 'Table', 'FlexTable', 'Button', 'Image', 'Graph']
 default_fields = ['doctype','name','owner','creation','modified','modified_by','parent','parentfield','parenttype','idx','docstatus']
 
-	
 def get_fieldnames(session, doctype, filters=None, additional_fields=None):
 	if not filters: filters = {}
 	if not additional_fields: additional_fields = default_fields
@@ -33,23 +32,6 @@ def get_fieldnames(session, doctype, filters=None, additional_fields=None):
 	filters.update({"fieldtype": ["not in", no_value_fields]})
 	return get_doctype(doctype).get_fieldnames(filters) + additional_fields
 	
-def update(session, doclist):
-	if doclist and isinstance(doclist, dict):
-		doclist = [doclist]
-	
-	doclistcon = session.controller(doclist[0]["doctype"], doclist[0]["name"])
-	existing_names = map(lambda d: d.name, doclistcon.doclist)
-
-	for d in doclist:
-		if d.get("name") in existing_names:
-			doclistcon.doclist.getone({"name": d["name"]}).update(d)
-		else:
-			d["__islocal"] = 1
-			doclistcon.doclist.append(d)
-
-	doclistcon.save()
-
-	return doclistcon
 	
 def insert_variants(session, base, variants):
 	for v in variants:
