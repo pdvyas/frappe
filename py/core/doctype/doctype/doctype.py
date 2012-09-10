@@ -19,7 +19,6 @@
 # CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
-from __future__ import unicode_literals
 import webnotes
 import webnotes.model
 from webnotes.utils import cint
@@ -38,7 +37,6 @@ class DocTypeController(DocListController):
 		from webnotes.model.db_schema import updatedb
 		updatedb(self.doc.name)
 		
-		# export
 		self.export()
 		
 		# clear cache

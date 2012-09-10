@@ -31,7 +31,6 @@
 	
 	where patch1, patch2 is module name
 """
-from __future__ import unicode_literals
 import webnotes
 import webnotes.utils
 

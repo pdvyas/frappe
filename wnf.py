@@ -22,7 +22,6 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
 
-from __future__ import unicode_literals
 import os, sys
 
 def replace_code(start, txt1, txt2, extn, search=None):
@@ -42,8 +41,6 @@ def replace_code(start, txt1, txt2, extn, search=None):
 					res = search_replace_with_prompt(fpath, txt1, txt2)
 					if res == 'skip':
 						return 'skip'
-
-
 
 def search_replace_with_prompt(fpath, txt1, txt2):
 	""" Search and replace all txt1 by txt2 in the file with confirmation"""
@@ -109,13 +106,8 @@ def append_future_import():
 	"""appends from __future__ import unicode_literals to py files if necessary"""
 	import os
 	import conf
-	conf_path = os.path.abspath(conf.__file__)
-	if conf_path.endswith("pyc"):
-		conf_path = conf_path[:-1]
 	
-	base_path = os.path.dirname(conf_path)
-	
-	for path, folders, files in os.walk(base_path):
+	for path, folders, files in os.walk('.'):
 		for f in files:
 			if f.endswith('.py'):
 				file_path = os.path.join(path, f)
@@ -123,19 +115,12 @@ def append_future_import():
 					content = pyfile.read()
 				future_import = 'from __future__ import unicode_literals'
 
-				if future_import in content: continue
-
-				content = content.split('\n')
-				idx = -1
-				for c in content:
-					idx += 1
-					if c and not c.startswith('#'):
-						break
-				content.insert(idx, future_import)
-				content = "\n".join(content)
-				with open(file_path, 'w') as pyfile:
-					pyfile.write(content)
-
+				if future_import in content:
+					with open(file_path, 'w') as pyfile:
+						pyfile.write(content.replace(future_import + '\n', ''))
+					
+					print file_path
+				
 def setup_options():
 	from optparse import OptionParser
 	parser = OptionParser()
@@ -153,11 +138,6 @@ def setup_options():
 						help="watch and minify + concat js files, if necessary")
 	parser.add_option("--no_compress", default=False, action="store_true",
 						help="do not compress when building js bundle")
-
-						
-	parser.add_option("--build_web_cache", default=False, action="store_true",
-						help="build web cache")
-
 	parser.add_option("--domain", metavar="DOMAIN",
 						help="store domain in Website Settings", nargs=1)
 
@@ -279,26 +259,20 @@ def run():
 	(options, args) = setup_options()
 
 
-	from webnotes.db import Database
 	import webnotes.modules.patch_handler
-
-	# connect
-	if options.db_name is not None:
-		if options.password:
-			webnotes.connect(options.db_name, options.password)
-		else:
-			webnotes.connect(options.db_name)
-	elif not any([options.install, options.pull]):
-		webnotes.connect(conf.db_name)
+	from webnotes.sessions import Session
+	
+	# session
+	session = Session(None, None, 'Administrator')
 
 	# build
 	if options.build:
 		from webnotes.utils import bundlejs
-		bundlejs.bundle(options.no_compress)
+		bundlejs.bundle(session, options.no_compress)
 
 	if options.watch:
 		from webnotes.utils import bundlejs
-		bundlejs.watch(options.no_compress)
+		bundlejs.watch(session, options.no_compress)
 
 	# code replace
 	elif options.replace:
@@ -388,11 +362,7 @@ def run():
 		webnotes.conn.set_value('Website Settings', None, 'subdomain', options.domain)
 		webnotes.conn.commit()
 		print "Domain set to", options.domain
-		
-	elif options.build_web_cache:
-		import website.web_cache
-		website.web_cache.refresh_cache(["blog"])
-		
+				
 	elif options.append_future_import:
 		append_future_import()
 
@@ -415,7 +385,7 @@ def run():
 			import conf
 			conf.test_verbosity = 2
 		import tests.stages
-		tests.stages.upto(options.setup_test_stage, with_tests=options.with_tests)
+		tests.stages.upto(session, options.setup_test_stage, with_tests=options.with_tests)
 
 	elif options.test_stage is not None:
 		if options.verbose:

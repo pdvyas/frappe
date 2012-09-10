@@ -20,7 +20,6 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
 
-from __future__ import unicode_literals
 import webnotes, webnotes.model
 from webnotes.utils import cint
 from webnotes.model.controller import DocListController
@@ -32,7 +31,7 @@ class DocTypeMapperController(DocListController):
 				self.doc.to_doctype)
 
 	def validate(self):
-		if not getattr(webnotes, 'syncing', False):
+		if not getattr(self.session, 'syncing', False):
 			self.check_fields()
 		
 	def on_update(self):
@@ -43,7 +42,7 @@ class DocTypeMapperController(DocListController):
 		
 	def check_fields(self):
 		def _warn(fieldname, doctype):
-			webnotes.msgprint("""Field: "%s" does not exist in DocType: "%s"
+			self.session.msgprint("""Field: "%s" does not exist in DocType: "%s"
 				""" % (fieldname, doctype))
 				
 		def _validate(from_table, to_table, match_id):
@@ -66,7 +65,7 @@ class DocTypeMapperController(DocListController):
 	
 	def get_fieldnames(self, doctype, filters=None):
 		"""get fieldnames excluding default fields and no value fields"""
-		doctypelist = webnotes.model.get_doctype(doctype)
+		doctypelist = self.session.get_doctype(doctype)
 		
 		if not filters: filters = {}
 		filters.update({
@@ -78,14 +77,14 @@ class DocTypeMapperController(DocListController):
 		
 	def map(self, from_doclist, newcon=None):
 		if isinstance(from_doclist, basestring):
-			from_doclist = webnotes.model.get(self.doc.from_doctype, from_doclist)
+			from_doclist = self.session.get_doclist(self.doc.from_doctype, from_doclist)
 		
 		# check if submitted
 		self.is_submitted(from_doclist)
 		
 		# get controller with new doclist
 		if not newcon:
-			newcon = webnotes.model.get_controller([{"doctype": self.doc.to_doctype}])
+			newcon = self.session.get_controller([{"doctype": self.doc.to_doctype}])
 		
 		# map parent
 		newcon.doc.update(self._map_fields(0, from_doclist[0], self.doc.to_doctype))
@@ -136,14 +135,14 @@ class DocTypeMapperController(DocListController):
 	
 	def is_submitted(self, from_doclist):
 		if cint(self.doc.ref_doc_submitted) and from_doclist[0].docstatus != 1:
-			webnotes.msgprint("""%s: %s has not been submitted. 
+			self.session.msgprint("""%s: %s has not been submitted. 
 				Cannot create a new %s""" % (self.doc.from_doctype,
 				from_doclist[0].name, self.doc.to_doctype),
 				raise_exception=webnotes.DocStatusError)
 
 def map_doc(from_doctype, to_doctype, from_docname):
 	"""form should contain {"mapper_name": "", "from_docname": ""}"""
-	mapper = webnotes.conn.sql("""select name, ifnull(is_custom, 0) as is_custom,
+	mapper = self.session.db.sql("""select name, ifnull(is_custom, 0) as is_custom,
 		ifnull(is_default, 0) as is_default from `tabDocType Mapper`
 		where from_doctype=%s and to_doctype=%s
 		order by is_custom asc, is_default desc""", (from_doctype, to_doctype))
@@ -151,9 +150,9 @@ def map_doc(from_doctype, to_doctype, from_docname):
 		from_doclist, newcon = from_docname, None
 		for mapping in mapper:
 			if not mapping["is_custom"] or mapping["is_default"]:
-				from_doclist, newcon = webnotes.model.get_controller("DocType Mapper",
+				from_doclist, newcon = self.session.get_controller("DocType Mapper",
 					mapping["name"]).map(from_doclist, newcon)
 		return newcon.doclist
 	else:
-		webnotes.msgprint("""DocType Mapper not found for mapping 
+		self.session.msgprint("""DocType Mapper not found for mapping 
 			"%s" to "%s" """ % (from_doctype, to_doctype), raise_exception=NameError)

@@ -20,7 +20,6 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
 
-from __future__ import unicode_literals
 """
 XTEA Block Encryption Algorithm
 Author: Paul Chakravarti (paul_dot_chakravarti_at_gmail_dot_com)

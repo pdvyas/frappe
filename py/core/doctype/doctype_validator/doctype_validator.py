@@ -20,30 +20,30 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-from __future__ import unicode_literals
 from webnotes.model.controller import DocListController
 
 def validate(controller):
 	"""validate doctype based on DocType Validator"""
-	import webnotes.model
+
+	session = controller.session
 
 	# load validators
-	doctypelist = webnotes.model.get_doctype(controller.doclist[0].doctype)
+	doctypelist = session.get_doctype(controller.doclist[0].doctype)
 	
 	# link field validators
 	for d in doctypelist.get({"doctype":"DocType Link Filter"}):
-		filter_link(controller.doclist, d, doctypelist)
+		filter_link(session, controller.doclist, d, doctypelist)
 	
 	# if-then validators
 	for d in doctypelist.get({"doctype":"DocType Conditional Property"}):
-		check_condition(controller.doclist, d, doctypelist)
+		check_condition(session, controller.doclist, d, doctypelist)
 	
 	# duplicate validators
 	for d in doctypelist.get({"doctype":"DocType Unique Row"}):
-		no_duplicate(controller.doclist, d.unique_table_field, d['keys'].split('\n'))
+		no_duplicate(session, controller.doclist, d.unique_table_field, d['keys'].split('\n'))
 
 _cached_link_docs = {}
-def filter_link(doclist, link_filter, doctypelist):
+def filter_link(session, doclist, link_filter, doctypelist):
 	"""check if all the rules are valid"""
 	import webnotes
 	from webnotes.utils import cast
@@ -51,7 +51,7 @@ def filter_link(doclist, link_filter, doctypelist):
 	def _get(doctype, name):
 		global _cached_link_docs
 		return _cached_link_docs.setdefault("%s:%s" % (doctype, name), 
-			webnotes.conn.sql("""select * from `tab%s` 
+			session.db.sql("""select * from `tab%s` 
 				where name=%s""" % (doctype, '%s'), name, as_dict=1))
 			
 	def _check(doc):
@@ -75,16 +75,16 @@ def filter_link(doclist, link_filter, doctypelist):
 			valdoc = _get(link_df.options, val)
 			
 			if not valdoc:
-				webnotes.msgprint("""%s: "%s" is not a valid "%s" """ % (link_df.label, val, 
+				session.msgprint("""%s: "%s" is not a valid "%s" """ % (link_df.label, val, 
 					link_df.options), raise_exception=webnotes.InvalidLinkError)
 					
 			if not check(valdoc[0].get(link_filter.fieldname), link_filter.condition, 
 					link_filter.value):
 					
 				# need this meta for the label
-				linkdoctypelist = webnotes.model.get_doctype(link_df.options)
+				linkdoctypelist = session.get_doctype(link_df.options)
 				
-				webnotes.msgprint("""%s: "%s" must have "%s" %s "%s" """ % \
+				session.msgprint("""%s: "%s" must have "%s" %s "%s" """ % \
 					(link_df.label, val, linkdoctypelist.get_label(link_filter.fieldname), 
 						link_filter.condition, link_filter.value),
 					raise_exception = webnotes.LinkFilterError) 
@@ -121,10 +121,9 @@ def check(val1, condition, val2):
 		return val1 != val2
 	
 
-def no_duplicate(doclist, parentfield, keys):
+def no_duplicate(session, doclist, parentfield, keys):
 	"""raise exception if duplicate entries are found"""
 	import webnotes
-	import webnotes.model
 	from webnotes.utils import comma_and
 	
 	all_values = []
@@ -134,15 +133,15 @@ def no_duplicate(doclist, parentfield, keys):
 			values.append(d.get(key))
 				
 		if values in all_values:
-			doctypelist = webnotes.model.get_doctype(d.doctype)
+			doctypelist = session.get_doctype(d.doctype)
 			labels = map(doctypelist.get_label, keys)
-			webnotes.msgprint("""Duplicate rows found in table %s 
+			session.msgprint("""Duplicate rows found in table %s 
 				having same values for colums %s""" % (d.doctype, comma_and(labels)),
 				raise_exception=webnotes.DuplicateEntryError)
 				
 		all_values.append(values)
 
-def check_condition(doclist, condition, doctypelist):
+def check_condition(session, doclist, condition, doctypelist):
 	"""check if-then type of conditions"""
 	import webnotes
 	from webnotes.utils import cast
@@ -153,7 +152,7 @@ def check_condition(doclist, condition, doctypelist):
 		ref_field = condition.get(_type+"_reference_field")
 		if ref_field:
 			link_field_dt = doctypelist.get_options(field, parentfield=parentfield)
-			val1 = webnotes.model.get(link_field_dt, doc.get(field))[0].get(ref_field)
+			val1 = session.get_doclist(link_field_dt, doc.get(field))[0].get(ref_field)
 		else:
 			val1 = doc.get(field)
 		df = doctypelist.get_field(field, parentfield=parentfield)
@@ -180,7 +179,7 @@ def check_condition(doclist, condition, doctypelist):
 			except ValueError, e:
 				# for development
 				# looks like the if or then part is missing!
-				webnotes.msgprint("""Invalid field specified in 
+				session.msgprint("""Invalid field specified in 
 					Conditional Property # %d of DocType Validator: %s""" % \
 					(condition.idx, doclist[0].doctype),
 					raise_exception=webnotes.ConditionalPropertyError)
@@ -223,7 +222,7 @@ def check_condition(doclist, condition, doctypelist):
 			tval = _get_field_msg("then")
 		
 		# hopefully, an elaborate message!
-		webnotes.msgprint("""%(if)s %(ifield)s %(icond)s%(ival)s,
+		session.msgprint("""%(if)s %(ifield)s %(icond)s%(ival)s,
 			%(then)s %(tfield)s %(should_be)s %(tcond)s%(tval)s""" % {
 				"if": webnotes._("if"),
 				"ifield": ifield,

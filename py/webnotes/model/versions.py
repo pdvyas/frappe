@@ -14,11 +14,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
 import webnotes
 import webnotes.model
 
-def save_version(oldlist, newlist):
+def save_version(session, oldlist, newlist):
 	"""save diff of oldlist and newlist as a version
 		it is necessary to differentiate between oldlist and newlist
 		as the version system is based on reverse chronology"""
@@ -26,7 +25,7 @@ def save_version(oldlist, newlist):
 	
 	if difflist:
 		# save difflist to tabVersion
-		webnotes.model.insert([{
+		session.insert([{
 			"doctype": "Version", 
 			"diff": serialize(difflist),
 			"modified": newlist[0].modified, 
@@ -35,28 +34,28 @@ def save_version(oldlist, newlist):
 			"doc_name": newlist[0].name,
 			"doc_modified_by": oldlist[0].modified_by,
 			"doc_modified": oldlist[0].modified,
-			"version": get_next_version_no(newlist[0].doctype, newlist[0].name),
+			"version": get_next_version_no(session, newlist[0].doctype, newlist[0].name),
 		}])
 		
-def get_next_version_no(doctype, name):
-	res = webnotes.conn.sql("""select ifnull(max(version), 0) as version from `tabVersion`
+def get_next_version_no(session, doctype, name):
+	res = session.db.sql("""select ifnull(max(version), 0) as version from `tabVersion`
 		where doc_type=%s and doc_name=%s""", (doctype, name))
 	res = res and res[0]["version"] or 0
 	return res + 1
 	
-def get_version(doctype, name, version):
+def get_version(session, doctype, name, version):
 	"""returns a specified version (modified) of a doclist"""
-	doclist = webnotes.model.get(doctype, name)
+	doclist = session.get_doclist(doctype, name)
 	
 	# get a list of all versions upto given modified datetime
-	versions = webnotes.conn.sql("""select diff from `tabVersion`
+	versions = session.db.sql("""select diff from `tabVersion`
 		where doc_type=%s and doc_name=%s and version >= %s
 		order by version desc""",
 		(doclist[0]["doctype"], doclist[0]["name"], version))
 
 	if not versions:
 		# aha! looks like the version does not exist
-		webnotes.msgprint("""No version exists for %s: "%s" """ % \
+		session.msgprint("""No version exists for %s: "%s" """ % \
 			(doclist[0]["doctype"], doclist[0]["name"]), raise_exception=NameError)
 	
 	# apply versions in descending chronological order to get the mentioned version
@@ -65,7 +64,7 @@ def get_version(doctype, name, version):
 	
 	return doclist
 	
-def diff(oldlist, newlist, additional_fields=None):
+def diff(session, oldlist, newlist, additional_fields=None):
 	"""
 		returns a diff list between old and new doclists
 		diff docs only consist of valid fields and doctype, name, [idx, docstatus]
@@ -77,7 +76,7 @@ def diff(oldlist, newlist, additional_fields=None):
 		new = {}
 		for key in doc:
 			if key in fieldnames.setdefault(doc["doctype"],
-					webnotes.model.get_fieldnames(doc["doctype"],
+					session.get_fieldnames(doc["doctype"],
 					{"fieldtype": ["not in", webnotes.model.no_value_fields]},
 					additional_fields)):
 				new[key] = doc[key]
@@ -156,11 +155,12 @@ def merge(doclist, difflist):
 				break
 		# looks like the doclist does not contain the diff's doc, so just add it
 		if add:
-			doclist.append(Document(fielddata = diff))
+			doclist.append(Document(fielddata = diff, session = doclist[0].session))
 	
 	# well it has to be a doclist and not just a list
 	from webnotes.model.doclist import objectify
-	return objectify(filter(lambda doc: [doc["doctype"], doc["name"]] not in remove_list, doclist))
+	return objectify(doclist[0].session, 
+		filter(lambda doc: [doc["doctype"], doc["name"]] not in remove_list, doclist))
 	
 # why use cPickle?
 # getting back/setting objects like datetime is taken care of by cPickle, unlike json

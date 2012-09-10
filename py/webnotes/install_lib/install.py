@@ -23,7 +23,6 @@
 # called from wnf.py
 # lib/wnf.py --install [rootpassword] [dbname] [source]
 
-from __future__ import unicode_literals
 import os,sys
 
 class Installer:
@@ -31,6 +30,8 @@ class Installer:
 
 		import webnotes
 		import webnotes.db
+		from webnotes.sessions import Session
+		self.session = Session(None, None, 'Administrator')
 	
 		if root_login and not root_password:
 			import getpass
@@ -40,9 +41,9 @@ class Installer:
 		from webnotes.model.db_schema import DbManager
 		
 		self.conn = webnotes.db.Database(user=root_login, password=root_password)			
-		webnotes.conn=self.conn
-		webnotes.session= {'user':'Administrator'}
-		self.dbman = DbManager(self.conn)
+		self.session.db = self.conn
+		self.session.user = "Administrator"
+		self.dbman = DbManager(self.session)
 
 	def import_from_db(self, target, source_path='', password = 'admin', verbose=0):
 		"""
@@ -94,7 +95,7 @@ class Installer:
 		if 'Framework.sql' in source_path:
 			from webnotes.model.sync import sync_install
 			print "Building tables from all module..."
-			sync_install()
+			sync_install(self.session)
 
 		# set administrator password
 		self.set_admin_password()
@@ -110,19 +111,17 @@ class Installer:
 		self.create_auth_table()
 
 	def set_admin_password(self):
-		import webnotes
 		# set the basic passwords
-		webnotes.conn.begin()
-		webnotes.conn.sql("""insert into __Auth (user, `password`)
+		self.conn.begin()
+		self.conn.sql("""insert into __Auth (user, `password`)
 			values ('Administrator', password('admin'))
 			on duplicate key update `password`=password('admin')""")
-		webnotes.conn.commit()
+		self.conn.commit()
 
 	def create_sessions_table(self):
 		"""create sessions table"""
-		import webnotes
 		self.dbman.drop_table('tabSessions')
-		webnotes.conn.sql("""CREATE TABLE `tabSessions` (
+		self.conn.sql("""CREATE TABLE `tabSessions` (
 		  `user` varchar(40) DEFAULT NULL,
 		  `sid` varchar(120) DEFAULT NULL,
 		  `sessiondata` longtext,
@@ -133,33 +132,29 @@ class Installer:
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8""")
 	
 	def create_scheduler_log(self):
-		import webnotes
 		self.dbman.drop_table('__SchedulerLog')
-		webnotes.conn.sql("""create table __SchedulerLog (
+		self.conn.sql("""create table __SchedulerLog (
 			`timestamp` timestamp,
 			method varchar(200),
 			error text
 		) ENGINE=MyISAM DEFAULT CHARSET=utf8""")
 	
 	def create_session_cache(self):
-		import webnotes
 		self.dbman.drop_table('__SessionCache')
-		webnotes.conn.sql("""create table `__SessionCache` ( 
+		self.conn.sql("""create table `__SessionCache` ( 
 			user VARCHAR(180), 
 			country VARCHAR(180), 
 			cache LONGTEXT) ENGINE=InnoDB""")
 
 	def create_cache_item(self):
-		import webnotes
 		self.dbman.drop_table('__CacheItem')
-		webnotes.conn.sql("""create table __CacheItem (
+		self.conn.sql("""create table __CacheItem (
 			`key` VARCHAR(180) NOT NULL PRIMARY KEY,
 			`value` LONGTEXT
 			) ENGINE=InnoDB DEFAULT CHARSET=utf8""")
 			
 	def create_auth_table(self):
-		import webnotes
-		webnotes.conn.sql("""create table if not exists __Auth (
+		self.conn.sql("""create table if not exists __Auth (
 			`user` VARCHAR(180) NOT NULL PRIMARY KEY,
 			`password` VARCHAR(180) NOT NULL
 			) ENGINE=InnoDB DEFAULT CHARSET=utf8""")

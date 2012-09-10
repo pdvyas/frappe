@@ -20,7 +20,6 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
 
-from __future__ import unicode_literals
 import webnotes
 
 class Profile:
@@ -31,15 +30,6 @@ class Profile:
 	def __init__(self, name=''):
 		self.name = name or webnotes.session.get('user')
 		self.roles = []
-		
-		self.all_read = []
-		self.can_create = []
-		self.can_read = []
-		self.can_write = []
-		self.can_cancel = []
-		self.can_search = []
-		self.can_get_report = []
-		self.allow_modules = []
 		
 	def _load_roles(self):
 		self.roles = webnotes.get_roles()
@@ -95,7 +85,12 @@ class Profile:
 			in_create => Not in create
 		
 		"""
-		
+
+		self.can_create = []
+		self.can_search = []
+		self.can_get_report = []
+		self.allow_modules = []
+	
 		self.build_doctype_map()
 		self.build_perm_map()
 		
@@ -107,16 +102,6 @@ class Profile:
 				if p.get('create') and not dtp.get('in_create') and \
 						not dtp.get('issingle'):
 					self.can_create.append(dt)
-				elif p.get('write'):
-					self.can_write.append(dt)
-				elif p.get('read'):
-					if dtp.get('read_only'):
-						self.all_read.append(dt)
-					else:
-						self.can_read.append(dt)
-
-			if p.get('cancel'):
-				self.can_cancel.append(dt)
 
 			if (p.get('read') or p.get('write') or p.get('create')):
 				self.can_get_report.append(dt)
@@ -126,10 +111,6 @@ class Profile:
 						self.can_search.append(dt)
 					if not dtp.get('module') in self.allow_modules:
 						self.allow_modules.append(dtp.get('module'))
-
-		self.can_write += self.can_create
-		self.can_read += self.can_write
-		self.all_read += self.can_read
 
 	def get_defaults(self):
 		"""

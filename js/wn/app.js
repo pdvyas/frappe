@@ -46,9 +46,9 @@ wn.Application = Class.extend({
 		if(window.app) {
 			wn.call({
 				method: 'startup',
-				callback: function(r, rt) {
+				callback: function(r) {
 					wn.provide('wn.boot');
-					wn.boot = r;
+					wn.boot = r.boot;
 					if(wn.boot.profile.name=='Guest') {
 						window.location = 'index.html';
 						return;
@@ -93,7 +93,7 @@ wn.Application = Class.extend({
 			if(wn.boot.__messages) {
 				$.extend(wn._messages, wn.boot.__messages);
 			}
-
+			
 			this.set_globals();		
 		} else {
 			this.set_as_guest();

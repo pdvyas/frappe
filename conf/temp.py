@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 keywords = """add_days, add_months, add_years, cint, cstr, date_diff, default_fields, 
 flt, fmt_money, formatdate, generate_hash, getTraceback, get_defaults, get_first_day, 
 get_last_day, getdate, has_common, month_name, nowdate, now, replace_newlines, 

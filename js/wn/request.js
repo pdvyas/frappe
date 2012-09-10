@@ -71,6 +71,7 @@ wn.request.update_btn = function(btn, start) {
 }
 
 wn.request.cleanup = function(opts, r) {
+	wn.last_response = r;
 	wn.request.update_btn(opts.btn, null);
 	
 	// hide button indicator

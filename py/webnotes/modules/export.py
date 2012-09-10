@@ -20,7 +20,6 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
 
-from __future__ import unicode_literals
 """
 	Export files to modules
 """
@@ -31,15 +30,14 @@ def export_to_files(record_list=None, record_module=None, verbose=0):
 	"""
 		Export record_list to files. record_list is a list of lists ([doctype],[docname] )  ,
 	"""
-	import webnotes.model.doc
-	from webnotes.model.doclist import DocList
+	from webnotes.model.doclist import DocList, load
 	module_doclist =[]
 	if record_list:
 		if isinstance(record_list, DocList):
 			write_document_file(record_list, record_module)
 		else:
 			for record in record_list:
-				doclist = webnotes.model.doc.get(record[0], record[1])
+				doclist = load(session, record[0], record[1])
 				write_document_file(doclist, record_module)
 
 def create_init_py(modules_path, dt, dn):

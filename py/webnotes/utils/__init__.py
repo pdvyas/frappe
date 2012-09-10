@@ -20,7 +20,6 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
 
-from __future__ import unicode_literals
 import webnotes
 
 user_time_zone = None
@@ -119,13 +118,13 @@ def getdate(string_date):
 		
 	return datetime.datetime.strptime(string_date, "%Y-%m-%d").date()
 
-def add_to_date(date, years=0, months=0, days=0):
+def add_to_date(session, date, years=0, months=0, days=0):
 	"""Adds `days` to the given date"""
 	format = isinstance(date, basestring)
 	if date:
 		date = getdate(date)
 	else:
-		date = now_datetime()
+		date = now_datetime(session)
 	
 	from dateutil.relativedelta import relativedelta
 	date += relativedelta(years=years, months=months, days=days)
@@ -169,7 +168,7 @@ def get_last_day(dt):
 	import datetime
 	return get_first_day(dt, 0, 1) + datetime.timedelta(-1)
 
-def now_datetime():
+def now_datetime(session):
 	global user_time_zone
 	from datetime import datetime
 	from pytz import timezone
@@ -177,7 +176,7 @@ def now_datetime():
 	# get localtime
 	if not user_time_zone:
 		import conf
-		user_time_zone = webnotes.conn.get_value('Control Panel', None, 'time_zone') \
+		user_time_zone = hasattr(session, 'bootinfo') and session.bootinfo.control_panel.time_zone \
 			or getattr(conf, "user_timezone") or 'Asia/Calcutta'
 
 	# convert to UTC
@@ -199,17 +198,17 @@ def get_datetime_str(datetime_obj):
 	
 	return datetime_obj.strftime('%Y-%m-%d %H:%M:%S')
 	
-def now():
+def now(session):
 	"""return current datetime as yyyy-mm-dd hh:mm:ss"""
-	return now_datetime().strftime('%Y-%m-%d %H:%M:%S')
+	return now_datetime(session).strftime('%Y-%m-%d %H:%M:%S')
 	
-def nowdate():
+def nowdate(session):
 	"""return current date as yyyy-mm-dd"""
-	return now_datetime().strftime('%Y-%m-%d')
+	return now_datetime(session).strftime('%Y-%m-%d')
 
-def nowtime():
+def nowtime(session):
 	"""return current time in hh:mm"""
-	return now_datetime().strftime('%H:%M')
+	return now_datetime(session).strftime('%H:%M')
 
 def formatdate(string_date):
 	"""
@@ -258,14 +257,14 @@ def cint(s):
 	return tmp
 		
 def cstr(s):
-	if isinstance(s, unicode):
+	if isinstance(s, str):
 		return s
-	elif s==None: 
+	elif isinstance(s, unicode):
+		return s.encode('utf-8')
+	elif s==None:
 		return ''
-	elif isinstance(s, basestring):
-		return unicode(s, 'utf-8')
 	else:
-		return unicode(s)
+		return str(s)
 
 def cast(df, val):
 	if df.fieldtype == 'Int':
@@ -322,7 +321,7 @@ def money_in_words(number, main_currency = None, fraction_currency=None):
 	Returns string in words with currency and fraction currency. 
 	"""
 	
-	d = get_defaults()
+	d = webnotes.conn.get_defaults()
 	if not main_currency:
 		main_currency = d.get('currency', 'INR')
 	if not fraction_currency:
@@ -400,14 +399,6 @@ def in_words(integer):
 	return psn(n, known, psn)
 	
 
-# Get Defaults
-# ==============================================================================
-
-def get_defaults(key=None):
-	"""
-	Get dictionary of default values from the :term:`Control Panel`, or a value if key is passed
-	"""
-	return webnotes.conn.get_defaults(key)
 
 def set_default(key, val):
 	"""

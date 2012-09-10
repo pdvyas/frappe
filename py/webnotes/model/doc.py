@@ -20,7 +20,6 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
 
-from __future__ import unicode_literals
 """
 Contains the Document class representing an object / record
 """
@@ -68,7 +67,7 @@ class Document(dict):
 		 * `idx` : Index (sequence) of the child record	
 	"""
 	
-	def __init__(self, doctype=None, name=None, fielddata=None):
+	def __init__(self, doctype=None, name=None, fielddata=None, session=None):
 		self.doctype = doctype
 		self.name = name
 		if fielddata:
@@ -82,11 +81,18 @@ class Document(dict):
 	def __setattr__(self, key, value):
 		self[key] = value
 
-	def save(self, new=False, doctypelist=None):
-		if not doctypelist:
-			doctypelist = webnotes.model.get_doctype(self.doctype)
+	def __getstate__(self): 
+		return self
 
-		fields_to_save = self.get_valid_fields(doctypelist)
+	def __setstate__(self, d): 
+		self.update(d)
+
+
+	def save(self, session, new=False, doctypelist=None):
+		if not doctypelist:
+			doctypelist = session.get_doctype(self.doctype)
+
+		fields_to_save = self.get_valid_fields(session, doctypelist)
 		
 		# set None if field does not exist
 		for f in fields_to_save:
@@ -94,67 +100,62 @@ class Document(dict):
 				self[f] = None
 		
 		if cint(doctypelist[0].issingle):
-			self.insert_single(fields_to_save)
+			self.insert_single(session, fields_to_save)
 		elif new or self.__islocal:
-			self.insert(fields_to_save, doctypelist[0].autoname)
+			self.insert(session, fields_to_save, doctypelist[0].autoname)
 		else:
-			self._update(fields_to_save)
+			self._update(session, fields_to_save)
 		
 		# clear temp fields
 		for k in self.keys():
 			if k.startswith("__"):
 				del self[k]
 
-	def insert_single(self, fields_to_insert):
+	def insert_single(self, session, fields_to_insert):
 		# delete existing records
-		webnotes.conn.sql("""delete from tabSingles where doctype=%s""", self.doctype)
+		session.db.sql("""delete from tabSingles where doctype=%s""", self.doctype)
 		
 		for f in fields_to_insert:
 			if f in self:
-				webnotes.conn.sql("""insert into tabSingles (doctype, field, value)
+				session.db.sql("""insert into tabSingles (doctype, field, value)
 					values (%s, %s, %s)""", (self.doctype, f, self.get(f)))
 
-	def insert(self, fields_to_insert, autoname):
+	def insert(self, session, fields_to_insert, autoname):
 		"""insert a non-single doc"""
-		self.set_name(autoname)
-		self.validate_name()
-		self.validate_default_fields()
+		self.set_name(session, autoname)
+		self.validate_name(session)
+		self.validate_default_fields(session)
 		
 		column_place_holders = ", ".join(["`%s`" % f for f in fields_to_insert])
 		value_place_holders = ", ".join(["%%(%s)s" % f for f in fields_to_insert])
 	
-		webnotes.conn.sql("""insert into `tab%s` (%s) values (%s)""" % \
+		session.db.sql("""insert into `tab%s` (%s) values (%s)""" % \
 			(self.doctype, column_place_holders, value_place_holders), self)
 	
-	def _update(self, fields_to_update):
-		self.validate_default_fields()
+	def _update(self, session, fields_to_update):
+		self.validate_default_fields(session)
 		
 		# exclude name, creation, owner from fields to update
 		fields_to_update = filter(lambda f: f not in ("name", "creation", "owner"),
 			fields_to_update)
 		set_fields = map(lambda f: "`%s` = %%(%s)s" % (f, f), fields_to_update)
 				
-		webnotes.conn.sql("""update `tab%s` set %s where name = %s""" % \
+		session.db.sql("""update `tab%s` set %s where name = %s""" % \
 			(self.doctype, ", ".join(set_fields), "%(name)s"), self)
 			
-	def set_name(self, autoname=None):
+	def set_name(self, session, autoname=None):
 		self.localname = self.name
 		if self.name and not self.name.startswith("New %s" % self.doctype):
 			return
 
-		# determine amended name
-		if self.amended_from:
-			self.name = self.get_amended_name()
-			return
-
 		# call autoname method of controller
-		controller = webnotes.model.get_controller([self], module=self.module or None)
+		controller = session.controller([self], module=self.module or None)
 		if hasattr(controller, "autoname"):
 			name = controller.autoname()
 			if name:
 				self.name = name
 			elif not self.name:
-				webnotes.msgprint("""Error in autoname method of "%s" """ % self.doctype,
+				session.msgprint("""Error in autoname method of "%s" """ % self.doctype,
 					raise_exception=webnotes.ProgrammingError)
 		
 		elif autoname == "naming_series":
@@ -165,21 +166,12 @@ class Document(dict):
 			# via prompt
 			self.name = self.__newname
 		else:
-			self.name = make_autoname(autoname or "#########")
-			
-	def get_amended_name(self):
-		if "-" not in self.amended_from:
-			amend_prefix = self.amended_from
-			amend_id = 1
-		else:
-			amend_prefix = self.amended_from.split("-")[:-1]
-			amend_id = cint(self.amended_from.split("-")[-1]) + 1
-		return "%s-%d" % (amend_prefix, amend_id)
+			self.name = make_autoname(session, autoname or "#########")
 		
-	def validate_name(self):
+	def validate_name(self, session):
 		# name missing
 		if not self.name:
-			webnotes.msgprint("""No Name specified for "%s" """ % self.doctype,
+			session.msgprint("""No Name specified for "%s" """ % self.doctype,
 				raise_exception=webnotes.NameError)
 		
 		self.name = self.name.strip()
@@ -187,35 +179,35 @@ class Document(dict):
 		# illegal characters - [TODO: should allow single quote]
 		for ch in ('%', "'", '"', '#', '*', '?', '`'):
 			if ch in self.name:
-				webnotes.msgprint("""(%s) is not allowed in Name (%s)""" % \
+				session.msgprint("""(%s) is not allowed in Name (%s)""" % \
 					(ch, self.name), raise_exception=webnotes.NameError)
 
 		# not able to name
 		if self.name.startswith("New %s" % self.doctype):
-			webnotes.msgprint("""Error: cannot set Name. Please contact your System Manager""",
+			session.msgprint("""Error: cannot set Name. Please contact your System Manager""",
 				raise_exception=webnotes.NameError)
 
 		# already exists
-		if webnotes.conn.exists(self.doctype, self.name):
-			webnotes.msgprint(""" "%s": "%s" already exists""" % \
+		if session.db.exists(self.doctype, self.name):
+			session.msgprint(""" "%s": "%s" already exists""" % \
 				(self.doctype, self.name), raise_exception=webnotes.NameError)
 	
-	def validate_default_fields(self):
+	def validate_default_fields(self, session):
 		# set idx
 		if self.parent and not self.idx:
-			self.idx = cint(webnotes.conn.sql("""select max(idx) from `tab%s`
+			self.idx = cint(session.db.sql("""select max(idx) from `tab%s`
 				where parent=%s and parenttype=%s and parentfield=%s""" % \
 				(self.doctype, "%s", "%s", "%s"), (self.parent, self.parenttype,
 				self.parentfield), as_list=1)[0][0])
 
 		# set info
-		self.owner = self.owner or webnotes.session["user"]
-		self.modified_by = webnotes.session["user"]
-		ts = get_datetime(now_datetime())
+		self.owner = self.owner or session.user
+		self.modified_by = session.user
+		ts = get_datetime(now_datetime(session))
 		self.creation = self.creation or ts
 		self.modified = self.modified or ts
 
-	def get_valid_fields(self, doctypelist):
+	def get_valid_fields(self, session, doctypelist):
 		global valid_fields
 		if valid_fields.get(self.doctype):
 			return valid_fields.get(self.doctype)
@@ -226,7 +218,7 @@ class Document(dict):
 			valid_fields[self.doctype] = filter(lambda f: f in doctype_fieldnames,
 				self.keys())
 		else:
-			valid_fields[self.doctype] = webnotes.conn.get_table_columns(self.doctype)
+			valid_fields[self.doctype] = session.db.get_table_columns(self.doctype)
 
 		return valid_fields.get(self.doctype)
 
@@ -236,7 +228,7 @@ class Document(dict):
 			if isinstance(self[key], unicode):
 				self[key] = self[key].encode(encoding)
 
-def make_autoname(key):
+def make_autoname(session, key):
 	"""
 		Creates an autoname from the given key:
 
@@ -255,12 +247,13 @@ def make_autoname(key):
 		  DE/09/01/0001 where 09 is the year, 01 is the month and 0001 is the series
 	"""
 	name = ""
-	today = now_datetime().date()
 
 	key_parts = key.split(".")
 	for part in key_parts:
+		if part in ("MM", "YYYY", "YY"):
+			today = now_datetime(session).date()
 		if part.startswith("#"):
-			name += get_next_in_series(name, len(part))
+			name += get_next_in_series(session, name, len(part))
 		elif part == "YY":
 			name += today.strftime("%y")
 		elif part == "YYYY":
@@ -272,12 +265,12 @@ def make_autoname(key):
 
 	return name
 	
-def get_next_in_series(name, length):
-	if webnotes.conn.exists("Series", name):
-		webnotes.conn.sql("""update tabSeries set current = ifnull(current, 0) + 1 where name = %s""", name)
-		next = webnotes.conn.get_value("Series", name, "current")
+def get_next_in_series(session, name, length):
+	if session.db.exists("Series", name):
+		session.db.sql("""update tabSeries set current = ifnull(current, 0) + 1 where name = %s""", name)
+		next = session.db.get_value("Series", name, "current")
 	else:
-		webnotes.conn.sql("""insert into tabSeries (name, current) values (%s, 1)""", name)
+		session.db.sql("""insert into tabSeries (name, current) values (%s, 1)""", name)
 		next = 1
 
 	# returns a number like 00001 as a string
@@ -289,7 +282,3 @@ def get(doctype, name=None):
 	Returns a doclist containing the main record and all child records
 	"""
 	return webnotes.model.doclist.load(doctype, name or doctype)
-
-def getsingle(doctype):
-	"""get single doc as dict"""
-	return webnotes.model.doclist.load_main(doctype, doctype)

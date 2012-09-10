@@ -20,7 +20,6 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
 
-from __future__ import unicode_literals
 from webnotes.utils.minify import JavascriptMinify
 
 import os, sys
@@ -163,7 +162,7 @@ class Bundle:
 		self.bdata = bdata
 
 
-def bundle(no_compress):
+def bundle(session, no_compress):
 	"""concat / minify js files"""
 	# build js files
 	bundle = Bundle()
@@ -171,10 +170,10 @@ def bundle(no_compress):
 	bundle.make()
 
 	# build index.html and app.html
-	import webnotes.cms.make
-	webnotes.cms.make.make()
+	import website.utils
+	website.utils.make_web_files(session)
 	
-def watch(no_compress):
+def watch(session, no_compress):
 	"""watch and rebuild if necessary"""
 	import time
 	bundle = Bundle()

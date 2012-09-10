@@ -20,12 +20,11 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-from __future__ import unicode_literals
 import webnotes
 from webnotes.model.controller import DocListController
 
 @webnotes.whitelist()
-def get_items():
+def get_items(session):
 	"""get module doctypes (master, transaction, setup, tool), pages and reports"""
 	
 	out = webnotes.DictObj({
@@ -39,35 +38,35 @@ def get_items():
 	})
 	
 	# doctypes
-	for dt in webnotes.conn.sql("""select name, document_type, issingle	
+	for dt in session.db.sql("""select name, document_type, issingle	
 		from tabDocType where module=%s""",
-		webnotes.form.module):
+		session.request.params.get("module")):
 		if dt.document_type:
 			if dt.issingle:
 				out[dt.document_type.lower()].append(["Single", dt.name])
 			else:
-				out[dt.document_type.lower()].append(["DocType", dt.name, get_data(dt.name)])
+				out[dt.document_type.lower()].append(["DocType", dt.name, get_data(session, dt.name)])
 	
 	# pages
-	for page in webnotes.conn.sql("""select name from tabPage where module=%s""", 
-		webnotes.form.module):
+	for page in session.db.sql("""select name from tabPage where module=%s""", 
+		session.request.params.get("module")):
 		if not 'home' in page.name:
 			out.tool.append(["Page", page.name])
 		
 	# reports
-	for report in webnotes.conn.sql("""select tabReport.name, tabReport.ref_doctype 
+	for report in session.db.sql("""select tabReport.name, tabReport.ref_doctype 
 		from tabReport, tabDocType
 		where tabReport.ref_doctype = tabDocType.name and tabDocType.module = %s""",
-			webnotes.form.module):
+			session.request.params.get("module")):
 		
 		out.report.append(['Report', report.name, report.ref_doctype])
 		
 	return out
 	
-def get_data(dt):
+def get_data(session, dt):
 	"""get docstatus numbers"""
 	ret = []
 	for i in xrange(3):
-		ret.append(webnotes.conn.sql("""select count(*) from `tab%s` where 
+		ret.append(session.db.sql("""select count(*) from `tab%s` where 
 			ifnull(docstatus,0) = %s""" % (dt, '%s'), i, as_list=1)[0][0])
 	return ret

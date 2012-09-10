@@ -20,7 +20,6 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
 
-from __future__ import unicode_literals
 """
 Syncs a database table to the `DocType` (metadata)
 
@@ -65,7 +64,9 @@ import _mysql_exceptions
 # -------------------------------------------------
 
 class DbTable:
-	def __init__(self, doctype):
+	def __init__(self, session, doctype):
+		self.session = session
+		self.conn = session.db
 		self.doctype = doctype
 		self.name = 'tab' + doctype
 		self.columns = {}
@@ -93,7 +94,7 @@ class DbTable:
 		if t: add_text += ',\n'.join(self.get_index_definitions()) + ',\n'
 	
 		# create table
-		webnotes.conn.sql("""create table `%s` (
+		self.conn.sql("""create table `%s` (
 			name varchar(180) not null primary key, 
 			creation datetime,
 			modified datetime,
@@ -112,12 +113,12 @@ class DbTable:
 		"""
 			get columns from docfields and custom fields
 		"""
-		fl = webnotes.conn.sql("SELECT * FROM tabDocField WHERE parent = '%s'" % self.doctype, as_dict = 1)
+		fl = self.conn.sql("SELECT * FROM tabDocField WHERE parent = '%s'" % self.doctype)
 		
 		try:
-			custom_fl = webnotes.conn.sql("""\
+			custom_fl = self.conn.sql("""\
 				SELECT * FROM `tabCustom Field`
-				WHERE dt = %s AND docstatus < 2""", self.doctype, as_dict=1)
+				WHERE dt = %s AND docstatus < 2""", self.doctype)
 			if custom_fl: fl += custom_fl
 		except Exception, e:
 			if e.args[0]!=1146: # ignore no custom field
@@ -129,7 +130,7 @@ class DbTable:
 					f.get('search_index'), f.get('options'))
 	
 	def get_columns_from_db(self):
-		self.show_columns = webnotes.conn.sql("desc `%s`" % self.name, as_list=1)
+		self.show_columns = self.conn.sql("desc `%s`" % self.name, as_list=1)
 		for c in self.show_columns:
 			self.current_columns[c[0]] = {'name': c[0], 'type':c[1], 'index':c[3], 'default':c[4]}
 	
@@ -155,7 +156,7 @@ class DbTable:
 	# GET foreign keys
 	def get_foreign_keys(self):
 		fk_list = []
-		txt = webnotes.conn.sql("show create table `%s`" % self.name)[0][1]
+		txt = self.conn.sql("show create table `%s`" % self.name)[0][1]
 		for line in txt.split('\n'):
 			if line.strip().startswith('CONSTRAINT') and line.find('FOREIGN')!=-1:
 				try:
@@ -179,12 +180,12 @@ class DbTable:
 			
 		# drop
 		for col in self.drop_foreign_key:
-			webnotes.conn.sql("set foreign_key_checks=0")
-			webnotes.conn.sql("alter table `%s` drop foreign key `%s`" % (self.name, fk_dict[col.fieldname]))
-			webnotes.conn.sql("set foreign_key_checks=1")
+			self.conn.sql("set foreign_key_checks=0")
+			self.conn.sql("alter table `%s` drop foreign key `%s`" % (self.name, fk_dict[col.fieldname]))
+			self.conn.sql("set foreign_key_checks=1")
 		
 	def sync(self):
-		if not self.name in DbManager(webnotes.conn).get_tables_list(webnotes.conn.cur_db_name):
+		if not self.name in DbManager(self.session).get_tables_list(self.conn.cur_db_name):
 			self.create()
 		else:
 			self.alter()
@@ -195,24 +196,24 @@ class DbTable:
 			col.check(self.current_columns.get(col.fieldname, None))
 
 		for col in self.add_column:
-			webnotes.conn.sql("alter table `%s` add column `%s` %s" % (self.name, col.fieldname, col.get_definition()))
+			self.conn.sql("alter table `%s` add column `%s` %s" % (self.name, col.fieldname, col.get_definition()))
 
 		for col in self.change_type:
-			webnotes.conn.sql("alter table `%s` change `%s` `%s` %s" % (self.name, col.fieldname, col.fieldname, col.get_definition()))
+			self.conn.sql("alter table `%s` change `%s` `%s` %s" % (self.name, col.fieldname, col.fieldname, col.get_definition()))
 
 		for col in self.add_index:
 			# if index key not exists
-			if not webnotes.conn.sql("show index from `%s` where key_name = '%s'" % (self.name, col.fieldname)):
-				webnotes.conn.sql("alter table `%s` add index `%s`(`%s`)" % (self.name, col.fieldname, col.fieldname))
+			if not self.conn.sql("show index from `%s` where key_name = '%s'" % (self.name, col.fieldname)):
+				self.conn.sql("alter table `%s` add index `%s`(`%s`)" % (self.name, col.fieldname, col.fieldname))
 
 		for col in self.drop_index:
 			if col.fieldname != 'name': # primary key
 				# if index key exists
-				if webnotes.conn.sql("show index from `%s` where key_name = '%s'" % (self.name, col.fieldname)):
-					webnotes.conn.sql("alter table `%s` drop index `%s`" % (self.name, col.fieldname))
+				if self.conn.sql("show index from `%s` where key_name = '%s'" % (self.name, col.fieldname)):
+					self.conn.sql("alter table `%s` drop index `%s`" % (self.name, col.fieldname))
 
 		for col in self.set_default:
-			webnotes.conn.sql("alter table `%s` alter column `%s` set default %s" % (self.name, col.fieldname, '%s'), col.default)
+			self.conn.sql("alter table `%s` alter column `%s` set default %s" % (self.name, col.fieldname, '%s'), col.default)
 
 
 # -------------------------------------------------
@@ -283,13 +284,11 @@ class DbManager:
 		1. Setter and getter for different mysql variables.
 		2. Setter and getter for mysql variables at global level??
 	"""	
-	def __init__(self,conn):
+	def __init__(self, session):
 		"""
 		Pass root_conn here for access to all databases.
 		"""
- 		if conn:
- 			self.conn = conn
-		
+		self.conn = session.db
 
 	def get_variables(self,regex):
 		"""
@@ -414,30 +413,31 @@ def validate_column_name(n):
 # sync table - called from form.py
 # -------------------------------------------------
 
-def updatedb(dt, archive=0):
+def updatedb(session, dt, archive=0):
 	"""
 	Syncs a `DocType` to the table
 	   * creates if required
 	   * updates columns
 	   * updates indices
 	"""
-	res = webnotes.conn.sql("select ifnull(issingle, 0) from tabDocType where name=%s", dt)
+	res = session.db.sql("select ifnull(issingle, 0) from tabDocType where name=%s", dt)
 	if not res:
 		raise Exception, 'Wrong doctype "%s" in updatedb' % dt
 	
 	if not res[0].issingle:
-		webnotes.conn.commit()
-		tab = DbTable(dt)
+		session.db.commit()
+		tab = DbTable(session, dt)
 		tab.sync()
-		webnotes.conn.begin()
+		session.db.begin()
 
 # patch to remove foreign keys
 # ----------------------------
 
-def remove_all_foreign_keys():
-	webnotes.conn.sql("set foreign_key_checks = 0")
-	webnotes.conn.commit()
-	for t in webnotes.conn.sql("select name from tabDocType where ifnull(issingle,0)=0"):
+def remove_all_foreign_keys(session):
+	conn = session.conn
+	conn.sql("set foreign_key_checks = 0")
+	conn.commit()
+	for t in self.conn.sql("select name from tabDocType where ifnull(issingle,0)=0"):
 		dbtab = webnotes.model.db_schema.DbTable(t[0])
 		try:
 			fklist = dbtab.get_foreign_keys()
@@ -448,4 +448,4 @@ def remove_all_foreign_keys():
 				raise e
 				
 		for f in fklist:
-			webnotes.conn.sql("alter table `tab%s` drop foreign key `%s`" % (t[0], f[1]))
+			conn.sql("alter table `tab%s` drop foreign key `%s`" % (t[0], f[1]))

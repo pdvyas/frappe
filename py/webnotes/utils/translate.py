@@ -40,7 +40,6 @@
 # 1. _ in webnotes [x]
 # 2. _ in wn [x]
 
-from __future__ import unicode_literals
 
 import webnotes, conf
 import os

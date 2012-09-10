@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 import unittest, sys
 
 sys.path.append('lib/py')

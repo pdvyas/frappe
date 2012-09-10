@@ -20,78 +20,78 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-from __future__ import unicode_literals
 
 import webnotes
 import webnotes.model
 
 @webnotes.whitelist()
-def get_doclist():
+def get_doclist(session):
 	"""get bundle of doc"""	
-	doclist = webnotes.model.get(webnotes.form.doctype, webnotes.form.name, strip_nulls=True)
+	doclist = session.get_doclist(session.request.params.get('doctype'), 
+		session.request.params.get('name'), strip_nulls=True)
 
 	# add comments
-	doclist[0]['__comments'] = webnotes.conn.sql("""select * from tabComment where
+	doclist[0]['__comments'] = session.db.sql("""select * from tabComment where
 		parenttype=%s and parent=%s order by modified""", 
 		(doclist[0].doctype, doclist[0].name), as_dict=1)
 	
 	# add assignment
-	todo = 	webnotes.conn.sql("""select owner from tabToDo where
+	todo = 	session.db.sql("""select owner from tabToDo where
 			parent=%s and reference_name=%s""", (doclist[0].doctype, doclist[0].name))
 	doclist[0]['__assigned_to'] = todo and todo[0][0] or ''
 	
-	webnotes.response['docs'] = doclist	
+	session.json['docs'] = doclist
 	
-	webnotes.user.update_recent(webnotes.form.doctype, webnotes.form.name)
+	session.profile.update_recent(session.request.params.get('doctype'), 
+		session.request.params.get('name'))
 
 @webnotes.whitelist()
-def get_doctype():
+def get_doctype(session):
 	"""get doctype, all child doctypes"""
 	docs = []
-	doctypelist = webnotes.model.get_doctype(webnotes.form.doctype, processed=True, strip_nulls=True)
+	doctypelist = session.get_doctype(session.request.params.get('doctype'), 
+		processed=True, strip_nulls=True)
 	docs = doctypelist
 	for d in doctypelist.get({"fieldtype":"Table", "doctype":"DocField"}):
-		docs.extend(webnotes.model.get_doctype(d.options, processed=True))
+		docs.extend(session.get_doctype(d.options, processed=True))
 	
-	webnotes.response['docs'] = docs
+	session.json['docs'] = docs
 	
 @webnotes.whitelist()
-def save():
+def save(session):
 	"""insert doclist"""
-	import webnotes.model
 	import json
 	
-	c = webnotes.model.get_controller(json.loads(webnotes.form.get('docs')))
+	c = session.controller(json.loads(session.request.params('docs')))
 	c.save()
-	webnotes.response['docs'] = c.doclist
+	session.json['docs'] = c.doclist
 
 @webnotes.whitelist()
-def delete():
+def delete(session):
 	"""delete model, by id"""
-	import webnotes.model
 	import json
 
-	if 'docs' in webnotes.form:
-		c = webnotes.model.get_controller(json.loads(webnotes.form.get('docs')))
+	if 'docs' in session.request.params:
+		c = session.controller(json.loads(session.request.params('docs')))
 	else:
-		c = webnotes.model.get_controller(webnotes.form.doctype, webnotes.form.name)
+		c = session.controller(session.request.params.get('doctype'), 
+			session.request.params.get('name'))
 		
 	#c.delete()
 
 @webnotes.whitelist()
-def update_value():
+def update_value(session):
 	"""update a single value"""
-	import webnotes.model
 	from webnotes.utils import remove_nulls
 	
-	obj = webnotes.model.get_controller(webnotes.form.doctype, webnotes.form.parent \
-		or webnotes.form.name)
-	if webnotes.form.parent:
-		doc = obj.doclist.get({ "name": webnotes.form.name })[0]
+	obj = session.controller(session.request.params.get('doctype'), 
+		session.request.params.get('doctype') or session.request.params.get('name'))
+	if session.request.params.get('parent'):
+		doc = obj.doclist.get({ "name": session.request.params.get('name') })[0]
 	else:
 		doc = obj.doc
 	
-	doc[webnotes.form.field] = webnotes.form.value
+	doc[session.request.params.get('field')] = session.request.params.get('value')
 	
 	obj.save()
 	

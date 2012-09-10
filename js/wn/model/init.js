@@ -68,8 +68,9 @@ $.extend(wn.model, {
 	},
 	can_delete: function(doctype) {
 		if(!doctype) return false;
-		return wn.model.get('DocType', doctype).get('allow_trash') && 
-			wn.boot.profile.can_cancel.indexOf(doctype)!=-1;
+		var doclist = wn.model.get('DocType', doctype);
+		return doclist.doc.get('allow_trash') && 
+			doclist.get_perm()[CANCEL];
 	},
 	sync: function(doclist) {
 		for(var i=0, len=doclist.length; i<len; i++) {

@@ -20,7 +20,6 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
 
-from __future__ import unicode_literals
 import webnotes, json
 import webnotes.model
 import webnotes.model.doc
@@ -28,7 +27,7 @@ import webnotes.utils.cache
 from webnotes.utils import cstr
 
 class DocList(list):
-	"""DocList object as a wrapper around a list"""
+	"""DocList object as a wrapper around a list"""	
 	def get(self, filters, limit=0):
 		"""pass filters as:
 			{"key": "val", "key": ["!=", "val"],
@@ -91,34 +90,29 @@ class DocList(list):
 			for f in remove:
 				del d[f]
 		
-def load(doctype, name):
-	# from cache?
-	doclist = webnotes.utils.cache.get(doctype + '/' + name)
-	if doclist:
-		return json.loads(doclist)
-	
+def load(session, doctype, name):	
 	# load main doc
-	doclist = [load_main(doctype, name)]
+	doclist = [load_main(session, doctype, name)]
 	
 	# load children
 	table_fields = map(lambda f: (f.options, name, f.fieldname, doctype),
-		webnotes.model.get_table_fields(doctype))
+		session.db.get_table_fields(doctype))
 
 	for args in table_fields:
-		children = load_children(*args)
+		children = load_children(session, *args)
 		if children: doclist += children
 
-	return objectify(doclist)
+	return objectify(session, doclist)
 
-def load_main(doctype, name):
+def load_main(session, doctype, name):
 	"""retrieves doc from database"""
-	if webnotes.model.is_single(doctype):
-		doc = webnotes.conn.sql("""select field, value from `tabSingles`
+	if session.db.is_single(doctype):
+		doc = session.db.sql("""select field, value from `tabSingles`
 			where doctype=%s""", doctype, as_list=1)
 		doc = dict(doc)
 		doc["name"] = doctype
 	else:
-		doc  = webnotes.conn.sql("""select * from `tab%s` where name = %s""" % \
+		doc  = session.db.sql("""select * from `tab%s` where name = %s""" % \
 			(doctype, "%s"), name)
 		if not doc:
 			raise NameError, """%s: "%s" does not exist""" % (doctype, name)
@@ -127,19 +121,19 @@ def load_main(doctype, name):
 	doc["doctype"] = doctype
 	return doc
 
-def load_children(options, parent, parentfield, parenttype):
+def load_children(session, options, parent, parentfield, parenttype):
 	"""load children based on options, parentfield, parenttype and parent"""
 	options = options.split("\n")[0].strip()
 		
-	return webnotes.conn.sql("""select *, "%s" as doctype from `tab%s` where parent = %s 
+	return session.db.sql("""select *, "%s" as doctype from `tab%s` where parent = %s 
 		and parentfield = %s and parenttype = %s order by idx""" % (options, options, "%s", "%s", "%s"),
 		(parent, parentfield, parenttype), as_dict=1)
 		
-def objectify(doclist):
+def objectify(session, doclist):
 	doclist_obj = DocList([])
 	for d in doclist:
 		if isinstance(d, webnotes.model.doc.Document):
 			doclist_obj.append(d)
 		else:
-			doclist_obj.append(webnotes.model.doc.Document(fielddata = d))
+			doclist_obj.append(webnotes.model.doc.Document(fielddata = d, session = session))
 	return doclist_obj

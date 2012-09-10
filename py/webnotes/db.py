@@ -23,7 +23,6 @@
 # Database Module
 # --------------------
 
-from __future__ import unicode_literals
 import MySQLdb
 import webnotes
 import conf
@@ -62,16 +61,12 @@ class Database:
 		"""
 		      Connect to a database
 		"""
-		self._conn = MySQLdb.connect(user=self.user, host=self.host, passwd=self.password, 
-			charset='utf8', use_unicode=True)
+		self._conn = MySQLdb.connect(user=self.user, host=self.host, passwd=self.password)
 		self._conn.converter[246]=float
 		self._conn.set_character_set('utf8')		
 		self._cursor = self._conn.cursor()
 	
 	def use(self, db_name):
-		"""
-		      `USE` db_name
-		"""
 		self.sql("use " + db_name)
 		self.cur_db_name = db_name
 	
@@ -140,7 +135,8 @@ class Database:
 				if ignore_ddl and e.args[0] in (1146,1054,1091):
 					pass
 				else:
-					webnotes.errprint(webnotes.getTraceback())
+					if debug:
+						webnotes.errprint(webnotes.traceback())
 					raise e
 					
 			if webnotes.catch_warning and w:
@@ -172,7 +168,7 @@ class Database:
 			newrow = []
 			for c in row:
 				if isinstance(c, (datetime.date, datetime.datetime, datetime.timedelta)):
-					c = unicode(c)
+					c = str(c)
 				elif isinstance(c, long):
 					c = int(c)
 				
@@ -294,7 +290,39 @@ class Database:
 			d = {}
 			for rec in res: 
 				d[rec.defkey] = rec.defvalue or ''
-			return d		
+			return d
+			
+	def is_single(self, doctype):
+		"""used in doc.py"""
+		from webnotes.utils import cint
+		return cint(self.get_value("DocType", doctype, "issingle"))
+
+	def get_table_fields(self, doctype):
+		"""get table fields from doctype and custom fields"""
+		table_fields = self.sql("""select options, fieldname from `tabDocField`
+			where parent = %s and fieldtype='Table'""", doctype, as_dict=1)
+		custom_table_fields = []
+		try:
+			custom_table_fields = self.sql("""select options, fieldname from `tabCustom Field`
+				where dt = %s and fieldtype='Table'""", doctype, as_dict=1)
+		except Exception, e:
+			if e.args[0]!=1146: raise e
+			
+		return (table_fields or []) + (custom_table_fields)
+
+	def get_roles(self, user=None, with_standard=True):
+		"""get roles of current user"""
+		if user=='Guest':
+			return ['Guest']
+		
+		roles = [r.role for r in self.sql("""select role from tabUserRole 
+			where parent=%s and role!='All'""", user)] + ['All']
+		
+		# filter standard if required
+		if not with_standard:
+			roles = filter(lambda x: x not in ['All', 'Guest', 'Administrator'], roles)
+	
+		return roles
 
 	def begin(self):
 		if not self.in_transaction:

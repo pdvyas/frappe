@@ -20,34 +20,47 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
 
-"""
-Simple Caching:
+import memcache, conf
+from webnotes.utils import cstr
 
-Stores key-value pairs in database and enables simple caching
-
-CacheItem(key).get() returns the cached value if not expired (else returns null)
-CacheItem(key).set(interval = 60000) sets a value to cache, expiring after x seconds
-CacheItem(key).clear() clears an old value
-setup() sets up cache
-"""
-
-import webnotes
-
-def clear(key=None):
-	"""clear doctype cache"""
-	if key:
-		webnotes.conn.sql("delete from __CacheItem where `key`=%s", key)
-	else:
-		webnotes.conn.sql("""delete from __CacheItem""")
-
-def get(key):
-	"""get cache"""
-	value = webnotes.conn.sql("""select `value` from __CacheItem where 
-		`key`=%s""", key)
-	return value and value[0].value or None
+class MClient(memcache.Client):
+	"""memcache client that will automatically prefix conf.db_name
+	and maintain a key list"""
+	def n(self, key):
+		return conf.db_name + ":" + cstr(key).replace(" ", "_")
 	
-def set(key, value):
-	"""set in cache"""
-	clear(key)	
-	webnotes.conn.sql("""insert into __CacheItem (`key`, `value`) 
-		values (%s, %s)""", (key, str(value)))
+	def set_value(self, key, val):
+		self.set(self.n(key), val)
+		self.add_to_key_list(key)
+		
+	def get_value(self, key):
+		return self.get(self.n(key))
+		
+	def delete_value(self, key):
+		self.delete(self.n(key))
+		
+	def add_to_key_list(self, key):
+		key_list = self.get_value('key_list') or []
+		if key not in key_list:
+			key_list.append(key)
+		self.set(self.n("key_list"), key_list)
+		
+	def flush_keys(self, startswith):
+		"""flush keys from known key_list"""
+		if not startswith:
+			for key in self.get_value('key_list'):
+				self.delete_value(key)
+
+			self.delete_value('key_list')
+		else:
+			deleted = []
+			keys = self.get_value('key_list')
+			for key in keys:
+				if key.startswith(startswith):
+					self.delete(self.n(key))
+					deleted.append(key)
+					
+			for d in deleted:
+				keys.remove(d)
+			
+			self.set_value("key_list", keys)

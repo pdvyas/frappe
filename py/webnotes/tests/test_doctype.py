@@ -1,5 +1,4 @@
 # Test Cases
-from __future__ import unicode_literals
 import unittest, webnotes
 
 import webnotes.model.doctype 

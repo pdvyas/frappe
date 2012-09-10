@@ -20,52 +20,24 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
 
-from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import cint, remove_nulls
 no_value_fields = ['Section Break', 'Column Break', 'HTML', 'Table', 'FlexTable', 'Button', 'Image', 'Graph']
 default_fields = ['doctype','name','owner','creation','modified','modified_by','parent','parentfield','parenttype','idx','docstatus']
 
-def get(doctype, name, strip_nulls = False):
-	"""returns doclist identified by name, from table indicated by doctype, with its children"""
-	doclist = get_controller(doctype, name).doclist
-	if strip_nulls:
-		[remove_nulls(d) for d in doclist]
-	return doclist
 	
-def get_doctype(doctype, processed=False, strip_nulls=False):
-	"""returns doclist identified by doctype, from tabDocType with its children"""
-	import webnotes.model.doctype
-	doclist = webnotes.model.doctype.get(doctype, processed)
-	if strip_nulls:
-		[remove_nulls(d) for d in doclist]
-	return doclist
-	
-def get_fieldnames(doctype, filters=None, additional_fields=None):
+def get_fieldnames(session, doctype, filters=None, additional_fields=None):
 	if not filters: filters = {}
 	if not additional_fields: additional_fields = default_fields
 	
 	filters.update({"fieldtype": ["not in", no_value_fields]})
 	return get_doctype(doctype).get_fieldnames(filters) + additional_fields
-
-def insert(doclist):
-	"""insert a new doclist"""
+	
+def update(session, doclist):
 	if doclist and isinstance(doclist, dict):
 		doclist = [doclist]
 	
-	doclistcon = get_controller(doclist)
-	for d in doclistcon.doclist:
-		d["__islocal"] = 1
-	doclistcon.save()
-
-	# can be used to retrieve name or any value after save
-	return doclistcon
-	
-def update(doclist):
-	if doclist and isinstance(doclist, dict):
-		doclist = [doclist]
-	
-	doclistcon = get_controller(doclist[0]["doctype"], doclist[0]["name"])
+	doclistcon = session.controller(doclist[0]["doctype"], doclist[0]["name"])
 	existing_names = map(lambda d: d.name, doclistcon.doclist)
 
 	for d in doclist:
@@ -79,92 +51,31 @@ def update(doclist):
 
 	return doclistcon
 	
-def insert_variants(base, variants):
+def insert_variants(session, base, variants):
 	for v in variants:
 		base_copy = base.copy()
 		base_copy.update(v)
-		insert(base_copy)
+		insert(session, base_copy)
 		
-def insert_test_data(doctype, sort_fn=None):
+def insert_test_data(session, doctype, sort_fn=None):
 	from webnotes.modules.export import get_test_doclist
 	data = get_test_doclist(doctype)
 	if sort_fn:
 		data = sorted(data, key=sort_fn)
 	
 	for doclist in data:
-		webnotes.model.insert(doclist)
+		insert(session, doclist)
 
 def insert_child(fields):
 	"""insert a child, must specify parent, parenttype and doctype"""
-
-	# load parent
 	parent = get_controller(fields['parenttype'], fields['parent'])
-
-	# make child
 	parent.add_child(fields)
-
-	# save
 	parent.save()
 
 @webnotes.whitelist()
 def map_doc(from_doctype, to_doctype, from_docname):
 	from core.doctype.doctype_mapper.doctype_mapper import map_doc
 	return map_doc(from_doctype, to_doctype, from_docname)
-
-controllers = {}
-def get_controller(doctype, name=None, module=None):
-	"""return controller object"""
-	global controllers
-	
-	doclist = doctype
-	if isinstance(doctype, list):
-		doctype = doclist[0]['doctype']
-	
-	# return if already loaded
-	if doctype in controllers:
-		return controllers[doctype](doclist, name)
-
-	import webnotes, os
-	from webnotes.modules import get_doc_path, scrub
-	from webnotes.model.controller import DocListController
-	
-	module_name = module or webnotes.conn.get_value("DocType", doctype, "module") or "Core"
-	doc_path = get_doc_path(module_name, 'doctype', doctype)
-	module_path = os.path.join(doc_path, scrub(doctype)+'.py')
-
-	# load translations
-	if webnotes.can_translate():
-		from webnotes.utils.translate import get_lang_data
-		webnotes._messages.update(get_lang_data(doc_path, None, 'py'))
-
-	# check if path exists
-	if os.path.exists(module_path):
-		module = __import__(scrub(module_name) + '.doctype.' + scrub(doctype) + '.' \
-			+ scrub(doctype), fromlist = [scrub(doctype).encode("utf-8")])
-
-		# find controller in module
-		import inspect
-		for attr in dir(module):
-			attrobj = getattr(module, attr)
-			if inspect.isclass(attrobj) and attr.startswith(doctype.replace(' ', '').replace('-', '')) \
-				and issubclass(attrobj, DocListController):
-				controllers[doctype] = attrobj
-				return attrobj(doclist, name)
-	
-	# vanilla controller
-	return DocListController(doclist, name)
-
-def is_single(doctype):
-	"""used in doc.py"""
-	from webnotes.utils import cint
-	return cint(webnotes.conn.get_value("DocType", doctype, "issingle"))
-
-def get_table_fields(doctype):
-	table_fields = webnotes.conn.sql("""select options, fieldname from `tabDocField`
-		where parent = %s and fieldtype='Table'""", doctype, as_dict=1)
-	custom_table_fields = webnotes.conn.sql("""select options, fieldname from `tabCustom Field`
-		where dt = %s and fieldtype='Table'""", doctype, as_dict=1)
-	return (table_fields or []) + (custom_table_fields or [])
 	
 def check_if_doc_is_linked(dt, dn):
 	"""

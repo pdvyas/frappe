@@ -20,7 +20,6 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
 
-from __future__ import unicode_literals
 """
 Transactions are defined as collection of classes, a DocList represents collection of Document
 objects for a transaction with main and children.
@@ -28,19 +27,64 @@ objects for a transaction with main and children.
 Group actions like save, etc are performed on doclists
 """
 
-import webnotes, json
+import webnotes
+import json, os
 import webnotes.model
 import webnotes.model.doc
 import webnotes.model.doclist
 import webnotes.utils.cache
 
+from webnotes import _
 from webnotes.utils import cint, cstr, now_datetime, get_datetime, get_datetime_str, comma_and, cast
 
+def get(session, doctype, name=None, module=None):
+	"""return controller object"""
+	doclist = doctype
+	if isinstance(doctype, list):
+		doctype = doclist[0]['doctype']
+	
+	# return if already loaded
+	if doctype not in session.controllers:
+
+		from webnotes.modules import get_doc_path, scrub
+	
+		module_name = module or session.db.get_value("DocType", doctype, "module") or "Core"
+		doc_path = get_doc_path(module_name, 'doctype', doctype)
+		module_path = os.path.join(doc_path, scrub(doctype)+'.py')
+
+		# load translations
+		if webnotes.can_translate():
+			from webnotes.utils.translate import get_lang_data
+			webnotes._messages.update(get_lang_data(doc_path, None, 'py'))
+
+		# vanilla controller
+		session.controllers[doctype] = get_controller_class(module_name, doctype, module_path)
+		
+	return session.controllers[doctype](session, doclist, name)
+
+
+def get_controller_class(module_name, doctype, module_path):
+	if os.path.exists(module_path):
+		from webnotes.modules import get_doc_path, scrub
+		module = __import__(scrub(module_name) + '.doctype.' + scrub(doctype) + '.' \
+			+ scrub(doctype), fromlist = [scrub(doctype)])
+
+		# find controller in module
+		import inspect
+		for attr in dir(module):
+			attrobj = getattr(module, attr)
+			if inspect.isclass(attrobj) and attr.startswith(doctype.replace(' ', '').replace('-', '')) \
+				and issubclass(attrobj, DocListController):
+				return attrobj
+		
+	return DocListController
+			
 class DocListController(object):
 	"""
 	Collection of Documents with one parent and multiple children
 	"""
-	def __init__(self, doctype=None, name=None):
+	def __init__(self, session=None, doctype=None, name=None):
+		self.session = session
 		if doctype:
 			self.load(doctype, name)
 		if hasattr(self, "setup"):
@@ -56,11 +100,11 @@ class DocListController(object):
 		self.set_doclist(self.load_doclist(doctype, name))
 		
 	def load_doclist(self, doctype, name):
-		return webnotes.model.doclist.load(doctype, name)
+		return webnotes.model.doclist.load(self.session, doctype, name)
 	
 	def set_doclist(self, doclist):
 		if not isinstance(doclist, webnotes.model.doclist.DocList):
-			self.doclist = webnotes.model.doclist.objectify(doclist)
+			self.doclist = webnotes.model.doclist.objectify(self.session, doclist)
 		else:
 			self.doclist = doclist
 		self.doc = self.doclist[0]
@@ -75,11 +119,11 @@ class DocListController(object):
 		self.doctype_validate()
 		
 		from webnotes.model.doctype import get_property
-		if get_property(self.doc.doctype, "document_type") in ["Master", "Transaction"]:
+		if get_property(self.session, self.doc.doctype, "document_type") in ["Master", "Transaction"]:
 			from webnotes.model.doclist import load
 			# get the old doclist
 			try:
-				oldlist = load(self.doc.doctype, self.doc.name)
+				oldlist = load(self.session, self.doc.doctype, self.doc.name)
 			except NameError, e:
 				oldlist = None
 		else:
@@ -99,11 +143,11 @@ class DocListController(object):
 		self.check_permission()
 		self.check_links()
 		self.check_mandatory()
-		self.update_metadata()
+		self.update_timestamps()
 
 	def save_main(self):
 		"""Save the main doc"""
-		self.doc.save(cint(self.doc.get('__islocal')))
+		self.doc.save(self.session, cint(self.doc.get('__islocal')))
 
 	def save_children(self):
 		"""Save Children, with the new parent name"""
@@ -119,7 +163,7 @@ class DocListController(object):
 				d.modified = self.doc.modified
 				d.modified_by = self.doc.modified_by
 
-				d.save(new = cint(d.get('__islocal')))
+				d.save(self.session, new = cint(d.get('__islocal')))
 			
 			child_map.setdefault(d.doctype, []).append(d.name)
 		
@@ -129,49 +173,47 @@ class DocListController(object):
 	def save_version(self, oldlist):
 		"""create a new version of given difflist"""
 		from webnotes.model.versions import save_version
-		save_version(oldlist, self.doclist)
+		save_version(self.session, oldlist, self.doclist)
 		
 	def remove_children(self, child_map):
 		"""delete children from database if they do not exist in the doclist"""
 		# get all children types
-		tablefields = webnotes.model.get_table_fields(self.doc.doctype)
+		tablefields = self.session.db.get_table_fields(self.doc.doctype)
 				
 		for dt in tablefields:
 			cnames = child_map.get(dt['options']) or []
 			if cnames:
-				webnotes.conn.sql("""delete from `tab%s` where parent=%s
+				self.session.db.sql("""delete from `tab%s` where parent=%s
 					and parenttype=%s and name not in (%s)""" % \
 					(dt['options'], '%s', '%s', ','.join(['%s'] * len(cnames))), 
 					tuple([self.doc.name, self.doc.doctype] + cnames))
 			else:
-				webnotes.conn.sql("""delete from `tab%s` where parent=%s 
+				self.session.db.sql("""delete from `tab%s` where parent=%s 
 					and parenttype=%s""" % (dt['options'], '%s', '%s'),
 					(self.doc.name, self.doc.doctype))
 
 	def check_if_latest(self):
 		"""Raises exception if the modified time is not the same as in the database"""
-		if not (webnotes.model.is_single(self.doc.doctype) or \
+		if not (self.session.db.is_single(self.doc.doctype) or \
 				cint(self.doc.get('__islocal'))):
-			modified = webnotes.conn.sql("""select modified from `tab%s`
+			modified = self.session.db.sql("""select modified from `tab%s`
 				where name=%s for update""" % (self.doc.doctype, "%s"),
 				self.doc.name or "")
 			
 			if modified and get_datetime_str(modified[0].modified) != \
 					get_datetime_str(self.doc.modified):
-				webnotes.msgprint("""\
-					Document has been modified after you have opened it.
+				self.session.response.info(_("""Document has been modified after you have opened it.
 					To maintain the integrity of the data, you will not be able to save
-					your changes. Please refresh this document. FYI: [%s / %s]""" % \
-					(modified[0].modified, self.doc.modified),
+					your changes. Please refresh this document.)"""),
 					raise_exception=webnotes.IntegrityError)
 
 	def check_permission(self):
 		"""Raises exception if permission is not valid"""
 		# hail the administrator - nothing can stop you!
-		if webnotes.session["user"] == "Administrator":
+		if self.session.user == "Administrator":
 			return
 		
-		doctypelist = webnotes.model.get_doctype("DocType", self.doc.doctype)
+		doctypelist = self.session.get_doctype("DocType", self.doc.doctype)
 		if not hasattr(self, "user_roles"):
 			self.user_roles = webnotes.user and webnotes.user.get_roles() or ["Guest"]
 		if not hasattr(self, "user_defaults"):
@@ -201,12 +243,12 @@ class DocListController(object):
 				else:
 					# oops, illegal value
 					has_perm = False
-					webnotes.msgprint("""Value: "%s" is not allowed for field "%s" """ % \
+					self.session.response.info(_("""Value: "%s" is not allowed for field "%s" """) % \
 						(self.doc.get(match_field, "no_value"),
 						doctypelist.get_field(match_field).label))
 
 		if not has_perm:
-			webnotes.msgprint("""Not enough permissions to save %s: "%s" """ % \
+			self.session.response.info(_("""Not enough permissions to save %s: "%s" """) % \
 				(self.doc.doctype, self.doc.name), raise_exception=webnotes.PermissionError)
 
 	def check_links(self):
@@ -215,16 +257,16 @@ class DocListController(object):
 		link_fields = {}
 		error_list = []
 		for doc in self.doclist:
-			for lf in link_fields.setdefault(doc.doctype, get_link_fields(doc.doctype)):
+			for lf in link_fields.setdefault(doc.doctype, get_link_fields(self.session, doc.doctype)):
 				options = (lf.options or "").split("\n")[0].strip()
 				options = options.startswith("link:") and options[5:] or options
 				if doc.get(lf.fieldname) and options and \
-						not webnotes.conn.exists(options, doc[lf.fieldname]):
+						not self.session.db.exists(options, doc[lf.fieldname]):
 					error_list.append((options, doc[lf.fieldname], lf.label))
 
 		if error_list:
-			webnotes.msgprint("""The following values do not exist in the database: %s.
-				Please correct these values and try to save again.""" % \
+			self.session.response.info(_("""The following values do not exist in the database: %s.
+				Please correct these values and try to save again.""") % \
 				comma_and(["%s: \"%s\" (specified in field: %s)" % err for err in error_list]),
 				raise_exception=webnotes.InvalidLinkError)
 
@@ -232,26 +274,26 @@ class DocListController(object):
 		"""check if all required fields have value"""
 		reqd = []
 		for doc in self.doclist:
-			for df in webnotes.model.get_doctype(doc.doctype).get({
+			for df in self.session.get_doctype(doc.doctype).get({
 					"parent": doc.doctype, "doctype": "DocField", "reqd": 1}):
 				if doc.get(df.fieldname) is None:
 					reqd.append("""\"%s\" is a Mandatory field [in %s%s]""" % \
 						(df.label, df.parent, doc.idx and " - %d" % doc.idx or ""))
 		if reqd:
-			webnotes.msgprint("In %s - %s\n" % (self.doc.doctype, self.doc.name or "") +
+			self.session.response.info(_("In") + " %s - %s\n" % (self.doc.doctype, self.doc.name or "") +
 				"\n".join(reqd),
 				raise_exception=webnotes.MandatoryError)
 
-	def update_metadata(self):
+	def update_timestamps(self):
 		"""Update owner, creation, modified_by, modified, docstatus"""
-		ts = get_datetime(now_datetime())
+		ts = get_datetime(now_datetime(self.session))
 
 		for d in self.doclist:
 			if self.doc.get('__islocal'):
-				d.owner = webnotes.session["user"]
+				d.owner = self.session.user
 				d.creation = ts
 
-			d.modified_by = webnotes.session["user"]
+			d.modified_by = self.session.user
 			d.modified = ts
 
 	def doctype_validate(self):
@@ -288,7 +330,7 @@ class DocListController(object):
 	def export(self):
 		"""export current doc to file system"""
 		import conf
-		if (getattr(conf,'developer_mode', 0) and not getattr(webnotes, 'syncing', False)
+		if (getattr(conf,'developer_mode', 0) and not getattr(self.session, 'syncing', False)
 				and not getattr(webnotes, "testing", False)):
 			from webnotes.modules.export import export_to_files
 			export_to_files(record_list=self.doclist)
@@ -296,9 +338,9 @@ class DocListController(object):
 	def set_as_default(self, filters=None):
 		"""sets is_default to 0 in rest of the related documents"""
 		if self.doc.is_default:
-			conditions, filters = webnotes.conn.build_conditions(filters)
+			conditions, filters = self.session.db.build_conditions(filters)
 			filters.update({"name": self.doc.name})
-			webnotes.conn.sql("""update `tab%s` set `is_default`=0
+			self.session.db.sql("""update `tab%s` set `is_default`=0
 				where %s and name!=%s""" % (self.doc.doctype, conditions, "%(name)s"),
 				filters)
 				
@@ -306,7 +348,7 @@ class DocListController(object):
 		"""set's default values in doclist"""
 		import webnotes.model.utils
 		for doc in self.doclist:
-			for df in webnotes.model.get_doctype(doc.doctype).get({
+			for df in self.session.get_doctype(doc.doctype).get({
 					"parent": doc.doctype, "doctype": "DocField"}):
 				if doc.get(df.fieldname) in [None, ""] and df.default:
 					doc[df.fieldname] = cast(df, df.default)
@@ -326,7 +368,7 @@ class DocListController(object):
 			from webnotes.utils import file_manager
 			fn, content = file_manager.get_file(fid)
 		except Exception, e:
-			webnotes.msgprint("Unable to open attached file. Please try again.")
+			self.session.response.info(_("Unable to open attached file. Please try again."))
 			raise e
 
 		# convert char to string (?)

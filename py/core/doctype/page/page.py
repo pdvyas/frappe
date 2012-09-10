@@ -20,7 +20,6 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
 
-from __future__ import unicode_literals
 import webnotes
 import webnotes.model
 from webnotes.model.controller import DocListController
@@ -36,8 +35,8 @@ class PageController(DocListController):
 		if (self.doc.name and self.doc.name.startswith('New Page')) or not self.doc.name:
 			self.doc.name = self.doc.page_name.lower().replace('"','').replace("'",'').\
 				replace(' ', '-')[:20]
-			if webnotes.conn.exists('Page',self.doc.name):
-				cnt = webnotes.conn.sql("""select name from tabPage 
+			if self.session.db.exists('Page',self.doc.name):
+				cnt = self.session.db.sql("""select name from tabPage 
 					where name like "%s-%%" order by name desc limit 1""" % self.doc.name)
 				if cnt:
 					cnt = cint(cnt[0][0].split('-')[-1]) + 1
@@ -57,7 +56,7 @@ class PageController(DocListController):
 	def replace_by_img(self, match):
 		import webnotes
 		name = match.group('name')
-		return '<img src="cgi-bin/getfile.cgi?ac=%s&name=%s">' % (webnotes.conn.get('Control Panel', None, 'account_id'), name)
+		return '<img src="files/%s">' % name
 		
 	# export
 	def on_update(self):
@@ -66,7 +65,7 @@ class PageController(DocListController):
 			it will write out a .html file
 		"""
 		import conf
-		if not getattr(webnotes, 'syncing', False) and getattr(conf,'developer_mode', 0) \
+		if not getattr(self.session, 'syncing', False) and getattr(conf,'developer_mode', 0) \
 			and self.doc.standard=='Yes':
 			from webnotes.modules.export import export_to_files
 			from webnotes.modules import get_module_path, scrub
@@ -138,11 +137,10 @@ class PageController(DocListController):
 					
 				
 @webnotes.whitelist()
-def get():
+def get(session, page_name=None):
 	"""
 	   Return the :term:`doclist` of the `Page` specified by `name`
 	"""
-	from webnotes.model import get_controller
-	page = get_controller('Page', webnotes.form.page_name)
+	page = session.controller('Page', page_name or session.request.params.get('page_name'))
 	page.get_from_files()
 	return page.doclist

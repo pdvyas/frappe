@@ -20,7 +20,6 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
 
-from __future__ import unicode_literals
 """
 globals attached to webnotes module
 + some utility functions that should probably be moved
@@ -31,9 +30,13 @@ class DictObj(dict):
 	"""dict like object that exposes keys as attributes"""
 	def __getattr__(self, key):
 		return self.get(key)
-	
 	def __setattr__(self, key, value):
 		self[key] = value
+	def __getstate__(self): 
+		return self
+	def __setstate__(self, d): 
+		self.update(d)
+
 
 code_fields_dict = {
 	'Page':[('script', 'js'), ('content', 'html'), ('style', 'css'), ('static_content', 'html'), ('server_code', 'py')],
@@ -48,7 +51,6 @@ code_fields_dict = {
 # globals
 auto_cache_clear = False
 auth_obj = None
-conn = None
 session = None
 user = None
 catch_warning = False
@@ -130,7 +132,7 @@ def msgprint(msg, small=0, raise_exception=0, as_table=False, debug=0):
 		else:
 			raise ValidationError, msg
 
-def getTraceback():
+def traceback():
 	import webnotes.utils
 	return webnotes.utils.getTraceback()
 	
@@ -170,11 +172,9 @@ def connect(db_name=None, password=None):
 	"""
 		Connect to this db (or db), if called from command prompt
 	"""
-	import webnotes.db
 	global conn
-	if conn:
-		conn.close()
-	conn = webnotes.db.Database(user=db_name, password=password)
+	import webnotes.db
+	conn = webnotes.db.Database(db_name, password)
 	
 	global session
 	session = {'user':'Administrator'}
@@ -217,47 +217,16 @@ def whitelist(allow_guest=False, allow_roles=[]):
 	
 	for specific roles, set allow_roles = ['Administrator'] etc.
 	"""
-	def innerfn(fn):
+	def inner(fn):	
 		global whitelisted
-		import webnotes
-				
-		if webnotes.session:
-		 	if webnotes.session['user']=='Guest':
-				# only methods explicitly flagged as "allow_guest"
-				# to be added if user is "Guest"
-				if allow_guest:
-					whitelisted.append(fn)
-			elif allow_roles:
-				# if specific roles are mentioned,
-				# add to whitelist only if user has that role
-				roles = get_roles()
-				for role in allow_roles:
-					if role in roles:
-						whitelisted.append(fn)
-						break
-			else:
-				whitelisted.append(fn)
-		
+		whitelisted.append(DictObj({
+			"function": fn,
+			"allow_guest": allow_guest,
+			"allow_roles": allow_roles
+		}))
 		return fn
-		
-	return innerfn
 	
-def get_roles(user=None, with_standard=True):
-	"""get roles of current user"""
-	if not user:
-		user = session['user']
-
-	if user=='Guest':
-		return ['Guest']
-		
-	roles = [r.role for r in conn.sql("""select role from tabUserRole 
-		where parent=%s and role!='All'""", user)] + ['All']
-		
-	# filter standard if required
-	if not with_standard:
-		roles = filter(lambda x: x not in ['All', 'Guest', 'Administrator'], roles)
-	
-	return roles
+	return inner
 
 def json_handler(obj):
 	"""serialize non-serializable data for json"""
