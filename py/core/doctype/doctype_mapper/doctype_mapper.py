@@ -152,7 +152,7 @@ def get_mapper_list(from_doctype, to_doctype=None):
 	mapper_list = webnotes.conn.sql("""select name from `tabDocType Mapper`
 		where %s and (ifnull(is_custom, 0) = 0 or ifnull(is_default, 0) = 1)
 		order by is_custom asc, is_default desc""" % condition, 
-		(from_doctype, to_doctype))
+		to_doctype and (from_doctype, to_doctype) or (from_doctype, ))
 
 	return mapper_list
 
@@ -205,7 +205,7 @@ def validate_prev_doclist(from_doctype, to_doctype, to_doclist):
 		webnotes.msgprint("""DocType Mapper not found for mapping 
 			"%s" to "%s" """ % (from_doctype, to_doctype), raise_exception=NameError)
 	
-	condition_dict = get_conditions(mapper)
+	condition_dict = get_conditions(mapper_list)
 	mapper_doclist = webnotes.model.get("DocType Mapper", mapper_list[0]["name"])
 	
 	prev_doclist_cache = {}
@@ -235,7 +235,7 @@ def validate_prev_doclist(from_doctype, to_doctype, to_doclist):
 
 	def validate_prev_children(prev_children, child, match_id):
 		ref_detail_field = scrub(prev_children[0].doctype)
-		prev_child = prev_children.get({"name": child.get(ref_detail_field)})
+		prev_child = prev_children.getone({"name": child.get(ref_detail_field)})
 		if not prev_child:
 			msgprint(_("""Equivalent entry of row # %(row)s does not exist in
 				%(prev_parenttype)s: "%(prev_parent)s" """) % {
@@ -272,14 +272,13 @@ def validate_prev_doclist(from_doctype, to_doctype, to_doclist):
 		if mapping.from_field and mapping.to_field:
 			# if condition exists for given match id
 			if any((c.startswith(cstr(mapping.match_id)) for c in condition_dict)):
-				
 				# loop through children and check parent and child values
 				for child in to_doclist.get({"parentfield": mapping.to_field}):
 					if child.get(ref_field):
 						prev_doclist = get_prev_doclist(child.get(ref_field))
 						
 						validate_prev_parent(prev_doclist[0], to_doclist[0])
-						
+											
 						validate_prev_children(prev_doclist.get({
 							"parentfield": mapping.from_field}), child, mapping.match_id)
 
@@ -294,32 +293,31 @@ def is_next_submitted(from_doctype, from_docname):
 	msg_list = []
 	
 	for mapper in mapper_list:
-		mapper_doclist = webnotes.model.get("DocType Mapper", mapper)
+		mapper_doclist = webnotes.model.get("DocType Mapper", mapper.name)
 		to_doctype = mapper_doclist[0].to_doctype
 		to_doctypelist = webnotes.model.get_doctype(to_doctype)
-		
 		for mapping in mapper_doclist.get({"parentfield": "table_mapper_details"}):
 			if mapping.to_table not in checked and to_doctypelist.get(
 					{"doctype": "DocField", "parent": mapping.to_table,
-					"fieldname": scrub(mapper.from_doctype)}):
+					"fieldname": scrub(from_doctype)}):
 				exists = webnotes.conn.sql("""select distinct parent from `tab%s` 
 					where docstatus=1 and `%s`=%s""" % (mapping.to_table,
-					scrub(mapper.from_doctype), "%s"), (from_docname, ))
+					scrub(from_doctype), "%s"), (from_docname, ))
 				if exists:
-				# store a message for given to doc
-				msg_list.append(_("""Submitted %(to_doctype)s: "%(to_docname)s" 
-					exists against %(from_doctype)s: "%(from_docname)s" """) % \
-					{
-						"to_doctype": _(to_doctype),
-						"to_docname": '", "'.join((e["parent"] for e in exists)),
-						"from_doctype": from_doctype,
-						"from_docname": from_docname,
-					})
+					# store a message for given to doc
+					msg_list.append(_("""Submitted %(to_doctype)s: "%(to_docname)s" 
+						exists against %(from_doctype)s: "%(from_docname)s" """) % \
+						{
+							"to_doctype": _(to_doctype),
+							"to_docname": '", "'.join((e["parent"] for e in exists)),
+							"from_doctype": from_doctype,
+							"from_docname": from_docname,
+						})
 				
-				# since we have custom mappers, we don't want to check twice
-				checked.append(mapping.to_table)
+					# since we have custom mappers, we don't want to check twice
+					checked.append(mapping.to_table)
 				
-				# found - so just break
-				break
+					# found - so just break
+					break
 	
 	msgprint("""%s""" % "<br>".join(msg_list), raise_exception=webnotes.IntegrityError)

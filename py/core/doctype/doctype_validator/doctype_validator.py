@@ -22,6 +22,7 @@
 
 from __future__ import unicode_literals
 from webnotes.model.controller import DocListController
+from webnotes.utils import getdate
 
 def validate(controller):
 	"""validate doctype based on DocType Validator"""
@@ -101,6 +102,11 @@ def check(val1, condition, val2):
 			* val1 is the actual value
 			* val2 is the one saved in filter
 	"""
+	import datetime
+	if isinstance(val1, datetime.date) or isinstance(val2, datetime.date):
+		val1 = getdate(val1)
+		val2 = getdate(val2)
+	
 	if condition == 'in':
 		return val1 in [v.strip() for v in val2.split(",")]
 	elif condition == 'Begins With':
