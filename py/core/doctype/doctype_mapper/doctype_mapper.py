@@ -154,13 +154,14 @@ def get_mapper_list(from_doctype, to_doctype=None):
 		order by is_custom asc, is_default desc""" % condition, 
 		(from_doctype, to_doctype))
 
-	if not mapper_list:
-		webnotes.msgprint("""DocType Mapper not found for mapping 
-			"%s" to "%s" """ % (from_doctype, to_doctype), raise_exception=NameError)
 	return mapper_list
 
 def map_doc(from_doctype, to_doctype, from_docname):
 	mapper_list = get_mapper_list(from_doctype, to_doctype)
+	if not mapper_list:
+		webnotes.msgprint("""DocType Mapper not found for mapping 
+			"%s" to "%s" """ % (from_doctype, to_doctype), raise_exception=NameError)
+	
 	from_doclist, newcon = from_docname, None
 	for mapper in mapper_list:
 		from_doclist, newcon = webnotes.model.get_controller("DocType Mapper",
@@ -200,6 +201,10 @@ def validate_prev_doclist(from_doctype, to_doctype, to_doclist):
 	from webnotes.modules import scrub
 	
 	mapper_list = get_mapper_list(from_doctype, to_doctype)
+	if not mapper_list:
+		webnotes.msgprint("""DocType Mapper not found for mapping 
+			"%s" to "%s" """ % (from_doctype, to_doctype), raise_exception=NameError)
+	
 	condition_dict = get_conditions(mapper)
 	mapper_doclist = webnotes.model.get("DocType Mapper", mapper_list[0]["name"])
 	
@@ -283,6 +288,8 @@ def is_next_submitted(from_doctype, from_docname):
 		mapped doctype"""
 	from webnotes.modules import scrub
 	mapper_list = get_mapper_list(from_doctype)
+	if not mapper_list: return
+	
 	checked = []
 	msg_list = []
 	
