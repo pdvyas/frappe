@@ -24,7 +24,7 @@
 
 import os, sys
 
-def replace_code(start, txt1, txt2, extn, search=None):
+def replace_code(start, txt1, txt2, extn, search=None, force=False):
 	"""replace all txt1 by txt2 in files with extension (extn)"""
 	import webnotes.utils
 	import os, re
@@ -38,11 +38,11 @@ def replace_code(start, txt1, txt2, extn, search=None):
 					content = f.read()
 			
 				if re.search(search, content):
-					res = search_replace_with_prompt(fpath, txt1, txt2)
+					res = search_replace_with_prompt(fpath, txt1, txt2, force)
 					if res == 'skip':
 						return 'skip'
 
-def search_replace_with_prompt(fpath, txt1, txt2):
+def search_replace_with_prompt(fpath, txt1, txt2, force):
 	""" Search and replace all txt1 by txt2 in the file with confirmation"""
 	import re
 
@@ -55,18 +55,22 @@ def search_replace_with_prompt(fpath, txt1, txt2):
 	for c in content:
 		match = re.search(txt1, c)
 		if match:
-			print fpath
-			print colored(match.group(), 'red').join(c[:-1].split(match.group()))
-			a = ''
-			while a.lower() not in ['y', 'n', 'skip']:
-				a = raw_input('Do you want to Change [y/n/skip]?')
-			if a.lower() == 'y':
+			if force:
 				c = re.sub(txt1, txt2, c)
-				changed = True
-			elif a.lower() == 'skip':
-				return 'skip'
+				changed = True			
 			else:
-				continue
+				print fpath
+				print colored(match.group(), 'red').join(c[:-1].split(match.group()))
+				a = ''
+				while a.lower() not in ['y', 'n', 'skip']:
+					a = raw_input('Do you want to Change [y/n/skip]?')
+				if a.lower() == 'y':
+					c = re.sub(txt1, txt2, c)
+					changed = True
+				elif a.lower() == 'skip':
+					return 'skip'
+				else:
+					pass
 		tmp.append(c)
 
 	if changed:
@@ -276,7 +280,8 @@ def run():
 
 	# code replace
 	elif options.replace:
-		replace_code(options.replace[0], options.replace[1], options.replace[2], options.replace[3])
+		replace_code(options.replace[0], options.replace[1], options.replace[2], 
+			options.replace[3], force=options.force)
 			
 	# git
 	elif options.status:
@@ -359,8 +364,8 @@ def run():
 		cleanup_data.run()
 		
 	elif options.domain:
-		webnotes.conn.set_value('Website Settings', None, 'subdomain', options.domain)
-		webnotes.conn.commit()
+		session.db.set_value('Website Settings', None, 'subdomain', options.domain)
+		session.db.commit()
 		print "Domain set to", options.domain
 				
 	elif options.append_future_import:
@@ -401,7 +406,7 @@ def run():
 		import webnotes.model
 				
 		if options.test_export[1]=='*':
-			for d in webnotes.conn.sql("""select name from `tab%s`""" % options.test_export[0]):
+			for d in session.db.sql("""select name from `tab%s`""" % options.test_export[0]):
 				export_for_test(webnotes.model.get(options.test_export[0], d[0]))
 		else:
 			export_for_test(webnotes.model.get(options.test_export[0], options.test_export[1]))
@@ -411,14 +416,14 @@ def run():
 			fromlist = [options.run_method[0].split(".")[-1]])
 		if hasattr(module, options.run_method[1]):
 			try:
-				webnotes.conn.begin()
+				session.db.begin()
 				getattr(module, options.run_method[1])()
-				webnotes.conn.commit()
+				session.db.commit()
 				print "executed method", options.run_method[1], "of", \
 					options.run_method[0]
 			except Exception, e:
 				print e
-				webnotes.conn.rollback()
+				session.db.rollback()
 				
 	elif options.build_message_files:
 		import webnotes.utils.translate

@@ -149,7 +149,7 @@ class Document(dict):
 			return
 
 		# call autoname method of controller
-		controller = session.controller([self], module=self.module or None)
+		controller = session.get_controller([self], module=self.module or None)
 		if hasattr(controller, "autoname"):
 			name = controller.autoname()
 			if name:

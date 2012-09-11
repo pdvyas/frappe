@@ -141,6 +141,6 @@ def get(session, page_name=None):
 	"""
 	   Return the :term:`doclist` of the `Page` specified by `name`
 	"""
-	page = session.controller('Page', page_name or session.request.params.get('page_name'))
+	page = session.get_controller('Page', page_name or session.request.params.get('page_name'))
 	page.get_from_files()
 	return page.doclist

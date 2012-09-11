@@ -31,22 +31,6 @@ def get_fieldnames(session, doctype, filters=None, additional_fields=None):
 	
 	filters.update({"fieldtype": ["not in", no_value_fields]})
 	return get_doctype(doctype).get_fieldnames(filters) + additional_fields
-	
-	
-def insert_variants(session, base, variants):
-	for v in variants:
-		base_copy = base.copy()
-		base_copy.update(v)
-		insert(session, base_copy)
-		
-def insert_test_data(session, doctype, sort_fn=None):
-	from webnotes.modules.export import get_test_doclist
-	data = get_test_doclist(doctype)
-	if sort_fn:
-		data = sorted(data, key=sort_fn)
-	
-	for doclist in data:
-		insert(session, doclist)
 
 def insert_child(fields):
 	"""insert a child, must specify parent, parenttype and doctype"""

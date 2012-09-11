@@ -62,7 +62,7 @@ def save(session):
 	"""insert doclist"""
 	import json
 	
-	c = session.controller(json.loads(session.request.params('docs')))
+	c = session.get_controller(json.loads(session.request.params('docs')))
 	c.save()
 	session.json['docs'] = c.doclist
 
@@ -72,9 +72,9 @@ def delete(session):
 	import json
 
 	if 'docs' in session.request.params:
-		c = session.controller(json.loads(session.request.params('docs')))
+		c = session.get_controller(json.loads(session.request.params('docs')))
 	else:
-		c = session.controller(session.request.params.get('doctype'), 
+		c = session.get_controller(session.request.params.get('doctype'), 
 			session.request.params.get('name'))
 		
 	#c.delete()
@@ -84,7 +84,7 @@ def update_value(session):
 	"""update a single value"""
 	from webnotes.utils import remove_nulls
 	
-	obj = session.controller(session.request.params.get('doctype'), 
+	obj = session.get_controller(session.request.params.get('doctype'), 
 		session.request.params.get('doctype') or session.request.params.get('name'))
 	if session.request.params.get('parent'):
 		doc = obj.doclist.get({ "name": session.request.params.get('name') })[0]

@@ -94,7 +94,7 @@ class Session:
 		"""login or guest"""
 		if self.request.params.get('cmd')=='login':
 			try:
-				profile = self.controller("Profile", self.request.params.get("user"))
+				profile = self.get_controller("Profile", self.request.params.get("user"))
 				if profile.authenticate(self.request.params.get("password")):
 					self.user = profile.doc.get('name')
 					self.write('Logged In')
@@ -133,8 +133,8 @@ class Session:
 			return True
 		else:
 			return False
-					
-	def controller(self, doctype, name=None, module=None):
+
+	def get_controller(self, doctype, name=None, module=None):
 		import webnotes.model.controller
 		return webnotes.model.controller.get(self, doctype, name, module)
 
@@ -148,7 +148,7 @@ class Session:
 		return doclist
 		
 	def get_doclist(self, doctype, name=None, strip_nulls=False):
-		doclist = self.controller(doctype, name).doclist
+		doclist = self.get_controller(doctype, name).doclist
 		if strip_nulls:
 			[remove_nulls(d) for d in doclist]
 		return doclist
@@ -158,7 +158,7 @@ class Session:
 		if doclist and isinstance(doclist, dict):
 			doclist = [doclist]
 
-		con = self.controller(doclist)
+		con = self.get_controller(doclist)
 		for d in con.doclist:
 			d["__islocal"] = 1
 		con.save()
@@ -171,7 +171,7 @@ class Session:
 		if doclist and isinstance(doclist, dict):
 			doclist = [doclist]
 
-		con = self.controller(doclist[0]["doctype"], doclist[0]["name"])
+		con = self.get_controller(doclist[0]["doctype"], doclist[0]["name"])
 		existing_names = map(lambda d: d.name, con.doclist)
 
 		for d in doclist:
@@ -187,6 +187,20 @@ class Session:
 
 		return con		
 		
+	def insert_variants(self, base, variants):
+		for v in variants:
+			base_copy = base.copy()
+			base_copy.update(v)
+			self.insert(base_copy)
+		
+	def insert_test_data(self, doctype, sort_fn=None):
+		from webnotes.modules.export import get_test_doclist
+		data = get_test_doclist(doctype)
+		if sort_fn:
+			data = sorted(data, key=sort_fn)
+		for doclist in data:
+			self.insert(doclist)
+		
 	def load_bootinfo(self):
 		"""build and return boot info"""
 		from webnotes.utils import remove_nulls
@@ -197,7 +211,7 @@ class Session:
 
 		self.db.begin()
 		# profile
-		self.profile = self.controller('Profile', self.user)
+		self.profile = self.get_controller('Profile', self.user)
 		self.bootinfo.profile = self.profile.load_profile()
 		self.load_control_panel()
 		self.bootinfo.sysdefaults = self.db.get_defaults()

@@ -42,11 +42,6 @@ def get(session, doctype, name=None, module=None):
 	doclist = doctype
 	if isinstance(doctype, list):
 		doctype = doclist[0]["doctype"]
-		name = doclist[0].get("name")
-		
-	# single name=doctype
-	if not name and doctype:
-		name = doctype
 	
 	# return if already loaded
 	if doctype not in session.controllers:
