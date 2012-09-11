@@ -61,7 +61,7 @@ wn.ui.Form = Class.extend({
 		if(this.fields[0].fieldtype!='Section Break') {
 			me.make_fieldset('_first_section');
 		}
-				
+		
 		// controls
 		$.each(this.fields, function(i, df) {
 			// change section

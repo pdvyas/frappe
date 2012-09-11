@@ -31,6 +31,7 @@
 # ------------------------------------------
 
 import webnotes, unittest
+from webnotes import _, msgprint
 
 class TestNSM(unittest.TestCase):
 	
@@ -259,4 +260,14 @@ class NestedSetController(DocListController):
 		update_nsm(self)
 		
 	def on_trash(self):
+		self.validate_before_trash()
 		update_remove_node(self.doc.doctype, self.doc.name)
+
+	def validate_before_trash(self):
+		if not self.doc.parent_account:
+			msgprint(_("Root %s can not be deleted" % self.doc.doctype), 
+				raise_exception=webnotes.ValidationError)
+		elif webnotes.conn.exists(self.doc.doctype, {self.nsm_parent_field: self.doc.name}):
+			msgprint(_("Child %s exists for this %s. You can not trash this." % 
+				(self.doc.doctype, self.doc.doctype)), 
+				raise_exception=webnotes.ValidationError)

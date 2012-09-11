@@ -111,13 +111,13 @@ wn.ui.Control = Class.extend({
 			var val = this.validate(val);
 		}
 		if(this.doc) {
-			this.doc.set(this.docfield.fieldname, val);					
+			this.doc.set(this.docfield.fieldname, val);
 		}
 		this.set_static(val);
 	},
 	get_doc_val: function() {
 		if(this.doc && this.docfield.fieldname) {
-			return this.doc.get(this.doc.fieldname);
+			return this.doc.get(this.docfield.fieldname);
 		}
 	},
 	set_events: function() {

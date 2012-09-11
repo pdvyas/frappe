@@ -31,6 +31,10 @@ def get_fieldnames(session, doctype, filters=None, additional_fields=None):
 	
 	filters.update({"fieldtype": ["not in", no_value_fields]})
 	return get_doctype(doctype).get_fieldnames(filters) + additional_fields
+	
+def get_label(doctype, fieldname, parent=None, parentfield=None):
+	doctypelist = get_doctype(doctype)
+	return doctypelist.get_label(fieldname, parent, parentfield)
 
 def insert_child(fields):
 	"""insert a child, must specify parent, parenttype and doctype"""

@@ -104,8 +104,11 @@ wn.datetime = {
 		var y = d.getFullYear();
 		
 		last_date = month_last[m];
-		if(m==2 && (y % 4)==0 && ((y % 100)!=0 || (y % 400)==0)) // leap year test
+		if(m==2 && (y % 4)==0 && ((y % 100)!=0 || (y % 400)==0)) {
+			// leap year test
 			last_date = 29;
+		}
+			
 		return y+'-'+int_to_str(m,2)+'-'+last_date;
 	},
 	
@@ -127,20 +130,21 @@ wn.datetime = {
 		var user_fmt = dateutil.get_user_fmt();
 		if(!val)return val;
 
-		[datestr, timestr] = dateutil.get_date_and_time_str(val);
+		dt = dateutil.get_date_and_time_str(val);
+		datestr = dt[0], timestr = dt[1];
 		
 		// set to user fmt
 		d = datestr.split('-');
 		if(d.length==3) {
-			if(user_fmt=='dd-mm-yyyy')
+			if(user_fmt==='dd-mm-yyyy')
 				val =  d[2]+'-'+d[1]+'-'+d[0];
-			else if(user_fmt=='dd/mm/yyyy')
+			else if(user_fmt==='dd/mm/yyyy')
 				val =  d[2]+'/'+d[1]+'/'+d[0];
-			else if(user_fmt=='yyyy-mm-dd')
+			else if(user_fmt==='yyyy-mm-dd')
 				val =  d[0]+'-'+d[1]+'-'+d[2];
-			else if(user_fmt=='mm/dd/yyyy')
+			else if(user_fmt==='mm/dd/yyyy')
 				val =  d[1]+'/'+d[2]+'/'+d[0];
-			else if(user_fmt=='mm-dd-yyyy')
+			else if(user_fmt==='mm-dd-yyyy')
 				val =  d[1]+'-'+d[2]+'-'+d[0];
 		}
 

@@ -70,14 +70,20 @@ wn.ui.SelectControl = wn.ui.Control.extend({
 	make_input: function() {
 		this.$input = $('<select>').appendTo(this.$w.find('.controls'));
 		if(this.docfield.options) {
-			this.$input.add_options(this.docfield.options.split('\n'));			
+			// loading trick! used when loading options programmatically
+			var options = this.docfield.options.split('\n');
+			if (options[0] === "loading") {
+				options = [""];
+			}
+			this.$input.add_options(options);
 		}
 	},
 	validate: function(val) {
 		// value must be of options
 		if(this.docfield.options) {
 			var options = this.docfield.options.split('\n');
-			if(!in_list(options, val)) {
+			// loading trick! used when loading options programmatically
+			if (options[0] !== "loading" && !in_list(options, val)) {
 				val = options[0];
 			}
 		}
@@ -89,6 +95,16 @@ wn.ui.SelectControl = wn.ui.Control.extend({
 		if(this.doc_initialized && (this.get_doc_val() != this.get())) {
 			this.set(this.get());
 		}
+	},
+	set_init_value: function() {
+		if(this.docfield.options) {
+			var options = this.docfield.options.split("\n");
+			// loading trick! used when loading options programmatically
+			if (options[0] === "loading" && this.$input.find("option").length === 1) {
+				return;
+			}
+		}
+		this._super();
 	}
 });
 

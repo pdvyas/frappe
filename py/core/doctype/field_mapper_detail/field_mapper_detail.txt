@@ -3,104 +3,145 @@
 
 	# These values are common in all dictionaries
 	{
-		u'creation': '2012-08-08 11:28:05',
+		u'creation': u'2012-08-08 11:28:05',
 		u'docstatus': 0,
-		u'modified': '2012-08-08 12:42:12',
+		u'modified': '2012-09-07 15:24:42',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': u'FMD/.#####',
-		'colour': u'White:FFF',
-		u'doctype': u'DocType',
-		'document_type': u'System',
-		'istable': 1,
-		'module': u'Core',
+		u'allow_attach': 0,
+		u'allow_copy': 0,
+		u'allow_email': 0,
+		u'allow_print': 0,
+		u'allow_rename': 0,
+		u'autoname': u'FMD/.#####',
+		u'colour': u'White:FFF',
+		u'default_print_format': u'',
+		u'description': u'',
+		u'docstatus_labels': u'',
+		'doctype': u'DocType',
+		u'document_type': u'System',
+		u'hide_heading': 0,
+		u'hide_toolbar': 0,
+		u'in_create': 0,
+		u'in_dialog': 0,
+		u'is_submittable': 0,
+		u'issingle': 0,
+		u'istable': 1,
+		u'max_attachments': 0,
+		u'module': u'Core',
 		u'name': u'__common__',
-		'section_style': u'Tray',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'version': 1
+		u'name_case': u'',
+		u'read_only': 0,
+		u'read_only_onload': 0,
+		u'search_fields': u'',
+		u'section_style': u'Tray',
+		u'server_code_error': u' ',
+		u'show_in_menu': 0,
+		u'version': 1
 	},
 
 	# These values are common for all DocField
 	{
-		u'doctype': u'DocField',
+		'doctype': u'DocField',
 		u'name': u'__common__',
-		'parent': u'Field Mapper Detail',
-		'parentfield': u'fields',
-		'parenttype': u'DocType',
-		'permlevel': 0
+		u'parent': u'Field Mapper Detail',
+		u'parentfield': u'fields',
+		u'parenttype': u'DocType',
+		u'permlevel': 0
 	},
 
 	# DocType, Field Mapper Detail
 	{
 		u'doctype': u'DocType',
-		u'name': u'Field Mapper Detail'
+		'name': u'Field Mapper Detail'
 	},
 
 	# DocField
 	{
-		'default': u'0',
+		u'default': u'0',
 		u'doctype': u'DocField',
-		'fieldname': u'match_id',
-		'fieldtype': u'Int',
-		'label': u'Match Id',
-		'oldfieldname': u'match_id',
-		'oldfieldtype': u'Int',
-		'reqd': 1,
-		'width': u'50px'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'from_field',
-		'fieldtype': u'Data',
-		'label': u'From Field',
-		'oldfieldname': u'from_field',
-		'oldfieldtype': u'Data',
-		'reqd': 1,
-		'width': u'180px'
+		u'fieldname': u'match_id',
+		u'fieldtype': u'Int',
+		u'label': u'Match Id',
+		u'oldfieldname': u'match_id',
+		u'oldfieldtype': u'Int',
+		u'reqd': 1,
+		u'width': u'50px'
 	},
 
 	# DocField
 	{
 		u'doctype': u'DocField',
-		'fieldname': u'to_field',
-		'fieldtype': u'Data',
-		'label': u'To Field',
-		'oldfieldname': u'to_field',
-		'oldfieldtype': u'Data',
-		'reqd': 1,
-		'width': u'180px'
-	},
-
-	# DocField
-	{
-		'default': u'Yes',
-		u'doctype': u'DocField',
-		'fieldname': u'map',
-		'fieldtype': u'Select',
-		'label': u'Map',
-		'oldfieldname': u'map',
-		'oldfieldtype': u'Select',
-		'options': u'Yes\nNo',
-		'reqd': 1,
-		'width': u'50px'
+		u'fieldname': u'from_field',
+		u'fieldtype': u'Data',
+		u'label': u'From Field',
+		u'oldfieldname': u'from_field',
+		u'oldfieldtype': u'Data',
+		u'reqd': 1,
+		u'width': u'180px'
 	},
 
 	# DocField
 	{
 		u'doctype': u'DocField',
-		'fieldname': u'checking_operator',
-		'fieldtype': u'Select',
-		'label': u'Checking Operator (To Fld, Operator, From Fld)',
-		'oldfieldname': u'checking_operator',
-		'oldfieldtype': u'Select',
-		'options': u'\n=\n>\n>=\n<\n<=',
-		'width': u'180px'
+		u'fieldname': u'to_field',
+		u'fieldtype': u'Data',
+		u'label': u'To Field',
+		u'oldfieldname': u'to_field',
+		u'oldfieldtype': u'Data',
+		u'reqd': 1,
+		u'width': u'180px'
+	},
+
+	# DocField
+	{
+		u'allow_on_submit': 0,
+		u'default': u'1',
+		u'depends_on': u'',
+		u'description': u'',
+		u'doctype': u'DocField',
+		u'fieldname': u'map',
+		u'fieldtype': u'Check',
+		u'hidden': 0,
+		u'in_filter': 0,
+		u'label': u'Map',
+		u'no_copy': 0,
+		u'oldfieldname': u'map',
+		u'oldfieldtype': u'Select',
+		u'options': u'',
+		u'print_hide': 0,
+		u'report_hide': 0,
+		u'reqd': 1,
+		u'search_index': 0,
+		u'unique': 0,
+		u'width': u'50px'
+	},
+
+	# DocField
+	{
+		u'allow_on_submit': 0,
+		u'default': u'',
+		u'depends_on': u'',
+		u'description': u'',
+		u'doctype': u'DocField',
+		u'fieldname': u'condition',
+		u'fieldtype': u'Select',
+		u'hidden': 0,
+		u'in_filter': 0,
+		u'label': u'Condition (To Fld, Operator, From Fld)',
+		u'no_copy': 0,
+		u'oldfieldname': u'checking_operator',
+		u'oldfieldtype': u'Select',
+		u'options': u'\n=\n>\n>=\n<\n<=',
+		u'print_hide': 0,
+		u'report_hide': 0,
+		u'reqd': 0,
+		u'search_index': 0,
+		u'unique': 0,
+		u'width': u'180px'
 	}
 ]

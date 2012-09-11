@@ -5,7 +5,7 @@
 	{
 		u'creation': u'2012-07-31 11:10:43',
 		u'docstatus': 0,
-		u'modified': '2012-09-05 15:18:06',
+		u'modified': '2012-09-06 18:48:28',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -88,7 +88,7 @@
 		u'no_copy': 0,
 		u'oldfieldname': u'',
 		u'oldfieldtype': u'',
-		u'options': u'',
+		u'options': u'loading',
 		u'print_hide': 0,
 		u'report_hide': 0,
 		u'reqd': 0,
@@ -148,7 +148,7 @@
 		u'no_copy': 0,
 		u'oldfieldname': u'',
 		u'oldfieldtype': u'',
-		u'options': u'',
+		u'options': u'loading',
 		u'print_hide': 0,
 		u'report_hide': 0,
 		u'reqd': 0,

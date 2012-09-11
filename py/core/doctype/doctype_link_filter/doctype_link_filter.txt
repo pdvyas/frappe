@@ -3,82 +3,116 @@
 
 	# These values are common in all dictionaries
 	{
-		u'creation': '2012-07-27 15:05:22',
+		u'creation': u'2012-07-31 11:10:43',
 		u'docstatus': 0,
-		u'modified': '2012-07-27 16:42:46',
+		u'modified': '2012-09-06 19:07:01',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'description': u'Filters for Link Fields',
-		u'doctype': u'DocType',
-		'document_type': u'System',
-		'istable': 1,
-		'module': u'Core',
+		u'allow_attach': 0,
+		u'allow_copy': 0,
+		u'allow_email': 0,
+		u'allow_print': 0,
+		u'allow_rename': 0,
+		u'autoname': u'',
+		u'default_print_format': u'',
+		u'description': u'Filters for Link Fields',
+		u'docstatus_labels': u'',
+		'doctype': u'DocType',
+		u'document_type': u'System',
+		u'hide_heading': 0,
+		u'hide_toolbar': 0,
+		u'in_create': 0,
+		u'in_dialog': 0,
+		u'is_submittable': 0,
+		u'issingle': 0,
+		u'istable': 1,
+		u'max_attachments': u'',
+		u'module': u'Core',
 		u'name': u'__common__',
-		'version': 1
+		u'name_case': u'',
+		u'read_only': 0,
+		u'read_only_onload': 0,
+		u'search_fields': u'',
+		u'version': 1
 	},
 
 	# These values are common for all DocField
 	{
-		u'doctype': u'DocField',
+		'doctype': u'DocField',
 		u'name': u'__common__',
-		'parent': u'DocType Link Filter',
-		'parentfield': u'fields',
-		'parenttype': u'DocType',
-		'permlevel': 0
+		u'parent': u'DocType Link Filter',
+		u'parentfield': u'fields',
+		u'parenttype': u'DocType',
+		u'permlevel': 0
 	},
 
 	# DocType, DocType Link Filter
 	{
 		u'doctype': u'DocType',
-		u'name': u'DocType Link Filter'
+		'name': u'DocType Link Filter'
 	},
 
 	# DocField
 	{
 		u'doctype': u'DocField',
-		'fieldname': u'table_field',
-		'fieldtype': u'Select',
-		'label': u'Table Field'
+		u'fieldname': u'table_field',
+		u'fieldtype': u'Select',
+		u'label': u'Table Field'
 	},
 
 	# DocField
 	{
 		u'doctype': u'DocField',
-		'fieldname': u'link_field',
-		'fieldtype': u'Select',
-		'label': u'Link Field',
-		'reqd': 1
+		u'fieldname': u'link_field',
+		u'fieldtype': u'Select',
+		u'label': u'Link Field',
+		u'reqd': 1
+	},
+
+	# DocField
+	{
+		u'allow_on_submit': 0,
+		u'default': u'',
+		u'depends_on': u'',
+		u'description': u'',
+		u'doctype': u'DocField',
+		u'fieldname': u'fieldname',
+		u'fieldtype': u'Select',
+		u'hidden': 0,
+		u'in_filter': 0,
+		u'label': u'Fieldname',
+		u'no_copy': 0,
+		u'oldfieldname': u'',
+		u'oldfieldtype': u'',
+		u'options': u'loading',
+		u'print_hide': 0,
+		u'report_hide': 0,
+		u'reqd': 1,
+		u'search_index': 0,
+		u'unique': 0,
+		u'width': u''
 	},
 
 	# DocField
 	{
 		u'doctype': u'DocField',
-		'fieldname': u'fieldname',
-		'fieldtype': u'Select',
-		'label': u'Fieldname',
-		'reqd': 1
+		u'fieldname': u'condition',
+		u'fieldtype': u'Select',
+		u'label': u'Condition',
+		u'options': u'=\nin\n>\n<\n!=\n>=\n<=\nBegins With',
+		u'reqd': 1
 	},
 
 	# DocField
 	{
 		u'doctype': u'DocField',
-		'fieldname': u'condition',
-		'fieldtype': u'Select',
-		'label': u'Condition',
-		'options': u'=\nin\n>\n<\n!=\n>=\n<=\nBegins With',
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'value',
-		'fieldtype': u'Data',
-		'label': u'Value',
-		'reqd': 1
+		u'fieldname': u'value',
+		u'fieldtype': u'Data',
+		u'label': u'Value',
+		u'reqd': 1
 	}
 ]

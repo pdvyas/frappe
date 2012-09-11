@@ -67,7 +67,7 @@ wn.model.Document = Class.extend({
 		var new_val = this.convert_type(key, val);
 		if(this.fields[key] !== new_val) {
 			this.fields[key] = new_val;
-			this.trigger_change_event(key)
+			this.trigger_change_event(key);
 		}
 	},
 	trigger_change_event: function(key) {
