@@ -173,10 +173,10 @@ def rebuild_tree(session, doctype, parent_field):
 	# get all roots
 	right = 1
 	result = session.db.sql("SELECT name FROM `tab%s` WHERE `%s`='' or `%s` IS NULL ORDER BY name ASC" % (doctype, parent_field, parent_field), as_dict=False)
+	session.db.auto_commit_on_many_writes = True
 	for r in result:
 		right = rebuild_node(doctype, r[0], right, parent_field)
-		session.db.sql("commit")
-		session.db.sql("start transaction")
+	session.db.auto_commit_on_many_writes = False
 		
 def rebuild_node(session, doctype, parent, left, parent_field, cnt = 0):
 	"""

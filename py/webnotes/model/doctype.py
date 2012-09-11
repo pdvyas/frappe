@@ -211,7 +211,7 @@ def to_cache(session, doctype, processed, doclist):
 
 def cache_name(doctype, processed):
 	"""returns cache key"""
-	return doctype + (not processed and ":Raw" or "")
+	return "doctype:" + doctype + (not processed and ":Raw" or "")
 
 def clear_cache(session, doctype):
 	global doctype_cache

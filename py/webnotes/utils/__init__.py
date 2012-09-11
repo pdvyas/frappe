@@ -28,12 +28,12 @@ user_format = None
 no_value_fields = ['Section Break', 'Column Break', 'HTML', 'Table', 'FlexTable', 'Button', 'Image', 'Graph']
 default_fields = ['doctype','name','owner','creation','modified','modified_by','parent','parentfield','parenttype','idx','docstatus']
 
-def get_fullname(profile):
+def get_fullname(session, profile):
 	"""get the full name (first name + last name) of the user from Profile"""
-	p = webnotes.conn.sql("""select first_name, last_name from `tabProfile`
-		where name=%s""", profile, as_dict=1)
+	p = session.db.sql("""select first_name, last_name from `tabProfile`
+		where name=%s""", profile)
 	if p:
-		profile = " ".join([p[0]["first_name"] or "", p[0]["last_name"] or ""]) or profile
+		profile = " ".join(filter(None, [p[0].first_name, p[0].last_name])) or profile
 
 	return profile
 
@@ -92,10 +92,7 @@ def getTraceback():
 	trace_list = traceback.format_tb(tb, None) + traceback.format_exception_only(exc_type, value)
 	body = "Traceback (innermost last):\n" + "%-20s %s" % \
 		(unicode((b"").join(trace_list[:-1]), 'utf-8'), unicode(trace_list[-1], 'utf-8'))
-	
-	if webnotes.logger:
-		webnotes.logger.error('Db:'+(webnotes.conn and webnotes.conn.cur_db_name or '') + ' - ' + body)
-	
+		
 	return body
 
 def log(event, details):
@@ -118,13 +115,13 @@ def getdate(string_date):
 		
 	return datetime.datetime.strptime(string_date, "%Y-%m-%d").date()
 
-def add_to_date(session, date, years=0, months=0, days=0):
+def add_to_date(date, years=0, months=0, days=0):
 	"""Adds `days` to the given date"""
 	format = isinstance(date, basestring)
 	if date:
 		date = getdate(date)
 	else:
-		date = now_datetime(session)
+		raise Exception, "Start date required"
 	
 	from dateutil.relativedelta import relativedelta
 	date += relativedelta(years=years, months=months, days=days)
@@ -210,7 +207,7 @@ def nowtime(session):
 	"""return current time in hh:mm"""
 	return now_datetime(session).strftime('%H:%M')
 
-def formatdate(string_date):
+def formatdate(session, string_date):
 	"""
 	 	Convers the given string date to :data:`user_format`
 		User format specified in :term:`Control Panel`
@@ -225,7 +222,7 @@ def formatdate(string_date):
 	
 	global user_format
 	if not user_format:
-		user_format = webnotes.conn.get_value('Control Panel', None, 'date_format')
+		user_format = session.db.get_value('Control Panel', None, 'date_format')
 	
 	out = user_format
 	return out.replace("dd", date.strftime("%d")).replace("mm", date.strftime("%m"))\
@@ -278,11 +275,11 @@ def comma_and(lst):
 	if len(lst)==1: return lst[0]
 	return ', '.join(lst[:-1]) + ' and ' + lst[-1]
 
-def fmt_money(amount, fmt = '%.2f'):
+def fmt_money(session, amount, fmt = '%.2f'):
 	"""
 	Convert to string with commas for thousands, millions etc
 	"""
-	curr = webnotes.conn.get_value('Control Panel', None, 'currency_format') or 'Millions'
+	curr = session.get_value('Control Panel', None, 'currency_format') or 'Millions'
 
 	val = 2
 	if curr == 'Millions': val = 3
@@ -316,12 +313,12 @@ def fmt_money(amount, fmt = '%.2f'):
 #
 # convet currency to words
 #
-def money_in_words(number, main_currency = None, fraction_currency=None):
+def money_in_words(session, number, main_currency = None, fraction_currency=None):
 	"""
 	Returns string in words with currency and fraction currency. 
 	"""
 	
-	d = webnotes.conn.get_defaults()
+	d = session.db.get_defaults()
 	if not main_currency:
 		main_currency = d.get('currency', 'INR')
 	if not fraction_currency:
@@ -340,12 +337,12 @@ def money_in_words(number, main_currency = None, fraction_currency=None):
 #
 # convert number to words
 #
-def in_words(integer):
+def in_words(session, integer):
 	"""
 	Returns string in words for the given integer.
 	"""
 
-	in_million = webnotes.conn.get_default('currency_format')=='Millions' and 1 or 0
+	in_million = session.db.get_default('currency_format')=='Millions' and 1 or 0
 
 	n=int(integer)
 	known = {0: 'zero', 1: 'one', 2: 'two', 3: 'three', 4: 'four', 5: 'five', 6: 'six', 7: 'seven', 8: 'eight', 9: 'nine', 10: 'ten',
@@ -398,41 +395,6 @@ def in_words(integer):
 
 	return psn(n, known, psn)
 	
-
-
-def set_default(key, val):
-	"""
-	Set / add a default value to :term:`Control Panel`
-	"""
-	return webnotes.conn.set_default(key, val)
-
-#
-# Clear recycle bin
-#
-def clear_recycle_bin():
-	sql = webnotes.conn.sql
-	
-	tl = sql('show tables')
-	total_deleted = 0
-	for t in tl:
-		fl = [i[0] for i in sql('desc `%s`' % t[0])]
-		
-		if 'name' in fl:
-			total_deleted += sql("select count(*) from `%s` where name like '__overwritten:%%'" % t[0])[0][0]
-			sql("delete from `%s` where name like '__overwritten:%%'" % t[0])
-
-		if 'parent' in fl:	
-			total_deleted += sql("select count(*) from `%s` where parent like '__oldparent:%%'" % t[0])[0][0]
-			sql("delete from `%s` where parent like '__oldparent:%%'" % t[0])
-	
-			total_deleted += sql("select count(*) from `%s` where parent like 'oldparent:%%'" % t[0])[0][0]
-			sql("delete from `%s` where parent like 'oldparent:%%'" % t[0])
-
-			total_deleted += sql("select count(*) from `%s` where parent like 'old_parent:%%'" % t[0])[0][0]
-			sql("delete from `%s` where parent like 'old_parent:%%'" % t[0])
-
-	return "%s records deleted" % str(int(total_deleted))
-
 def remove_nulls(d):
 	"""
 		Returns d with empty ('' or None) values stripped
@@ -579,9 +541,9 @@ def escape_html(text):
 	return "".join(html_escape_table.get(c,c) for c in text)
 
 
-def get_system_managers_list():
+def get_system_managers_list(session):
 	"""Returns a list of system managers' email addresses"""
-	system_managers_list = webnotes.conn.sql("""\
+	system_managers_list = session.db.sql("""\
 		SELECT DISTINCT p.name
 		FROM tabUserRole ur, tabProfile p
 		WHERE

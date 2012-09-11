@@ -152,8 +152,7 @@ class ProfileController(DocListController):
 
 	def get_fullname(self):
 		"""get first_name space last_name"""
-		return (self.doc.first_name or '') + \
-			(self.doc.first_name and " " or '') + (self.doc.last_name or '')
+		return " ".join(filter(None, [self.doc.first_name, self.doc.last_name]))
 
 	def password_reset_mail(self, password):
 		"""reset password"""

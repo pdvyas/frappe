@@ -41,7 +41,12 @@ def get(session, doctype, name=None, module=None):
 	"""return controller object"""
 	doclist = doctype
 	if isinstance(doctype, list):
-		doctype = doclist[0]['doctype']
+		doctype = doclist[0]["doctype"]
+		name = doclist[0].get("name")
+		
+	# single name=doctype
+	if not name and doctype:
+		name = doctype
 	
 	# return if already loaded
 	if doctype not in session.controllers:
@@ -119,7 +124,8 @@ class DocListController(object):
 		self.doctype_validate()
 		
 		from webnotes.model.doctype import get_property
-		if get_property(self.session, self.doc.doctype, "document_type") in ["Master", "Transaction"]:
+		if get_property(self.session, self.doc.doctype, "document_type") in ["Master", "Transaction"]\
+			and not self.doc.get("__islocal"):
 			from webnotes.model.doclist import load
 			# get the old doclist
 			try:
@@ -309,7 +315,7 @@ class DocListController(object):
 				getattr(self, method)()
 
 		# if possible, deprecate
-		trigger(method, self.doclist[0])
+		trigger(self.session, method, self.doclist[0])
 
 	def clear_table(self, table_field):
 		self.doclist = filter(lambda d: d.parentfield != table_field, self.doclist)
@@ -378,7 +384,7 @@ class DocListController(object):
 		import csv
 		return csv.reader(content.splitlines())
 
-def trigger(method, doc):
+def trigger(session, method, doc):
 	"""trigger doctype events"""
 	try:
 		import startup.event_handlers
@@ -386,7 +392,7 @@ def trigger(method, doc):
 		return
 		
 	if hasattr(startup.event_handlers, method):
-		getattr(startup.event_handlers, method)(doc)
+		getattr(startup.event_handlers, method)(session, doc)
 		
 	if hasattr(startup.event_handlers, 'doclist_all'):
-		startup.event_handlers.doclist_all(doc, method)
+		startup.event_handlers.doclist_all(session, doc, method)

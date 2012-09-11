@@ -270,8 +270,8 @@ class Database:
 			self.sql("""insert into tabDefaultValue 
 				(name, parent, parenttype, parentfield, defkey, defvalue) values
 				(%s, %s, %s, %s, %s, %s)""", ('control_panel:' + key, 'Control Panel', 
-					'Control Panel', 'sys_defaults', key, val))
-	
+					'Control Panel', 'system_defaults', key, val))
+		
 	def get_default(self, key):
 		"""get default value"""
 		ret = self.sql("""select defvalue from tabDefaultValue where defkey=%s""", key)
@@ -329,7 +329,7 @@ class Database:
 		self.sql("commit")
 
 	def rollback(self):
-		self.sql("ROLLBACK")
+		self.sql("rollback")
 
 	def field_exists(self, dt, fn):
 		"""

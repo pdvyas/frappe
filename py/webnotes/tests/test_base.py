@@ -16,14 +16,18 @@
 
 import unittest
 import webnotes
+import conf
 from webnotes.utils import cint
+from webnotes.sessions import Session
 
 class TestBase(unittest.TestCase):
 	def setUp(self):
-		webnotes.conn.begin()
+		self.session = Session(None, None, 'Administrator', conf.test_db_name)
+		self.session.db.begin()
 		
 	def tearDown(self):
-		webnotes.conn.rollback()
+		self.session.db.rollback()
+		self.session.db.close()
 		
 	def assertDoc(self, lst):
 		"""assert all values"""
@@ -34,7 +38,7 @@ class TestBase(unittest.TestCase):
 					cl.append('%s=%s' % (k, '%s'))
 					vl.append(d[k])
 
-			self.assertTrue(webnotes.conn.sql("""select name from `tab%s`
+			self.assertTrue(self.session.db.sql("""select name from `tab%s`
 				where %s limit 1""" % (d['doctype'], ' and '.join(cl)), vl))
 
 	def assertCount(self, lst):
@@ -46,26 +50,26 @@ class TestBase(unittest.TestCase):
 					cl.append('%s=%s' % (k, '%s'))
 					vl.append(d[0][k])
 
-			self.assertEqual(webnotes.conn.sql("""select count(name) from `tab%s`
+			self.assertEqual(self.session.db.sql("""select count(name) from `tab%s`
 				where %s limit 1""" % (d[0]['doctype'], ' and '.join(cl)), vl,
 				as_dict=False)[0][0], d[1])
 
 	def assertNsm(self, dt, parent_fld, group_fld):
 		# check nested set model
-		roots = webnotes.conn.sql("""select name, lft, rgt from `tab%s`
+		roots = self.session.db.sql("""select name, lft, rgt from `tab%s`
 			where ifnull(`%s`, '') = '' and docstatus < 2""" % (dt, parent_fld),
 			as_dict=False)
 			
 		# root's lft, rgt
 		for d in roots:
-			node_count = webnotes.conn.sql("""select count(name) from `tab%s`
+			node_count = self.session.db.sql("""select count(name) from `tab%s`
 				where lft >= %s and rgt <= %s and docstatus < 2""" % \
 				(dt, d[1], d[2]), as_dict=False)[0][0]
 				
 			self.assertEqual(cint(d[2]), cint(d[1])+(node_count*2)-1)
 			
 		# ledger's lft, rgt
-		self.assertTrue(webnotes.conn.sql("""select name from `tab%s`
+		self.assertTrue(self.session.db.sql("""select name from `tab%s`
 			where ifnull(%s, '') = '%s' and rgt = lft+1""" % \
 			(dt, group_fld, (group_fld == 'is_group' and 'No' or 'Ledger')),
 			as_dict=False))
@@ -81,7 +85,7 @@ class TestBase(unittest.TestCase):
 			for d2 in doclist2:
 				if d1["doctype"] == d2["doctype"] and d1["name"] == d2["name"]:
 					for f in fieldnames.setdefault(d1["doctype"],
-							webnotes.model.get_fieldnames(d1["doctype"])):
+							webnotes.model.get_fieldnames(self.session, d1["doctype"])):
 						if f not in ignore and d1.get(f) != d2.get(f):
 							not_equal.append([d1["doctype"], d1["name"], d1.get(f),
 								d2.get(f)])
@@ -93,6 +97,5 @@ class TestBase(unittest.TestCase):
 		
 				
 	def create_docs(self, records):
-		import webnotes.model
 		for record in records:
-			webnotes.model.insert(record)
+			self.session.insert(record)

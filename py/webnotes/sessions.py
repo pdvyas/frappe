@@ -47,11 +47,7 @@ class Session:
 		
 		# for a local session, pass the user, there is no booting!
 		if not user:
-			self.bootinfo = self.memc.get_value("bootinfo:" + self.sid)
-			if self.bootinfo and self.request.params.get("cmd")!="login":
-				self.resume()
-			else:
-				self.boot()
+			self.start()
 		
 	def error(self, txt): self.errors.append(txt)
 	def write(self, txt): self.messages.append(txt)
@@ -64,15 +60,29 @@ class Session:
 				raise raise_exception, txt
 			else:
 				raise webnotes.ValidationError, txt
-			
-	def resume(self):
-		self.user = self.bootinfo.user
-	
+
+	def start(self):
+		if self.request.params.get("cmd")=="login":
+			# login
+			self.boot()
+		else:
+			self.user = self.memc.get_value("session:" + self.sid)
+			if self.user:
+				# resume
+				self.bootinfo = self.memc.get_value("bootinfo:" + self.sid)
+				if not bootinfo:
+					# cache was cleared, rebuild
+					self.boot()
+			else:
+				# guest
+				self.boot()
+					
 	def boot(self):
 		"""boot session"""
-		self.set_user()
+		if not self.user:
+			self.set_user()
 		self.load_bootinfo()
-		self.memc.set_value("session:" + self.sid, {"user": self.user})
+		self.memc.set_value("session:" + self.sid, self.user)
 		self.memc.set_value("bootinfo:" + self.sid, self.bootinfo)
 
 	def new_sid(self):
@@ -112,7 +122,7 @@ class Session:
 		"""database connection"""
 		if not self._db:
 			import webnotes.db
-			self._db = webnotes.db.Database(self.db_name)
+			self._db = webnotes.db.Database(user = self.db_name)
 		return self._db
 
 	def non_english(self):
@@ -137,7 +147,7 @@ class Session:
 			doclist = DocList([remove_nulls(d) for d in doclist])
 		return doclist
 		
-	def get_doclist(self, doctype, name, strip_nulls=False):
+	def get_doclist(self, doctype, name=None, strip_nulls=False):
 		doclist = self.controller(doctype, name).doclist
 		if strip_nulls:
 			[remove_nulls(d) for d in doclist]
@@ -148,34 +158,34 @@ class Session:
 		if doclist and isinstance(doclist, dict):
 			doclist = [doclist]
 
-		doclistcon = self.controller(doclist)
-		for d in doclistcon.doclist:
+		con = self.controller(doclist)
+		for d in con.doclist:
 			d["__islocal"] = 1
-		doclistcon.save()
+		con.save()
 
 		# can be used to retrieve name or any value after save
-		return doclistcon
+		return con
 		
 	def update(self, doclist):
 		"""update doclist"""
 		if doclist and isinstance(doclist, dict):
 			doclist = [doclist]
 
-		doclistcon = session.controller(doclist[0]["doctype"], doclist[0]["name"])
-		existing_names = map(lambda d: d.name, doclistcon.doclist)
+		con = self.controller(doclist[0]["doctype"], doclist[0]["name"])
+		existing_names = map(lambda d: d.name, con.doclist)
 
 		for d in doclist:
 			if d.get("name") in existing_names:
 				# update row
-				doclistcon.doclist.getone({"name": d["name"]}).update(d)
+				con.doclist.getone({"name": d["name"]}).update(d)
 			else:
 				# add row
 				d["__islocal"] = 1
-				doclistcon.doclist.append(d)
+				con.doclist.append(d)
 
-		doclistcon.save()
+		con.save()
 
-		return doclistcon		
+		return con		
 		
 	def load_bootinfo(self):
 		"""build and return boot info"""
@@ -269,15 +279,12 @@ class Session:
 			self.json['msgprints'] = self.logs
 		return json.dumps(self.json, default=webnotes.json_handler)
 
-@webnotes.whitelist()
-def clear(user=None):
-	"""clear all cache"""
-	import webnotes
-	clear_cache(user)
-	webnotes.response.json['message'] = "Cache Cleared"
+	def clear_cache(self):
+		self.memc.flush_keys("bootinfo:")
+		self.memc.flush_keys("doctype:")
 
-def clear_cache(user=''):
-	"""clear cache"""
-	import webnotes
-	webnotes.memc.flush_keys("bootdata")
-	webnotes.memc.flush_keys("doctypes")
+@webnotes.whitelist()
+def clear(session):
+	"""clear all cache"""
+	session.clear_cache(user)
+	return "Cache Cleared"
