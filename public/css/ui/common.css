@@ -1,3 +1,7 @@
+.small {
+	font-size: 90%;
+}
+
 .navbar-icon-home {
 	vertical-align: middle;
 	opacity: 0.4;
@@ -22,9 +26,10 @@
 }
 
 #alert-container .alert {
-  -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-     -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+     -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  padding-right: 42px;
 }
 
 .avatar {

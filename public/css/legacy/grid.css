@@ -49,6 +49,7 @@ div.grid_tbarlinks {
 	border-right: 1px solid #ddd;
 	padding: 0px;
 	background-color: #fff;
+	font-size: 12px;
 }
 
 .grid_head_wrapper {
@@ -65,6 +66,7 @@ div.grid_tbarlinks {
 	border-bottom: 1px solid #AAA;
 	height: 40px;
 	padding: 0px;
+	font-size: 12px;
 
 	background: #eeeeee; /* Old browsers */
 	background: -moz-linear-gradient(top,  #eeeeee 0%, #cccccc 100%); /* FF3.6+ */
@@ -107,6 +109,7 @@ div.grid_tbarlinks {
 	border: 0px;
 	width: 100%;
  	margin: 0px;
+	font-size: 12px;
  }
 
 .grid_cell_div textarea {

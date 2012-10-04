@@ -68,12 +68,13 @@ function show_alert(txt, add_class) {
 			z-index: 10;"></div>').appendTo('#dialog-container');
 	}
 
-	var div = $('<div class="alert">'+txt+'\
-		<button type="button" class="close">&times;</button></div>')
+	var div = $('<div class="alert"><span>'+txt+'</span> \
+		<a href="#" class="close">&times;</a></div>')
 			.appendTo('#alert-container')
 			.addClass(add_class);
 	div.find('.close').click(function() {
 		$(this).parent().remove();
+		return false;
 	});
 	return div;
 }

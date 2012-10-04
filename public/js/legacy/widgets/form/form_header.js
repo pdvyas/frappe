@@ -30,32 +30,48 @@
 
 _f.FrmHeader = Class.extend({
 	init: function(parent, frm) {
+		this.frm = frm;
 		this.appframe = new wn.ui.AppFrame(parent, null, frm.meta.module)
 		this.$w = this.appframe.$w;
-		this.appframe.add_tab('<span class="small-module-icons small-module-icons-'+
-			frm.meta.module.toLowerCase()+'"></span>'+
-			' <span>'+ frm.meta.module + "</span>", 0.7, function() {
-			wn.set_route(wn.modules[frm.meta.module])
-		});
-				
+
 		if(!frm.meta.issingle) {
 			this.appframe.add_tab(frm.doctype, 0.5, function() {
 				wn.set_route("List", frm.doctype);
 			});
 		}
+
+		this.appframe.add_tab('<span class="small-module-icons small-module-icons-'+
+			frm.meta.module.toLowerCase()+'"></span>'+
+			' <span>'+ frm.meta.module + "</span>", 0.7, function() {
+			wn.set_route(wn.modules[frm.meta.module])
+		});
 	},
 	refresh: function() {
 		// refresh breadcrumbs
-		if(cur_frm.cscript.set_breadcrumbs) {
-			this.appframe.clear_breadcrumbs();
-			cur_frm.cscript.set_breadcrumbs();
-		} else {
-			wn.views.breadcrumbs(this.appframe, 
-				cur_frm.meta.module, cur_frm.meta.name, cur_frm.docname);			
-		}
+		this.appframe.title(this.frm.docname);
 		
+		this.refresh_timestamps();
 		this.refresh_labels();
 		this.refresh_toolbar();
+	},
+	refresh_timestamps: function() {
+		this.$w.find(".avatar").remove();
+		
+		$(repl('<span class="avatar avatar-small">\
+			<img src="%(image_owner)s" title="Created By" data-content="%(creation)s" /></span>\
+		 	<span class="avatar avatar-small">\
+			<img src="%(image_mod)s"  title="Last Updated By" data-content="%(mod)s" /></span>', {
+			image_owner: wn.user_info(this.frm.doc.owner).image,
+			image_mod: wn.user_info(this.frm.doc.modified_by).image,
+			creation: wn.user_info(this.frm.doc.owner).fullname.bold() 
+				+" on "+this.frm.doc.creation,
+			mod: wn.user_info(this.frm.doc.owner).fullname.bold() 
+				+" on "+this.frm.doc.modified,
+		})).insertAfter(this.$w.find(".appframe-title"));
+		
+		this.$w.find(".avatar img").popover({trigger:"hover"});
+		
+		
 	},
 	refresh_labels: function() {
 		cur_frm.doc = get_local(cur_frm.doc.doctype, cur_frm.doc.name);
@@ -88,7 +104,7 @@ _f.FrmHeader = Class.extend({
 			%(lab_status)s</span>', {
 				lab_status: labinfo[0],
 				lab_class: labinfo[1]
-			})).insertBefore(this.$w.find('.breadcrumb-area'))
+			})).insertBefore(this.$w.find('.appframe-title'))
 	},
 	refresh_toolbar: function() {
 		// clear

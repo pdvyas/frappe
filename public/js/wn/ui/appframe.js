@@ -4,7 +4,9 @@ wn.ui.AppFrame = Class.extend({
 		this.$w = $('<div></div>').appendTo(parent);
 				
 		this.$titlebar = $('<div class="appframe-titlebar">\
+			<div class="appframe-marker"></div>\
 			<span class="appframe-title"></span>\
+			<span class="appframe-subject"></span>\
 			<span class="close" style="margin-top: 5px; margin-right: 7px;">&times;</span>\
 		</div>').appendTo(this.$w);
 
@@ -17,8 +19,10 @@ wn.ui.AppFrame = Class.extend({
 
 	},
 	title: function(txt) {
-		this.clear_breadcrumbs();
-		this.add_breadcrumb(txt);
+		this.$titlebar.find(".appframe-title").html(txt);
+	},
+	set_title: function(txt) {
+		this.title(txt);
 	},
 	set_marker: function(module) {
 		try {
@@ -26,23 +30,14 @@ wn.ui.AppFrame = Class.extend({
 		} catch(e) {
 			var color = "#000";
 		}
-		$('<div class="appframe-marker">')
-			.prependTo(this.$titlebar)
+		this.$titlebar.find(".appframe-marker")
 			.css({
 				"background-color": color
 			});
 	},
-	add_tabs: function() {
-		if(!this.tabs) {
-			this.tabs = $('<div class="appframe-tabs"></div>')
-				.prependTo(this.$w).css("width", this.$w.width());
-			//this.$w.parents(".layout-wrapper").css("margin-top", "30px");
-		}
-	},
 	add_tab: function(tab_name, opacity, click) {
-		this.add_tabs();
 		var span = $('<span class="appframe-tab"></span>')
-			.html(tab_name).appendTo(this.tabs);
+			.html(tab_name).insertAfter(this.$titlebar.find(".close"));
 		opacity && span.css("opacity", opacity);
 		click && span.click(click);
 		return span
@@ -53,8 +48,8 @@ wn.ui.AppFrame = Class.extend({
 		if(icon) {
 			args.icon = '<i class="icon '+icon+'"></i>';
 		}
-		this.buttons[label] = $(repl('<button class="btn btn-small">\
-			%(icon)s %(label)s</button>', args))
+		this.buttons[label] = $(repl('<button class="btn btn-small" style="margin-right: 3px">\
+			%(icon)s %(label)s</button> ', args))
 			.click(click)
 			.appendTo(this.toolbar);
 		return this.buttons[label];

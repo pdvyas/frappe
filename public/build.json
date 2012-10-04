@@ -134,9 +134,7 @@
 			"lib/public/js/legacy/webpage/search.js",
 			"lib/public/js/legacy/webpage/spinner.js",
 			"lib/public/js/legacy/webpage/loaders.js",
-			"lib/public/js/legacy/wn/page_layout.js",
 			"lib/public/js/legacy/wn/widgets/page_sidebar.js",
-			"lib/public/js/legacy/wn/widgets/footer.js",
 			"lib/public/js/legacy/model/local_data.js",
 			"lib/public/js/legacy/model/doclist.js",
 			"public/js/toolbar.min.js",
@@ -151,26 +149,12 @@
 			"lib/public/js/legacy/widgets/form/print_format.js",
 			"lib/public/js/legacy/widgets/form/email.js",
 			"lib/public/js/legacy/widgets/form/clientscriptAPI.js",
-			"lib/public/js/legacy/widgets/form/form_comments.js",
 			"lib/public/js/legacy/wn/widgets/form/sidebar.js",
-			"lib/public/js/legacy/wn/widgets/form/comments.js",
-			"lib/public/js/legacy/wn/widgets/form/attachments.js",
-			"lib/public/js/legacy/wn/widgets/form/assign_to.js",
+			"lib/public/js/wn/form/attachments.js",
+			"lib/public/js/wn/form/assign_to.js",
+			"lib/public/js/wn/form/comments.js",
 			"lib/public/js/wn/app.js"
 		]
-	},
-	
-	{
-		"public/js/fields.js": ["lib/public/js/legacy/widgets/form/fields.js"]
-	},
-
-	{
-		"public/css/fields.css": ["lib/public/css/legacy/fields.css"]
-	},
-
-	{
-		"public/js/listing.js": ["lib/public/js/legacy/widgets/listing.js"]
-	},
-
+	}
 ]
 

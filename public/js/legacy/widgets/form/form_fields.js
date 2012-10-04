@@ -434,7 +434,7 @@ _f.CodeField.prototype.set_disp = function(val) {
 	if(this.df.fieldtype=='Text Editor') {
 		this.disp_area.innerHTML = val;
 	} else {
-		this.disp_area.innerHTML = '<textarea class="code_text" readonly=1>'+val+'</textarea>';
+		this.disp_area.innerHTML = '<pre>'+val+'</pre>';
 	}
 }
 

@@ -1,12 +1,5 @@
 /* FORMS */
 
-div.form-title {
-	/*background-color: #e0eeff;*/
-	padding: 5px 19px 15px 19px;
-	margin: -15px -15px 0px -15px;
-	border-bottom: 1px solid #eee;
-}
-
 .appframe-titlebar .label {
 	vertical-align: middle;
 	margin-right: 7px;
@@ -37,7 +30,6 @@ div.form-section-head hr {
 	margin: 9px 0px;
 }
 
-
 div.frm_print_wrapper {
 	background-color:#FFF;
 	border:1px solid #444;
@@ -58,40 +50,8 @@ div.dialog_frm {
 	margin: 10px;
 }
 
-
-
-/*------------------*/
-
 .top_cell {
 	height: 50px;
-}
-
-div.attach_area {
-	padding: 8px;
-	margin: 8px;
-	background-color: #EEE;
-}
-
-div.attach_area table {
-	width: 100%;
-}
-
-.tablabel_normal {
-	margin: 0 4px 0 0;
-	padding: 3px 5px;
-	line-height: 1.3em;
-	display: inline;
-	cursor: pointer;
-}
-
-.tablabel_selected {
-	margin: 0 4px 0 0;
-	padding: 3px 5px;
-	line-height: 1.3em;
-	font-weight: bold;
-	display: inline;
-	cursor: pointer;
-	color: #000;
 }
 
 .scrollhead_wrapper {
@@ -100,32 +60,9 @@ div.attach_area table {
 	height: 30px;
 }
 
-.treeimg {
-	cursor: pointer;
-	margin-right: 3px;
-}
-
-
 .sectionCell {
 	padding: 5px;
 	vertical-align: top;
-}
-
-.code_area {
-	width: 80%;
-	margin: 8px;
-	padding: 4px;
-	background-color: #F8F8F8;
-	border: 1px solid #CCC;
-	overflow-x: auto;
-}
-
-.code_text {
-	width: 100%;
-	height: 360px;
-	margin-top: 3px;
-	font-family: Courier, Fixed;
-	font-size: 12px;
 }
 
 div.time_field select{

@@ -21,15 +21,6 @@
 	margin-bottom: 3px;
 }
 
-.input_area input, select, textarea { 
-	font-size: 14px;
-	padding: 2px;
-
-	-webkit-border-radius: 3px;
-	-moz-border-radius: 3px;
-	border-radius: 3px;
-}
-
 .input_area input { 
 	width: 80%; 
 	margin: 0px; 

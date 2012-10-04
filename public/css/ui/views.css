@@ -51,6 +51,7 @@ div.appframe-titlebar {
 	height: 30px;
 	color: #555;
 	border-bottom: 1px solid #c2c2c2;
+	vertical-align: middle;
 }
 
 div.appframe-marker {
@@ -63,6 +64,8 @@ div.appframe-marker {
 .appframe-title {
 	font-size: 160%;
 	font-weight: bold;
+	display: inline-block;
+	margin-top: 5px;
 }
 
 div.appframe-toolbar {
@@ -71,8 +74,19 @@ div.appframe-toolbar {
 	border-bottom: 1px solid #c2c2c2;
 }
 
-div.appframe-toolbar .label {
-	margin: 2px 2px;
+div.appframe-titlebar .label {
+	display: inline-block;
+	margin-bottom: 7px;
+}
+
+div.appframe-titlebar .avatar {
+	margin-top: -4px;
+	margin-left: 9px;
+	margin-right: -6px;
+}
+
+div.appframe-titlebar .close {
+	margin: 0px 12px;
 }
 
 div.appframe-toolbar input, div.appframe-toolbar select {
@@ -83,21 +97,15 @@ div.appframe-toolbar button {
 	padding: 3px 7px !important;
 }
 
-div.appframe-tabs {
-	position: absolute;
-	margin: 0px;
-}
-
 span.appframe-tab {
+	float: right;
 	display: inline-block;
 	background-color: #555;
 	color: white;
+	margin-top: -6px;
 	padding: 12px 11px;
-	margin-right: 40px;
-	margin-left: -40px;
 	height: 18px;
 	vertical-align: middle;
-	float: right;
 	cursor: pointer;
 }
 

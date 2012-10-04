@@ -6,20 +6,8 @@ html {
 body {	
 	margin: 0px;
 	padding: 0px;
-	font-size: 14px;
 	color: #000;
-}
-
-/* font settings */
-
-h1, h2, h3, h4, h5 {
-	font-family: Arial, sans-serif;
-}
-
-body {
-	font-family: Arial, sans-serif;
-	font-size: 13px;
-	background-color: #eee;
+	background-color: #f2f2ee;
 }
 
 footer {
@@ -39,95 +27,8 @@ footer {
 	line-height: 1.7;
 }
 
-span, div, td, input, textarea, button, select {
-	font-family: inherit;
-}
-
-
-.markdown pre {
-    background-color: #F5F5F5;
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    border-radius: 4px 4px 4px 4px;
-    display: block;
-    font-size: 12.025px;
-    line-height: 18px;
-    margin: 0 0 15px;
-    padding: 8.5px;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-}
-
-.markdown code, .markdown pre {
-    border-radius: 3px 3px 3px 3px;
-    color: #333333;
-    font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
-    font-size: 12px;
-}
-
-button { margin: 2px; margin-left: 0px; }
-
-label {
-	padding-top: 15px;
-	color: #404040;
-}
-
-select, input, textarea { 
-	border: 1px solid #ccc; 
-	-moz-border-radius: 4px;
-	-webkit-border-radius: 4px;
-	font-size: inherit;
-	padding: 4px;
-	color: #444;
-	-webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
-	-moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
-	box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
-}
-
-textarea { 
-	font-family: inherit; 
-	height: 120px; 
-	width: 90%; 
-	font-size: inherit; 
-	white-space: normal;
-}
-
-table { padding: 0px; border-collapse: 'collapse'}
-
-td { 
-	padding:0px; 
-	margin: 0px; 
-	vertical-align: top; 
-}
-
-p {
-	margin: 0px 0px 9px 0px;
-	line-height: 1.5em;
-}
-
-li {
-	line-height: 1.5em;
-}
-
-hr {
-  clear: both;
-  margin: 18px 0;
-  border: 0;
-  border-top: 1px solid #e5e5e5;
-  border-bottom: 1px solid #ffffff;
-}
 
 /* links */
-
-a:active { outline:none; }
-
-a {
-  color: #0088cc;
-  text-decoration: none;
-}
-a:hover {
-  color: #005580;
-  text-decoration: underline;
-}
 
 .link_type {
 	padding:2px;
@@ -149,7 +50,9 @@ div.fix_ff_cursor { overflow: auto; }
 
 /* --- Layout --- */
 
-div.comment { color: #444; }
+div.comment { 
+	color: #444; 
+}
 
 .help {
 	margin-bottom: 3px;
@@ -216,16 +119,6 @@ div.loading_div {
 	border: 1px solid #FF4;
 }
 
-div.std-footer {
-	margin: 13px -15px;
-	border-top: 1px solid #AAA;
-	padding: 13px;
-}
-
-div.std-footer-item {
-	margin: 0px 13px 13px 0px;
-}
-
 .shadow {
 	-moz-box-shadow: 0px 2px 2px #888;
 	-webkit-box-shadow: 0px 2px 2px #888;
@@ -237,22 +130,6 @@ div.std-footer-item {
 	-moz-border-radius: 5px;
 	border-radius: 5px;	
 }
-
-/* from bootstrap */
-.container {
-  margin-left: auto;
-  margin-right: auto;
-  zoom: 1;
-}
-.container:before, .container:after {
-  display: table;
-  content: "";
-  zoom: 1;
-}
-.container:after {
-  clear: both;
-}
-
 
 .clear {
 	clear: both;

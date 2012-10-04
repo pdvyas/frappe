@@ -147,11 +147,16 @@ _f.Frm.prototype.onhide = function() { if(_f.cur_grid_cell) _f.cur_grid_cell.gri
 // ======================================================================================
 
 _f.Frm.prototype.setup_std_layout = function() {
-	this.page_layout = new wn.PageLayout({
-		parent: this.wrapper,
-		main_width: (this.meta.in_dialog && !this.in_form) ? '100%' : '75%',
-		sidebar_width: (this.meta.in_dialog && !this.in_form) ? '0%' : '25%'
-	})	
+	this.page_layout = $a(this.wrapper, 'div', 
+		'layout-wrapper layout-wrapper-background', {
+		display: "none"
+	});
+	this.page_layout.head = $a(this.page_layout, 'div');	
+	this.page_layout.main = $a(this.page_layout, 'div', 'layout-main-section');
+	this.page_layout.sidebar_area = $a(this.page_layout, 'div', 'layout-side-section');
+	$a(this.page_layout, 'div', '', {clear:'both'});
+	this.page_layout.body 			= $a(this.page_layout.main, 'div');
+	this.page_layout.footer 		= $a(this.page_layout.main, 'div');
 
 	// only tray
 	this.meta.section_style='Simple'; // always simple!
@@ -162,7 +167,7 @@ _f.Frm.prototype.setup_std_layout = function() {
 	// sidebar
 	if(this.meta.in_dialog && !this.in_form) {
 		// hide sidebar
-		$(this.page_layout.wrapper).removeClass('layout-wrapper-background');
+		$(this.page_layout).removeClass('layout-wrapper-background');
 		$(this.page_layout.main).removeClass('layout-main-section');
 		$(this.page_layout.sidebar_area).toggle(false);
 	} else {
@@ -284,7 +289,12 @@ _f.Frm.prototype.setup_meta = function(doctype) {
 
 
 _f.Frm.prototype.setup_sidebar = function() {
-	this.sidebar = new wn.widgets.form.sidebar.Sidebar(this);
+	wn.require("lib/js/wn/ui/form/sidebar.js");
+	this.sidebar = new wn.ui.FormSidebar({
+		parent: this.page_layout.sidebar_area,
+		frm: this
+	});
+	// this.sidebar = new wn.widgets.form.sidebar.Sidebar(this);
 }
 
 
@@ -419,7 +429,7 @@ _f.Frm.prototype.setup_client_script = function() {
 
 _f.Frm.prototype.refresh_print_layout = function() {
 	$ds(this.print_wrapper);
-	$dh(this.page_layout.wrapper);
+	$dh(this.page_layout);
 
 	var me = this;
 	var print_callback = function(print_html) {
@@ -583,7 +593,7 @@ _f.Frm.prototype.refresh = function(docname) {
 			// ----------------------------------
 			if(this.print_wrapper) {
 				$dh(this.print_wrapper);
-				$ds(this.page_layout.wrapper);
+				$ds(this.page_layout);
 			}
 
 			// header
@@ -1113,19 +1123,6 @@ _f.Frm.prototype.set_unsaved = function() {
 	cur_frm.doc.__unsaved = 1;
 	var frm_head = cur_frm.frm_head || wn.container.page.frm.frm_head;
 	frm_head.refresh_labels();
-}
-
-_f.Frm.prototype.show_comments = function() {
-	if(!cur_frm.comments) {
-		cur_frm.comments = new Dialog(540, 400, 'Comments');
-		cur_frm.comments.comment_body = $a(cur_frm.comments.body, 'div', 'dialog_frm');
-		$y(cur_frm.comments.body, {backgroundColor:'#EEE'});
-		cur_frm.comments.list = new CommentList(cur_frm.comments.comment_body);
-	}
-	cur_frm.comments.list.dt = cur_frm.doctype;
-	cur_frm.comments.list.dn = cur_frm.docname;
-	cur_frm.comments.show();
-	cur_frm.comments.list.run();
 }
 
 _f.Frm.prototype.get_doc = function() {

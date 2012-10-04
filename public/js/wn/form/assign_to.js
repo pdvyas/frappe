@@ -24,47 +24,60 @@
 // refresh - load todos
 // create - new todo
 // delete to do
-wn.widgets.form.sidebar.AssignTo = Class.extend({
-	init: function(parent, sidebar, doctype, docname) {
+
+wn.provide("wn.ui.form");
+
+wn.ui.form.AssignTo = Class.extend({
+	init: function(opts) {
+		$.extend(this, opts);
 		var me = this;
-		this.doctype = doctype;
-		this.name = docname;
-		this.wrapper = $a(parent, 'div', 'sidebar-comment-wrapper');
-		this.body = $a(this.wrapper, 'div');
-		this.add_btn = $btn($a(this.wrapper, 'div'), 
-			'Assign this document to', 
-			function() {
-				me.add();
-			})
+		this.wrapper = $('<div>\
+			<div class="assignments"></div>\
+		</div>').appendTo(this.parent);
+
+		this.$list = this.wrapper.find(".assignments");
 		
-		this.refresh();
+		this.parent.find(".btn").click(function() {
+			me.add();
+		});
 	},
 	refresh: function() {
+		if(this.frm.doc.__islocal) {
+			this.parent.toggle(false);
+			return;
+		}
+		this.parent.toggle(true);
+
 		var me = this;
 		$c('webnotes.widgets.form.assign_to.get', {
-			doctype: me.doctype,
-			name: me.name
+			doctype: me.frm.doctype,
+			name: me.frm.docname
 		}, function(r,rt) {
 			me.render(r.message)
 		})
 	},
 	render: function(d) {
 		var me = this;
-		$(this.body).empty();
+		this.$list.empty();
 		if(this.dialog) {
 			this.dialog.hide();			
 		}
 		
-		for(var i=0; i<d.length; i++) {
-			$(this.body).append(repl('<div>%(owner)s \
-				<a class="close" href="#" data-owner="%(owner)s">&#215</a></div>', d[i]))
+		for(var i=0; i<d.length; i++) {	
+			$.extend(d[i], wn.user_info(d[i].owner));
+			
+			$(repl('<div class="alert alert-info">\
+				<span class="avatar avatar-small"><img src="%(image)s" /></span> %(fullname)s \
+				<a class="close" href="#" style="top: 4px;"\
+					data-owner="%(owner)s">&times;</a></div>', d[i]))
+				.appendTo(this.$list);
 		}
 
 		// set remove
-		$(this.body).find('a.close').click(function() {
+		this.$list.find('a.close').click(function() {
 			$c('webnotes.widgets.form.assign_to.remove', {
-				doctype: me.doctype,
-				name: me.name,
+				doctype: me.frm.doctype,
+				name: me.frm.docname,
 				assign_to: $(this).attr('data-owner')		
 			}, function(r,rt) {me.render(r.message);});
 			return false;
@@ -93,8 +106,8 @@ wn.widgets.form.sidebar.AssignTo = Class.extend({
 				var assign_to = me.dialog.fields_dict.assign_to.get_value();
 				if(assign_to) {
 					$c('webnotes.widgets.form.assign_to.add', {
-						doctype: me.doctype,
-						name: me.name,
+						doctype: me.frm.doctype,
+						name: me.frm.docname,
 						assign_to: assign_to,
 						description: me.dialog.fields_dict.description.get_value(),
 						priority: me.dialog.fields_dict.priority.get_value(),
