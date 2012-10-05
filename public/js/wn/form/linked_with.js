@@ -20,36 +20,24 @@
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // 
 
-wn.widgets.form.sidebar = { Sidebar: function(form) {
-	var me = this;
-	this.form = form;
-	this.opts = {
-		sections: [
+wn.provide("wn.ui.form")
 
-			{
-				title: 'Tags',
-				render: function(wrapper) {
-					me.form.taglist = new TagList(wrapper, 
-						me.form.doc._user_tags ? me.form.doc._user_tags.split(',') : [], 
-						me.form.doctype, me.form.docname, 0, 
-						function() {	});
-				},
-				display: function() { return !me.form.doc.__islocal }
-			},
-			
-
-		]
+wn.ui.form.LinkedWith = Class.extend({
+	init: function(opts) {
+		var me = this;
+		$.extend(this, opts);
+		this.parent.click(function() {
+			me.show();
+		})
+	},
+	refresh: function() {
+		this.parent.css("display", this.frm.doc.__islocal ? "none" : "inline-block");
+	},
+	show: function() {
+		var dialog = new wn.ui.Dialog({
+			width: 640,
+			title: "Linked With"
+		});
+		dialog.show();
 	}
-	
-	this.refresh = function() {
-		var parent = this.form.page_layout.sidebar_area;
-		if(!this.sidebar) {
-			//$y(parent, {paddingTop:'37px'})
-			this.sidebar = new wn.widgets.PageSidebar(parent, this.opts);
-		} else {
-			this.sidebar.refresh();
-		}
-	}
-	
-
-}}
+});

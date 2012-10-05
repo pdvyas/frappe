@@ -30,10 +30,10 @@ default_fields = ['doctype','name','owner','creation','modified','modified_by','
 #=================================================================================
 
 def insert(doclist):
-	from webnotes.model.doclist import DocList
+	from webnotes.model.controller import Controller
 	for d in doclist:
 		d["__islocal"] = 1
-	dl = DocList(doclist)
+	dl = Controller(doclist)
 	dl.save()
 	
 	return dl

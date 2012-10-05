@@ -70,7 +70,7 @@ class Bundle:
 			if suffix=='concat' or out_type != 'js' \
 				or self.no_compress or ('.min.' in f):
 				if out_type=="js":
-					outtxt += '\n' + data + ';\n'					
+					outtxt += '\n' + data + '\n'					
 				else:
 					outtxt += '\n' + data + '\n'
 			else:
@@ -81,7 +81,7 @@ class Bundle:
 				tmpmin = tmpout.getvalue() or ''
 				tmpmin.strip('\n')
 				outtxt += tmpmin
-						
+
 		with open(outfile, 'w') as f:
 			f.write(outtxt)
 		

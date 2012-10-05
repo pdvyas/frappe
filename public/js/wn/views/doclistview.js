@@ -379,7 +379,7 @@ wn.views.ListView = Class.extend({
 		this.doctype = doclistview.doctype;
 		
 		var t = "`tab"+this.doctype+"`.";
-		this.fields = [t + 'name', t + 'owner', t + 'docstatus', 
+		this.fields = [t + 'name', t + 'owner', t + 'modified_by', t + 'docstatus', 
 			t + '_user_tags', t + 'modified'];
 		this.stats = ['_user_tags'];
 		this.show_hide_check_column();
@@ -417,10 +417,9 @@ wn.views.ListView = Class.extend({
 			$(parent).append(repl('<a href="#!Form/%(doctype)s/%(name)s">%(name)s</a>', data));
 		} 
 		else if(opts.content=='avatar') {
-			$(parent).append(wn.avatar(data.owner));
-		}
-		else if(opts.content=='avatar_modified') {
-			$(parent).append(wn.avatar(data.modified_by));
+			$(parent).append(wn.avatar(data.modified_by))
+				.css("padding-left", "0px")
+				.attr("title", "Last Updated By: " + wn.user_info(data.modified_by).fullname);
 		}
 		else if(opts.content=='check') {
 			$(parent).append('<input class="list-delete" type="checkbox">');

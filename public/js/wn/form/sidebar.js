@@ -28,7 +28,7 @@ wn.ui.FormSidebar = Class.extend({
 	make: function() {
 		var me = this;
 		this.wrapper = $('<div class="section">\
-			<div class="btn-group">\
+			<div class="btn-group" style="display: inline-block;">\
 				<button class="btn btn-small dropdown-toggle" data-toggle="dropdown">\
 				<i class="icon-small icon-asterisk"></i> Actions <span class="caret"></span></button>\
 				<ul class="dropdown-menu">\
@@ -52,6 +52,8 @@ wn.ui.FormSidebar = Class.extend({
 					</li>\
 				</ul>\
 			</div>\
+			<button class="btn btn-small linked-with" style="margin-left: 7px;">\
+				<i class="icon-small icon-random"></i></button>\
 			<div class="tags_area">\
 				<hr>\
 			</div>\
@@ -96,7 +98,12 @@ wn.ui.FormSidebar = Class.extend({
 		this.frm.comments = new wn.ui.form.Comments({
 			frm: this.frm,
 			parent: this.wrapper.find(".comments_area")
-		});			
+		});
+		
+		this.frm.linked_with = new wn.ui.form.LinkedWith({
+			frm: this.frm,
+			parent: this.wrapper.find(".linked-with")
+		})
 		
 	},
 	refresh: function() {
@@ -117,7 +124,7 @@ wn.ui.FormSidebar = Class.extend({
 		this.wrapper.find("[data-action='delete']")
 			.toggle(can_delete ? true : false);
 		
-		
+		this.frm.linked_with.refresh();
 		this.frm.tags.refresh();
 		this.frm.assign_to.refresh();
 		this.frm.attachments && this.frm.attachments.refresh();

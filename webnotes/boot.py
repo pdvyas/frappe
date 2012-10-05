@@ -30,7 +30,6 @@ import webnotes.model.doc
 import webnotes.widgets.page
 import webnotes.cms
 
-
 def get_bootinfo():
 	"""build and return boot info"""
 	bootinfo = webnotes.DictObj()
