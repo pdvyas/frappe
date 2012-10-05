@@ -108,91 +108,11 @@ wn.ui.form.Comments = Class.extend({
 				.prependTo(wrapper);
 		}
 
-		if(this.comment_list) {
+		if(this.comment_list && this.comment_list.length) {
 			this.get_comment(this.comment_list[0], ($(wrapper).width() - 100) + "px")
-				.appendTo($(wrapper).find(".latest-comment").empty());
+				.appendTo($(wrapper).find(".latest-comment").empty().toggle(true));
 		} else {
 			$(wrapper).find(".latest-comment").toggle(false);			
 		}
 	}
 })
-
-// function(parent, sidebar, doctype, docname) {
-// 	var me = this;
-// 	this.sidebar = sidebar;
-// 	this.doctype = doctype; this.docname = docname;
-// 	
-// 	this.refresh = function() {
-// 		$c('webnotes.widgets.form.comments.get_comments', {dt: me.doctype, dn: me.docname, limit: 5}, function(r, rt) {
-// 			wn.widgets.form.comments.sync(me.doctype, me.docname, r);
-// 			me.make_body();
-// 			me.refresh_latest_comment();
-// 		});
-// 	}
-// 	
-// 	this.refresh_latest_comment = function() {
-// 		var wrapper = cur_frm.page_layout.body;
-// 		if(!$(wrapper).find(".latest-comment").length) {
-// 			$('<div class="latest-comment alert" style="margin-top:0px;">').prependTo(wrapper);
-// 		}
-// 		var comment_list = wn.widgets.form.comments.comment_list[me.docname];
-// 		if(comment_list) {
-// 			$(wrapper).find(".latest-comment")
-// 				.html(repl('<div style="width: 70%; float:left;">\
-// 					Last Comment: <b>%(comment)s</b></div>\
-// 					<div style="width: 25%; float:right; text-align: right; font-size: 90%">\
-// 						by %(comment_by_fullname)s</div>\
-// 					<div class="clear"></div>', comment_list[0]))					
-// 				.toggle(true);
-// 		} else {
-// 			$(wrapper).find(".latest-comment").toggle(false);			
-// 		}
-// 	}
-// 	
-// 	
-// 	this.make_body = function() {
-// 		if(this.wrapper) this.wrapper.innerHTML = '';
-// 		else this.wrapper = $a(parent, 'div', 'sidebar-comment-wrapper');
-// 
-// 		this.input = $a_input(this.wrapper, 'text');
-// 		$(this.input).keydown(function(e) {
-// 			if(e.which==13) {
-// 				$(me.btn).click();
-// 			}
-// 		})
-// 		this.btn = $btn(this.wrapper, 'Post', function() { me.add_comment() }, {marginLeft:'8px'});
-// 
-// 		this.render_comments()
-// 
-// 	}
-// 	this.render_comments = function() {
-// 		var f = wn.widgets.form.comments;
-// 		var cl = f.comment_list[me.docname]
-// 		this.msg = $a(this.wrapper, 'div', 'help small');
-// 
-// 		if(cl) {
-// 			this.msg.innerHTML = cl.length + ' out of ' + f.n_comments[me.docname] + ' comments';
-// 			if(f.n_comments[me.docname] > cl.length) {
-// 				this.msg.innerHTML += ' <span class="link_type" \
-// 					onclick="cur_frm.show_comments()">Show all</span>'
-// 			}
-// 			for(var i=0; i< cl.length; i++) {
-// 				this.render_one_comment(cl[i]);
-// 			}
-// 		} else {
-// 			this.msg.innerHTML = 'Be the first one to comment.'
-// 		}
-// 	}
-// 
-// 	//
-// 	this.render_one_comment = function(det) {
-// 		// comment
-// 		$a(this.wrapper, 'div', 'social sidebar-comment-text', '', det.comment);
-// 		// by etc
-// 		$a(this.wrapper, 'div', 'sidebar-comment-info', '', comment_when(det.creation) + ' by ' + det.comment_by_fullname);
-// 	}
-// 	
-// 	this.
-// 	
-// 	this.refresh();
-// }

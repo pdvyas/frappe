@@ -52,6 +52,9 @@ wn.ui.FormSidebar = Class.extend({
 					</li>\
 				</ul>\
 			</div>\
+			<div class="tags_area">\
+				<hr>\
+			</div>\
 			<div class="assign_area">\
 				<hr>\
 				<div><button class="btn btn-small" style="margin-top: -2px">\
@@ -71,6 +74,11 @@ wn.ui.FormSidebar = Class.extend({
 		</div>').appendTo(this.parent);
 
 		this.wrapper.find(".dropdown-toggle").dropdown();
+		
+		this.frm.tags = new wn.ui.form.TagEditor({
+			parent: this.wrapper.find(".tags_area"),
+			frm: this.frm			
+		});
 		
 		// assign to
 		this.frm.assign_to = new wn.ui.form.AssignTo({
@@ -110,6 +118,7 @@ wn.ui.FormSidebar = Class.extend({
 			.toggle(can_delete ? true : false);
 		
 		
+		this.frm.tags.refresh();
 		this.frm.assign_to.refresh();
 		this.frm.attachments && this.frm.attachments.refresh();
 		this.frm.comments.refresh();

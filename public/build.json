@@ -72,6 +72,7 @@
 			"lib/public/css/ui/views.css",
 			"lib/public/css/ui/fonts.css",
 			"lib/public/js/lib/Aristo/aristo.selected.css",
+			"lib/public/js/lib/tag-it/jquery.tagit.css",
 		]
 	},
 
@@ -101,11 +102,11 @@
 	
 	{
 		"public/js/all-app.js": [
-			"lib/public/js/lib/jquery/jquery.ui.core.js:concat",
-			"lib/public/js/lib/jquery/jquery.ui.datepicker.js:concat",
-			"lib/public/js/lib/jquery/jquery.ui.autocomplete.js:concat",
+			"lib/public/js/lib/jquery/jquery.ui.core.min.js",
+			"lib/public/js/lib/jquery/jquery.ui.datepicker.min.js",
+			"lib/public/js/lib/jquery/jquery.ui.autocomplete.min.js",
 			"lib/public/js/lib/tiny_mce_33/jquery.tinymce.js:concat",
-			"lib/public/js/lib/bootstrap.min.js:concat",
+			"lib/public/js/lib/bootstrap.min.js",
 			"lib/public/js/lib/mousetrap.min.js",
 			"lib/public/js/lib/sprintf.js",
 			"public/js/core.min.js",
@@ -135,7 +136,6 @@
 			"lib/public/js/legacy/webpage/search.js",
 			"lib/public/js/legacy/webpage/spinner.js",
 			"lib/public/js/legacy/webpage/loaders.js",
-			"lib/public/js/legacy/wn/widgets/page_sidebar.js",
 			"lib/public/js/legacy/model/local_data.js",
 			"lib/public/js/legacy/model/doclist.js",
 			"public/js/toolbar.min.js",
@@ -150,7 +150,9 @@
 			"lib/public/js/legacy/widgets/form/print_format.js",
 			"lib/public/js/legacy/widgets/form/email.js",
 			"lib/public/js/legacy/widgets/form/clientscriptAPI.js",
-			"lib/public/js/legacy/wn/widgets/form/sidebar.js",
+			"lib/public/js/lib/tag-it/tag-it.js",
+			"lib/public/js/wn/form/sidebar.js",
+			"lib/public/js/wn/form/tags.js",
 			"lib/public/js/wn/form/attachments.js",
 			"lib/public/js/wn/form/assign_to.js",
 			"lib/public/js/wn/form/comments.js",

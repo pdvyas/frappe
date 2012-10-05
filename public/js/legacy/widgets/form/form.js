@@ -289,12 +289,10 @@ _f.Frm.prototype.setup_meta = function(doctype) {
 
 
 _f.Frm.prototype.setup_sidebar = function() {
-	wn.require("lib/js/wn/ui/form/sidebar.js");
 	this.sidebar = new wn.ui.FormSidebar({
 		parent: this.page_layout.sidebar_area,
 		frm: this
 	});
-	// this.sidebar = new wn.widgets.form.sidebar.Sidebar(this);
 }
 
 

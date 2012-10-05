@@ -67,8 +67,12 @@ class Bundle:
 			outtxt += ('\n/*\n *\t%s\n */' % f)
 					
 			# append
-			if suffix=='concat' or out_type != 'js' or self.no_compress or ('.min.' in f):
-				outtxt += '\n' + data + '\n'
+			if suffix=='concat' or out_type != 'js' \
+				or self.no_compress or ('.min.' in f):
+				if out_type=="js":
+					outtxt += '\n' + data + ';\n'					
+				else:
+					outtxt += '\n' + data + '\n'
 			else:
 				jsm = JavascriptMinify()
 				tmpin = StringIO(data)
