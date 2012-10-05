@@ -27,44 +27,42 @@ wn.ui.FormSidebar = Class.extend({
 	},
 	make: function() {
 		var me = this;
-		$('<div class="section">\
+		this.wrapper = $('<div class="section">\
 			<div class="btn-group">\
 				<button class="btn btn-small dropdown-toggle" data-toggle="dropdown">\
-				Actions <span class="caret"></span></button>\
+				<i class="icon-small icon-asterisk"></i> Actions <span class="caret"></span></button>\
 				<ul class="dropdown-menu">\
-					<li><a href="#" onclick="newdoc(cur_frm.doctype); return false;">\
+					<li><a href="#" data-action="new" onclick="newdoc(cur_frm.doctype); return false;">\
 						<i class="icon icon-plus"></i> New</a>\
 					</li>\
-					<li><a href="#" onclick="cur_frm.print_doc(); return false;">\
+					<li><a href="#" data-action="print" onclick="cur_frm.print_doc(); return false;">\
 						<i class="icon icon-print"></i> Print</a>\
 					</li>\
-					<li><a href="#" onclick="cur_frm.email_doc(); return false;">\
+					<li><a href="#" data-action="email" onclick="cur_frm.email_doc(); return false;">\
 						<i class="icon icon-envelope"></i> Email</a>\
 					</li>\
-					<li><a href="#" onclick="cur_frm.copy_doc(); return false;">\
+					<li><a href="#" data-action="copy" onclick="cur_frm.copy_doc(); return false;">\
 						<i class="icon icon-file"></i> Copy</a>\
 					</li>\
-					<li><a href="#" onclick="cur_frm.reload_doc(); return false;">\
+					<li><a href="#" data-action="refresh" onclick="cur_frm.reload_doc(); return false;">\
 						<i class="icon icon-refresh"></i> Refresh</a>\
 					</li>\
-					<li><a href="#" onclick="cur_frm.savetrash(); return false;">\
+					<li><a href="#" data-action="delete" onclick="cur_frm.savetrash(); return false;">\
 						<i class="icon icon-remove-sign"></i> Delete</a>\
 					</li>\
 				</ul>\
 			</div>\
 			<div class="assign_area">\
 				<hr>\
-				<div><h5 style="display: inline-block;">Assigned To</h5>\
-				<button class="btn btn-small" style="margin-top: -2px">\
+				<div><button class="btn btn-small" style="margin-top: -2px">\
 					<i class="icon-small icon-ok"></i>\
-					Add</button></div>\
+					Assign To</button></div>\
 			</div>\
 			<div class="attach_area">\
 				<hr>\
-				<div><h5 style="display: inline-block;">Attachments</h5>\
-				<button class="btn btn-small" style="margin-top: -2px">\
+				<div><button class="btn btn-small" style="margin-top: -2px">\
 					<i class="icon-small icon-upload"></i>\
-					Upload</button></div>\
+					Upload Attachment</button></div>\
 			</div>\
 			<div class="comments_area">\
 				<hr>\
@@ -72,30 +70,48 @@ wn.ui.FormSidebar = Class.extend({
 			</div>\
 		</div>').appendTo(this.parent);
 
-		$(this.parent).find(".dropdown-toggle").dropdown();
+		this.wrapper.find(".dropdown-toggle").dropdown();
 		
 		// assign to
 		this.frm.assign_to = new wn.ui.form.AssignTo({
-			parent:$(this.parent).find(".assign_area"),
+			parent: this.wrapper.find(".assign_area"),
 			frm: this.frm, 
 		});
 		
 		if(this.frm.meta.allow_attach) {
 			this.frm.attachments = new wn.ui.form.Attachments({
 				frm: this.frm,
-				parent: $(this.parent).find(".attach_area")
+				parent: this.wrapper.find(".attach_area")
 			});			
 		}
 
 		this.frm.comments = new wn.ui.form.Comments({
 			frm: this.frm,
-			parent: $(this.parent).find(".comments_area")
+			parent: this.wrapper.find(".comments_area")
 		});			
 		
 	},
 	refresh: function() {
+		var can_create = in_list(wn.boot.profile.can_create, this.frm.doctype);
+		var can_delete = (cint(this.frm.doc.docstatus) != 1) && !this.frm.doc.__islocal
+			&& wn.model.can_delete(this.frm.doctype)
+			
+		this.wrapper.find("[data-action='new']")
+			.toggle(can_create ? true : false);
+		this.wrapper.find("[data-action='refresh']")
+			.toggle(!this.frm.doc.__islocal);
+		this.wrapper.find("[data-action='print']")
+			.toggle(!(this.frm.doc.__islocal || this.frm.meta.allow_print));
+		this.wrapper.find("[data-action='email']")
+			.toggle(!(this.frm.doc.__islocal || this.frm.meta.allow_email));
+		this.wrapper.find("[data-action='copy']")
+			.toggle(!(!can_create || this.frm.meta.allow_copy));
+		this.wrapper.find("[data-action='delete']")
+			.toggle(can_delete ? true : false);
+		
+		
 		this.frm.assign_to.refresh();
-		this.frm.attachments.refresh();
+		this.frm.attachments && this.frm.attachments.refresh();
 		this.frm.comments.refresh();
 	}
 })

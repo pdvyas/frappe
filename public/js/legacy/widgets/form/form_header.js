@@ -57,19 +57,26 @@ _f.FrmHeader = Class.extend({
 	refresh_timestamps: function() {
 		this.$w.find(".avatar").remove();
 		
-		$(repl('<span class="avatar avatar-small">\
-			<img src="%(image_owner)s" title="Created By" data-content="%(creation)s" /></span>\
-		 	<span class="avatar avatar-small">\
-			<img src="%(image_mod)s"  title="Last Updated By" data-content="%(mod)s" /></span>', {
-			image_owner: wn.user_info(this.frm.doc.owner).image,
-			image_mod: wn.user_info(this.frm.doc.modified_by).image,
-			creation: wn.user_info(this.frm.doc.owner).fullname.bold() 
-				+" on "+this.frm.doc.creation,
-			mod: wn.user_info(this.frm.doc.owner).fullname.bold() 
-				+" on "+this.frm.doc.modified,
+		if(this.frm.doc.__islocal) return;
+		
+		$(repl('%(avatar_owner)s %(avatar_mod)s', {
+			avatar_owner: wn.avatar(this.frm.doc.owner),
+			avatar_mod: wn.avatar(this.frm.doc.modified_by)
 		})).insertAfter(this.$w.find(".appframe-title"));
 		
-		this.$w.find(".avatar img").popover({trigger:"hover"});
+		this.$w.find(".avatar:eq(0)").popover({
+			trigger:"hover",
+			title: "Created By",
+			content: wn.user_info(this.frm.doc.owner).fullname.bold() 
+				+" on "+this.frm.doc.creation
+		});
+
+		this.$w.find(".avatar:eq(1)").popover({
+			trigger:"hover",
+			title: "Modified By",
+			content: wn.user_info(this.frm.doc.modified_by).fullname.bold() 
+				+" on "+this.frm.doc.modified
+		});
 		
 		
 	},

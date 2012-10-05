@@ -15,10 +15,14 @@ div.section div.section-head {
 	font-weight: bold;
 }
 
-div.section .alert {
+div.section .alert-list .alert {	
 	margin-bottom: 12px;
 	padding-top: 4px;
 	padding-bottom: 4px;
+}
+
+div.section .alert-list .alert:first-child {
+	margin-top: 12px;
 }
 
 div.section hr {

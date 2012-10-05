@@ -30,10 +30,9 @@ wn.ui.form.Attachments = Class.extend({
 	make: function() {
 		var me = this;
 		this.wrapper = $('<div>\
-			<div class="attachments"></div>\
-			<p class="help small">Attachments can be uploaded after saving.</p>\
+			<div class="alert-list"></div>\
 		</div>').appendTo(this.parent);
-		this.$list = this.wrapper.find(".attachments");
+		this.$list = this.wrapper.find(".alert-list");
 
 		this.parent.find(".btn").click(function() {
 			me.new_attachment();
@@ -50,8 +49,11 @@ wn.ui.form.Attachments = Class.extend({
 		return true;
 	},
 	refresh: function() {
-		this.wrapper.find(".help").toggle(this.frm.doc.__islocal ? true : false);
-		this.wrapper.find(".btn").toggle(!this.frm.doc.__islocal && !this.max_reached());
+		if(this.frm.doc.__islocal) {
+			this.parent.toggle(false);
+			return;
+		}
+		this.parent.toggle(true);
 		
 		this.$list.empty();
 

@@ -32,10 +32,10 @@ wn.ui.form.AssignTo = Class.extend({
 		$.extend(this, opts);
 		var me = this;
 		this.wrapper = $('<div>\
-			<div class="assignments"></div>\
+			<div class="alert-list"></div>\
 		</div>').appendTo(this.parent);
 
-		this.$list = this.wrapper.find(".assignments");
+		this.$list = this.wrapper.find(".alert-list");
 		
 		this.parent.find(".btn").click(function() {
 			me.add();
@@ -65,9 +65,10 @@ wn.ui.form.AssignTo = Class.extend({
 		
 		for(var i=0; i<d.length; i++) {	
 			$.extend(d[i], wn.user_info(d[i].owner));
+			d[i].avatar = wn.avatar(d[i].owner);
 			
-			$(repl('<div class="alert alert-info">\
-				<span class="avatar avatar-small"><img src="%(image)s" /></span> %(fullname)s \
+			$(repl('<div class="alert alert-success">\
+				%(avatar)s %(fullname)s \
 				<a class="close" href="#" style="top: 4px;"\
 					data-owner="%(owner)s">&times;</a></div>', d[i]))
 				.appendTo(this.$list);

@@ -30,10 +30,10 @@ wn.ui.form.Comments = Class.extend({
 	make: function() {
 		this.wrapper = $('<div>\
 			<input type="text" style="width: 100%;">\
-			<div class="comments"></div>\
+			<div class="alert-list"></div>\
 		</div>').appendTo(this.parent);
 
-		this.$list = this.wrapper.find(".comments");
+		this.$list = this.wrapper.find(".alert-list");
 		
 		var me = this;
 		this.wrapper.find("input").keydown(function(e) {
@@ -57,7 +57,7 @@ wn.ui.form.Comments = Class.extend({
 				dt: this.frm.doctype, dn: this.frm.docname, limit: 10
 			},
 			callback: function(r) {
-				me.render(r.message);
+				me.render(r.message || []);
 			}
 		});
 	},
@@ -72,10 +72,11 @@ wn.ui.form.Comments = Class.extend({
 	},
 	get_comment: function(c, width) {
 		$.extend(c, wn.user_info(c.comment_by));
+		c.avatar = wn.avatar(c.comment_by);
 		c.comment_when = comment_when(c.creation);
 		c.width = width || "145px"
 		return $(repl('<div style="width: 40px; float: left;">\
-				<span class="avatar avatar-small"><img src="%(image)s" /></span>\
+				%(avatar)s\
 			</div><div style="float: left; width: %(width)s; margin-bottom: 9px;">\
 				%(comment)s<br>\
 				<span class="help small">by %(fullname)s, %(comment_when)s</span>\
@@ -94,7 +95,7 @@ wn.ui.form.Comments = Class.extend({
 			args: args,
 			callback: function(r) {
 				me.wrapper.find("input").val("");
-				me.comment_list = [args].concat(me.comment_list);
+				me.comment_list = [args].concat(me.comment_list || []);
 				me.get_comment(args).prependTo(me.$list);
 				me.refresh_latest_comment();
 			}
@@ -106,7 +107,7 @@ wn.ui.form.Comments = Class.extend({
 			$('<div class="latest-comment alert" style="margin-top:0px;">')
 				.prependTo(wrapper);
 		}
-		;
+
 		if(this.comment_list) {
 			this.get_comment(this.comment_list[0], ($(wrapper).width() - 100) + "px")
 				.appendTo($(wrapper).find(".latest-comment").empty());

@@ -64,8 +64,7 @@ function show_alert(txt, add_class) {
 		$('<div id="dialog-container">').appendTo('body');		
 	}
 	if(!$('#alert-container').length) {
-		$('<div id="alert-container" style="position: fixed; bottom: 8px; right: 8px; \
-			z-index: 10;"></div>').appendTo('#dialog-container');
+		$('<div id="alert-container"></div>').appendTo('#dialog-container');
 	}
 
 	var div = $('<div class="alert"><span>'+txt+'</span> \

@@ -387,10 +387,10 @@ wn.views.ListView = Class.extend({
 	},
 	columns: [
 		{width: '3%', content:'check'},
-		{width: '4%', content:'avatar'},
+		{width: '5%', content:'avatar'},
 		{width: '3%', content:'docstatus', css: {"text-align": "center"}},
 		{width: '35%', content:'name'},
-		{width: '40%', content:'tags', css: {'color':'#aaa'}},
+		{width: '39%', content:'tags', css: {'color':'#aaa'}},
 		{width: '15%', content:'modified', css: {'text-align': 'right', 'color':'#222'}}		
 	],
 	render_column: function(data, parent, opts) {
@@ -417,15 +417,10 @@ wn.views.ListView = Class.extend({
 			$(parent).append(repl('<a href="#!Form/%(doctype)s/%(name)s">%(name)s</a>', data));
 		} 
 		else if(opts.content=='avatar') {
-			$(parent).append(repl('<span class="avatar avatar avatar-small"><img src="%(avatar)s" \
-				title="Created By: %(fullname)s"/></span>', 
-				data));
+			$(parent).append(wn.avatar(data.owner));
 		}
 		else if(opts.content=='avatar_modified') {
-			$(parent).append(repl('<span class="avatar avatar avatar-small">\
-				<img src="%(avatar_modified)s" \
-				title="Last Updated By: %(fullname_modified)s"/></span>', 
-				data));
+			$(parent).append(wn.avatar(data.modified_by));
 		}
 		else if(opts.content=='check') {
 			$(parent).append('<input class="list-delete" type="checkbox">');

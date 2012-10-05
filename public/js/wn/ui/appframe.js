@@ -46,7 +46,7 @@ wn.ui.AppFrame = Class.extend({
 		this.add_toolbar();
 		args = { label: label, icon:'' };
 		if(icon) {
-			args.icon = '<i class="icon '+icon+'"></i>';
+			args.icon = '<i class="icon-small '+icon+'"></i>';
 		}
 		this.buttons[label] = $(repl('<button class="btn btn-small" style="margin-right: 3px">\
 			%(icon)s %(label)s</button> ', args))
