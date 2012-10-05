@@ -19,13 +19,11 @@ wn.pages['data-import-tool'].onload = function(wrapper) {
 		<h3>2. Import Data</h3>\
 		<p class="help">Attach .csv file to import data</p>\
 		<div id="dit-upload-area"></div><br>\
+		<div class="dit-progress-area" style="display: None"></div>\
 		<p id="dit-output"></p>\
 		');
 		
-	$(wrapper).find('.layout-side-section').append('<h4>Help</h4><br>\
-		<p><b>Date Format:</b></p>\
-		<p>Dates must be in format "YYYY-MM-DD", for example, \
-			31st Jan 2012 must be "2012-01-31"</p>\
+	$(wrapper).find('.layout-side-section').append('<h4>Help</h4>\
 		<p><b>Importing non-English data:</b></p>\
 		<p>While uploading non English files ensure that the encoding is UTF-8.</p>\
 		<p>Microsoft Excel Users:\
@@ -42,6 +40,9 @@ wn.pages['data-import-tool'].onload = function(wrapper) {
 		</p>')
 	
 	$select = $(wrapper).find('[name="dit-doctype"]');
+	
+	wn.messages.waiting($(wrapper).find(".dit-progress-area").toggle(false), 
+		"Performing hardcore import process....", 100);
 	
 	// load doctypes
 	wn.call({
@@ -99,14 +100,33 @@ wn.pages['data-import-tool'].onload = function(wrapper) {
 			method: 'core.page.data_import_tool.data_import_tool.upload'
 		},
 		callback: function(r) {
-			$('#dit-output').empty();
+			$(wrapper).find(".dit-progress-area").toggle(false);
 			
-			$.each(r, function(i, v) {
+			// replace links if error has occured
+			if(r.error) {
+				r.messages = $.map(r.messages, function(v) {
+					var msg = v.replace("Inserted", "Valid").split("<");
+					if (msg.length > 1) {
+						v = msg[0] + (msg[1].split(">").slice(-1)[0]);
+					} else {
+						v = msg[0];
+					}
+					return v;
+				});
+				
+				r.messages = ["<h4 style='color:red'>Import Failed!</h4>"]
+					.concat(r.messages)
+			} else {
+				r.messages = ["<h4 style='color:green'>Import Successful!</h4>"].
+					concat(r.messages)
+			}
+			
+			$.each(r.messages, function(i, v) {
 				var $p = $('<p>').html(v).appendTo('#dit-output');
 				if(v.substr(0,5)=='Error') {
 					$p.css('color', 'red');
 				}
-				if(v.substr(0,8)=='Inserted') {
+				if(v.substr(0,8)=='Inserted' || v.substr(0,5)=='Valid') {
 					$p.css('color', 'green');
 				}
 				if(v.substr(0,7)=='Updated') {
@@ -124,19 +144,12 @@ wn.pages['data-import-tool'].onload = function(wrapper) {
 	// add ignore option
 	$('<input type="checkbox" name="ignore_encoding_errors"><span> Ignore Encoding Errors</span><br><br>')
 		.insertBefore('#dit-upload-area form input[type="submit"]')
-
-
-	// add overwrite option
-	$('<span>Date Format: </span><select name="date_format"></select><br><br>')
-		.insertBefore('#dit-upload-area form input[type="submit"]')
-	
-	$('#dit-upload-area select').add_options(['dd/mm/yyyy', 'mm/dd/yyyy', 'yyyy-mm-dd'])
-
 	
 	// rename button
 	$('#dit-upload-area form input[type="submit"]')
 		.attr('value', 'Upload and Import')
 		.click(function() {
-			$('#dit-output').html('Performing hardcore import process....')
+			$('#dit-output').empty();
+			$(wrapper).find(".dit-progress-area").toggle(true);
 		});
 }
