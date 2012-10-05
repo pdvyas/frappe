@@ -11,7 +11,7 @@ def rename_doc(doctype, old, new, is_doctype=0, debug=0):
 	
 	# get doclist of given doctype
 	# without child fields of table type fields (form=0)
-	doclist = webnotes.model.doctype.get(doctype, form=0)
+	doclist = webnotes.model.doctype.get(doctype)
 	
 	# rename the doc
 	webnotes.conn.sql("update `tab%s` set name=%s where name=%s" \

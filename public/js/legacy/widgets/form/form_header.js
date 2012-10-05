@@ -57,7 +57,8 @@ _f.FrmHeader = Class.extend({
 	refresh_timestamps: function() {
 		this.$w.find(".avatar").remove();
 		
-		if(this.frm.doc.__islocal) return;
+		if(this.frm.doc.__islocal || !this.frm.doc.owner || !this.frm.doc.modified_by) 
+			return;
 		
 		$(repl('%(avatar_owner)s %(avatar_mod)s', {
 			avatar_owner: wn.avatar(this.frm.doc.owner),

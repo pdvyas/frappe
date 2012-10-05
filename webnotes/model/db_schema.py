@@ -431,6 +431,9 @@ def updatedb(dt):
 		tab.sync()
 		webnotes.conn.begin()
 
+	from webnotes.model.doctype import clear_cache
+	clear_cache(dt)
+
 # patch to remove foreign keys
 # ----------------------------
 

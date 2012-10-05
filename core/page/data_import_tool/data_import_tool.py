@@ -14,7 +14,7 @@ def get_doctype_options():
 	import webnotes.model.doctype
 	return [doctype] + filter(None, map(lambda d: \
 		d.doctype=='DocField' and d.fieldtype=='Table' and d.options or None, 
-		webnotes.model.doctype.get(doctype, form=0)))
+		webnotes.model.doctype.get(doctype)))
 
 data_separator = '----Start entering data below this line----'
 
@@ -131,7 +131,7 @@ def upload():
 	webnotes.conn.begin()
 	
 	overwrite = webnotes.form_dict.get('overwrite')
-	doctype_dl = webnotes.model.doctype.get(doctype, form=0)
+	doctype_dl = webnotes.model.doctype.get(doctype)
 	columns = rows[3][1:]
 	
 	# parent details

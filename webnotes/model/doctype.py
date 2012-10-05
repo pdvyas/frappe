@@ -126,7 +126,7 @@ def apply_property_setters(doctype, doclist):
 	for ps in webnotes.conn.sql("""select * from `tabProperty Setter` where
 		doc_type=%s""", doctype, as_dict=1):
 		if ps['doctype_or_field']=='DocType':
-			doclist[0][ps['property']] = ps['value']
+			doclist[0].fields[ps['property']] = ps['value']
 		else:
 			docfield = filter(lambda d: d.doctype=="DocField" and d.fieldname==ps['field_name'], 
 				doclist)
@@ -265,7 +265,7 @@ def get_property(dt, prop, fieldname=None):
 	"""get a doctype property"""
 	doctypelist = get(dt)
 	if fieldname:
-		return doctypelist.getone({"fieldname":fieldname}).get(prop)
+		return doctypelist.getone({"fieldname":fieldname}).fields.get(prop)
 	else:
 		return doctypelist[0].fields.get(prop)
 		

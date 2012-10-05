@@ -22,7 +22,10 @@
 
 wn.ui.FilterList = Class.extend({
 	init: function(opts) {
-		wn.require('lib/js/legacy/widgets/form/fields.js');
+		if(!window.make_field) {
+			wn.require('lib/css/legacy/fields.css');			
+			wn.require('lib/js/legacy/widgets/form/fields.js');			
+		}
 		$.extend(this, opts);
 		this.filters = [];
 		this.$w = this.$parent;

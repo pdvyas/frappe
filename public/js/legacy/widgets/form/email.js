@@ -120,7 +120,6 @@ _e.make = function() {
 		return split(term).pop();
 	}
 
-
 	$(d.widgets['To'])
 		.bind( "keydown", function(event) {
 			if (event.keyCode === $.ui.keyCode.TAB &&

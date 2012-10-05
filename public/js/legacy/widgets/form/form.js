@@ -667,11 +667,11 @@ _f.Frm.prototype.refresh_field = function(fname) {
 
 _f.Frm.prototype.refresh_fields = function() {
 	// refresh fields
-	for(var i=0; i<this.fields.length; i++) {
+	for(var i=0, fields_len = this.fields.length; i< fields_len; i++) {
 		var f = this.fields[i];
 		f.perm = this.perm;
 		f.docname = this.docname;
-		
+				
 		// if field is identifiable (not blank section or column break)
 		// get the "customizable" parameters for this record
 		var fn = f.df.fieldname || f.df.label;
