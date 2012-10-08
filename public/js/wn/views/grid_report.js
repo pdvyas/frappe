@@ -460,19 +460,25 @@ wn.views.GridReport = Class.extend({
 					}
 					
 					// make link to add a filter
-					var link_formatter = me.dataview_columns[cell].link_formatter;	
-					var html = repl('<a href="#" \
-						onclick="wn.cur_grid_report.filter_inputs.%(col_name)s.val(\'%(value)s\'); \
-							wn.cur_grid_report.set_route(); return false;">\
-						%(value)s</a>', {
-							value: value,
-							col_name: link_formatter.filter_input,
-							page_name: wn.container.page.page_name
-						})
+					var link_formatter = me.dataview_columns[cell].link_formatter;
+					if (link_formatter.filter_input) {
+						var html = repl('<a href="#" \
+							onclick="wn.cur_grid_report.filter_inputs \
+								.%(col_name)s.val(\'%(value)s\'); \
+								wn.cur_grid_report.set_route(); return false;">\
+							%(value)s</a>', {
+								value: value,
+								col_name: link_formatter.filter_input,
+								page_name: wn.container.page.page_name
+							});
+					} else {
+						var html = value;
+					}
 
 					// make icon to open form
 					if(link_formatter.open_btn) {
-						var doctype = link_formatter.doctype ? eval(link_formatter.doctype) 
+						var doctype = link_formatter.doctype 
+							? eval(link_formatter.doctype) 
 							: dataContext.doctype;
 						html += me.get_link_open_icon(doctype, value);
 					}
@@ -482,11 +488,10 @@ wn.views.GridReport = Class.extend({
 		})
 	},
 	get_link_open_icon: function(doctype, name) {
-		return repl(' <i class="icon icon-share" style="cursor: pointer;"\
-			onclick="wn.set_route(\'Form\', \'%(doctype)s\', \'%(name)s\');">\
-		</i>', {
-			name: name,
-			doctype: doctype
+		return repl(' <a href="#Form/%(doctype)s/%(name)s">\
+			<i class="icon icon-share" style="cursor: pointer;"></i></a>', {
+			doctype: doctype,
+			name: encodeURIComponent(name)			
 		});
 	},
 	make_date_range_columns: function() {
@@ -704,7 +709,7 @@ wn.views.TreeGridReport = wn.views.GridReportWithPlot.extend({
 		var link = me.tree_grid.formatter(dataContext);
 		
 		if(dataContext.doctype) {
-			link += me.get_link_open_icon(dataContext.doctype, value);	
+			link += me.get_link_open_icon(dataContext.doctype, dataContext.name);	
 		}
 			
 		if (data[idx + 1] && data[idx + 1].indent > data[idx].indent) {
