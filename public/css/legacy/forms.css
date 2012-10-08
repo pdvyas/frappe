@@ -71,6 +71,24 @@ div.time_field select{
 	width: 45px;
 }
 
+/* fields */
+
+.mandatory .label_text {
+	color: red;
+}
+
+.mandatory :input {
+	background-color: red;
+}
+
+.field .icon-warning-sign {
+	display: none;
+}
+
+.field.mandatory .icon-warning-sign {
+	display: inline-block;
+}
+
 /* sidebar */
 
 div.sidebar-comment-wrapper input {
