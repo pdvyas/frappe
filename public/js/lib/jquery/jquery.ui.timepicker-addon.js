@@ -400,7 +400,7 @@ $.extend(Timepicker.prototype, {
 				// if we only want time picker...
 			if (o.timeOnly === true) {
 				$tp.prepend(
-					'<div class="ui-widget-header ui-helper-clearfix ui-corner-all">' +
+					'<div class="ui-datepicker-header ui-widget-header ui-helper-clearfix ui-corner-all">' +
 						'<div class="ui-datepicker-title">' + o.timeOnlyTitle + '</div>' +
 					'</div>');
 				$dp.find('.ui-datepicker-header, .ui-datepicker-calendar').hide();

@@ -39,55 +39,20 @@ var no_value_fields = ['Section Break', 'Column Break', 'HTML', 'Table', 'FlexTa
 var codeid=0; var code_editors={};
 
 function make_field(docfield, doctype, parent, frm, in_grid, hide_label) { // Factory
-
-	switch(docfield.fieldtype.toLowerCase()) {
-		
-		// general fields
-		case 'data':var f = new DataField(); break;
-		case 'password':var f = new DataField(); break;
-		case 'int':var f = new IntField(); break;
-		case 'float':var f = new FloatField(); break;
-		case 'currency':var f = new CurrencyField(); break;
-		case 'read only':var f = new ReadOnlyField(); break;
-		case 'link':var f = new LinkField(); break;
-		case 'date':var f = new DateField(); break;
-		case 'time':var f = new TimeField(); break;
-		case 'html':var f = new HTMLField(); break;
-		case 'check':var f = new CheckField(); break;
-		case 'text':var f = new TextField(); break;
-		case 'small text':var f = new TextField(); break;
-		case 'select':var f = new SelectField(); break;
-		case 'button':var f = new _f.ButtonField(); break;
-		
-		// form fields
-		case 'code':var f = new _f.CodeField(); break;
-		case 'text editor':var f = new _f.CodeField(); break;
-		case 'table':var f = new _f.TableField(); break;
-		case 'section break':var f= new _f.SectionBreak(); break;
-		case 'column break':var f= new _f.ColumnBreak(); break;
-		case 'image':var f= new _f.ImageField(); break;
+	field_class = "wn.form." + docfield.fieldtype.replace(/ /g, "") + "Field";
+	if(window[field_class]) {
+		var f = new window[field_class]({
+			df: docfield,
+			parent: parent,
+			doctype: doctype,
+			frm: frm,
+			in_grid: in_grid,
+			perm: frm ? frm.perm : [[1,1,1]]
+		});
+	} else {
+		console.log("field not found: " + field_class)
 	}
 
-	f.parent 	= parent;
-	f.doctype 	= doctype;
-	f.df 		= docfield;
-	f.perm 		= frm ? frm.perm : [[1,1,1]];
-	if(_f)
-		f.col_break_width = _f.cur_col_break_width;
-
-	if(in_grid) {
-		f.in_grid = true;
-		f.with_label = 0;
-	}
-	if(hide_label) {
-		f.with_label = 0;
-	}
-	if(frm) {
-		f.frm = frm;
-		if(parent)
-			f.layout_cell = parent.parentNode;
-	}
-	if(f.init) f.init();
 	f.make_body();
 	return f;
 }

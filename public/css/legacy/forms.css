@@ -13,7 +13,7 @@ div.form-intro-area {
 div.form-section-head {
 	margin: 11px -15px 3px -15px;
 	border-top: 1px solid #ccc;
-	padding: 11px 23px 0px 23px;
+	padding: 11px 0px 0px 23px;
 }
 
 div.form-layout-row:first-child .form-section-head {
@@ -73,20 +73,61 @@ div.time_field select{
 
 /* fields */
 
-.mandatory .label_text {
+.field {
+	margin-top: 7px;
+}
+
+.grid_cell_div .field {
+	margin-top: 0px !important;
+}
+
+.field .lable_txt {
+	font-size: 95%;
+}
+
+.mandatory .label_txt {
 	color: red;
 }
 
-.mandatory :input {
-	background-color: red;
+.input_area input, .input_area select, .disp_area {
+	max-width: 300px;
+}
+
+.input_area input { 
+	width: 80%; 
+	margin: 0px; 
+}
+.input_area select { 
+	width: 80%; 
+}
+.input_area textarea { 
+	width: 90%; 
+}
+
+.mandatory input, .mandatory select, .mandatory textarea {
+	background-color: #fee;
 }
 
 .field .icon-warning-sign {
 	display: none;
 }
 
-.field.mandatory .icon-warning-sign {
-	display: inline-block;
+.mandatory .icon-warning-sign {
+	display: inline-block !important;
+}
+
+.disp_area { 
+	width: 80%; 
+	padding: 2px 0px; 
+	font-size: 12px; 
+	background-color: #eee;
+	padding: 2px;
+	border: 1px solid #ddd;
+	min-height: 16px;
+	
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;	
 }
 
 /* sidebar */
