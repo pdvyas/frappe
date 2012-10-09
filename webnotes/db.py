@@ -117,8 +117,6 @@ class Database:
 		if cmd in ['alter', 'drop', 'truncate'] and webnotes.user.name != 'Administrator':
 			webnotes.msgprint('Not allowed to execute query')
 			raise Execption
-
-	# ======================================================================================
 	
 	def sql(self, query, values=(), as_dict = 0, as_list = 0, formatted = 0, 
 		debug=0, ignore_ddl=0, as_utf8=0, auto_commit=0):
@@ -171,8 +169,6 @@ class Database:
 		"""
 		return self._cursor.description
 
-	# ======================================================================================
-
 	def convert_to_simple_type(self, v, formatted=0):
 		import datetime
 		from webnotes.utils import formatdate, fmt_money
@@ -207,8 +203,6 @@ class Database:
 		
 		return v
 
-	# ======================================================================================
-
 	def convert_to_lists(self, res, formatted=0, as_utf8=0):
 		"""
 		      Convert the given result set to a list of lists (with cleaned up dates and decimals)
@@ -224,8 +218,6 @@ class Database:
 			nres.append(nr)
 		return nres
 		
-	# ======================================================================================
-
 	def convert_to_utf8(self, res, formatted=0):
 		"""
 		      Convert the given result set to a list of lists and as utf8 (with cleaned up dates and decimals)
@@ -304,8 +296,6 @@ class Database:
 		self.set_value(doc.doctype, doc.name, field, val, doc.modified)
 		doc.fields[field] = val
 
-	# ======================================================================================
-
 	def set_global(self, key, val, user='__global'):
 		res = self.sql('select defkey from `tabDefaultValue` where defkey=%s and parent=%s', (key, user))
 		if res:
@@ -316,8 +306,6 @@ class Database:
 	def get_global(self, key, user='__global'):
 		g = self.sql("select defvalue from tabDefaultValue where defkey=%s and parent=%s", (key, user))
 		return g and g[0][0] or None
-
-	# ======================================================================================
 
 	def set_default(self, key, val, parent="Control Panel"):
 		"""set control panel default (tabDefaultVal)"""
@@ -367,8 +355,6 @@ class Database:
 	def rollback(self):
 		self.sql("ROLLBACK")
 
-	# ======================================================================================
-
 	def field_exists(self, dt, fn):
 		"""
 		      Returns True if `fn` exists in `DocType` `dt`
@@ -395,7 +381,6 @@ class Database:
 			except:
 				return None
 
-	# ======================================================================================
 	def close(self):
 		"""
 		      Close my connection

@@ -75,13 +75,8 @@ wn.ui.toolbar.SelectorDialog = Class.extend({
 		this.dialog.fields_dict.doctype.input.focus();
 		return false;
 	},
-	set_values: function(lst) {
-		// convert to labels
-		for(var i=0;i<lst.length;i++) 
-			lst[i]=get_doctype_label(lst[i]);
-		
+	set_values: function(lst) {		
 		// set values
-		var sel = this.dialog.fields_dict.doctype.input;
-		$(sel).empty().add_options(lst.sort());	
+		this.dialog.fields_dict.doctype.$input.empty().add_options(lst.sort());	
 	}
 })

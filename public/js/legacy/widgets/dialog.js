@@ -71,7 +71,10 @@ var Dialog = wn.ui.Dialog.extend({
 		if(d[0]!='HTML') {
 			var t = make_table(row,1,2,'100%',['30%','70%']);
 			row.tab = t;
+			
 			var c1 = $td(t,0,0);
+			$(c1).css({"vertical-align": "top"});
+			
 			var c2 = $td(t,0,1);
 			if(d[0]!='Check' && d[0]!='Button')
 				$(c1).text(d[1]);
@@ -90,7 +93,7 @@ var Dialog = wn.ui.Dialog.extend({
 			c1.innerHTML = d[1];
 			c2.style.overflow = 'auto';
 			this.widgets[d[1]] = $a_input(c2, 'text');
-			if(d[2])$a(c2, 'div', 'field_description').innerHTML = d[2];
+			if(d[2])$a(c2, 'div', 'help small').innerHTML = d[2];
 		} 
 		else if(d[0]=='Link') {
 			c1.innerHTML = d[1];
@@ -112,20 +115,20 @@ var Dialog = wn.ui.Dialog.extend({
 			c1.innerHTML = d[1];
 			c2.style.overflow = 'auto';
 			this.widgets[d[1]] = $a_input(c2, 'password');
-			if(d[3])$a(c2, 'div', 'field_description').innerHTML = d[3];
+			if(d[3])$a(c2, 'div', 'help small').innerHTML = d[3];
 
 		} 
 		else if(d[0]=='Select') {
 			c1.innerHTML = d[1];
 			this.widgets[d[1]] = $a(c2, 'select', '', {width:'160px'})
-			if(d[2])$a(c2, 'div', 'field_description').innerHTML = d[2];
+			if(d[2])$a(c2, 'div', 'help small').innerHTML = d[2];
 			if(d[3])add_sel_options(this.widgets[d[1]], d[3], d[3][0]);
 		} 
 		else if(d[0]=='Text') {
 			c1.innerHTML = d[1];
 			c2.style.overflow = 'auto';
 			this.widgets[d[1]] = $a(c2, 'textarea');		
-			if(d[2])$a(c2, 'div', 'field_description').innerHTML = d[2];
+			if(d[2])$a(c2, 'div', 'help small').innerHTML = d[2];
 		} 
 		else if(d[0]=='Button') {
 			c2.style.height = '32px';

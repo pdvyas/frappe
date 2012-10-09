@@ -65,6 +65,7 @@ def get(doctype, processed=False):
 		expand_selects(doclist)
 		add_print_formats(doclist)
 		add_search_fields(doclist)
+		add_linked_with(doclist)
 		# update_language(doclist)
 
 	# add validators
@@ -159,7 +160,19 @@ def add_custom_fields(doctype, doclist):
 		doclist.append(custom_field)
 
 	return doclist
-	
+
+def add_linked_with(doclist):
+	"""add list of doctypes this doctype is 'linked' with"""
+	doctype = doclist[0].name
+	links = webnotes.conn.sql("""select parent, fieldname from tabDocField
+		where (fieldtype="Link" and options=%s)
+		or (fieldtype="Select" and options=%s)""", (doctype, "link:"+ doctype))
+	links += webnotes.conn.sql("""select dt, fieldname from `tabCustom Field`
+		where (fieldtype="Link" and options=%s)
+		or (fieldtype="Select" and options=%s)""", (doctype, "link:"+ doctype))
+		
+	doclist[0].fields["__linked_with"] = dict(list(set(links)))
+
 def from_cache(doctype, processed):
 	""" load doclist from cache.
 		sets flag __from_cache in first doc of doclist if loaded from cache"""

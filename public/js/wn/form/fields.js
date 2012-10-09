@@ -50,7 +50,8 @@ wn.form.Field = Class.extend({
 	},
 	
 	make_body: function() { 
-		this.$wrapper = $('<div class="field">\
+		this.$wrapper = $('<div class="field field-'+ 
+				this.df.fieldtype.toLowerCase().replace(/ /g, "") +'">\
 			<div class="label_area">\
 				<span class="label_txt"></span>\
 				<i class="icon icon-warning-sign" \
@@ -68,8 +69,14 @@ wn.form.Field = Class.extend({
 		this.wrapper = this.$wrapper.get(0);
 	},
 	
-	hide_label: function() {
-		this.$wrapper.find(".label_area").toggle(false);
+	make_inline: function() {
+		this.$wrapper.css({
+			display: "inline",
+			margin: "0px",
+			"margin-top": "-4px"
+		}).find(".label_area, .help, .disp_area").remove();
+		
+		this.$wrapper.find(".input_area").css({display:"inline"})
 	},
 	
 	refresh: function() {
@@ -93,7 +100,7 @@ wn.form.Field = Class.extend({
 	
 	refresh_description: function() {
 		this.$wrapper.find(".help").toggle(this.df.description ? true : false)
-			.text(this.df.description);
+			.html(this.df.description);
 	},
 	
 	refresh_mandatory: function(val) {
@@ -106,7 +113,7 @@ wn.form.Field = Class.extend({
 		if(status == this.cur_status) return;
 		
 		if(status=="Write") {
-			if(!this.input && this.make_input)
+			if(!this.$input && this.make_input)
 				this.make_input();
 			this.$wrapper.toggle(true);
 			this.$wrapper.find(".input_area").toggle(true);
@@ -162,7 +169,7 @@ wn.form.Field = Class.extend({
 	},
 	
 	set_focus: function() {
-		this.input && this.input.focus && this.input.focus();
+		this.$input && this.$input.focus && this.$input.focus();
 	},
 	
 	set_value: function(val) {
@@ -178,11 +185,11 @@ wn.form.Field = Class.extend({
 	},
 
 	set_input: function(val) {
-		if(this.input) this.input.val(val);
+		if(this.$input) this.$input.val(val);
 	},
 
 	get_value: function() {
-		return this.input ? this.validate(this.input.val()) : null;
+		return this.$input ? this.validate(this.$input.val()) : null;
 	},
 	
 	set_display: function(v) {
@@ -244,7 +251,7 @@ wn.form.Field = Class.extend({
 wn.form.DataField = wn.form.Field.extend({
 	make_input: function() {
 		var me = this;
-		this.input = $("<input type='"+ 
+		this.$input = $("<input type='"+ 
 			(this.df.fieldtype=='Password' ? 'password' : 'text') +"'>")
 			.appendTo(this.$wrapper.find(".input_area"))
 			.attr("name", this.df.fieldname)
@@ -292,7 +299,7 @@ wn.form.CurrencyField = wn.form.DataField.extend({
 	make_input: function() {
 		this._super();
 		// select if 0
-		this.input.focus(function() {
+		this.$input.focus(function() {
 			if(cint(this.value)==0)
 				this.select();
 		});
@@ -324,6 +331,7 @@ wn.form.ReadOnlyField = wn.form.DataField.extend({
 wn.form.HTMLField = wn.form.Field.extend({
 	make_body: function() {
 		this.$wrapper = $("<div>").appendTo(this.parent);
+		this.wrapper = this.$wrapper.get(0);
 	},
 	refresh: function() {
 		if(this.df.options) {
@@ -341,7 +349,7 @@ wn.form.HTMLField = wn.form.Field.extend({
 var datepicker_active = false;
 wn.form.DateField = wn.form.DataField.extend({
 	validate: function(v) {
-		if(!v) return;
+		if(!v) return v;
 		var me = this;
 		this.clear = function() {
 			msgprint ("Date must be in format " + this.user_fmt);
@@ -361,7 +369,7 @@ wn.form.DateField = wn.form.DataField.extend({
 		if(!this.user_fmt)this.user_fmt = 'yyyy-mm-dd';
 
 		var me = this;
-		$(this.input).datepicker({
+		$(this.$input).datepicker({
 			dateFormat: me.user_fmt.replace('yyyy','yy'), 
 			altFormat:'yy-mm-dd', 
 			changeYear: true,
@@ -379,7 +387,7 @@ wn.form.DateField = wn.form.DataField.extend({
 		this._super(dateutil.str_to_user(val));
 	},
 	get_value: function() {
-		return this.validate(dateutil.user_to_str(this.input.val()));
+		return this.validate(dateutil.user_to_str(this.$input.val()));
 	},
 	set_display: function(val) {
 		this._super(dateutil.str_to_user(val));
@@ -393,8 +401,8 @@ wn.form.LinkField = wn.form.DataField.extend({
 	make_input: function() {
 		var me = this;
 		this._super();
-		this.input.unbind("change");
-		this.input.autocomplete({
+		this.$input.unbind("change");
+		this.$input.autocomplete({
 			source: function(request, response) {
 				wn.call({
 					method:'webnotes.widgets.search.search_link',
@@ -433,7 +441,7 @@ wn.form.LinkField = wn.form.DataField.extend({
 		// then update model and run trigger
 		
 		var me = this;
-		if(after_link_validated) {
+		if(after_link_validated || !this.frm) {
 			this._super(val)
 		} else {
 			this.validate_link(val);
@@ -480,7 +488,7 @@ wn.form.LinkField = wn.form.DataField.extend({
 	},
 	activate: function(docname) {
 		this._super(docname);
-		this.input.css({width: "80%"});
+		this.$input.css({width: "80%"});
 	},
 	set_display: function(val) {
 		this._super(repl('<a href="#Form/%(doctype)s/%(name)s">%(name)s</a>', {
@@ -562,7 +570,7 @@ wn.form.LinkField = wn.form.DataField.extend({
 
 wn.form.CheckField = wn.form.Field.extend({
 	make_body: function() {
-		this.$wrapper = $('<div class="field">\
+		this.$wrapper = $('<div class="field field-check">\
 			<span class="input_area"></span>\
 			<span class="disp_area">\
 				<i class="icon icon-ok"></i>\
@@ -576,20 +584,20 @@ wn.form.CheckField = wn.form.Field.extend({
 	},
 	make_input: function() {
 		var me = this;
-		this.input = $("<input type='checkbox' style='width: 20px; margin-top: -2px;'>")
-			.appendTo(this.input_area).click(
-			function() {
-				me.set_model(this.checked?1:0);
-			});
+		this.$input = $("<input type='checkbox' style='width: 20px; margin-top: -2px;'>")
+			.appendTo(this.$wrapper.find(".input_area")).click(
+				function() {
+					me.set_model(this.checked?1:0);
+				});
 	},
 	set_input: function(val) {
-		if(this.input) this.input.get(0).checked= cint(val) ? true : false;
+		if(this.$input) this.$input.get(0).checked = cint(val) ? true : false;
 	},
 	set_display: function(val) {
 		this.$wrapper.find(".icon-ok").css("display", cint(val) ? true : false);
 	},
 	get_value: function() {
-		return this.validate(this.input.get(0).checked ? 1 : 0);
+		return this.validate(this.$input.get(0).checked ? 1 : 0);
 	}
 })
 
@@ -600,10 +608,10 @@ var text_dialog;
 wn.form.TextField = wn.form.Field.extend({
 	make_input: function() {
 		var me = this;
-		this.input = $('<textarea>').appendTo(this.$wrapper.find(".input_area"))
+		this.$input = $('<textarea>').appendTo(this.$wrapper.find(".input_area"))
 			.change(function() {
 				me.set_model(me.get_value())
-			});
+			});			
 	},
 
 	set_display: function(val) {
@@ -633,7 +641,7 @@ wn.form.TextField = wn.form.Field.extend({
 			});
 			
 			var me = this;
-			this.dialog.fields_dict.update.input.click(function() {
+			this.dialog.fields_dict.update.$input.click(function() {
 				me.set_model(me.dialog.fields_dict[me.df.fieldname].get_value());
 				me.dialog.hide();
 			});
@@ -653,7 +661,7 @@ wn.form.TextField = wn.form.Field.extend({
 wn.form.SmallTextField = wn.form.TextField.extend({
 	make_input: function() {
 		this._super();
-		this.input.css("height", "80px");
+		this.$input.css("height", "80px");
 	}
 });
 
@@ -668,19 +676,19 @@ wn.form.SelectField = wn.form.Field.extend({
 		}
 
 		var me = this;
-		this.input = $("<select>").appendTo(this.$wrapper.find(".input_area"))
+		this.$input = $("<select>").appendTo(this.$wrapper.find(".input_area"))
 			.change(function() {
 				me.set_model(me.get_value());
 			});
 	},
 	validate: function(val) {
-		if(!this.input) 
+		if(!this.$input) 
 			return val;
 			
-		if(!this.input.find("option[value='"+(val==null ? "" : val)+"']").length) {
+		if(!this.$input.find("option[value='"+(val==null ? "" : val)+"']").length) {
 			console.log("Unable to set value " + val + " for Select field " 
 				+ this.df.fieldname);
-			return this.input.val();
+			return this.$input.val();
 		} else {
 			return val;
 		}
@@ -690,7 +698,7 @@ wn.form.SelectField = wn.form.Field.extend({
 		
 		// reset options
 		this.set_attach_options();
-		if(this.input) this.input.empty().add_options(this.df.options.split("\n"));
+		if(this.$input) this.$input.empty().add_options(this.df.options.split("\n"));
 
 		if(this.frm)
 			this.set_from_model();
@@ -724,7 +732,7 @@ wn.form.TimeField = wn.form.Field.extend({
 		wn.require("lib/js/lib/jquery/jquery.ui.timepicker-addon.js");
 		
 		var me = this;
-		this.input = $('<input type="text">')
+		this.$input = $('<input type="text">')
 			.appendTo(this.$wrapper.find(".input_area"))
 			.change(function() {
 				me.set_model(me.get_value());
@@ -739,10 +747,13 @@ wn.form.TimeField = wn.form.Field.extend({
 // -------------------
 
 wn.form.ButtonField = wn.form.Field.extend({
+	make_body: function() {
+		this._super();
+		this.$wrapper.find(".label_area, .disp_area").remove();
+	},
 	make_input: function() {
 		var me = this;
-		this.$wrapper.find(".label_area, .disp_area").remove();
-		this.input = $("<button class='btn btn-small'>")
+		this.$input = $("<button class='btn btn-small'>")
 			.appendTo(this.$wrapper.find(".input_area"))
 			.text(this.df.label)
 			.click(function() {
@@ -753,5 +764,7 @@ wn.form.ButtonField = wn.form.Field.extend({
 					me.frm.runscript(me.df.options, me);
 				}
 			});
+			
+		this.input = this.$input.get(0);
 	}
 });

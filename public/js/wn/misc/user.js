@@ -15,7 +15,7 @@ wn.user_info = function(uid) {
 }
 
 wn.avatar_dims = {};
-wn.avatar = function(user, large) {
+wn.avatar = function(user, large, title) {
 	var image = wn.user_info(user).image;
 	var to_size = large ? 72 : 30;
 	
@@ -46,7 +46,7 @@ wn.avatar = function(user, large) {
 	
 	var dims = wn.avatar_dims[image];
 	
-	return repl('<span class="avatar" style="width: %(len)s; height: %(len)s;\
+	return repl('<span class="avatar" %(title)s style="width: %(len)s; height: %(len)s;\
 		border-radius: %(len)s;">\
 		<img src="%(image)s" style="%(smaller_dim)s: %(len)s; \
 			%(adjust_dim)s: -%(adjust_len)spx;"></span>', {
@@ -54,7 +54,8 @@ wn.avatar = function(user, large) {
 			smaller_dim: dims.smaller_dim,
 			len: to_size + "px",
 			adjust_dim: dims.adjust_dim,
-			adjust_len: large ? dims.adjust_len_large : dims.adjust_len_small
+			adjust_len: large ? dims.adjust_len_large : dims.adjust_len_small,
+			title: title ? ('title="' + title + '"') : ""
 		});
 }
 

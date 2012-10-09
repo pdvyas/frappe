@@ -89,10 +89,6 @@ div.time_field select{
 	color: red;
 }
 
-.input_area input, .input_area select, .disp_area {
-	max-width: 300px;
-}
-
 .input_area input { 
 	width: 80%; 
 	margin: 0px; 
@@ -129,6 +125,20 @@ div.time_field select{
 	-moz-border-radius: 3px;
 	border-radius: 3px;	
 }
+
+.input_area input, .input_area select, .disp_area {
+	max-width: 300px;
+}
+
+.field-text .disp_area, .field-texteditor .disp_area, .field-code .disp_area {
+	max-width: 90%;
+	width: 90%;
+}
+
+.field-button .disp_area, .field-button .label_area  {
+	display: none;
+}
+
 
 /* sidebar */
 
