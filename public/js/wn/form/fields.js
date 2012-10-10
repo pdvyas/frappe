@@ -388,9 +388,6 @@ wn.form.DateField = wn.form.DataField.extend({
 	},
 	get_value: function() {
 		return this.validate(dateutil.user_to_str(this.$input.val()));
-	},
-	set_display: function(val) {
-		this._super(dateutil.str_to_user(val));
 	}
 });
 
