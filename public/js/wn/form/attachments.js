@@ -49,7 +49,7 @@ wn.ui.form.Attachments = Class.extend({
 		return true;
 	},
 	refresh: function() {
-		if(this.frm.doc.__islocal) {
+		if(this.frm.doc.__islocal || !this.frm.meta.allow_attach) {
 			this.parent.toggle(false);
 			return;
 		}

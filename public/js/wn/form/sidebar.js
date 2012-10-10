@@ -87,13 +87,11 @@ wn.ui.FormSidebar = Class.extend({
 			parent: this.wrapper.find(".assign_area"),
 			frm: this.frm, 
 		});
-		
-		if(this.frm.meta.allow_attach) {
-			this.frm.attachments = new wn.ui.form.Attachments({
-				frm: this.frm,
-				parent: this.wrapper.find(".attach_area")
-			});			
-		}
+
+		this.frm.attachments = new wn.ui.form.Attachments({
+			frm: this.frm,
+			parent: this.wrapper.find(".attach_area")
+		});			
 
 		this.frm.comments = new wn.ui.form.Comments({
 			frm: this.frm,
