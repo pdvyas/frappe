@@ -408,7 +408,7 @@ _r.ReportBuilder.prototype.set_criteria_sel = function(criteria_name) {
 		sc.sort_order=='ASC' ? this.dt.set_asc() : this.dt.set_desc();
 	}
 	if(sc && sc.page_len) {
-		this.dt.page_len_sel.inp.value = sc.page_len;
+		this.dt.page_len_sel.value = sc.page_len;
 	}
 	
 	this.current_loaded = criteria_name;
@@ -638,7 +638,7 @@ _r.ReportBuilder.prototype.reset_report = function() {
 	this.dt.clear_all();
 	
 	this.dt.sort_sel.value = 'ID';
-	this.dt.page_len_sel.inp.value = '50';
+	this.dt.page_len_sel.value = '50';
 	this.dt.set_no_limit(0);
 	this.dt.set_desc();
 	
@@ -750,7 +750,7 @@ _r.ReportBuilder.prototype.make_datatable = function() {
 			// add to "filter_values"
 			var v = t.get_value?t.get_value():'';
 			if(t.df.fieldtype=='Select') {
-				if(t.input.multiple) {
+				if(false) {
 					for(var sel_i=0;sel_i < v.length; sel_i++) {
 						add_to_filter(t.df.fieldname, v[sel_i], 1);
 					}
@@ -791,7 +791,7 @@ _r.ReportBuilder.prototype.make_datatable = function() {
 							cl[cl.length] = table_name(t.df.parent) + '.' + fn + ' LIKE "' + v + '%"';
 
 						} else if(t.df.fieldtype=='Select') {
-							if(t.input.multiple) {
+							if(false) {
 								// loop for multiple select
 								var tmp_cl = [];
 								for(var sel_i=0;sel_i < v.length; sel_i++) {
@@ -995,13 +995,12 @@ _r.ReportFilters.prototype.add_numeric_field = function(cell, f, dt, is_custom) 
 	f2.label = f2.label + ' <=';
 	var tmp2 = this.make_field_obj(f2, dt, my_div, is_custom);
 	tmp2.sql_condition = '<=';
-	tmp2.bound = 'upper';		
+	tmp2.bound = 'upper';
 }
 
 // make a field object
 _r.ReportFilters.prototype.make_field_obj = function(f, dt, parent, is_custom) {
-	var tmp = make_field(f, dt, parent, this.rb, false);
-	tmp.not_in_form = 1;
+	var tmp = make_field(f, dt, parent, null, false);
 	tmp.in_filter = 1;
 	tmp.refresh();
 	this.rb.filter_fields[this.rb.filter_fields.length] = tmp;
@@ -1086,7 +1085,7 @@ _r.ReportColumnPicker.prototype.make_body = function() {
 	// all fields
 	$a($td(t,0,0), 'h3', '', {marginBottom:'8px'}).innerHTML = 'Columns';
 	this.unsel_fields = $a($td(t,0,0), 'select', '', {height:'200px', width:'100%', border:'1px solid #AAA'});
-	this.unsel_fields.multiple = true;
+	this.unsel_fields.multiple = false;
 	this.unsel_fields.onchange = function() { for(var i=0; i<this.options.length; i++) this.options[i].field.is_selected = this.options[i].selected; }
 
 	// buttons
@@ -1118,7 +1117,7 @@ _r.ReportColumnPicker.prototype.make_body = function() {
 	// multiple fields
 	$a($td(t,0,2), 'h3', '', {marginBottom:'8px'}).innerHTML = 'Selected Columns';
 	this.sel_fields = $a($td(t,0,2), 'select', '', {height:'200px', width:'100%', border:'1px solid #AAA'});
-	this.sel_fields.multiple = true;
+	this.sel_fields.multiple = false;
 	this.sel_fields.onchange = function() { for(var i=0; i<this.options.length; i++) this.options[i].field.is_selected = this.options[i].selected; }
 
 }

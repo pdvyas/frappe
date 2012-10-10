@@ -259,7 +259,6 @@ wn.form.DataField = wn.form.Field.extend({
 			(this.df.fieldtype=='Password' ? 'password' : 'text') +"'>")
 			.appendTo(this.$wrapper.find(".input_area"))
 			.attr("name", this.df.fieldname)
-			.attr("id", this.df.parent + "_" + this.df.fieldname)
 			.change(function() {
 				// fix: allow 0 as value
 				me.set_model(me.get_value());
@@ -373,7 +372,7 @@ wn.form.DateField = wn.form.DataField.extend({
 		if(!this.user_fmt)this.user_fmt = 'yyyy-mm-dd';
 
 		var me = this;
-		$(this.$input).datepicker({
+		this.$input.datepicker({
 			dateFormat: me.user_fmt.replace('yyyy','yy'), 
 			altFormat:'yy-mm-dd', 
 			changeYear: true,
