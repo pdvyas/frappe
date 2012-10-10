@@ -47,6 +47,7 @@ wn.form.Field = Class.extend({
 	init: function(opts) {
 		$.extend(this, opts);
 		this.with_label = true;
+		if(!this.parent) this.parent = wn.temp_container;
 	},
 	
 	make_body: function() { 
@@ -180,8 +181,11 @@ wn.form.Field = Class.extend({
 	},
 	
 	set_from_model: function() {
-		this.set_value(this.validate(_f.get_value(
-			this.doctype,this.docname,this.df.fieldname)));
+		this.set_value(this.validate(this.get_model_value()));
+	},
+	
+	get_model_value: function() {
+		return _f.get_value(this.doctype, this.docname,this.df.fieldname);
 	},
 
 	set_input: function(val) {
@@ -650,7 +654,7 @@ wn.form.TextField = wn.form.Field.extend({
 		}
 		
 		text_dialog = this.dialog;
-		this.dialog.fields_dict[this.df.fieldname].set_value()
+		this.dialog.fields_dict[this.df.fieldname].set_value(this.get_model_value())
 		this.dialog.show();
 	}
 })

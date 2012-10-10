@@ -167,7 +167,7 @@ _f.Frm.prototype.setup_std_layout = function() {
 	// sidebar
 	if(this.meta.in_dialog && !this.in_form) {
 		// hide sidebar
-		$(this.page_layout).removeClass('layout-wrapper-background');
+		$(this.page_layout).removeClass('layout-wrapper-background').css("box-shadow", "none");
 		$(this.page_layout.main).removeClass('layout-main-section');
 		$(this.page_layout.sidebar_area).toggle(false);
 	} else {

@@ -400,7 +400,8 @@ _f.Grid.prototype.notify_keypress = function(e, keycode) {
 }
 
 _f.Grid.prototype.make_template = function(hc) {
-	hc.template = make_field(wn.meta.get_docfield(hc.doctype, hc.fieldname), hc.doctype, null, this.field.frm, true);
+	hc.template = make_field(wn.meta.get_docfield(hc.doctype, hc.fieldname), hc.doctype, 
+		null, this.field.frm, true);
 	hc.template.grid = this;
 }
 

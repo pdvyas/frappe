@@ -98,6 +98,7 @@ div.time_field select{
 }
 .input_area textarea { 
 	width: 90%; 
+	height: 200px;
 }
 
 .mandatory input, .mandatory select, .mandatory textarea {
@@ -114,7 +115,6 @@ div.time_field select{
 
 .disp_area { 
 	width: 80%; 
-	padding: 2px 0px; 
 	font-size: 12px; 
 	background-color: #eee;
 	padding: 2px;
@@ -133,6 +133,12 @@ div.time_field select{
 .field-text .disp_area, .field-texteditor .disp_area, .field-code .disp_area {
 	max-width: 90%;
 	width: 90%;
+}
+
+.field-code .disp_area {
+	border: 0px;
+	background-color: #fff;
+	padding: 0px;
 }
 
 .field-button .disp_area, .field-button .label_area  {
