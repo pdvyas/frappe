@@ -228,10 +228,11 @@ wn.form.CodeField = wn.form.Field.extend({
 		this._super(v==null ? "" : v);
 	},
 	set_input: function(v) {
+		if(!this.editor) return;
 		this.setting_value = true;
 		this.editor.getSession().setValue(v);
-		this.setting_value = false;
 		this.editor.resize();
+		this.setting_value = false;
 	},
 	get_value: function() {
 		return this.editor.getSession().getValue();
