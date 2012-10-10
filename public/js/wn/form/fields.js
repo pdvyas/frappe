@@ -330,8 +330,8 @@ wn.form.ReadOnlyField = wn.form.DataField.extend({
 
 wn.form.HTMLField = wn.form.Field.extend({
 	make_body: function() {
-		this.$wrapper = $("<div>").appendTo(this.parent);
-		this.wrapper = this.$wrapper.get(0);
+		this.$wrapper = $("<div style='field field-html'>").appendTo(this.parent);
+		this.disp_area = this.wrapper = this.$wrapper.get(0);
 	},
 	refresh: function() {
 		if(this.df.options) {

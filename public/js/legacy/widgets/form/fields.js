@@ -1,7 +1,3 @@
-
-/*
- *	lib/public/js/legacy/widgets/form/fields.js
- */
 // Copyright (c) 2012 Web Notes Technologies Pvt Ltd (http://erpnext.com)
 // 
 // MIT License (MIT)

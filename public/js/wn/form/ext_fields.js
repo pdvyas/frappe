@@ -227,6 +227,9 @@ wn.form.CodeField = wn.form.Field.extend({
 	set_value: function(v) {
 		this._super(v==null ? "" : v);
 	},
+	set_disp: function(v) {
+		this._super("<pre>"+ v.replace(/</g, "&lt;").replace(/>/g, "&gt;") +"</pre>");
+	},
 	set_input: function(v) {
 		if(!this.editor) return;
 		this.setting_value = true;
