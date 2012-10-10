@@ -105,7 +105,7 @@ wn.form.SectionBreakField = wn.form.Field.extend({
 wn.form.TableField = wn.form.Field.extend({
 	make_body: function() {
 		if(this.perm[this.df.permlevel] && this.perm[this.df.permlevel][READ]) {
-			this.wrapper = $("<div>").appendTo(this.parent).get(0);
+			this.wrapper = $("<div style='margin-top: 8px;'>").appendTo(this.parent).get(0);
 
 			this.grid = new _f.FormGrid(this);
 			if(this.frm)this.frm.grids[this.frm.grids.length] = this;
