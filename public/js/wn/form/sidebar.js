@@ -53,7 +53,7 @@ wn.ui.FormSidebar = Class.extend({
 				</ul>\
 			</div>\
 			<button class="btn btn-small linked-with" style="margin-left: 7px;">\
-				<i class="icon-small icon-random"></i></button>\
+				<i class="icon-small icon-random"></i> Links</button>\
 			<div class="tags_area">\
 				<hr>\
 			</div>\

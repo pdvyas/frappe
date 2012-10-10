@@ -704,7 +704,7 @@ wn.form.SelectField = wn.form.Field.extend({
 		// setup options as one of attached files
 		if(this.df.options == 'attach_files:') {		
 			if(!this.frm) return;
-			var fl = this.doc.file_list;
+			var fl = this.frm.doc.file_list;
 			if(fl) {
 				this.df.options = '';
 				var fl = fl.split('\n');

@@ -32,8 +32,7 @@ wn.ui.FieldGroup = Class.extend({
 	make_fields: function() {
 		if(!window.make_field) {
 			// called in website, load some libs
-			wn.require('lib/css/legacy/fields.css');
-			wn.require('lib/js/legacy/widgets/form/fields.js');
+			wn.require('lib/js/wn/form/fields.js');
 		}
 
 		$(this.parent).css({padding:'11px'});
