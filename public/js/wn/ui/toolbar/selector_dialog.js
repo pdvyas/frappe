@@ -60,7 +60,7 @@ wn.ui.toolbar.SelectorDialog = Class.extend({
 		});
 		
 		// on change
-		$(this.dialog.fields_dict.doctype.input).change(function() {
+		$(this.dialog.fields_dict.doctype.$input).change(function() {
 			me.dialog.fields_dict.go.input.click();
 		}).keypress(function(ev) {
 			if(ev.which==13) {
@@ -72,7 +72,6 @@ wn.ui.toolbar.SelectorDialog = Class.extend({
 	},
 	show: function() {
 		this.dialog.show();
-		this.dialog.fields_dict.doctype.input.focus();
 		return false;
 	},
 	set_values: function(lst) {		

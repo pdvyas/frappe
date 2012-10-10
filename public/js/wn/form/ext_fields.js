@@ -180,55 +180,61 @@ wn.form.TableField = wn.form.Field.extend({
 wn.form.CodeField = wn.form.Field.extend({
 	make_input: function() {
 		wn.require('lib/js/lib/ace/ace.js');
+		var input_area = this.$wrapper.find(".input_area");
 		
-		$(this.input_area).css('border','1px solid #aaa');
+		input_area.css('border','1px solid #aaa');
 		this.pre = $("<pre style='position: relative; height: 400px; \
 			width: 100%; padding: 0px; border-radius: 0px;\
-			margin: 0px; background-color: #fff;'>").appendTo(this.input_area).get(0);
+			margin: 0px; background-color: #fff;'>").appendTo(input_area).get(0);
 
-		this.input = {};
+		this.$input = {};
 		this.myid = wn.dom.set_unique_id(this.pre);
 		this.editor = ace.edit(this.myid);
 
-		if(me.df.options=='Markdown' || me.df.options=='HTML') {
+		if(this.df.options=='Markdown' || this.df.options=='HTML') {
 			wn.require('lib/js/lib/ace/mode-html.js');	
 			var HTMLMode = require("ace/mode/html").Mode;
-		    me.editor.getSession().setMode(new HTMLMode());
+		    this.editor.getSession().setMode(new HTMLMode());
 		}
 
-		else if(me.df.options=='Javascript') {
+		else if(this.df.options=='Javascript') {
 			wn.require('lib/js/lib/ace/mode-javascript.js');	
 			var JavascriptMode = require("ace/mode/javascript").Mode;
-		    me.editor.getSession().setMode(new JavascriptMode());
+		    this.editor.getSession().setMode(new JavascriptMode());
 		}
 
-		else if(me.df.options=='Python') {
+		else if(this.df.options=='Python') {
 			wn.require('lib/js/lib/ace/mode-python.js');	
 			var PythonMode = require("ace/mode/python").Mode;
-		    me.editor.getSession().setMode(new PythonMode());
+		    this.editor.getSession().setMode(new PythonMode());
 		}
 		
 		this.refresh_on_render();
 	},
 	refresh_on_render: function() {
+		var me = this;
 		$(this.frm.wrapper).bind('render_complete', function() {
 			me.editor.resize();
 			me.editor.getSession().on('change', function() {
 				if(me.setting_value) return;
 				var val = me.get_value();
-				if(locals[this.frm.doctype][this.frm.docname][me.df.fieldname] != val) {
+				if(locals[me.frm.doctype][me.frm.docname][me.df.fieldname] != val) {
 					me.set_model(me.get_value());
 				}
 			})
 		});
 	},
+	set_value: function(v) {
+		this._super(v==null ? "" : v);
+	},
 	set_input: function(v) {
-		me.setting_value = true;
-		me.editor.getSession().setValue(v);
-		me.setting_value = false;
+		this.setting_value = true;
+		this.editor.getSession().setValue(v);
+		this.setting_value = false;
+		this.editor.resize();
 	},
 	get_value: function() {
-		return me.editor.getSession().getValue();
+		return this.editor.getSession().getValue();
 	}
 });
 
@@ -238,16 +244,16 @@ wn.form.CodeField = wn.form.Field.extend({
 wn.form.TextEditorField = wn.form.Field.extend({
 	make_input: function() {
 		var me = this;
-		this.input = $('<textarea class="span8">').css('font-size','12px').css('height', '300px')
+		this.$input = $('<textarea class="span8">').css('font-size','12px').css('height', '300px')
 			.appendTo(this.$wrapper.find(".input_area"));
 		
-		this.myid = wn.dom.set_unique_id(this.input.get(0));
+		this.myid = wn.dom.set_unique_id(this.$input.get(0));
 
 		wn.require('lib/js/lib/wysihtml5/bootstrap-wysihtml5.css');
 		wn.require('lib/js/lib/wysihtml5/wysihtml5.min.js');
 		wn.require('lib/js/lib/wysihtml5/bootstrap-wysihtml5.min.js');
 
-		this.input.wysihtml5({
+		this.$input.wysihtml5({
 			"events": {
 				change: function() {
 					me.set_model(me.get_value());

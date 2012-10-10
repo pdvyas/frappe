@@ -73,8 +73,8 @@ wn.ui.form.Attachments = Class.extend({
 		fileid = fileinfo[1];
 		
 		var me = this;
-		$('<div class="alert alert-info"><i class="icon icon-file"></i> <a href="files/'+ fileid +'">'
-			+ fileid +'</a><a href="#" class="close">&times;</a>\
+		$('<div class="alert alert-info"><i class="icon icon-file"></i> <a href="files/'
+			+ fileid +'" target="_blank">'+ fileid +'</a><a href="#" class="close">&times;</a>\
 			</div>')
 			.appendTo(this.$list)
 			.find(".close")
