@@ -30,6 +30,9 @@ default_fields = ['doctype','name','owner','creation','modified','modified_by','
 #=================================================================================
 
 def insert(doclist):
+	if not isinstance(doclist, list):
+		doclist = [doclist]
+
 	from webnotes.model.doclist import DocList
 	for d in doclist:
 		d["__islocal"] = 1

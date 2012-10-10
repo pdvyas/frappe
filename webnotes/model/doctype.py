@@ -379,6 +379,15 @@ def get(dt, form=1):
 
 	doclist = _DocType(dt).make_doclist(form)	
 	return doclist
+	
+def get_fields(dt):
+	"""Get list of fields from doctype"""
+	if isinstance(dt, list):
+		doclist = dt
+	else:
+		doclist = get(dt)
+	return [d.fields["fieldname"] for d in doclist \
+		if d.fields["doctype"]=="DocField" and d.fields["parent"]==doclist[0].fields["name"]]
 
 # Deprecate after import_docs rewrite
 def get_field_property(dt, fieldname, property):
