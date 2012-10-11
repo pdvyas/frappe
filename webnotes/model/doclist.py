@@ -94,10 +94,13 @@ class DocList:
 		"""
 			Create a DocType object
 		"""
-		if self.obj: return self.obj
+		if self.obj:
+			self.obj.doc = self.doc
+			self.obj.doclist = self.doclist			
+			return self.obj
 
 		from webnotes.model.code import get_obj
-		self.obj = get_obj(doc=self.doc, doclist=self.children)
+		self.obj = get_obj(doc=self.doc, doclist=self.doclist)
 		return self.obj
 
 	def to_dict(self):
@@ -185,7 +188,7 @@ class DocList:
 
 		trigger(method, self.obj.doc)
 		
-		self.set_doclist([self.obj.doc] + self.obj.doclist)
+		self.set_doclist([self.obj.doc] + self.obj.doclist[1:])
 
 	def save_main(self):
 		"""
