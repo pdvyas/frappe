@@ -98,7 +98,7 @@ class DocType:
 		"""
 		from webnotes.model.doctype import get
 
-		ref_doclist = get(self.doc.doc_type, form=0)
+		ref_doclist = get(self.doc.doc_type, processed=False)
 
 		return ref_doclist
 
@@ -154,9 +154,8 @@ class DocType:
 			
 			self.set_properties(diff_list)
 
-			from webnotes.utils.cache import CacheItem
-			CacheItem(self.doc.doc_type).clear()
-			CacheItem('tags-' + self.doc.doc_type).clear()
+			from webnotes.model.doctype import clear_cache
+			clear_cache(self.doc.doc_type)
 
 
 	def diff(self, new_dl, ref_dl, dt_dl):
@@ -322,9 +321,8 @@ class DocType:
 				DELETE FROM `tabProperty Setter`
 				WHERE doc_type = %s""", self.doc.doc_type)
 		
-			from webnotes.utils.cache import CacheItem
-			CacheItem(self.doc.doc_type).clear()
-			CacheItem('tags-' + self.doc.doc_type).clear()
+			from webnotes.model.doctype import clear_cache
+			clear_cache(self.doc.doc_type)
 
 		self.get()
 

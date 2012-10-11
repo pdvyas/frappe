@@ -22,7 +22,9 @@
 
 wn.ui.FilterList = Class.extend({
 	init: function(opts) {
-		wn.require('js/fields.js');
+		if(!window.make_field) {
+			wn.require('lib/js/wn/form/fields.js');			
+		}
 		$.extend(this, opts);
 		this.filters = [];
 		this.$w = this.$parent;
@@ -201,8 +203,7 @@ wn.ui.Filter = Class.extend({
 		var field_area = me.$w.find('.filter_field').empty().get(0);
 		f = make_field(df, null, field_area, null, 0, 1);
 		f.df.single_select = 1;
-		f.not_in_form = 1;
-		f.with_label = 0;
+		f.make_inline();
 		f.refresh();
 		me.field = f;
 		

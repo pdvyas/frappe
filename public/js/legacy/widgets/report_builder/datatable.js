@@ -146,10 +146,12 @@ _r.DataTable.prototype.make_toolbar = function(parent) {
   // page len
 
   $td(t,0,4).innerHTML = 'Per Page:'; $y($td(t,0,4),{textAlign:'right',paddingRight:'4px'});  
-  var s = new SelectWidget($td(t,0,5), ['50','100','500','1000'], '70px');
-  s.inp.value = '50';
+  var s = $("<select style='width: 70px;'>")
+	.add_options(['50','100','500','1000'])
+	.appendTo($td(t,0,5)).get(0);
+  s.value = '50';
 
-  s.inp.onchange = function() { 
+  s.onchange = function() { 
   	me.page_len = flt(this.value);
   }
   this.page_len_sel = s;

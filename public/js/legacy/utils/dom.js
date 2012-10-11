@@ -20,44 +20,6 @@
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // 
 
-// short hand functions for setting up
-// rich text editor tinymce
-wn.tinymce = {
-	add_simple: function(ele, height) {
-		if(ele.myid) {
-			tinyMCE.execCommand( 'mceAddControl', true, ele.myid);
-			return;
-		}
-		
-		// no create
-		ele.myid = wn.dom.set_unique_id(ele);
-		$(ele).tinymce({
-			// Location of TinyMCE script
-			script_url : 'js/lib/tiny_mce_33/tiny_mce.js',
-
-			height: height ? height : '200px',
-			
-			// General options
-		    theme : "advanced",
-		    theme_advanced_buttons1 : "bold,italic,underline,separator,strikethrough,justifyleft,justifycenter,justifyright,justifyfull,bullist,numlist,outdent,indent,link,unlink,forecolor,backcolor,code,",
-		    theme_advanced_buttons2 : "",
-		    theme_advanced_buttons3 : "",
-		    theme_advanced_toolbar_location : "top",
-		    theme_advanced_toolbar_align : "left",
-			theme_advanced_path : false,
-			theme_advanced_resizing : false
-		});		
-	},
-	
-	remove: function(ele) {
-		tinyMCE.execCommand( 'mceRemoveControl', true, ele.myid);
-	},
-	
-	get_value: function(ele) {
-		return tinymce.get(ele.myid).getContent();
-	}
-}
-
 wn.ele = {
 	link: function(args) {
 		var span = $a(args.parent, 'span', 'link_type', args.style);
@@ -144,20 +106,6 @@ $bs = function(ele, r) { $(ele).css('-moz-box-shadow',r).css('-webkit-box-shadow
 // Select
 // ====================================
 
-function SelectWidget(parent, options, width, editable, bg_color) {
-	var me = this;
-	// native select
-	this.inp = $a(parent, 'select');
-	if(options) add_sel_options(this.inp, options);
-	if(width) $y(this.inp, {width:width});
-	this.set_width = function(w) { $y(this.inp, {width:w}) };
-	this.set_options = function(o) { add_sel_options(this.inp, o); }
-	this.inp.onchange = function() {
-		if(me.onchange)me.onchange(this);
-	}
-	return;
-}
-
 function empty_select(s) {
 	if(s.custom_select) { s.empty(); return; }
 	if(s.inp)s = s.inp;
@@ -213,6 +161,8 @@ function set_title(t) {
 function $a(parent, newtag, className, cs, innerHTML, onclick) {
 	if(parent && parent.substr)parent = $i(parent);
 	var c = document.createElement(newtag);
+	if(parent && parent.length)
+		parent = parent.get(0);
 	if(parent)
 		parent.appendChild(c);
 		

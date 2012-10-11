@@ -29,6 +29,7 @@ cur_frm.cscript.doc_type = function(doc, dt, dn) {
 cur_frm.cscript.onload = function(doc, dt, dn) {
 	$('div.grid_tbarlinks').parent().toggle(false);
 	cur_frm.add_fields_help();
+	cur_frm.page_layout.footer.hide_save();
 }
 
 cur_frm.cscript.refresh = function(doc, dt, dn) {
@@ -45,16 +46,16 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 				}
 			});	
 		}
-	},1);
+	}, 'icon-ok');
 	
 	cur_frm.add_custom_button('Refresh Form', function() {
 		cur_frm.cscript.doc_type(doc, dt, dn);
-	}, 1);
+	}, 'icon-refresh');
 	
 	cur_frm.add_custom_button('Reset to defaults', function() {
 		cur_frm.confirm('This will <b>remove the customizations</b> defined for this form.<br /><br />' 
 		+ 'Are you sure you want to <i>reset to defaults</i>?', doc, dt, dn);
-	}, 1);
+	}, 'icon-retweet');
 
 	if(!doc.doc_type) {
 		var frm_head = cur_frm.frm_head.appframe;

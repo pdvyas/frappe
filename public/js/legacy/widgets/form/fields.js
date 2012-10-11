@@ -34,6 +34,26 @@
 var no_value_fields = ['Section Break', 'Column Break', 'HTML', 'Table', 'FlexTable', 'Button', 'Image'];
 var codeid=0; var code_editors={};
 
+function make_field(docfield, doctype, parent, frm, in_grid, hide_label) { // Factory
+	field_class = "wn.form." + docfield.fieldtype.replace(/ /g, "") + "Field";
+	if(window[field_class]) {
+		var f = new window[field_class]({
+			df: docfield,
+			parent: parent,
+			doctype: doctype,
+			frm: frm,
+			in_grid: in_grid,
+			perm: frm ? frm.perm : [[1,1,1]]
+		});
+	} else {
+		console.log("field not found: " + field_class)
+	}
+
+	f.make_body();
+	return f;
+}
+
+
 function Field() {	
 	this.with_label = 1;
 }
@@ -379,7 +399,8 @@ Field.prototype.activate = function(docname) {
 function DataField() { } DataField.prototype = new Field();
 DataField.prototype.make_input = function() {
 	var me = this;
-	this.input = $a_input(this.input_area, this.df.fieldtype=='Password' ? 'password' : 'text');
+	this.input = $("<input type='"+ (this.df.fieldtype=='Password' ? 'password' : 'text') 
+		+"'>").appendTo(this.input_area).get(0);
 
 	this.get_value= function() {
 		var v = this.input.value;
@@ -479,7 +500,7 @@ DateField.prototype.make_input = function() {
 	this.user_fmt = sys_defaults.date_format;
 	if(!this.user_fmt)this.user_fmt = 'dd-mm-yy';
 
-	this.input = $a(this.input_area, 'input');
+	this.input = $("<input type='text'>").appendTo(this.input_area).get(0);
 
 	$(this.input).datepicker({
 		dateFormat: me.user_fmt.replace('yyyy','yy'), 
@@ -544,11 +565,23 @@ LinkField.prototype.make_input = function() {
 	var me = this;
 	
 	if(me.df.no_buttons) {
-		this.txt = $a(this.input_area, 'input');
+		this.txt = $("<input type='text'>").appendTo(this.input_area).get(0);
 		this.input = this.txt;	
 	} else {
-		makeinput_popup(this, 'icon-search', 'icon-play', 'icon-plus');
-	
+		me.input = me.input_area;
+
+		'icon-search', 'icon-play', 'icon-plus'
+
+		me.txt = $('<input type="text" style="width:65%">').appendTo(me.input_area).get(0);
+		me.btn = $('<i style="cursor: pointer; margin-left: 2px;" class="icon icon-search"\
+			title="Search Link"></i>').appendTo(me.input_area).get(0);
+		me.btn1 = $('<i style="cursor: pointer; margin-left: 2px;" class="icon icon-play"\
+			title="Open Link"></i>').appendTo(me.input_area).get(0);
+		me.btn2 = $('<i style="cursor: pointer; margin-left: 2px;" class="icon icon-plus"\
+			title="Make New"></i>').appendTo(me.input_area).get(0);		
+		me.txt.name = me.df.fieldname;
+		me.setdisabled = function(tf) { me.txt.disabled = tf; }
+			
 		// setup buttons
 		me.setup_buttons();
 
@@ -658,7 +691,7 @@ LinkField.prototype.setup_buttons = function() {
 			new_doc(me.df.options); 
 		}
 	} else {
-		$dh(me.btn2); $y($td(me.tab,0,2), {width:'0px'});
+		$dh(me.btn2);
 	}
 }
 
@@ -848,8 +881,8 @@ CheckField.prototype.onmake = function() {
 }
 
 CheckField.prototype.make_input = function() { var me = this;
-	this.input = $a_input(this.input_area,'checkbox');
-	$y(this.input, {width:"16px", border:'0px', margin:'2px'}); // no specs for checkbox
+	this.input = $("<input type='checkbox' style='width: 20px; margin-top: -2px;'>")
+		.appendTo(this.input_area).get(0);
 	
 	$(this.input).click(function() {
 		me.set(this.checked?1:0);
@@ -1141,64 +1174,6 @@ TimeField.prototype.set_disp=function(v) {
 	this.set_disp_html(t);
 }
 
-// ======================================================================================
-// Used by date and link fields
-
-function makeinput_popup(me, iconsrc, iconsrc1, iconsrc2) {
-	
-	var icon_style = {cursor: 'pointer', width: '16px', verticalAlign:'middle',
-		marginBottom:'-3px'};
-	
-	me.input = $a(me.input_area, 'div');
-	if(!me.not_in_form)
-		$y(me.input, {width:'80%'});
-		
-	me.input.set_width = function(w) {
-		$y(me.input, {width:(w-2)+'px'});
-	}
-	
-	var tab = $a(me.input, 'table');
-	me.tab = tab;
-	
-	$y(tab, {width:'100%', borderCollapse:'collapse', tableLayout:'fixed'});
-	
-	var c0 = tab.insertRow(0).insertCell(0);
-	var c1 = tab.rows[0].insertCell(1);
-	
-	$y(c1,{width: '20px'});
-	me.txt = $a($a($a(c0, 'div', '', {paddingRight:'8px'}), 'div'), 'input', '', {width:'100%'});
-
-	me.btn = $a(c1, 'i', iconsrc, icon_style)
-
-	if(iconsrc1) // link
-		me.btn.setAttribute('title','Search');
-	else // date
-		me.btn.setAttribute('title','Select Date');
-
-	if(iconsrc1) {
-		var c2 = tab.rows[0].insertCell(2);
-		$y(c2,{width: '20px'});
-		me.btn1 = $a(c2, 'i', iconsrc1, icon_style)
-		me.btn1.setAttribute('title','Open Link');
-	}
-
-	if(iconsrc2) {
-		var c3 = tab.rows[0].insertCell(3);
-		$y(c3,{width: '20px'});
-		me.btn2 = $a(c3, 'i', iconsrc2, icon_style)
-		me.btn2.setAttribute('title','Create New');
-		$dh(me.btn2);
-	}
-		
-	me.txt.name = me.df.fieldname;
-
-	me.setdisabled = function(tf) { me.txt.disabled = tf; }
-}
-
-
-var tmpid = 0;
-
-// ======================================================================================
 
 _f.ButtonField = function() { };
 _f.ButtonField.prototype = new Field();
@@ -1272,59 +1247,5 @@ _f.ButtonField.prototype.show = function() {
 _f.ButtonField.prototype.set = function(v) { }; // No Setter
 _f.ButtonField.prototype.set_disp = function(val) {  } // No Disp on readonly
 
-// ======================================================================================
 
-function make_field(docfield, doctype, parent, frm, in_grid, hide_label) { // Factory
-
-	switch(docfield.fieldtype.toLowerCase()) {
-		
-		// general fields
-		case 'data':var f = new DataField(); break;
-		case 'password':var f = new DataField(); break;
-		case 'int':var f = new IntField(); break;
-		case 'float':var f = new FloatField(); break;
-		case 'currency':var f = new CurrencyField(); break;
-		case 'read only':var f = new ReadOnlyField(); break;
-		case 'link':var f = new LinkField(); break;
-		case 'date':var f = new DateField(); break;
-		case 'time':var f = new TimeField(); break;
-		case 'html':var f = new HTMLField(); break;
-		case 'check':var f = new CheckField(); break;
-		case 'text':var f = new TextField(); break;
-		case 'small text':var f = new TextField(); break;
-		case 'select':var f = new SelectField(); break;
-		case 'button':var f = new _f.ButtonField(); break;
-		
-		// form fields
-		case 'code':var f = new _f.CodeField(); break;
-		case 'text editor':var f = new _f.CodeField(); break;
-		case 'table':var f = new _f.TableField(); break;
-		case 'section break':var f= new _f.SectionBreak(); break;
-		case 'column break':var f= new _f.ColumnBreak(); break;
-		case 'image':var f= new _f.ImageField(); break;
-	}
-
-	f.parent 	= parent;
-	f.doctype 	= doctype;
-	f.df 		= docfield;
-	f.perm 		= frm ? frm.perm : [[1,1,1]];
-	if(_f)
-		f.col_break_width = _f.cur_col_break_width;
-
-	if(in_grid) {
-		f.in_grid = true;
-		f.with_label = 0;
-	}
-	if(hide_label) {
-		f.with_label = 0;
-	}
-	if(frm) {
-		f.frm = frm;
-		if(parent)
-			f.layout_cell = parent.parentNode;
-	}
-	if(f.init) f.init();
-	f.make_body();
-	return f;
-}
 

@@ -116,6 +116,8 @@ wn.datetime = {
 	},
 	
 	str_to_user: function(val, no_time_str) {
+		if(!val) return val;
+		
 		var user_fmt = dateutil.get_user_fmt();
 		var time_str = '';
 		//alert(user_fmt);
@@ -160,6 +162,7 @@ wn.datetime = {
 	},
 	
 	user_to_str: function(d) {
+		if(!d) return d;
 		var user_fmt = this.get_user_fmt();
 		
 		var time_str = '';

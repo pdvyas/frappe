@@ -110,45 +110,40 @@ def getlist(doclist, field):
 # Copy doclist
 # ------------
 
-def copy_doclist(doclist, no_copy = []):
-	"""
-      Save & return a copy of the given doclist
-      Pass fields that are not to be copied in `no_copy`
-	"""
+def clone(source_doclist):
+	""" Copy previous invoice and change dates"""
 	from webnotes.model.doc import Document
+	from webnotes.model.controller import Controller
+	
+	new_doclist = []
+	new_parent = Document(fielddata = source_doclist.doc.fields.copy())
+	new_parent.name = 'Temp/001'
+	new_parent.fields['__islocal'] = 1
+	new_parent.fields['docstatus'] = 0
 
-	cl = []
+	if new_parent.fields.has_key('amended_from'):
+		new_parent.fields['amended_from'] = None
+		new_parent.fields['amendment_date'] = None
 
-	# main doc
-	c = Document(fielddata = doclist[0].fields.copy())
+	new_parent.save(1)
 
-	# clear no_copy fields
-	for f in no_copy:
-		if c.fields.has_key(f):
-			c.fields[f] = None
+	new_doclist.append(new_parent)
 
-	c.name = None
-	c.save(1)
-	cl.append(c)
-
-	# new parent name
-	parent = c.name
-
-	# children
-	for d in doclist[1:]:
-		c = Document(fielddata = d.fields.copy())
-		c.name = None
-
-		# clear no_copy fields
-		for f in no_copy:
-			if c.fields.has_key(f):
-				c.fields[f] = None
-
-		c.parent = parent
-		c.save(1)
-		cl.append(c)
-
-	return cl
+	for d in source_doclist.doclist[1:]:
+		newd = Document(fielddata = d.fields.copy())
+		newd.name = None
+		newd.fields['__islocal'] = 1
+		newd.fields['docstatus'] = 0
+		newd.parent = new_parent.name
+		new_doclist.append(newd)
+	
+	doclistobj = Controller()
+	doclistobj.set_doclist(new_doclist)
+	doclistobj.doc = new_doclist[0]
+	doclistobj.doclist = new_doclist
+	doclistobj.children = new_doclist[1:]
+	doclistobj.save()
+	return doclistobj
 
 def getvaluelist(doclist, fieldname):
 	"""

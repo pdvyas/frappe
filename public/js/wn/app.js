@@ -72,9 +72,6 @@ wn.Application = Class.extend({
 			wn.control_panel = wn.boot.control_panel;
 
 			this.set_globals();
-			if(wn.boot.developer_mode) {
-				console.log("LocalStorage is OFF for developer mode. Please build before going live.");
-			}			
 		} else {
 			this.set_as_guest();
 		}
@@ -100,6 +97,8 @@ wn.Application = Class.extend({
 		sys_defaults = {};
 	},
 	make_page_container: function() {
+		wn.temp_container = $("<div id='#temp-container' style='display: none;'>")
+			.appendTo("body");
 		wn.container = new wn.views.Container();
 		wn.views.make_403();
 		wn.views.make_404();

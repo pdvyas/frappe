@@ -33,11 +33,7 @@ wn.provide('wn.ui.toolbar');
 wn.ui.toolbar.SelectorDialog = Class.extend({
 	init: function(opts) {
 		this.opts = opts;
-		try{
-			this.make_dialog();			
-		} catch(e) {
-			console.log(e);
-		}
+		this.make_dialog();			
 		this.bind_events();
 	},
 	make_dialog: function() {
@@ -64,7 +60,7 @@ wn.ui.toolbar.SelectorDialog = Class.extend({
 		});
 		
 		// on change
-		$(this.dialog.fields_dict.doctype.input).change(function() {
+		$(this.dialog.fields_dict.doctype.$input).change(function() {
 			me.dialog.fields_dict.go.input.click();
 		}).keypress(function(ev) {
 			if(ev.which==13) {
@@ -76,17 +72,10 @@ wn.ui.toolbar.SelectorDialog = Class.extend({
 	},
 	show: function() {
 		this.dialog.show();
-		this.dialog.fields_dict.doctype.input.focus();
 		return false;
 	},
-	set_values: function(lst) {
-		// convert to labels
-		for(var i=0;i<lst.length;i++) 
-			lst[i]=get_doctype_label(lst[i]);
-		
+	set_values: function(lst) {		
 		// set values
-		var sel = this.dialog.fields_dict.doctype.input;
-		$(sel).empty();
-		add_sel_options(sel, lst.sort());		
+		this.dialog.fields_dict.doctype.$input.empty().add_options(lst.sort());	
 	}
 })

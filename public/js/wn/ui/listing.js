@@ -20,9 +20,6 @@
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // 
 
-// new re-factored Listing object
-// uses FieldGroup for rendering filters
-// removed rarely used functionality
 //
 // opts:
 //   parent
@@ -30,6 +27,8 @@
 //   method (method to call on server)
 //   args (additional args to method)
 //   get_args (method to return args as dict)
+
+//	 render_row(row, data)
 
 //   show_filters [false]
 //   doctype
@@ -67,9 +66,6 @@ wn.ui.Listing = Class.extend({
 			} else {
 				this.opts.new_doctype = get_doctype_label(this.opts.new_doctype);
 			}
-		}
-		if(!this.opts.no_result_message) {
-			this.opts.no_result_message = 'Nothing to show'
 		}
 	},
 	make: function(opts) {
@@ -276,7 +272,15 @@ wn.ui.Listing = Class.extend({
 		} else {
 			if(this.start==0) {
 				this.$w.find('.result').toggle(false);
-				this.$w.find('.no-result').toggle(true);
+				var msg = this.get_no_result_message
+					? this.get_no_result_message()
+					: (this.no_result_message 
+						? this.no_result_message
+						: "Nothing to show");
+						
+				this.$w.find('.no-result')
+					.html(msg)
+					.toggle(true);
 			}
 		}
 		

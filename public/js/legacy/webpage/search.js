@@ -22,15 +22,6 @@
 
 search_fields = {};
 
-// Search Selector 2.0
-// -------------------
-
-function setlinkvalue(name) {
-	//selector.input.set(name);// in local - this will be set onchange
-	selector.input.set_input_value(name); // on screen
-	selector.hide();
-}
-
 // Link Selector
 // -------------
 
@@ -99,8 +90,8 @@ function makeselector() {
 		}
 
 		inp.value = '';
-		if(d.input && d.input.txt.value) {
-			inp.value = d.input.txt.value;
+		if(d.input && d.input.get_value) {
+			inp.value = d.input.get_value();
 		}
 		try{inp.focus();} catch(e){}
 
@@ -131,10 +122,6 @@ function makeselector() {
 				field_sel.selectedIndex = 0;
 			} );
 		}
-	}
-	d.onhide = function() {
-		//if(d.input && d.input.txt) // link, call onchange
-		//	d.input.txt.set_input_value()
 	}
 
 	btn.onclick = function() {
@@ -204,7 +191,11 @@ function makeselector() {
 			l.dt = r.coloptions[0];
 
 			if(d.input)
-				l.onclick = function() { setlinkvalue(this.link_name); }
+				l.onclick = function() { 
+					d.input.set_value(this.link_name); // on screen
+					d.input.set_model(this.link_name, true); // in model & call triggers
+					d.hide();
+				}
 			else
 				l.onclick = function() { loaddoc(this.dt, this.link_name); d.hide(); }
 

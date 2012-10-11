@@ -1,7 +1,4 @@
-div.psidebar {
-}
-
-div.psidebar div.head {
+div.sidebar div.head {
 	font-size: 14px;
 	font-weight: bold;
 	color: #555;
@@ -10,7 +7,6 @@ div.psidebar div.head {
 
 div.section {
 	margin-bottom: 15px;
-	overflow: hidden;
 }
 
 div.section div.section-head {
@@ -19,14 +15,24 @@ div.section div.section-head {
 	font-weight: bold;
 }
 
-div.section div.section-body {
-	
+div.section .alert-list .alert {	
+	margin-bottom: 12px;
+	padding-top: 4px;
+	padding-bottom: 4px;
+}
+
+div.section .alert-list .alert:first-child {
+	margin-top: 12px;
+}
+
+div.section hr {
+	margin: 10px 0px;
+}
+
+div.section .alert .close {
+	top: 0px;
 }
 
 div.section div.section-item {
 	margin-bottom: 7px;
-}
-
-div.section div.section-item, div.section .section-link {
-	color: #666;
 }

@@ -1,12 +1,5 @@
 /* FORMS */
 
-div.form-title {
-	/*background-color: #e0eeff;*/
-	padding: 5px 19px 15px 19px;
-	margin: -15px -15px 0px -15px;
-	border-bottom: 1px solid #eee;
-}
-
 .appframe-titlebar .label {
 	vertical-align: middle;
 	margin-right: 7px;
@@ -20,7 +13,7 @@ div.form-intro-area {
 div.form-section-head {
 	margin: 11px -15px 3px -15px;
 	border-top: 1px solid #ccc;
-	padding: 11px 23px 0px 23px;
+	padding: 11px 0px 0px 23px;
 }
 
 div.form-layout-row:first-child .form-section-head {
@@ -36,7 +29,6 @@ div.form-section-head h3 {
 div.form-section-head hr {
 	margin: 9px 0px;
 }
-
 
 div.frm_print_wrapper {
 	background-color:#FFF;
@@ -58,40 +50,8 @@ div.dialog_frm {
 	margin: 10px;
 }
 
-
-
-/*------------------*/
-
 .top_cell {
 	height: 50px;
-}
-
-div.attach_area {
-	padding: 8px;
-	margin: 8px;
-	background-color: #EEE;
-}
-
-div.attach_area table {
-	width: 100%;
-}
-
-.tablabel_normal {
-	margin: 0 4px 0 0;
-	padding: 3px 5px;
-	line-height: 1.3em;
-	display: inline;
-	cursor: pointer;
-}
-
-.tablabel_selected {
-	margin: 0 4px 0 0;
-	padding: 3px 5px;
-	line-height: 1.3em;
-	font-weight: bold;
-	display: inline;
-	cursor: pointer;
-	color: #000;
 }
 
 .scrollhead_wrapper {
@@ -100,32 +60,9 @@ div.attach_area table {
 	height: 30px;
 }
 
-.treeimg {
-	cursor: pointer;
-	margin-right: 3px;
-}
-
-
 .sectionCell {
 	padding: 5px;
 	vertical-align: top;
-}
-
-.code_area {
-	width: 80%;
-	margin: 8px;
-	padding: 4px;
-	background-color: #F8F8F8;
-	border: 1px solid #CCC;
-	overflow-x: auto;
-}
-
-.code_text {
-	width: 100%;
-	height: 360px;
-	margin-top: 3px;
-	font-family: Courier, Fixed;
-	font-size: 12px;
 }
 
 div.time_field select{
@@ -133,6 +70,81 @@ div.time_field select{
 	margin: 2px;
 	width: 45px;
 }
+
+/* fields */
+
+.field {
+	margin-top: 7px;
+}
+
+.grid_cell_div .field {
+	margin-top: 0px !important;
+}
+
+.field .lable_txt {
+	font-size: 95%;
+}
+
+.mandatory .label_txt {
+	color: red;
+}
+
+.input_area input { 
+	width: 80%; 
+	margin: 0px; 
+}
+.input_area select { 
+	width: 80%; 
+}
+.input_area textarea { 
+	width: 97%; 
+	height: 200px;
+}
+
+.mandatory input, .mandatory select, .mandatory textarea {
+	background-color: #fee;
+}
+
+.field .icon-warning-sign {
+	display: none;
+}
+
+.mandatory .icon-warning-sign {
+	display: inline-block !important;
+}
+
+.disp_area { 
+	width: 80%; 
+	font-size: 12px; 
+	background-color: #eee;
+	padding: 2px;
+	border: 1px solid #ddd;
+	min-height: 16px;
+	
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;	
+}
+
+.input_area input, .input_area select, .disp_area {
+	max-width: 300px;
+}
+
+.field-text .disp_area, .field-texteditor .disp_area, .field-code .disp_area {
+	max-width: 97%;
+	width: 97%;
+}
+
+.field-code .disp_area {
+	border: 0px;
+	background-color: #fff;
+	padding: 0px;
+}
+
+.field-button .disp_area, .field-button .label_area  {
+	display: none;
+}
+
 
 /* sidebar */
 

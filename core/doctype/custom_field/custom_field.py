@@ -34,7 +34,6 @@ class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
 
-# *************************** Validate *******************************
 	def set_fieldname(self):
 		if not self.doc.fieldname:
 			# remove special characters from fieldname
@@ -76,8 +75,8 @@ class DocType:
 		# create property setter to emulate insert after
 		self.create_property_setter()
 
-		from webnotes.utils.cache import CacheItem
-		CacheItem(self.doc.dt).clear()
+		from webnotes.model.doctype import clear_cache
+		clear_cache(self.doc.dt)
 
 	def on_trash(self):
 		# delete property setter entries
@@ -88,9 +87,9 @@ class DocType:
 			OR (property = 'previous_field' AND value = %s))""",
 				(self.doc.dt, self.doc.name, self.doc.name))
 
-		from webnotes.utils.cache import CacheItem
-		CacheItem(self.doc.dt).clear()
-
+		from webnotes.model.doctype import clear_cache
+		clear_cache(self.doc.dt)
+		
 	def create_property_setter(self):
 		idx_label_list, field_list = get_fields_label(self.doc.dt, 0)
 		label_index = idx_label_list.index(self.doc.insert_after)
@@ -129,7 +128,7 @@ def get_fields_label(dt=None, form=1):
 		fieldname = webnotes.form_dict.get('fieldname')
 	if not dt: return ""
 	
-	doclist = webnotes.model.doctype.get(dt, form=0)
+	doclist = webnotes.model.doctype.get(dt)
 	docfields = sorted((d for d in doclist if d.doctype=='DocField'),
 			key=lambda d: d.idx)
 	if fieldname:

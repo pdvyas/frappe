@@ -14,7 +14,7 @@ def get_doctype_options():
 	import webnotes.model.doctype
 	return [doctype] + filter(None, map(lambda d: \
 		d.doctype=='DocField' and d.fieldtype=='Table' and d.options or None, 
-		webnotes.model.doctype.get(doctype, form=0)))
+		webnotes.model.doctype.get(doctype)))
 
 data_separator = '----Start entering data below this line----'
 
@@ -131,7 +131,7 @@ def upload():
 	webnotes.conn.begin()
 	
 	overwrite = webnotes.form_dict.get('overwrite')
-	doctype_dl = webnotes.model.doctype.get(doctype, form=0)
+	doctype_dl = webnotes.model.doctype.get(doctype)
 	columns = rows[3][1:]
 	
 	# parent details
@@ -241,20 +241,20 @@ def import_doc(d, doctype, overwrite, row_idx):
 	"""import main (non child) document"""
 	import webnotes
 	import webnotes.model.doc
-	from webnotes.model.doclist import DocList
+	from webnotes.model.controller import Controller
 
 	if webnotes.conn.exists(doctype, d['name']):
 		if overwrite:
 			doclist = webnotes.model.doc.get(doctype, d['name'])
 			doclist[0].fields.update(d)
-			DocList(doclist).save()
+			Controller(doclist).save()
 			return 'Updated row (#%d) %s' % (row_idx, getlink(doctype, d['name']))
 		else:
 			return 'Ignored row (#%d) %s (exists)' % (row_idx, 
 				getlink(doctype, d['name']))
 	else:
 		d['__islocal'] = 1
-		dl = DocList([webnotes.model.doc.Document(fielddata = d)])
+		dl = Controller([webnotes.model.doc.Document(fielddata = d)])
 		dl.save()
 		return 'Inserted row (#%d) %s' % (row_idx, getlink(doctype,
 			dl.doc.fields['name']))

@@ -241,8 +241,10 @@ LocalDB.get_default_value = function(fn, ft, df) {
 		return user;
 	else if(df=='_Full Name')
 		return user_fullname;
-	else if(ft=='Date'&& (df=='Today' || df=='__today')) {
-		return get_today(); }
+	else if(ft=='Date'&& (df=='Today' || df=='__today'))
+		return dateutil.get_today();
+	else if(ft=='Time' && df=="Now")
+		return dateutil.get_cur_time();
 	else if(df)
 		return df;
 	else if(user_defaults[fn])

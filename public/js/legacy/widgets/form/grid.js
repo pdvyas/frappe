@@ -324,7 +324,7 @@ _f.Grid.prototype.add_template = function(cell) {
 	} else {
 		var hc = this.head_row.cells[cell.cellIndex];
 		cell.div.innerHTML = '';
-		cell.div.appendChild(hc.template.wrapper);
+		hc.template.parent = cell.div;
 		hc.template.activate(cell.row.docname);
 		hc.template.activated=1;
 		cell.hc = hc;
@@ -363,18 +363,6 @@ _f.Grid.prototype.remove_template = function(cell) {
 
 	if(!hc.template)return;
 	if(!hc.template.activated)return;
-
-	/*if(hc.template.df.fieldtype=='Date') {
-		// for calendar popup. the value will come after this
-		_f.grid_date_cell = cell;
-		setTimeout('_f.grid_refresh_date()', 100);
-	} else {
-		var input = hc.template.txt || hc.template.input;
-		_f.grid_refresh_field(hc.template, input)
-	}*/
-
-	if(hc.template && hc.template.wrapper.parentNode)
-		cell.div.removeChild(hc.template.wrapper);
 	this.set_cell_value(cell);
 	hc.template.activated=0;
 }
@@ -412,7 +400,8 @@ _f.Grid.prototype.notify_keypress = function(e, keycode) {
 }
 
 _f.Grid.prototype.make_template = function(hc) {
-	hc.template = make_field(wn.meta.get_docfield(hc.doctype, hc.fieldname), hc.doctype, '', this.field.frm, true);
+	hc.template = make_field(wn.meta.get_docfield(hc.doctype, hc.fieldname), hc.doctype, 
+		null, this.field.frm, true);
 	hc.template.grid = this;
 }
 
