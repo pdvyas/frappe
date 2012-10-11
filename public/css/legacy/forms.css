@@ -97,7 +97,7 @@ div.time_field select{
 	width: 80%; 
 }
 .input_area textarea { 
-	width: 90%; 
+	width: 97%; 
 	height: 200px;
 }
 
@@ -131,8 +131,8 @@ div.time_field select{
 }
 
 .field-text .disp_area, .field-texteditor .disp_area, .field-code .disp_area {
-	max-width: 90%;
-	width: 90%;
+	max-width: 97%;
+	width: 97%;
 }
 
 .field-code .disp_area {

@@ -589,6 +589,7 @@ wn.form.CheckField = wn.form.Field.extend({
 				function() {
 					me.set_model(this.checked?1:0);
 				});
+		this.input = this.$input.get(0);
 	},
 	set_input: function(val) {
 		if(this.$input) this.$input.get(0).checked = cint(val) ? true : false;

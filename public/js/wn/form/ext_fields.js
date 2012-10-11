@@ -257,18 +257,22 @@ wn.form.TextEditorField = wn.form.Field.extend({
 		wn.require('lib/js/lib/wysihtml5/wysihtml5.min.js');
 		wn.require('lib/js/lib/wysihtml5/bootstrap-wysihtml5.min.js');
 
-		this.$input.wysihtml5({
+		this.editor = this.$input.wysihtml5({
+			"html": true,
+			"color": true,
 			"events": {
 				change: function() {
 					me.set_model(me.get_value());
 				}
 			}
 		});
+		
 	},
 	set_input: function(val) {
-		$('#' + this.myid).val(val);
+		this.editor.data("wysihtml5").editor.setValue(val);
 	},
 	get_value: function() {
 		return this.validate($('#' + this.myid).val().replace(/&nbsp;/g, ' '));
 	}
+	
 });
