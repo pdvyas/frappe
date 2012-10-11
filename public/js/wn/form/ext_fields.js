@@ -269,7 +269,7 @@ wn.form.TextEditorField = wn.form.Field.extend({
 		
 	},
 	set_input: function(val) {
-		this.editor.data("wysihtml5").editor.setValue(val);
+		if(this.editor) this.editor.data("wysihtml5").editor.setValue(val);
 	},
 	get_value: function() {
 		return this.validate($('#' + this.myid).val().replace(/&nbsp;/g, ' '));
