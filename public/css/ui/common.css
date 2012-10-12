@@ -69,3 +69,7 @@
 .alert .close {
 	top: 0px;
 }
+
+.slick-cell { 
+	font-size: 12px; 
+}

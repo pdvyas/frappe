@@ -241,13 +241,7 @@ wn.views.GridReport = Class.extend({
 	},
 	
  	import_slickgrid: function() {
-		wn.require('lib/js/lib/slickgrid/slick.grid.css');
-		wn.require('lib/js/lib/slickgrid/slick-default-theme.css');
-		wn.require('lib/js/lib/slickgrid/jquery.event.drag.min.js');
-		wn.require('lib/js/lib/slickgrid/slick.core.js');
-		wn.require('lib/js/lib/slickgrid/slick.grid.js');
-		wn.require('lib/js/lib/slickgrid/slick.dataview.js');
-		wn.dom.set_style('.slick-cell { font-size: 12px; }');
+		wn.require_lib("slickgrid");
 		if(this.tree_grid.show) wn.require("app/js/tree_grid.css");	
 	},
 	refresh: function() {
@@ -367,7 +361,7 @@ wn.views.GridReport = Class.extend({
 	},
 	export: function() {
 		wn.downloadify(wn.slickgrid_tools.get_view_data(this.columns, this.dataView),
-			["Report Manager", "System Manager"]);
+			["Report Manager", "System Manager"], this.title);
 		return false;
 	},
 	apply_filters: function(item) {
