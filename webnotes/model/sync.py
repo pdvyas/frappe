@@ -21,10 +21,12 @@ def sync_all(force=0):
 
 def sync_core_doctypes(force=0):
 	# doctypes
-	return walk_and_sync(os.path.join(os.path.dirname(conf.__file__), 'lib'), force)
+	return walk_and_sync(os.path.join(os.path.dirname(os.path.abspath(conf.__file__)),
+		'lib'), force)
 
 def sync_modules(force=0):
-	return walk_and_sync(os.path.join(os.path.dirname(conf.__file__), 'app'), force)
+	return walk_and_sync(os.path.join(os.path.dirname(os.path.abspath(conf.__file__)),
+		'app'), force)
 
 def walk_and_sync(start_path, force=0):
 	"""walk and sync all doctypes and pages"""
