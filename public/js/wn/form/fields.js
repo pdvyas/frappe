@@ -220,23 +220,16 @@ wn.form.Field = Class.extend({
 		// for submit
 		if(ret=='Write' && cint(this.frm.doc.docstatus) > 0) ret = 'Read';
 
-		if(this.frm.doc && this.frm.docstatus==1 && ret=="Read")
-			ret = this.check_allow_on_submit();
-
-		return ret;		
-	},
-	check_allow_on_submit: function() {
-		var aos = cint(this.df.allow_on_submit);
-
-		if(aos && (this.in_grid || (this.frm && this.frm.not_in_container))) {
-			aos = null;
-			if(this.in_grid) aos = this.grid.field.df.allow_on_submit; // take from grid
-			if(this.frm && this.frm.not_in_container) { aos = cur_grid.field.df.allow_on_submit;} // take from grid
+		if(this.frm.doc && this.frm.doc.docstatus==1 && ret=="Read") {
+			ret = this.check_allow_on_submit();			
 		}
 
-		if(this.frm.editable && aos && cint(this.frm.doc.docstatus)>0) {
-			tmp_perm = get_perm(this.frm.doctype, this.frm.docname, 1);
-			if(tmp_perm[this.df.permlevel] && tmp_perm[this.df.permlevel][WRITE]) {
+		return ret;	
+	},
+	check_allow_on_submit: function() {
+		if(this.df.allow_on_submit && cint(this.frm.doc.docstatus)>0) {
+			if(this.frm.orig_perm[this.df.permlevel] 
+				&& this.frm.orig_perm[this.df.permlevel][WRITE]) {
 				return 'Write';
 			}
 		}
@@ -587,6 +580,7 @@ wn.form.CheckField = wn.form.Field.extend({
 		this.$wrapper.find(".icon-ok").css("display", cint(val) ? true : false);
 	},
 	get_value: function() {
+		if(!this.$input) return null;
 		return this.validate(this.$input.get(0).checked ? 1 : 0);
 	}
 })
@@ -607,12 +601,7 @@ wn.form.TextField = wn.form.Field.extend({
 			val = replace_newlines(val);
 		if(val==null) val = "";
 		this._super(val);
-	},
-	refresh: function() {
-		// in grid, everything happens in dialog
-		if(this.in_grid) this.show_dialog();
-		else this._super();
-	},
+	}
 })
 
 wn.form.SmallTextField = wn.form.TextField.extend({

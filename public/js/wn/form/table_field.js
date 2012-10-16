@@ -72,8 +72,19 @@ wn.form.TableField = wn.form.Field.extend({
 		
 		// edit permission on grid
 		this.slickgrid.onBeforeEditCell.subscribe(function(e, args) {
-			if(me.disp_status=="Write") return true;
-			else return false;
+			if(me.disp_status=="Write") {
+				return true;
+			} else {
+				// allow on submit
+				var df = args.column.docfield;
+				if(me.frm.doc.docstatus==1 
+					&& df.allow_on_submit
+						&& me.frm.orig_perm[me.df.permlevel]
+							&& me.frm.orig_perm[me.df.permlevel][WRITE])
+							return true;
+				else
+					return false;
+			}
 		})
 		
 		this.setup_drag_and_drop();
@@ -151,7 +162,14 @@ wn.form.TableField = wn.form.Field.extend({
 							? wn.form.SlickLongTextEditorAdapter 
 							: wn.form.SlickEditorAdapter)
 					}
-										
+					
+					if(d.fieldtype=="Check") {
+						column.formatter = function(row, cell, value) {
+							if(cint(value)) return "<i class='icon-ok'></i>"
+							else return "";
+						}
+					}
+					
 					return column;
 				} else {
 					return null;
@@ -371,7 +389,7 @@ wn.form.SlickEditorAdapter = function(args) {
 			if(df.fieldtype=="Link" || df.fieldtype=="Select") {
 				if (e.keyCode == $.ui.keyCode.UP || e.keyCode == $.ui.keyCode.DOWN || e.keyCode == $.ui.keyCode.ENTER) {
 					e.stopImmediatePropagation();
-				}				
+				}			
 			}
 		});
 		me.field.set_focus();

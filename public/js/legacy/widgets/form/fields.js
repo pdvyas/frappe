@@ -169,20 +169,15 @@ Field.prototype.get_status = function() {
 		ret = 'None';
 
 	// for submit
-	if(ret=='Write' && cint(cur_frm.doc.docstatus) > 0) ret = 'Read';
+	if(ret=='Write' && cint(this.frm.doc.docstatus) > 0) ret = 'Read';
 
 	// allow on submit
 	var a_o_s = cint(this.df.allow_on_submit);
 	
-	if(a_o_s && (this.in_grid || (this.frm && this.frm.not_in_container))) {
-		a_o_s = null;
-		if(this.in_grid) a_o_s = this.grid.field.df.allow_on_submit; // take from grid
-		if(this.frm && this.frm.not_in_container) { a_o_s = cur_grid.field.df.allow_on_submit;} // take from grid
-	}
-	
-	if(cur_frm.editable && a_o_s && cint(cur_frm.doc.docstatus)>0 && !this.df.hidden) {
-		tmp_perm = get_perm(cur_frm.doctype, cur_frm.docname, 1);
-		if(tmp_perm[this.df.permlevel] && tmp_perm[this.df.permlevel][WRITE]) {
+	// allowable on submit	
+	if(a_o_s && cint(this.frm.doc.docstatus)>0 && !this.df.hidden) {
+		// if has regular write, then this is editable!
+		if(this.frm.perm[this.df.permlevel] && this.frm.perm[this.df.permlevel][WRITE]) {
 			ret='Write';
 		}
 	}
