@@ -227,13 +227,14 @@ class CSVImport:
 		return out
 
 	def check_select_link_data(self, r, c, f, d, s = '', l = ''):
-		from webnotes.model.doctype import get_field_property
+		import webnotes.model.doctype
+		doctypelist = webnotes.model.doctype.get(self.dt_list[0])
 		options = ''
 		try:
 			if d and f:
-				dt = get_field_property(self.dt_list[0], f, 'options')
-				lbl = get_field_property(self.dt_list[0], f, 'label')
-				
+				field = doctypelist.get_field(f)
+				dt = field.options
+				lbl = field.label			
 				if dt:
 					options = l and dt and [n[0] for n in sql("select name from `tab%s` " % (('link:' in dt and dt[5:]) or dt))] or s and dt.split('\n') or ''
 					if options and d not in options :
