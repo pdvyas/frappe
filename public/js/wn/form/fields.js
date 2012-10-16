@@ -143,11 +143,7 @@ wn.form.Field = Class.extend({
 		// update locals
 		if(!this.frm) return;
 
-		if((!this.docname) && this.grid)
-			this.docname = this.grid.add_newrow(); // new row
-
 		this.refresh_mandatory(val);
-
 		this.frm.set_value_in_locals(this.doctype, this.docname, this.df.fieldname, val);
 		
 		if(!no_trigger)
@@ -162,7 +158,6 @@ wn.form.Field = Class.extend({
 		
 	run_trigger: function() {
 		if(!this.frm) return;
-
 		if(this.frm.cscript[this.df.fieldname])
 			this.frm.runclientscript(this.df.fieldname, this.doctype, this.docname);
 
@@ -581,7 +576,7 @@ wn.form.CheckField = wn.form.Field.extend({
 		this.$input = $("<input type='checkbox' style='width: 20px; margin-top: -2px;'>")
 			.appendTo(this.$wrapper.find(".input_area")).click(
 				function() {
-					me.set_model(this.checked?1:0);
+					me.set_model(me.get_value());
 				});
 		this.input = this.$input.get(0);
 	},

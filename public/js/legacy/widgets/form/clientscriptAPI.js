@@ -64,11 +64,19 @@ get_server_fields = function(method, arg, table_field, doc, dt, dn, allow_edit, 
 
 set_multiple = function (dt, dn, dict, table_field) {
 	var d = locals[dt][dn];
+	
+	// set value
 	for(var key in dict) {
 		d[key] = dict[key];
-	    if (table_field)	refresh_field(key, d.name, table_field);     
-		else 				refresh_field(key);	
+		if(!table_field) refresh_field(key);	
 	}
+
+	// refresh table
+	if(table_field) {
+		refresh_field(table_field);
+		return;	
+	}
+	
 }
 
 
