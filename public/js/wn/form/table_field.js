@@ -113,7 +113,7 @@ wn.form.TableField = wn.form.Field.extend({
 			
 			this.slickgrid.onAddNewRow.subscribe(function (e, args) {
 				// reload the data
-				refresh_data();
+				me.refresh_data();
 			});
 			
 		}
@@ -121,10 +121,13 @@ wn.form.TableField = wn.form.Field.extend({
 	
 	setup_client_script_helpers: function() {
 		var me = this;
+		this.field_settings = {};
 
 		this.grid = {
-			get_field: function() {
-				return me;
+			get_field: function(fieldname) {
+				if(!me.field_settings[fieldname])
+					me.field_settings[fieldname] = {};
+				return me.field_settings[fieldname];
 			},
 			set_column_disp: function() {
 				return me;
@@ -203,6 +206,7 @@ wn.form.TableField = wn.form.Field.extend({
 	},
 
 	refresh: function() {
+		var old_status = this.disp_status;
 		this.disp_status = this.get_status();
 		
 		if(this.disp_status=="None") {
@@ -210,11 +214,13 @@ wn.form.TableField = wn.form.Field.extend({
 		} else {
 			this.$wrapper.toggle(true);
 			
-			if(this.slickgrid && this.frm_docname == this.frm.doc.name) 
+			var active_cell = null;
+			if(this.slickgrid && this.frm_docname == this.frm.doc.name) {
 				var active_cell = this.slickgrid.getActiveCell();
-
-			// remake grid if new form or new docstatus
-			if(this.frm_docname!=this.frm.doc.name || this.frm_docstatus!=this.frm.doc.docstatus)
+			}
+						
+			// remake grid if new form or new disp_status
+			if(this.frm_docname != this.frm.doc.name || this.disp_status!=old_status)
 				this.make_grid();
 
 			this.refresh_data();
@@ -222,8 +228,8 @@ wn.form.TableField = wn.form.Field.extend({
 			// set active
 			if(active_cell) {
 				this.slickgrid.setActiveCell(active_cell.row, active_cell.cell);
-				$('.slick-cell.active').click();
 			}
+			$('.slick-cell.active').click();
 			
 		}
 
@@ -236,6 +242,7 @@ wn.form.TableField = wn.form.Field.extend({
 		this.slickgrid.setData(data);
 		this.slickgrid.render();
 		this.set_height(data);
+		$('.slick-cell.active').click();
 	},
 
 	set_height: function(data) {
@@ -380,6 +387,7 @@ wn.form.SlickEditorAdapter = function(args) {
 
 		me.field = make_field(df, df.parent, args.container, args.column.frm, true);
 		me.field.docname = args.item.name;
+		me.field.grid = args.column.table_field.grid; // helpers
 		me.field.make_inline();
 		me.field.refresh();
 		me.field.$wrapper.find(":input").bind("keydown", function(e) {
