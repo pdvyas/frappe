@@ -25,7 +25,7 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import cint, cstr, default_fields, flt, formatdate, get_defaults, getdate, now, nowdate, replace_newlines, set_default
-from webnotes.model import db_exists, default_fields
+, default_fields
 from webnotes.model.doc import Document, addchild, getchildren, make_autoname
 from webnotes.model.utils import getlist
 from webnotes.model.code import get_obj

@@ -28,43 +28,82 @@ wn.form.TableField = wn.form.Field.extend({
 		
 		this.$wrapper = $("<div class='field field-grid' \
 			style='margin-top: 8px;'>").appendTo(this.parent);
+		this.make_toolbar();
+			
 		this.wrapper = this.$wrapper.get(0);
 		this.setup_client_script_helpers();
 		
 		var me = this;
-		this.$wrapper.on("click", ".cell-delete", function() {
-			var d = me.data[me.slickgrid.getActiveCell().row];
-			LocalDB.delete_record(d.doctype, d.name);
-			
-			// renum
-			me.get_data();
-			$.each(me.data, function(i, d) {
-				d.idx = i + 1;
+	},
+	
+	make_toolbar: function() {
+		var me = this;
+		this.toolbar = $("<div style='margin-bottom: 4px;'>").appendTo(this.$wrapper);
+		$('<button class="btn btn-small"><i class="icon-small icon-plus-sign"></i> Insert</button>')
+			.appendTo(this.toolbar)
+			.click(function() {
+				var active_cell = me.slickgrid.getActiveCell();
+				if(!active_cell) {
+					var newrow = me.add_row();
+				} else {
+					var idx = me.data[active_cell.row].idx;
+
+					// push below
+					$.each(me.data, function(i, d) {
+						if(d.idx >= idx) d.idx++;
+					});					
+					var newrow = me.add_row();
+					newrow.idx = idx;
+				}				
+				
+				me.refresh_data();
+				me.slickgrid.setActiveCell(newrow.idx-1, 2);
 			});
-			
-			me.refresh_data();
-		});
+		$('<button class="btn btn-small" style="margin-left: 3px;"><i class="icon-small icon-remove"></i> Delete</button>')
+			.appendTo(this.toolbar)
+			.click(function() {
+				var active_cell = me.slickgrid.getActiveCell();
+				if(!active_cell) {
+					msgprint("Select a row to delete first.");
+					return;
+				}
+
+				var d = me.data[active_cell.row];
+				if(!d) return;
+
+				LocalDB.delete_record(d.doctype, d.name);
+
+				// renum
+				me.get_data();
+				$.each(me.data, function(i, d) {
+					d.idx = i + 1;
+				});
+
+				me.refresh_data();				
+			});
+		
 	},
 	
 	make_grid: function() {
 		var me = this;
 		wn.require_lib("slickgrid");
 
-		this.$wrapper.empty();
-
 		var width = $(this.parent).parent('.form-layout-row:first').width();
-		this.$input = $('<div style="height: 300px; border: 1px solid grey;"></div>')
-			.appendTo(this.wrapper)
-			.css('width', width);
+		if(this.$input) 
+			this.$input.empty();
+		else
+			this.$input = $('<div style="height: 300px; border: 1px solid grey;"></div>')
+				.appendTo(this.wrapper)
+				.css('width', width);
 
 		var options = {
 			enableCellNavigation: true,
 			enableColumnReorder: false,
 			enableRowReordering: true,
-			enableAddRow: this.disp_status=="Write" ? true : false,
+			enableAddRow: false, //this.disp_status=="Write" ? true : false,
 			rowHeight: 32,
 			editable: true,
-			autoEdit: false
+			autoEdit: true
 		};
 
 		this.slickgrid = new Slick.Grid(this.$input.get(0), [], 
@@ -108,12 +147,13 @@ wn.form.TableField = wn.form.Field.extend({
 	
 	setup_add_row: function() {
 		var me = this;
-		if(this.disp_status=="Write") {
+		if(false) {
 			this.slickgrid.setSelectionModel(new Slick.CellSelectionModel());
 			
 			this.slickgrid.onAddNewRow.subscribe(function (e, args) {
 				// reload the data
 				me.refresh_data();
+				$('.slick-cell.active').click();
 			});
 			
 		}
@@ -185,10 +225,6 @@ wn.form.TableField = wn.form.Field.extend({
 			this.columns.push({id: "_select", name: "", width: 40, 
 				behavior: "selectAndMove", selectable: false,
 				resizable: false, cssClass: "cell-reorder dnd" })
-			this.columns.push({id: "_delete", name: "", width: 40, 
-				selectable: false, resizable: false, cssClass:"cell-delete",
-				formatter: function() { return "<i class='icon-remove' style='margin-left: 7px; margin-top: 4px;'></i>" }
-				})
 		}
 		this.columns.push({id:'idx', field:'idx', name:'Sr', width: 40});			
 		this.columns = this.columns.concat(columns);
@@ -225,6 +261,8 @@ wn.form.TableField = wn.form.Field.extend({
 
 			this.refresh_data();
 			
+			this.toolbar.toggle(this.disp_status=="Write");
+			
 			// set active
 			if(active_cell) {
 				this.slickgrid.setActiveCell(active_cell.row, active_cell.cell);
@@ -242,13 +280,12 @@ wn.form.TableField = wn.form.Field.extend({
 		this.slickgrid.setData(data);
 		this.slickgrid.render();
 		this.set_height(data);
-		$('.slick-cell.active').click();
 	},
 
 	set_height: function(data) {
 		var height = 32 * (data.length + 3);
 		this.$wrapper.find('.ui-widget:first')
-			.css('height', (height > 300 ? 300 : height) + 'px')
+			.css('height', (height > 450 ? 450 : height) + 'px')
 			.css('background-color', '#f2f2f2');
 		this.slickgrid.resizeCanvas();
 	},
@@ -328,6 +365,7 @@ wn.form.TableField = wn.form.Field.extend({
 
 		grid.onDragStart.subscribe(function (e, dd) {
 			var cell = grid.getCellFromEvent(e);
+			var data = me.data;
 			if (!cell) {
 				return;
 			}
