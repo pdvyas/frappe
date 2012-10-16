@@ -39,7 +39,9 @@ LocalDB.getchildren = function(child_dt, parent, parentfield, parenttype) {
 			}
 		}
 	} 
-	l.sort(function(a,b){return (cint(a.idx)-cint(b.idx))}); return l; 
+	l.sort(function(a,b){
+		return (cint(a.idx)-cint(b.idx))
+	}); return l; 
 }
 
 // Add Doc
@@ -262,6 +264,7 @@ LocalDB.add_child = function(doc, childtype, parentfield) {
 	d.parent = doc.name;
 	d.parentfield = parentfield;
 	d.parenttype = doc.doctype;
+	d.idx = getchildren(childtype, d.parent, d.parentfield, d.parenttype).length;
 	return d;
 }
 

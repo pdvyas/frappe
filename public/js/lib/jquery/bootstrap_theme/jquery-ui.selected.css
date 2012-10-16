@@ -780,9 +780,13 @@ button.ui-button::-moz-focus-inner { border: 0; padding: 0; } /* reset extra pad
   padding:5px;
   color:gray;
   text-align: center;
+  box-shadow: none;
   filter:none;
 }
 
+.ui-datepicker td .ui-state-highlight {
+	background-color: #ddd;
+}
 
 .ui-datepicker td .ui-state-active{
   background:#BFBFBF;

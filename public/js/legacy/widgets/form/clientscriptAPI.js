@@ -64,19 +64,21 @@ get_server_fields = function(method, arg, table_field, doc, dt, dn, allow_edit, 
 
 set_multiple = function (dt, dn, dict, table_field) {
 	var d = locals[dt][dn];
+	
+	// set value
 	for(var key in dict) {
 		d[key] = dict[key];
-	    if (table_field)	refresh_field(key, d.name, table_field);     
-		else 				refresh_field(key);	
+		if(!table_field) refresh_field(key);	
 	}
+
+	// refresh table
+	if(table_field) {
+		refresh_field(table_field);
+		return;	
+	}
+	
 }
 
-refresh_many = function (flist, dn, table_field) {
-	for(var i in flist) {
-		if (table_field) refresh_field(flist[i], dn, table_field);
-		else refresh_field(flist[i]);
-	}
-}
 
 set_field_tip = function(n,txt) {
 	var df = wn.meta.get_docfield(cur_frm.doctype, n, cur_frm.docname);
@@ -90,27 +92,16 @@ set_field_tip = function(n,txt) {
 	}
 }
 
-refresh_field = function(n, docname, table_field) {
+var refresh_field = function(n, docname, table_field) {
 	// multiple
-	if(typeof n==typeof []) refresh_many(n, docname, table_field);
-	
-	if(table_field) { // for table
-		if(_f.frm_dialog && _f.frm_dialog.display) {
-			_f.frm_dialog.cur_frm.refresh_field(n);
-		} else {
-			var g = _f.cur_grid_cell;
-			if(g) var hc = g.grid.head_row.cells[g.cellIndex];
-			
-			if(g && hc && hc.fieldname==n && g.row.docname==docname) {
-				hc.template.refresh(); // if active
-			} else {
-				cur_frm.fields_dict[table_field].grid.refresh_cell(docname, n);
-			}
-		}
-	} else if(cur_frm) {
-		cur_frm.refresh_field(n)
+	if(table_field) {
+		cur_frm.fields_dict[table_field].refresh_data();
+	} else {
+		if(typeof n=="string") n = [n];
+		$.each(n, function(i, v) { cur_frm.refresh_field(v); });
 	}
 }
+var refresh_many = refresh_field;
 
 set_field_options = function(n, txt) {
 	cur_frm.set_df_property(n, 'options', txt)

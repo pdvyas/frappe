@@ -167,13 +167,8 @@ wn.views.QueryReport = Class.extend({
 		}
 	},
 	import_slickgrid: function() {
-		wn.require('lib/js/lib/slickgrid/slick.grid.css');
-		wn.require('lib/js/lib/slickgrid/slick-default-theme.css');
-		wn.require('lib/js/lib/slickgrid/jquery.event.drag.min.js');
-		wn.require('lib/js/lib/slickgrid/slick.core.js');
-		wn.require('lib/js/lib/slickgrid/slick.grid.js');
-		wn.require('lib/js/lib/slickgrid/slick.dataview.js');
-		wn.dom.set_style('.slick-cell { font-size: 12px; }\
+		wn.require_lib("slickgrid");
+		wn.dom.set_style('\
 		.slick-headerrow-column {\
 	      background: #87ceeb;\
 	      text-overflow: clip;\
@@ -417,7 +412,7 @@ wn.views.QueryReport = Class.extend({
 		 	function(row) {
 				return [row.splice(1)];
 		});
-		wn.downloadify(result, ["Report Manager", "System Manager"]);
+		wn.downloadify(result, ["Report Manager", "System Manager"], this.ref_doctype);
 		return false;
 	}
 })

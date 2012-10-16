@@ -3,10 +3,10 @@ wn.markdown = function(txt) {
 		wn.require('lib/js/lib/showdown.js');
 		wn.md2html = new Showdown.converter();
 	}
-	return wn.md2html.makeHtml(txt);
+	return wn.md2html.makeHtml(txt || "");
 }
 
-wn.downloadify = function(data, roles) {
+wn.downloadify = function(data, roles, title) {
 	if(roles && roles.length && !has_common(roles, user_roles)) {
 		msgprint("Export not allowed. You need " + wn.utils.comma_or(roles)
 			+ " Role to export.");
@@ -20,7 +20,7 @@ wn.downloadify = function(data, roles) {
 	
 	Downloadify.create(id ,{
 		filename: function(){
-			return me.title + '.csv';
+			return (title || "download") + '.csv';
 		},
 		data: function(){ 
 			return wn.to_csv(data);

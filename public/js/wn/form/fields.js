@@ -70,12 +70,22 @@ wn.form.Field = Class.extend({
 		this.wrapper = this.$wrapper.get(0);
 	},
 	
+	make_input: function() {
+		var me = this;
+		this.$wrapper.find(":input")
+			.attr("name", this.df.fieldname)
+			.change(function() {
+				me.set_model(me.get_value());
+			})
+			.addClass("mousetrap"); // for ctrl+s
+	},
+	
 	make_inline: function() {
 		this.$wrapper.css({
 			display: "inline",
 			margin: "0px",
 			"margin-top": "-4px"
-		}).find(".label_area, .help, .disp_area").remove();
+		}).find(".label_area, .help").remove();
 		
 		this.$wrapper.find(".input_area").css({display:"inline"})
 	},
@@ -87,9 +97,6 @@ wn.form.Field = Class.extend({
 	},
 	
 	refresh_view: function() {
-		if(this.in_grid) {
-			this.$wrapper.find(".label_area, help, .disp_area").toggle(false);
-		}
 		this.refresh_label();
 		this.refresh_display();
 		this.refresh_description();
@@ -111,7 +118,7 @@ wn.form.Field = Class.extend({
 	
 	refresh_display: function() {
 		var status = this.get_status();
-		if(status == this.cur_status) return;
+		if(status == this.disp_status) return;
 		
 		if(status=="Write") {
 			if(!this.$input && this.make_input)
@@ -129,18 +136,14 @@ wn.form.Field = Class.extend({
 			this.$wrapper.toggle(false);
 		}
 		
-		this.cur_status = status;
+		this.disp_status = status;
 	},
 	
 	set_model: function(val, no_trigger) {
 		// update locals
 		if(!this.frm) return;
 
-		if((!this.docname) && this.grid)
-			this.docname = this.grid.add_newrow(); // new row
-
 		this.refresh_mandatory(val);
-
 		this.frm.set_value_in_locals(this.doctype, this.docname, this.df.fieldname, val);
 		
 		if(!no_trigger)
@@ -155,18 +158,10 @@ wn.form.Field = Class.extend({
 		
 	run_trigger: function() {
 		if(!this.frm) return;
-
 		if(this.frm.cscript[this.df.fieldname])
 			this.frm.runclientscript(this.df.fieldname, this.doctype, this.docname);
 
 		this.frm.refresh_dependency();
-	},
-	
-	activate: function(docname) {
-		this.docname = docname;
-		if(this.$wrapper) this.$wrapper.appendTo(this.parent); // add to new cell
-		this.refresh();
-		this.set_focus();
 	},
 	
 	set_focus: function() {
@@ -225,23 +220,16 @@ wn.form.Field = Class.extend({
 		// for submit
 		if(ret=='Write' && cint(this.frm.doc.docstatus) > 0) ret = 'Read';
 
-		if(this.frm.doc && this.frm.docstatus==1 && ret=="Read")
-			ret = this.check_allow_on_submit();
-
-		return ret;		
-	},
-	check_allow_on_submit: function() {
-		var aos = cint(this.df.allow_on_submit);
-
-		if(aos && (this.in_grid || (this.frm && this.frm.not_in_container))) {
-			aos = null;
-			if(this.in_grid) aos = this.grid.field.df.allow_on_submit; // take from grid
-			if(this.frm && this.frm.not_in_container) { aos = cur_grid.field.df.allow_on_submit;} // take from grid
+		if(this.frm.doc && this.frm.doc.docstatus==1 && ret=="Read") {
+			ret = this.check_allow_on_submit();			
 		}
 
-		if(this.frm.editable && aos && cint(this.frm.doc.docstatus)>0) {
-			tmp_perm = get_perm(this.frm.doctype, this.frm.docname, 1);
-			if(tmp_perm[this.df.permlevel] && tmp_perm[this.df.permlevel][WRITE]) {
+		return ret;	
+	},
+	check_allow_on_submit: function() {
+		if(this.df.allow_on_submit && cint(this.frm.doc.docstatus)>0) {
+			if(this.frm.orig_perm[this.df.permlevel] 
+				&& this.frm.orig_perm[this.df.permlevel][WRITE]) {
 				return 'Write';
 			}
 		}
@@ -258,11 +246,8 @@ wn.form.DataField = wn.form.Field.extend({
 		this.$input = $("<input type='"+ 
 			(this.df.fieldtype=='Password' ? 'password' : 'text') +"'>")
 			.appendTo(this.$wrapper.find(".input_area"))
-			.attr("name", this.df.fieldname)
-			.change(function() {
-				// fix: allow 0 as value
-				me.set_model(me.get_value());
-			});
+			
+		this._super();
 	},
 	set_value: function(val) {
 		// show empty string instead of null
@@ -486,10 +471,7 @@ wn.form.LinkField = wn.form.DataField.extend({
 		this.$wrapper.find(".input_area .icon-plus").css("display", 
 			this.can_create ? "inline" : "none")
 	},
-	activate: function(docname) {
-		this._super(docname);
-		this.$input.css({width: "80%"});
-	},
+
 	set_display: function(val) {
 		this._super(repl('<a href="#Form/%(doctype)s/%(name)s">%(name)s</a>', {
 			doctype: this.df.options,
@@ -587,7 +569,7 @@ wn.form.CheckField = wn.form.Field.extend({
 		this.$input = $("<input type='checkbox' style='width: 20px; margin-top: -2px;'>")
 			.appendTo(this.$wrapper.find(".input_area")).click(
 				function() {
-					me.set_model(this.checked?1:0);
+					me.set_model(me.get_value());
 				});
 		this.input = this.$input.get(0);
 	},
@@ -598,6 +580,7 @@ wn.form.CheckField = wn.form.Field.extend({
 		this.$wrapper.find(".icon-ok").css("display", cint(val) ? true : false);
 	},
 	get_value: function() {
+		if(!this.$input) return null;
 		return this.validate(this.$input.get(0).checked ? 1 : 0);
 	}
 })
@@ -610,9 +593,7 @@ wn.form.TextField = wn.form.Field.extend({
 	make_input: function() {
 		var me = this;
 		this.$input = $('<textarea>').appendTo(this.$wrapper.find(".input_area"))
-			.change(function() {
-				me.set_model(me.get_value())
-			});			
+		this._super();
 	},
 
 	set_display: function(val) {
@@ -620,42 +601,6 @@ wn.form.TextField = wn.form.Field.extend({
 			val = replace_newlines(val);
 		if(val==null) val = "";
 		this._super(val);
-	},
-	refresh: function() {
-		// in grid, everything happens in dialog
-		if(this.in_grid) return;
-		else this._super();
-	},
-	activate: function(docname) {
-		this._super(docname);
-		this.show_dialog();
-	},
-	show_dialog: function() {
-		if(!this.dialog) {
-			this.dialog = new wn.ui.Dialog({
-				title: "Edit Text for " + this.df.label,
-				width: 400,
-				fields: [
-					this.df,
-					{label:"Update", fieldtype:"Button"}
-				]
-			});
-			
-			var me = this;
-			this.dialog.fields_dict.update.$input.click(function() {
-				me.set_model(me.dialog.fields_dict[me.df.fieldname].get_value());
-				me.dialog.hide();
-			});
-			
-			this.dialog.onhide = function() {
-				if(_f.cur_grid_cell)
-					_f.cur_grid_cell.grid.cell_deselect();
-			}
-		}
-		
-		text_dialog = this.dialog;
-		this.dialog.fields_dict[this.df.fieldname].set_value(this.get_model_value())
-		this.dialog.show();
 	}
 })
 
@@ -678,9 +623,7 @@ wn.form.SelectField = wn.form.Field.extend({
 
 		var me = this;
 		this.$input = $("<select>").appendTo(this.$wrapper.find(".input_area"))
-			.change(function() {
-				me.set_model(me.get_value());
-			});
+		this._super();
 	},
 	validate: function(val) {
 		if(!this.$input) 
@@ -735,12 +678,11 @@ wn.form.TimeField = wn.form.Field.extend({
 		var me = this;
 		this.$input = $('<input type="text">')
 			.appendTo(this.$wrapper.find(".input_area"))
-			.change(function() {
-				me.set_model(me.get_value());
-			})
 			.timepicker({
 				timeFormat: 'hh:mm',
 			});
+
+		this._super();
 	}
 });
 

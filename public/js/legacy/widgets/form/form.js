@@ -586,9 +586,11 @@ _f.Frm.prototype.refresh = function(docname) {
 
 		this.editable = this.is_editable[this.docname];
 		
-		if(!this.doc.__archived && (this.editable || (!this.editable && this.meta.istable))) {
+		if(this.editable || (!this.editable && this.meta.istable)) {
 			// show form layout (with fields etc)
 			// ----------------------------------
+			this.layout.show();
+			
 			if(this.print_wrapper) {
 				$dh(this.print_wrapper);
 				$ds(this.page_layout);
@@ -617,9 +619,6 @@ _f.Frm.prototype.refresh = function(docname) {
 			// footer
 			this.refresh_footer();
 			
-			// layout
-			if(this.layout) this.layout.show();
-
 			// call onload post render for callbacks to be fired
 			if(cur_frm.cscript.is_onload) {
 				this.runclientscript('onload_post_render', this.doctype, this.docname);
@@ -816,8 +815,16 @@ _f.Frm.prototype.show_doc = function(dn) {
 // ======================================================================================
 var validated; // bad design :(
 _f.Frm.prototype.save = function(save_action, call_back) {
+	// removes focus from a field before save, 
+	// so that its change event gets triggered before saving
+	$(document.activeElement).blur();
+	
 	//alert(save_action);
-	if(!save_action) save_action = 'Save';
+	if(!save_action) {
+		if(cint(this.doc.docstatus) > 0) return;
+		save_action = 'Save';
+	}
+
 	var me = this;
 	if(this.savingflag) {
 		msgprint("Document is currently saving....");
@@ -925,15 +932,12 @@ _f.Frm.prototype.runclientscript = function(caller, cdt, cdn) {
 
 	var ret = null;
 	var doc = locals[cur_frm.doc.doctype][cur_frm.doc.name];
-	try {
-		if(this.cscript[caller])
-			ret = this.cscript[caller](doc, cdt, cdn);
-		// for product
-		if(this.cscript['custom_'+caller])
-			ret += this.cscript['custom_'+caller](doc, cdt, cdn);
-	} catch(e) {
-		console.log(e);
-	}
+	
+	if(this.cscript[caller])
+		ret = this.cscript[caller](doc, cdt, cdn);
+	// for product
+	if(this.cscript['custom_'+caller])
+		ret += this.cscript['custom_'+caller](doc, cdt, cdn);
 
 	if(caller && caller.toLowerCase()=='setup') {
 
@@ -942,11 +946,7 @@ _f.Frm.prototype.runclientscript = function(caller, cdt, cdn) {
 		// js
 		var cs = doctype.__js || (doctype.client_script_core + doctype.client_script);
 		if(cs) {
-			try {
-				var tmp = eval(cs);
-			} catch(e) {
-				console.log(e);
-			}
+			var tmp = eval(cs);
 		}
 
 		// css

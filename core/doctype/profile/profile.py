@@ -94,11 +94,15 @@ class DocType:
 		if self.temp.get('roles'):
 			from webnotes.model.doc import Document
 
+			self.is_system_manager = webnotes.conn.sql("""select name from
+				tabUserRole where parent=%s and role='System Manager'""", self.doc.name)
+
 			# remove roles
 			webnotes.conn.sql("""delete from tabUserRole where parent='%s' 
 				and role in ('%s')""" % (self.doc.name, "','".join(self.temp['roles']['unset_roles'])))
 
-			self.check_one_system_manager()
+			if "System Manager" in self.temp['roles']['unset_roles']:
+				self.check_one_system_manager()
 
 			# add roles
 			user_roles = webnotes.get_roles(self.doc.name)
@@ -110,11 +114,16 @@ class DocType:
 					d.parentfield = 'user_roles'
 					d.parent = self.doc.name
 					d.save()
+
+			if self.is_system_manager and not "System Manager" in self.temp['roles']['set_roles']:
+				# check if there is atleast one system manager
+				self.check_one_system_manager()
 			
 	def check_one_system_manager(self):
-		if not webnotes.conn.sql("""select parent from tabUserRole where role='System Manager' and docstatus<2 and parent!='Administrator'"""):
+		if not webnotes.conn.sql("""select parent from tabUserRole where role='System Manager' \
+			and docstatus<2 and parent!='Administrator'"""):
 			webnotes.msgprint("""Cannot un-select as System Manager as there must 
-				be atleast one 'System Manager'""", raise_exception=1)
+				be atleast one 'System Manager'.""", raise_exception=1)
 				
 	def on_update(self):
 		# owner is always name

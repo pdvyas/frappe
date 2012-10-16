@@ -41,7 +41,7 @@ wn.require = function(items) {
 
 wn.assets = {
 	// keep track of executed assets
-	executed_ : {},
+	loaded_ : [],
 	
 	check: function() {
 		// if version is different then clear localstorage
@@ -110,7 +110,7 @@ wn.assets = {
 		var type = wn.assets.extn(src);
 		if(wn.assets.handler[type]) {
 			wn.assets.handler[type](wn.assets.get(src), src);
-			wn.assets.executed_[src] = 1;
+			wn.assets.loaded_.push(src);
 		}
 	},
 	
@@ -124,5 +124,57 @@ wn.assets = {
 		css: function(txt, src) {
 			wn.dom.set_style(txt);
 		}
+	}
+}
+
+wn.libs = {
+	slickgrid: [
+		'lib/js/lib/slickgrid/slick.grid.css',
+		'lib/js/lib/slickgrid/slick-default-theme.css',
+		'lib/js/lib/jquery/jquery.ui.interactions.min.js',
+		'lib/js/lib/slickgrid/jquery.event.drag.min.js',
+		'lib/js/lib/slickgrid/plugins/slick.cellrangeselector.js',
+		'lib/js/lib/slickgrid/plugins/slick.cellselectionmodel.js',
+		'lib/js/lib/slickgrid/plugins/slick.rowselectionmodel.js',
+		'lib/js/lib/slickgrid/plugins/slick.rowmovemanager.js',
+		'lib/js/lib/slickgrid/plugins/slick.cellrangedecorator.js',
+		'lib/js/lib/slickgrid/plugins/slick.cellrangeselector.js',
+		'lib/js/lib/slickgrid/slick.formatters.js',
+		'lib/js/lib/slickgrid/slick.core.js',
+		'lib/js/lib/slickgrid/slick.grid.js',
+		'lib/js/lib/slickgrid/slick.dataview.js'
+	]
+}
+
+wn.require_lib = function(lib) {
+	
+	if(typeof lib=="string") {
+		lib = [lib];
+	}
+
+	var files = $.map(lib, function(l) { 
+		return $.map(wn.libs[l], function(f) { if(!in_list(wn.assets.loaded_, f)) return f; });
+	});
+
+	if(files) {
+		var dialog = new wn.ui.Dialog({
+			title: "Loading...",
+			width: 500
+		});
+		
+		dialog.show();
+		
+		$('<div style="margin: 30px 10px">\
+			<div class="progress"><div class="bar"></div></div>\
+		</div>').appendTo(dialog.body);
+		
+		
+		$.each(files, function(i, v) {
+			wn.require(v);
+			var width = cint(flt(i+1) / files.length * 100) + "%";
+			$(dialog.body).find(".bar").css("width", width);
+		})
+		
+		dialog.hide();
 	}
 }
