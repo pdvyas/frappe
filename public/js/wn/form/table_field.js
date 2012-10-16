@@ -23,10 +23,27 @@
 
 wn.form.TableField = wn.form.Field.extend({
 	make_body: function() {
+		this.frm_docname = null;
+		this.frm_docstatus = null;
+		
 		this.$wrapper = $("<div class='field field-grid' \
 			style='margin-top: 8px;'>").appendTo(this.parent);
 		this.wrapper = this.$wrapper.get(0);
 		this.setup_client_script_helpers();
+		
+		var me = this;
+		this.$wrapper.on("click", ".cell-delete", function() {
+			var d = me.data[me.slickgrid.getActiveCell().row];
+			LocalDB.delete_record(d.doctype, d.name);
+			
+			// renum
+			me.get_data();
+			$.each(me.data, function(i, d) {
+				d.idx = i + 1;
+			});
+			
+			me.refresh_data();
+		});
 	},
 	
 	make_grid: function() {
@@ -44,14 +61,14 @@ wn.form.TableField = wn.form.Field.extend({
 			enableCellNavigation: true,
 			enableColumnReorder: false,
 			enableRowReordering: true,
-			enableAddRow: true,
+			enableAddRow: this.disp_status=="Write" ? true : false,
 			rowHeight: 32,
-			editable: true
+			editable: true,
+			autoEdit: false
 		};
 
-		var columns = this.get_columns();
 		this.slickgrid = new Slick.Grid(this.$input.get(0), [], 
-			columns, options);
+			this.get_columns(), options);
 		
 		// edit permission on grid
 		this.slickgrid.onBeforeEditCell.subscribe(function(e, args) {
@@ -73,11 +90,8 @@ wn.form.TableField = wn.form.Field.extend({
 	add_row: function() {
 		var d = LocalDB.add_child(this.frm.doc, this.df.options, this.df.fieldname);
 		d.idx = this.data.length+1;
-
-		this.slickgrid.invalidateRow(this.data.length);
-		this.slickgrid.updateRowCount();
-		this.refresh_data();
-		
+		this.data.push(d);
+		this.set_height(this.data);
 		return d;
 	},
 	
@@ -85,6 +99,12 @@ wn.form.TableField = wn.form.Field.extend({
 		var me = this;
 		if(this.disp_status=="Write") {
 			this.slickgrid.setSelectionModel(new Slick.CellSelectionModel());
+			
+			this.slickgrid.onAddNewRow.subscribe(function (e, args) {
+				// reload the data
+				refresh_data();
+			});
+			
 		}
 	},
 	
@@ -98,8 +118,10 @@ wn.form.TableField = wn.form.Field.extend({
 			set_column_disp: function() {
 				return me;
 			},
-			refresh_cell: function() {
-				me.refresh_data();
+			refresh_cell: function(docname, fieldname) {
+				$.each(me.data, function(i, d) {
+					if(d.name==docname) me.slickgrid.updateRow(i);
+				});
 			}
 		}
 		
@@ -136,12 +158,20 @@ wn.form.TableField = wn.form.Field.extend({
 				}
 			}
 		);
-				
-		return [
-			{id: "_select", name: "", width: 40, behavior: "selectAndMove", selectable: false,
-				resizable: false, cssClass: "cell-reorder dnd" },
-			{id:'idx', field:'idx', name:'Sr', width: 40}
-		].concat(columns);
+		
+		this.columns = [];
+		if(this.disp_status=="Write") {
+			this.columns.push({id: "_select", name: "", width: 40, 
+				behavior: "selectAndMove", selectable: false,
+				resizable: false, cssClass: "cell-reorder dnd" })
+			this.columns.push({id: "_delete", name: "", width: 40, 
+				selectable: false, resizable: false, cssClass:"cell-delete",
+				formatter: function() { return "<i class='icon-remove' style='margin-left: 7px; margin-top: 4px;'></i>" }
+				})
+		}
+		this.columns.push({id:'idx', field:'idx', name:'Sr', width: 40});			
+		this.columns = this.columns.concat(columns);
+		return this.columns;
 	},
 
 	get_data: function() {
@@ -161,21 +191,37 @@ wn.form.TableField = wn.form.Field.extend({
 			this.$wrapper.toggle(false);
 		} else {
 			this.$wrapper.toggle(true);
-			this.make_grid();
+			
+			if(this.slickgrid && this.frm_docname == this.frm.doc.name) 
+				var active_cell = this.slickgrid.getActiveCell();
+
+			// remake grid if new form or new docstatus
+			if(this.frm_docname!=this.frm.doc.name || this.frm_docstatus!=this.frm.doc.docstatus)
+				this.make_grid();
+
 			this.refresh_data();
+			
+			// set active
+			if(active_cell) {
+				this.slickgrid.setActiveCell(active_cell.row, active_cell.cell);
+				$('.slick-cell.active').click();
+			}
+			
 		}
-		
+
+		this.frm_docname = this.frm.doc.name;
+		this.frm_docstatus = this.frm.doc.docstatus;
 	},
 
 	refresh_data: function() {
 		var data = this.get_data();			
 		this.slickgrid.setData(data);
 		this.slickgrid.render();
-		this.set_height(data);		
+		this.set_height(data);
 	},
 
 	set_height: function(data) {
-		var height = 32 * (data.length + 2);
+		var height = 32 * (data.length + 3);
 		this.$wrapper.find('.ui-widget:first')
 			.css('height', (height > 300 ? 300 : height) + 'px')
 			.css('background-color', '#f2f2f2');
@@ -248,7 +294,7 @@ wn.form.TableField = wn.form.Field.extend({
 			grid.render();
 		});
 
-	  	grid.registerPlugin(moveRowsPlugin);
+			grid.registerPlugin(moveRowsPlugin);
 
 		grid.onDragInit.subscribe(function (e, dd) {
 			// prevent the grid from cancelling drag'n'drop by default
@@ -312,7 +358,6 @@ wn.form.SlickEditorAdapter = function(args) {
 	this.init = function() {
 		if(!args.item.name) {
 			args.item.name = args.column.table_field.add_row().name;
-			return;
 		}
 
 		me.field = make_field(df, df.parent, args.container, args.column.frm, true);
@@ -338,27 +383,32 @@ wn.form.SlickEditorAdapter = function(args) {
 
 	this.focus = function () {
 		me.field.set_focus();
-    };
+	};
 
 	this.serializeValue = function () {
-		return me.field.get_value();
+		return me.field ? me.field.get_value() : null;
 	};
 
 	this.applyValue = function (item, state) {
-		console.log(state)
 		item[df.fieldname] = state;
-		// already happens on change?
-		//me.field.set_model(me.field.validate(state));
 	};
 
 	this.loadValue = function (item) {
 		me.field.set_value(item[df.fieldname]);
 	};
 
-    this.isValueChanged = function () {
+	this.isValueChanged = function () {
 		if(!args.item.name) 
 			return true;
-		return me.field.get_value() != locals[df.parent][args.item.name][df.fieldname];
+		if(!me.field) 
+			return false;
+		if(me.field.disp_status!="Write")
+			return false;
+		changed = (me.field.get_value() != locals[df.parent][args.item.name][df.fieldname]);
+		// this is not called later
+		if(changed) 
+			me.field.set_model(me.field.get_value())
+		return changed;
 	};
 
 	this.validate = function () {
@@ -375,101 +425,105 @@ wn.form.SlickEditorAdapter = function(args) {
  */
 
 wn.form.SlickLongTextEditorAdapter = function (args) {
-  var $input, $wrapper;
-  var defaultValue;
-  var scope = this;
+	var $input, $wrapper;
+	var defaultValue;
+	var scope = this;
 
-  this.init = function () {
-    var $container = $("body");
+	this.init = function () {
+		if(!args.item.name) {
+			args.item.name = args.column.table_field.add_row().name;
+		}
 
-    $wrapper = $("<DIV style='z-index:10000;position:absolute;background:white;padding:5px;border:3px solid gray; -moz-border-radius:10px; border-radius:10px;'/>")
-        .appendTo($container);
+		var $container = $("body");
 
-    $input = $("<TEXTAREA hidefocus rows=5 style='backround:white;width:250px;height:80px;border:0;outline:0'>")
-        .appendTo($wrapper);
+		$wrapper = $("<DIV style='z-index:10000;position:absolute;background:white;padding:5px;border:3px solid gray; -moz-border-radius:10px; border-radius:10px;'/>")
+				.appendTo($container);
 
-    $("<DIV style='text-align:right'><BUTTON class='btn btn-small' style='margin-right:3px;'>Save (ctrl+enter)</BUTTON> <BUTTON class='btn btn-small'>Cancel</BUTTON></DIV>")
-        .appendTo($wrapper);
+		$input = $("<TEXTAREA hidefocus rows=5 style='backround:white;width:250px;height:80px;border:0;outline:0'>")
+				.appendTo($wrapper);
 
-    $wrapper.find("button:first").bind("click", this.save);
-    $wrapper.find("button:last").bind("click", this.cancel);
-    $input.bind("keydown", this.handleKeyDown);
+		$("<DIV style='text-align:right'><BUTTON class='btn btn-small' style='margin-right:3px;'>Save (ctrl+enter)</BUTTON> <BUTTON class='btn btn-small'>Cancel</BUTTON></DIV>")
+				.appendTo($wrapper);
 
-    scope.position(args.position);
-    $input.focus().select();
-  };
+		$wrapper.find("button:first").bind("click", this.save);
+		$wrapper.find("button:last").bind("click", this.cancel);
+		$input.bind("keydown", this.handleKeyDown);
 
-  this.handleKeyDown = function (e) {
-    if (e.which == $.ui.keyCode.ENTER && e.ctrlKey) {
-      scope.save();
-    } else if (e.which == $.ui.keyCode.ESCAPE) {
-      e.preventDefault();
-      scope.cancel();
-    } else if (e.which == $.ui.keyCode.TAB && e.shiftKey) {
-      e.preventDefault();
-      args.grid.navigatePrev();
-    } else if (e.which == $.ui.keyCode.TAB) {
-      e.preventDefault();
-      args.grid.navigateNext();
-    }
-  };
+		scope.position(args.position);
+		$input.focus().select();
+	};
 
-  this.save = function () {
-    args.commitChanges();
-  };
+	this.handleKeyDown = function (e) {
+		if (e.which == $.ui.keyCode.ENTER && e.ctrlKey) {
+			scope.save();
+		} else if (e.which == $.ui.keyCode.ESCAPE) {
+			e.preventDefault();
+			scope.cancel();
+		} else if (e.which == $.ui.keyCode.TAB && e.shiftKey) {
+			e.preventDefault();
+			args.grid.navigatePrev();
+		} else if (e.which == $.ui.keyCode.TAB) {
+			e.preventDefault();
+			args.grid.navigateNext();
+		}
+	};
 
-  this.cancel = function () {
-    $input.val(defaultValue);
-    args.cancelChanges();
-  };
+	this.save = function () {
+		args.commitChanges();
+	};
 
-  this.hide = function () {
-    $wrapper.hide();
-  };
+	this.cancel = function () {
+		$input.val(defaultValue);
+		args.cancelChanges();
+	};
 
-  this.show = function () {
-    $wrapper.show();
-  };
+	this.hide = function () {
+		$wrapper.hide();
+	};
 
-  this.position = function (position) {
-    $wrapper
-        .css("top", position.top - 5)
-        .css("left", position.left - 5)
-  };
+	this.show = function () {
+		$wrapper.show();
+	};
 
-  this.destroy = function () {
-    $wrapper.remove();
-  };
+	this.position = function (position) {
+		$wrapper
+				.css("top", position.top - 5)
+				.css("left", position.left - 5)
+	};
 
-  this.focus = function () {
-    $input.focus();
-  };
+	this.destroy = function () {
+		$wrapper.remove();
+	};
 
-  this.loadValue = function (item) {
-    $input.val(defaultValue = item[args.column.field]);
-    $input.select();
-  };
+	this.focus = function () {
+		$input.focus();
+	};
 
-  this.serializeValue = function () {
-    return $input.val();
-  };
+	this.loadValue = function (item) {
+		$input.val(defaultValue = item[args.column.field]);
+		$input.select();
+	};
 
-  this.applyValue = function (item, state) {
-	item[args.column.field] = state;
-	locals[args.item.doctype][args.item.name][args.column.field] = state;
-  };
+	this.serializeValue = function () {
+		return $input.val();
+	};
 
-  this.isValueChanged = function () {
-    return (!($input.val() == "" && defaultValue == null)) && ($input.val() != defaultValue);
-  };
+	this.applyValue = function (item, state) {
+		item[args.column.field] = state;
+		locals[args.item.doctype][args.item.name][args.column.field] = state;
+	};
 
-  this.validate = function () {
-    return {
-      valid: true,
-      msg: null
-    };
-  };
+	this.isValueChanged = function () {
+		return (!($input.val() == "" && defaultValue == null)) && ($input.val() != defaultValue);
+	};
 
-  this.init();
+	this.validate = function () {
+		return {
+			valid: true,
+			msg: null
+		};
+	};
+
+	this.init();
 }
 

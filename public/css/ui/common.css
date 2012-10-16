@@ -73,3 +73,7 @@
 .slick-cell { 
 	font-size: 12px; 
 }
+
+.cell-delete {
+	cursor: pointer !important;
+}
