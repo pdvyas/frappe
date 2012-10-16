@@ -42,7 +42,7 @@ class Controller:
 		self.to_docstatus = 0
 		if dt and dn:
 			self.load_from_db(dt, dn)
-		if type(dt) is list:
+		if isinstance(dt, list):
 			self.set_doclist(dt)
 
 	def load_from_db(self, dt=None, dn=None, prefix='tab'):
@@ -90,7 +90,7 @@ class Controller:
 		if self.obj: return self.obj
 
 		from webnotes.model.code import get_obj
-		self.obj = get_obj(doc=self.doc, doclist=self.children)
+		self.obj = get_obj(doc=self.doc, doclist=self.doclist)
 		return self.obj
 
 	def to_dict(self):
@@ -178,7 +178,7 @@ class Controller:
 
 		trigger(method, self.obj.doc)
 		
-		self.set_doclist([self.obj.doc] + self.obj.doclist)
+		self.set_doclist(self.obj.doclist)
 
 	def save_main(self):
 		"""
