@@ -70,7 +70,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 			page_length: 20,
 			show_filters: true,
 			new_doctype: this.doctype,
-			allow_delete: true,
+			allow_delete: true
 		});
 		this.make_column_picker();
 		this.make_sorter();
@@ -190,6 +190,9 @@ wn.views.ReportView = wn.ui.Listing.extend({
 			this.set_edit();
 		}
 		wn.slickgrid_tools.add_property_setter_on_resize(this.grid);
+		if(this.start!=0) {
+			this.grid.scrollRowIntoView(this.data.length-1);
+		}
 	},
 	
 	set_edit: function() {
