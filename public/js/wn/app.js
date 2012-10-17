@@ -57,8 +57,7 @@ wn.Application = Class.extend({
 				var xhr = jQuery.ajaxSettings.xhr();
 				interval = setInterval(function() {
 					if(xhr.readyState > 2) {
-				    	var total = parseInt(xhr.getResponseHeader('Original-Length') || 0) || 
-							parseInt(xhr.getResponseHeader('Content-Length'));
+				    	var total =  parseInt(xhr.getResponseHeader('Content-Length'));
 				    	var completed = parseInt(xhr.responseText.length);
 						var percent = (100.0 / total * completed).toFixed(2);
 						bar.css('width', (percent < 10 ? 10 : percent) + '%');
