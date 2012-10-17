@@ -165,6 +165,9 @@ def get_obj(dt = None, dn = None, doc=None, doclist=[], with_children = 0):
 	"""	
 	if doc and doclist:
 		return get_server_obj(doc, doclist)
+		
+	if doc:
+		return get_server_obj(doc, [doc])
 	
 	if dt:
 		import webnotes.model.doc

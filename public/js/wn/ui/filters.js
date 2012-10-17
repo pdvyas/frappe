@@ -23,7 +23,7 @@
 wn.ui.FilterList = Class.extend({
 	init: function(opts) {
 		if(!window.make_field) {
-			wn.require('lib/js/wn/form/fields.js');			
+			wn.require('lib/js/wn/form/fields.js');
 		}
 		$.extend(this, opts);
 		this.filters = [];
@@ -205,6 +205,8 @@ wn.ui.Filter = Class.extend({
 		f.df.single_select = 1;
 		f.make_inline();
 		f.refresh();
+		$(field_area).find("input").css("margin-top", "-9px"); 
+			// allignment hack don't know why
 		me.field = f;
 		
 		this.set_default_condition(df, fieldtype);
