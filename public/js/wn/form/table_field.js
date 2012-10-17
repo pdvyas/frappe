@@ -126,6 +126,7 @@ wn.form.TableField = wn.form.Field.extend({
 		this.setup_permissions();
 		this.setup_drag_and_drop();
 		this.setup_add_row();
+		wn.slickgrid_tools.add_property_setter_on_resize(this.slickgrid);
 
 		// description
 		if(this.df.description) {
@@ -224,13 +225,10 @@ wn.form.TableField = wn.form.Field.extend({
 						table_field: me,
 						editor: (d.fieldtype=="Text" || d.fieldtype=="Small Text" 
 							? wn.form.SlickLongTextEditorAdapter 
-							: wn.form.SlickEditorAdapter)
-					}
-					
-					if(d.fieldtype=="Check") {
-						column.formatter = function(row, cell, value) {
-							if(cint(value)) return "<i class='icon-ok'></i>"
-							else return "";
+							: wn.form.SlickEditorAdapter),
+						formatter: function(row, cell, value, columnDef, dataContext) {
+							var docfield = columnDef.docfield;
+							return wn.form.get_formatter(docfield ? docfield.fieldtype : "Data")(value, docfield);
 						}
 					}
 					

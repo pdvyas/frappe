@@ -122,7 +122,8 @@ class Controller:
 			Raises exception if permission is not valid
 		"""
 		if not self.doc.check_perm(verbose=1):
-			webnotes.msgprint("Not enough permission to save %s" % self.doc.doctype, raise_exception=1)
+			webnotes.msgprint("Not enough permission to save %s" % \
+				self.doc.doctype, raise_exception=1)
 
 	def check_links(self):
 		"""

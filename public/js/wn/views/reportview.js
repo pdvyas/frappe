@@ -61,12 +61,15 @@ wn.views.ReportView = wn.ui.Listing.extend({
 	},
 	setup: function() {
 		var me = this;
+		$("<div class='report-head'></div><div class='report-grid'></div>")
+			.appendTo($(this.page).find('.layout-main'))
+			
 		this.make({
 			title: 'Report: ' + (this.docname ? (this.doctype + ' - ' + this.docname) : this.doctype),
 			appframe: this.page.appframe,
 			method: 'webnotes.widgets.doclistview.get',
 			get_args: this.get_args,
-			parent: $(this.page).find('.layout-main'),
+			parent: $(this.page).find('.report-grid'),
 			start: 0,
 			page_length: 20,
 			show_filters: true,
@@ -138,34 +141,26 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		var me = this;
 		return $.map(this.columns, function(c) {
 			var docfield = wn.meta.docfield_map[c[1] || me.doctype][c[0]];
+			if(c[0]=="name") {
+				var docfield = {
+					label: "ID",
+					fieldtype: "Link",
+					fieldname: "name",
+					options: me.doctype
+				}
+			}
 			coldef = {
 				id: c[0],
 				field: c[0],
 				docfield: docfield,
 				name: (docfield ? docfield.label : toTitle(c[0])),
-				width: (docfield ? cint(docfield.width) : 120) || 120
-			}
-						
-			if(c[0]=='name') {
-				coldef.formatter = function(row, cell, value, columnDef, dataContext) {
-					return repl("<a href='#!Form/%(doctype)s/%(name)s'>%(name)s</a>", {
-						doctype: me.doctype,
-						name: value
-					});
+				width: (docfield ? cint(docfield.width) : 120) || 120,
+				formatter: function(row, cell, value, columnDef, dataContext) {
+					var docfield = columnDef.docfield;
+					return wn.form.get_formatter(docfield ? docfield.fieldtype : "Data")(value, docfield);
 				}
-			} else if(docfield && docfield.fieldtype=='Link') {
-				coldef.formatter = function(row, cell, value, columnDef, dataContext) {
-					if(value) {
-						return repl("<a href='#!Form/%(doctype)s/%(name)s'>%(name)s</a>", {
-							doctype: columnDef.docfield.options,
-							name: value
-						});						
-					} else {
-						return '';
-					}
-				}				
 			}
-			
+
 			return coldef;
 		});
 	},
@@ -186,12 +181,90 @@ wn.views.ReportView = wn.ui.Listing.extend({
 			enableCellNavigation: true,
 			enableColumnReorder: false
 		};
-		
-		var grid = new Slick.Grid(this.$w.find('.result-list')
+
+		this.col_defs = columns;
+		this.grid = new Slick.Grid(this.$w.find('.result-list')
 			.css('border', '1px solid grey')
 			.css('height', '500px')
 			.get(0), this.data, 
 			columns, options);
+
+		if(in_list(wn.boot.profile.can_write, this.doctype)) {
+			this.grid.setSelectionModel(new Slick.RowSelectionModel());
+			this.set_edit();
+		}
+		wn.slickgrid_tools.add_property_setter_on_resize(this.grid);
+	},
+	
+	set_edit: function() {
+		$("<div class='alert'>This report is editable</div>")
+			.appendTo($(this.page).find(".report-head").empty())
+		
+		var me = this;
+		this.grid.onClick.subscribe(function(e, args) {
+			// clicked on link
+			if(e.target.tagName.toLowerCase()=="a") return;
+			
+			if(me.selected_row == args.row) {
+				var docfield = me.col_defs[args.cell].docfield;
+				var rowdata = me.data[args.row];
+				
+				if(!docfield || in_list(['name', 'idx', 'owner', 'creation', 'modified_by', 
+					'modified', 'parent', 'parentfield', 'parenttype'], 
+					docfield.fieldname)) {
+					msgprint("This field is not editable");
+					return;
+				}
+				
+				if(docfield && rowdata.name) {
+					var fieldname = docfield.fieldname;
+					var dialog = new wn.ui.Dialog({
+						title: rowdata.name,
+						width: 700,
+						fields: [
+							copy_dict(docfield),
+								{fieldname:'update', label:'Update', fieldtype:'Button'}
+						]
+					});
+					dialog.fields_dict[fieldname].set_input(rowdata[fieldname])
+					
+					dialog.fields_dict.update.$input.click(function() {
+						// parent
+						var call_args = {
+							doctype: me.doctype,
+							name: rowdata.name,
+							fieldname: fieldname,
+							value: dialog.fields_dict[fieldname].get_value()
+						};
+						
+						if(docfield.parent && docfield.parent!=me.doctype)
+							call_args.parent = docfield.parent;
+	
+						wn.call({
+							method: 'webnotes.client.update_value',
+							args: call_args,
+							callback: function(r) {
+								if(r.exc) {
+									msgprint('Could not update');
+								} else {
+									$.extend(me.data[args.row], r.message);
+									dialog.hide();									
+									me.grid.setData(me.data);
+									me.grid.render();
+								}
+							},
+							btn: this
+						})
+					});
+					
+					dialog.show();
+					
+				}
+			}
+			me.selected_row = args.row;
+			return false;
+		});
+		
 	},
 	
 	// setup column picker

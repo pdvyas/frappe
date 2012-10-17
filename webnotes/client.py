@@ -24,17 +24,41 @@ from __future__ import unicode_literals
 import webnotes
 import json
 
+from webnotes.model.controller import Controller
+
 @webnotes.whitelist()
 def save():
 	"""insert or update from form query"""
 	doclist = json.loads(webnotes.form_dict.doclist)
 	
-	from webnotes.model.controller import Controller
-	
 	if not webnotes.has_permission(doclist[0]["doctype"], "write"):
 		webnotes.msgprint("No Write Permission", raise_exception=True)
 
-	doclistobj = Controller(doclist)
-	doclistobj.save()
+	controller = Controller(doclist)
+	controller.save()
 	
 	return [d.fields for d in doclist]
+
+@webnotes.whitelist()
+def update_value():
+	"""update a value"""
+	
+	globals().update(webnotes.form_dict)
+	
+	if "parent" in webnotes.form_dict:
+		controller = Controller(doctype, parent)	
+	else:
+		controller = Controller(doctype, name)
+
+	row = controller.doclist.get({"name": name})[0]
+	row.fields[fieldname] = value
+
+	if controller.doc.docstatus!=0:
+		webnotes.msgprint("Cannot update Submitted / Cancelled document", 
+			raise_exception=True)
+	
+	controller.save()
+	
+	return row.fields
+	
+	

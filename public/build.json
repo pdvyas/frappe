@@ -138,6 +138,7 @@
 			"public/js/toolbar.min.js",
 			"lib/public/js/wn/views/breadcrumbs.js",
 			"lib/public/js/wn/form/fields.js",
+			"lib/public/js/wn/form/formatters.js",
 			"lib/public/js/wn/form/ext_fields.js",
 			"lib/public/js/wn/form/table_field.js",
 			"lib/public/js/legacy/widgets/form/form_dialog.js",
