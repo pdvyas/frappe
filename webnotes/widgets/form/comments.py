@@ -44,7 +44,6 @@ def add_comment(args=None):
 
 	if args.get('comment'):
 		from webnotes.model.doc import Document
-		from webnotes.utils import nowdate
 		
 		del args["cmd"]
 		

@@ -35,23 +35,18 @@ methods in following modules are imported for backward compatibility
 	* webnotes.model.doclist.*
 """
 custom_class = '''
-# Please edit this list and import only required elements
 import webnotes
 
-from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, sendmail, set_default, str_esc_quote, user_format, validate_email_add
+from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, now, nowdate, replace_newlines, sendmail, set_default, str_esc_quote, user_format, validate_email_add
 
-from webnotes.model.doc import Document, addchild, getchildren, make_autoname
+from webnotes.model.doc import Document, addchild, getchildren
 from webnotes.model.utils import getlist
 from webnotes.model.code import get_obj
 from webnotes import session, form, msgprint, errprint
 
-set = webnotes.conn.set
 sql = webnotes.conn.sql
-get_value = webnotes.conn.get_value
 
-convert_to_lists = webnotes.conn.convert_to_lists
 
-# -----------------------------------------------------------------------------------------
 
 class CustomDocType(DocType):
   def __init__(self, doc, doclist):
@@ -69,7 +64,7 @@ def execute(code, doc=None, doclist=[]):
 	"""
 	# functions used in server script of DocTypes
 	# --------------------------------------------------	
-	from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, sendmail, set_default, str_esc_quote, user_format, validate_email_add
+	from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, now, nowdate, replace_newlines, sendmail, set_default, str_esc_quote, user_format, validate_email_add
 	
 	from webnotes.model.doc import Document, addchild, getchildren
 	from webnotes.model.utils import getlist

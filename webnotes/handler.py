@@ -117,7 +117,6 @@ def load_month_events():
 @webnotes.whitelist()
 def import_csv():
 	import webnotes.model.import_docs
-	from webnotes.utils import cint
 	
 	i = webnotes.model.import_docs.CSVImport()
 	r = i.import_csv(webnotes.form_dict.get('csv_file'), webnotes.form_dict.get('dateformat'), webnotes.form_dict.get('overwrite', 0) and 1)

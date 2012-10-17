@@ -238,7 +238,6 @@ def export_query():
 
 	f = StringIO()
 	writer = csv.writer(f)
-	from webnotes.utils import cstr
 	for r in data:
 		# encode only unicode type strings and not int, floats etc.
 		writer.writerow(map(lambda v: isinstance(v, unicode) and v.encode('utf-8') or v, r))
