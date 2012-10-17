@@ -131,10 +131,10 @@ cur_frm.confirm = function(msg, doc, dt, dn) {
 
 
 cur_frm.add_fields_help = function() {
-	$(cur_frm.grids[0].parent).before(
-		'<div style="padding: 10px">\
-			<a id="fields_help" class="link_type">Help</a>\
-		</div>');
+	$(cur_frm.fields_dict.fields_help.disp_area).append('<span>\
+			<a id="fields_help" class="link_type" style="padding-left: 0px;">Help</a>\
+		</span>');
+	
 	$('#fields_help').click(function() {
 		var d = new wn.ui.Dialog({
 			title: 'Help: Field Properties',
