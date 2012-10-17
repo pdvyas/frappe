@@ -59,6 +59,6 @@ def update_value():
 	
 	controller.save()
 	
-	return row.fields
+	return [d.fields for d in controller.doclist]
 	
 	

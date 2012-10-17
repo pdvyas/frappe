@@ -23,7 +23,11 @@
 wn.Application = Class.extend({
 	init: function() {
 		var me = this;
-		this.load_app_js(function() { me.load_startup() });
+		if(window.app) {
+			this.load_app_js(function() { me.load_startup() });			
+		} else {
+			this.load_startup();
+		}
 	},
 	load_app_js: function(callback) {
 		var all_app = localStorage.getItem("all-app");
@@ -85,10 +89,7 @@ wn.Application = Class.extend({
 				}
 			})
 		} else {
-			// clear sid cookie
-			//document.cookie = "sid=Guest;expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/"
 			this.startup();
-			//wn.views.pageview.show(window.home_page);
 		}		
 	},
 	startup: function() {

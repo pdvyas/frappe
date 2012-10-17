@@ -209,9 +209,19 @@ wn.views.ReportView = wn.ui.Listing.extend({
 				var rowdata = me.data[args.row];
 				
 				if(!docfield || in_list(['name', 'idx', 'owner', 'creation', 'modified_by', 
-					'modified', 'parent', 'parentfield', 'parenttype'], 
+					'modified', 'parent', 'parentfield', 'parenttype', 'file_list', 'trash_reason'], 
 					docfield.fieldname)) {
 					msgprint("This field is not editable");
+					return;
+				}
+				
+				if(docfield.permlevel!=0) {
+					msgprint("Not permitted to edit the field. (Permlevel is "+docfield.permlevel+")");
+					return;
+				}
+				
+				if(docfield.fieldtype=="Read Only") {
+					msgprint("Cannot edit read only field");
 					return;
 				}
 				
@@ -246,7 +256,15 @@ wn.views.ReportView = wn.ui.Listing.extend({
 								if(r.exc) {
 									msgprint('Could not update');
 								} else {
-									$.extend(me.data[args.row], r.message);
+									// update all rows from the doclist
+									$.each(me.data, function(i, row) {
+										$.each(r.message, function(j, d) {
+											if(row.name==d.name) {
+												$.extend(row, d);
+												r.message.splice(j, 1);
+											}
+										});
+									});
 									dialog.hide();									
 									me.grid.setData(me.data);
 									me.grid.render();
