@@ -75,7 +75,7 @@ class DocType:
 		"validates fields for incorrect properties and double entries"
 		fieldnames = {}
 		illegal = ['.', ',', ' ', '-', '&', '%', '=', '"', "'", '*', '$']
-		for d in self.doclist:
+		for d in self.doclist.get({"parentfield":"fields"}):
 			if not d.permlevel: d.permlevel = 0
 			if d.parent and d.fieldtype and d.parent == self.doc.name:
 				# check if not double

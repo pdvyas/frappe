@@ -220,7 +220,8 @@ wn.form.Field = Class.extend({
 		// for submit
 		if(ret=='Write' && cint(this.frm.doc.docstatus) > 0) ret = 'Read';
 
-		if(this.frm.doc && this.frm.doc.docstatus==1 && ret=="Read") {
+		if(this.frm.doc && this.frm.doc.docstatus==1 && ret=="Read"
+			&& this.df.fieldtype!="Table") {
 			ret = this.check_allow_on_submit();			
 		}
 

@@ -78,7 +78,8 @@ class Controller:
 				doclist[i] = Document(fielddata=d)
 		
 		self.doclist = DocList(doclist)
-		self.doc, self.children = doclist[0], doclist[1:]
+		self.doc = doclist[0]
+
 		if self.obj:
 			self.obj.doclist = self.doclist
 			self.obj.doc = self.doc
@@ -90,7 +91,7 @@ class Controller:
 		if self.obj: return self.obj
 
 		from webnotes.model.code import get_obj
-		self.obj = get_obj(doc=self.doc, doclist=self.children)
+		self.obj = get_obj(doc=self.doc, doclist=self.doclist)
 		return self.obj
 
 	def to_dict(self):
@@ -178,8 +179,6 @@ class Controller:
 
 		trigger(method, self.obj.doc)
 		
-		self.set_doclist([self.obj.doc] + self.obj.doclist)
-
 	def save_main(self):
 		"""
 			Save the main doc
@@ -200,7 +199,7 @@ class Controller:
 			Save Children, with the new parent name
 		"""
 		child_map = {}
-		for d in self.children:
+		for d in self.doclist[1:]:
 			if (d.fields.has_key('parent') and d.fields.get('parent')) or \
 					(d.fields.has_key("parentfield") and d.fields.get("parentfield")):
 				# if d.parent:
