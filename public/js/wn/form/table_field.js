@@ -38,31 +38,42 @@ wn.form.TableField = wn.form.Field.extend({
 	
 	make_toolbar: function() {
 		var me = this;
-		this.toolbar = $("<div style='margin-bottom: 4px;'>").appendTo(this.$wrapper);
-		$('<button class="btn btn-small"><i class="icon-small icon-plus-sign"></i> Insert</button>')
-			.appendTo(this.toolbar)
+		this.toolbar = $("<div style='margin-bottom: 4px; height: 26px;'>"+
+			'<span style="margin-top: 5px; display: inline-block;">' + this.df.label.bold()
+			+"</span></div>").appendTo(this.$wrapper);
+			
+		btn_group = $('<div class="btn-group" style="float: right;">').appendTo(this.toolbar);
+		$('<button class="btn btn-small">\
+			<i class="icon-small icon-plus-sign"></i> Insert</button>')
+			.appendTo(btn_group)
 			.click(function() {
 				var active_cell = me.slickgrid.getActiveCell();
-				if(!active_cell) {
+								
+				if(!active_cell || !me.data[active_cell.row]) {
 					var newrow = me.add_row();
 				} else {
 					var idx = me.data[active_cell.row].idx;
-
 					// push below
-					$.each(me.data, function(i, d) {
-						if(d.idx >= idx) d.idx++;
-					});					
+					
+					for(var i=0; i<me.data.length; i++) {
+						if(me.data[i].idx >= idx) me.data[i].idx++;
+					}
+
 					var newrow = me.add_row();
 					newrow.idx = idx;
-				}				
+				}
 				
 				me.refresh_data();
-				me.slickgrid.setActiveCell(newrow.idx-1, 2);
+
+				me.slickgrid.setActiveCell(newrow.idx-1, 
+					active_cell ? active_cell.cell : 2);
+				me.frm.set_unsaved();
 			});
-		$('<button class="btn btn-small" style="margin-left: 3px;"><i class="icon-small icon-remove"></i> Delete</button>')
-			.appendTo(this.toolbar)
+		$('<button class="btn btn-small"><i class="icon-small icon-remove"></i> Delete</button>')
+			.appendTo(btn_group)
 			.click(function() {
 				var active_cell = me.slickgrid.getActiveCell();
+				
 				if(!active_cell) {
 					msgprint("Select a row to delete first.");
 					return;
@@ -80,14 +91,14 @@ wn.form.TableField = wn.form.Field.extend({
 				});
 
 				me.refresh_data();				
+				me.frm.set_unsaved();
 			});
+			
+		$("<div class='clear'>").appendTo(this.toolbar);
 		
 	},
 	
 	make_grid: function() {
-		var me = this;
-		wn.require_lib("slickgrid");
-
 		var width = $(this.parent).parent('.form-layout-row:first').width();
 		if(this.$input) 
 			this.$input.empty();
@@ -110,12 +121,31 @@ wn.form.TableField = wn.form.Field.extend({
 			this.get_columns(), options);
 		
 		// edit permission on grid
+		this.setup_permissions();
+		this.setup_drag_and_drop();
+		this.setup_add_row();
+		wn.slickgrid_tools.add_property_setter_on_resize(this.slickgrid);
+
+		// description
+		if(this.df.description) {
+			$('<div class="help small">')
+				.appendTo(this.wrapper)
+				.html(this.df.description)
+		}
+	},
+	
+	setup_permissions: function() {
+		var me = this;
 		this.slickgrid.onBeforeEditCell.subscribe(function(e, args) {
+			var df = args.column.docfield;
 			if(me.disp_status=="Write") {
-				return true;
+				if(me.frm.perm[me.df.permlevel]
+					&& me.frm.perm[me.df.permlevel][WRITE])
+					return true;
+				else 
+					return false;
 			} else {
 				// allow on submit
-				var df = args.column.docfield;
 				if(me.frm.doc.docstatus==1 
 					&& df.allow_on_submit
 						&& me.frm.orig_perm[me.df.permlevel]
@@ -126,20 +156,10 @@ wn.form.TableField = wn.form.Field.extend({
 			}
 		})
 		
-		this.setup_drag_and_drop();
-		this.setup_add_row();
-
-		// description
-		if(this.df.description) {
-			$('<div class="help small">')
-				.appendTo(this.wrapper)
-				.html(this.df.description)
-		}
 	},
 	
 	add_row: function() {
 		var d = LocalDB.add_child(this.frm.doc, this.df.options, this.df.fieldname);
-		d.idx = this.data.length+1;
 		this.data.push(d);
 		this.set_height(this.data);
 		return d;
@@ -203,13 +223,10 @@ wn.form.TableField = wn.form.Field.extend({
 						table_field: me,
 						editor: (d.fieldtype=="Text" || d.fieldtype=="Small Text" 
 							? wn.form.SlickLongTextEditorAdapter 
-							: wn.form.SlickEditorAdapter)
-					}
-					
-					if(d.fieldtype=="Check") {
-						column.formatter = function(row, cell, value) {
-							if(cint(value)) return "<i class='icon-ok'></i>"
-							else return "";
+							: wn.form.SlickEditorAdapter),
+						formatter: function(row, cell, value, columnDef, dataContext) {
+							var docfield = columnDef.docfield;
+							return wn.form.get_formatter(docfield ? docfield.fieldtype : "Data")(value, docfield);
 						}
 					}
 					
@@ -255,13 +272,15 @@ wn.form.TableField = wn.form.Field.extend({
 				var active_cell = this.slickgrid.getActiveCell();
 			}
 						
-			// remake grid if new form or new disp_status
-			if(this.frm_docname != this.frm.doc.name || this.disp_status!=old_status)
+			// remake grid if read becomes write or otherwise
+			if(this.disp_status!=old_status)
 				this.make_grid();
 
 			this.refresh_data();
 			
-			this.toolbar.toggle(this.disp_status=="Write");
+			// show / hide toolbar
+			this.toolbar.find('.btn-group')
+				.toggle(this.disp_status=="Write" ? true : false);
 			
 			// set active
 			if(active_cell) {
@@ -346,17 +365,18 @@ wn.form.TableField = wn.form.Field.extend({
 
 			// reset idx
 			$.each(data, function(idx, row) {
-				//row.idx = idx+1
-				locals[row.doctype][row.name].idx = idx + 1;
+				row.idx = idx+1
+				//locals[row.doctype][row.name].idx = idx + 1;
 			});
 			
 			grid.resetActiveCell();
 			grid.setData(data);
 			grid.setSelectedRows(selectedRows);
 			grid.render();
+			me.frm.set_unsaved();
 		});
 
-			grid.registerPlugin(moveRowsPlugin);
+		grid.registerPlugin(moveRowsPlugin);
 
 		grid.onDragInit.subscribe(function (e, dd) {
 			// prevent the grid from cancelling drag'n'drop by default
@@ -414,180 +434,3 @@ wn.form.TableField = wn.form.Field.extend({
 	}
 	
 })
-
-wn.form.SlickEditorAdapter = function(args) {
-	var df = args.column.docfield;
-	var me = this;
-	this.init = function() {
-		if(!args.item.name) {
-			args.item.name = args.column.table_field.add_row().name;
-		}
-
-		me.field = make_field(df, df.parent, args.container, args.column.frm, true);
-		me.field.docname = args.item.name;
-		me.field.grid = args.column.table_field.grid; // helpers
-		me.field.make_inline();
-		me.field.refresh();
-		me.field.$wrapper.find(":input").bind("keydown", function(e) {
-			if (e.keyCode == $.ui.keyCode.LEFT || e.keyCode == $.ui.keyCode.RIGHT) {
-				e.stopImmediatePropagation();
-			}
-			if(df.fieldtype=="Link" || df.fieldtype=="Select") {
-				if (e.keyCode == $.ui.keyCode.UP || e.keyCode == $.ui.keyCode.DOWN || e.keyCode == $.ui.keyCode.ENTER) {
-					e.stopImmediatePropagation();
-				}			
-			}
-		});
-		me.field.set_focus();
-	}
-
-	this.destroy = function () {
-		$(args.container).empty();
-	};
-
-	this.focus = function () {
-		me.field.set_focus();
-	};
-
-	this.serializeValue = function () {
-		return me.field ? me.field.get_value() : null;
-	};
-
-	this.applyValue = function (item, state) {
-		item[df.fieldname] = state;
-	};
-
-	this.loadValue = function (item) {
-		me.field.set_value(item[df.fieldname]);
-	};
-
-	this.isValueChanged = function () {
-		if(!args.item.name) 
-			return true;
-		if(!me.field) 
-			return false;
-		if(me.field.disp_status!="Write")
-			return false;
-		changed = (me.field.get_value() != locals[df.parent][args.item.name][df.fieldname]);
-		// this is not called later
-		if(changed) 
-			me.field.set_model(me.field.get_value())
-		return changed;
-	};
-
-	this.validate = function () {
-		return {valid: true, msg: null};
-	};
-	
-	this.init();
-}
-
-/*
- * An example of a "detached" editor.
- * The UI is added onto document BODY and .position(), .show() and .hide() are implemented.
- * KeyDown events are also handled to provide handling for Tab, Shift-Tab, Esc and Ctrl-Enter.
- */
-
-wn.form.SlickLongTextEditorAdapter = function (args) {
-	var $input, $wrapper;
-	var defaultValue;
-	var scope = this;
-
-	this.init = function () {
-		if(!args.item.name) {
-			args.item.name = args.column.table_field.add_row().name;
-		}
-
-		var $container = $("body");
-
-		$wrapper = $("<DIV style='z-index:10000;position:absolute;background:white;padding:5px;border:3px solid gray; -moz-border-radius:10px; border-radius:10px;'/>")
-				.appendTo($container);
-
-		$input = $("<TEXTAREA hidefocus rows=5 style='backround:white;width:250px;height:80px;border:0;outline:0'>")
-				.appendTo($wrapper);
-
-		$("<DIV style='text-align:right'><BUTTON class='btn btn-small' style='margin-right:3px;'>Save (ctrl+enter)</BUTTON> <BUTTON class='btn btn-small'>Cancel</BUTTON></DIV>")
-				.appendTo($wrapper);
-
-		$wrapper.find("button:first").bind("click", this.save);
-		$wrapper.find("button:last").bind("click", this.cancel);
-		$input.bind("keydown", this.handleKeyDown);
-
-		scope.position(args.position);
-		$input.focus().select();
-	};
-
-	this.handleKeyDown = function (e) {
-		if (e.which == $.ui.keyCode.ENTER && e.ctrlKey) {
-			scope.save();
-		} else if (e.which == $.ui.keyCode.ESCAPE) {
-			e.preventDefault();
-			scope.cancel();
-		} else if (e.which == $.ui.keyCode.TAB && e.shiftKey) {
-			e.preventDefault();
-			args.grid.navigatePrev();
-		} else if (e.which == $.ui.keyCode.TAB) {
-			e.preventDefault();
-			args.grid.navigateNext();
-		}
-	};
-
-	this.save = function () {
-		args.commitChanges();
-	};
-
-	this.cancel = function () {
-		$input.val(defaultValue);
-		args.cancelChanges();
-	};
-
-	this.hide = function () {
-		$wrapper.hide();
-	};
-
-	this.show = function () {
-		$wrapper.show();
-	};
-
-	this.position = function (position) {
-		$wrapper
-				.css("top", position.top - 5)
-				.css("left", position.left - 5)
-	};
-
-	this.destroy = function () {
-		$wrapper.remove();
-	};
-
-	this.focus = function () {
-		$input.focus();
-	};
-
-	this.loadValue = function (item) {
-		$input.val(defaultValue = item[args.column.field]);
-		$input.select();
-	};
-
-	this.serializeValue = function () {
-		return $input.val();
-	};
-
-	this.applyValue = function (item, state) {
-		item[args.column.field] = state;
-		locals[args.item.doctype][args.item.name][args.column.field] = state;
-	};
-
-	this.isValueChanged = function () {
-		return (!($input.val() == "" && defaultValue == null)) && ($input.val() != defaultValue);
-	};
-
-	this.validate = function () {
-		return {
-			valid: true,
-			msg: null
-		};
-	};
-
-	this.init();
-}
-

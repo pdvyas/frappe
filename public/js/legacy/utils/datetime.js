@@ -117,6 +117,7 @@ wn.datetime = {
 	
 	str_to_user: function(val, no_time_str) {
 		if(!val) return val;
+		if(!val.search) return val;
 		
 		var user_fmt = dateutil.get_user_fmt();
 		var time_str = '';

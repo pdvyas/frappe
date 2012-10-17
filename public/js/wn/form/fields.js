@@ -192,7 +192,11 @@ wn.form.Field = Class.extend({
 	},
 	
 	set_display: function(v) {
-		this.$wrapper.find(".disp_area").html(v);
+		this.$wrapper.find(".disp_area").html(this.get_formatted_value(v));
+	},
+	
+	get_formatted_value: function(v) {
+		return wn.form.get_formatter(this.df.fieldtype)(v, this.df)
 	},
 	
 	get_status: function() {
@@ -220,7 +224,8 @@ wn.form.Field = Class.extend({
 		// for submit
 		if(ret=='Write' && cint(this.frm.doc.docstatus) > 0) ret = 'Read';
 
-		if(this.frm.doc && this.frm.doc.docstatus==1 && ret=="Read") {
+		if(this.frm.doc && this.frm.doc.docstatus==1 && ret=="Read"
+			&& this.df.fieldtype!="Table") {
 			ret = this.check_allow_on_submit();			
 		}
 
@@ -471,13 +476,7 @@ wn.form.LinkField = wn.form.DataField.extend({
 		this.$wrapper.find(".input_area .icon-plus").css("display", 
 			this.can_create ? "inline" : "none")
 	},
-
-	set_display: function(val) {
-		this._super(repl('<a href="#Form/%(doctype)s/%(name)s">%(name)s</a>', {
-			doctype: this.df.options,
-			name: val
-		}));
-	},
+	
 	make_buttons: function() {
 		this.can_create = 0;
 		if(this.frm && in_list(profile.can_create, this.df.options))
@@ -555,7 +554,6 @@ wn.form.CheckField = wn.form.Field.extend({
 		this.$wrapper = $('<div class="field field-check">\
 			<span class="input_area"></span>\
 			<span class="disp_area">\
-				<i class="icon icon-ok"></i>\
 			</span>\
 			<span class="label_area">\
 				<span class="label_txt"></span>\
@@ -576,9 +574,6 @@ wn.form.CheckField = wn.form.Field.extend({
 	set_input: function(val) {
 		if(this.$input) this.$input.get(0).checked = cint(val) ? true : false;
 	},
-	set_display: function(val) {
-		this.$wrapper.find(".icon-ok").css("display", cint(val) ? true : false);
-	},
 	get_value: function() {
 		if(!this.$input) return null;
 		return this.validate(this.$input.get(0).checked ? 1 : 0);
@@ -595,13 +590,6 @@ wn.form.TextField = wn.form.Field.extend({
 		this.$input = $('<textarea>').appendTo(this.$wrapper.find(".input_area"))
 		this._super();
 	},
-
-	set_display: function(val) {
-		if(val && val.indexOf("<br>")==-1 && val.indexOf("<p>")==-1 && val.indexOf("<div")==-1)
-			val = replace_newlines(val);
-		if(val==null) val = "";
-		this._super(val);
-	}
 })
 
 wn.form.SmallTextField = wn.form.TextField.extend({

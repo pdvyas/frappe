@@ -38,10 +38,14 @@ LocalDB.getchildren = function(child_dt, parent, parentfield, parenttype) {
 				l.push(d);
 			}
 		}
-	} 
-	l.sort(function(a,b){
-		return (cint(a.idx)-cint(b.idx))
-	}); return l; 
+	}
+	l.sort(function(a,b) {
+		return cint(a.idx) - cint(b.idx)
+	}); 
+	
+	$.each(l, function(i, v) { v.idx = i+1; }); // for chrome bugs ???
+	
+	return l; 
 }
 
 // Add Doc

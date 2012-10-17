@@ -290,7 +290,7 @@ input.editor-checkbox {
 
 .cell-reorder {
   cursor: move;
-  background: url("lib/js/lib/slickgrid/images/drag-handle.png") no-repeat center center;
+  background: url("../lib/js/lib/slickgrid/images/drag-handle.png") no-repeat center center;
 }
 
 .cell-selection {

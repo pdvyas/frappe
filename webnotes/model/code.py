@@ -48,7 +48,7 @@ from webnotes import session, form, msgprint, errprint
 set = webnotes.conn.set
 sql = webnotes.conn.sql
 get_value = webnotes.conn.get_value
-in_transaction = webnotes.conn.in_transaction
+
 convert_to_lists = webnotes.conn.convert_to_lists
 
 # -----------------------------------------------------------------------------------------
@@ -163,18 +163,24 @@ def get_obj(dt = None, dn = None, doc=None, doclist=[], with_children = 0):
 	   Returns the instantiated `DocType` object. Here you can pass the DocType and name (ID) to get the object.
 	   If with_children is true, then all child records will be laoded and added in the doclist.
 	"""	
+	if doc and doclist:
+		return get_server_obj(doc, doclist)
+		
+	if doc:
+		return get_server_obj(doc, [doc])
+	
 	if dt:
 		import webnotes.model.doc
 		
 		if not dn:
 			dn = dt
+		
 		if with_children:
 			doclist = webnotes.model.doc.get(dt, dn, from_get_obj=1)
 		else:
 			doclist = webnotes.model.doc.get(dt, dn, with_children = 0, from_get_obj=1)
+		
 		return get_server_obj(doclist[0], doclist)
-	else:
-		return get_server_obj(doc, doclist)
 		
 #=================================================================================
 # get object and run method

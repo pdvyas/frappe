@@ -78,7 +78,8 @@ class Controller:
 				doclist[i] = Document(fielddata=d)
 		
 		self.doclist = DocList(doclist)
-		self.doc, self.children = doclist[0], doclist[1:]
+		self.doc = doclist[0]
+
 		if self.obj:
 			self.obj.doclist = self.doclist
 			self.obj.doc = self.doc
@@ -121,7 +122,8 @@ class Controller:
 			Raises exception if permission is not valid
 		"""
 		if not self.doc.check_perm(verbose=1):
-			webnotes.msgprint("Not enough permission to save %s" % self.doc.doctype, raise_exception=1)
+			webnotes.msgprint("Not enough permission to save %s" % \
+				self.doc.doctype, raise_exception=1)
 
 	def check_links(self):
 		"""
@@ -178,8 +180,6 @@ class Controller:
 
 		trigger(method, self.obj.doc)
 		
-		self.set_doclist(self.obj.doclist)
-
 	def save_main(self):
 		"""
 			Save the main doc
@@ -200,7 +200,7 @@ class Controller:
 			Save Children, with the new parent name
 		"""
 		child_map = {}
-		for d in self.children:
+		for d in self.doclist[1:]:
 			if (d.fields.has_key('parent') and d.fields.get('parent')) or \
 					(d.fields.has_key("parentfield") and d.fields.get("parentfield")):
 				# if d.parent:

@@ -59,7 +59,7 @@ def runserverobj():
 			else:
 				webnotes.response['message'] = r
 		
-		webnotes.response['docs'] =[so.doc] + so.doclist
+		webnotes.response['docs'] = so.doclist
 
 def check_guest_access(doc):
 	if webnotes.session['user']=='Guest' and not webnotes.conn.sql("select name from tabDocPerm where role='Guest' and parent=%s and ifnull(`read`,0)=1", doc.doctype):

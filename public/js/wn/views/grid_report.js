@@ -241,7 +241,6 @@ wn.views.GridReport = Class.extend({
 	},
 	
  	import_slickgrid: function() {
-		wn.require_lib("slickgrid");
 		if(this.tree_grid.show) wn.require("app/js/tree_grid.css");	
 	},
 	refresh: function() {
