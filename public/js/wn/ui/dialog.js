@@ -35,6 +35,10 @@ wn.ui.Dialog = wn.ui.FieldGroup.extend({
 			this.parent = this.body
 			this._super({});
 		}
+		
+		if(opts.user_cannot_cancel) {
+			this.no_cancel();
+		}
 	},
 	make: function() {
 		if(!$('#dialog-container').length) {
@@ -106,6 +110,7 @@ wn.ui.Dialog = wn.ui.FieldGroup.extend({
 	},
 	no_cancel: function() {
 		this.appframe.$titlebar.find('.close').toggle(false);
+		this.no_cancel_flag = true;
 	}
 });
 

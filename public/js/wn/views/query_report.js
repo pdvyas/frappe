@@ -167,7 +167,6 @@ wn.views.QueryReport = Class.extend({
 		}
 	},
 	import_slickgrid: function() {
-		wn.require_lib("slickgrid");
 		wn.dom.set_style('\
 		.slick-headerrow-column {\
 	      background: #87ceeb;\

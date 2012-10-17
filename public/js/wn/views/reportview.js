@@ -37,16 +37,12 @@ wn.views.ReportView = wn.ui.Listing.extend({
 	init: function(doctype, docname, page) {
 		var me = this;
 		$(page).find('.layout-main').html('Loading Report...');
-		this.import_slickgrid();
 		$(page).find('.layout-main').empty();
 		this.doctype = doctype;
 		this.docname = docname;
 		this.page = page;
 		this.tab_name = '`tab'+doctype+'`';
 		this.setup();
-	},
-	import_slickgrid: function() {
-		wn.require_lib("slickgrid");
 	},
 
 	set_init_columns: function() {
