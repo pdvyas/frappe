@@ -50,9 +50,9 @@ def getCSVelement(v):
 def get_fullname(profile):
 	"""get the full name (first name + last name) of the user from Profile"""
 	p = webnotes.conn.sql("""select first_name, last_name from `tabProfile`
-		where name=%s""", profile)
+		where name=%s""", profile, as_dict=1)
 	if p:
-		profile = " ".join(filter(None, [p[0].first_name, p[0].last_name])) or profile
+		profile = " ".join(filter(None, [p[0].get('first_name'), p[0].get('last_name')])) or profile
 
 	return profile
 		
