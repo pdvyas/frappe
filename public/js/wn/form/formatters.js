@@ -26,7 +26,7 @@ wn.form.formatters = {
 		return value==null ? "" : value
 	},
 	Float: function(value) {
-		return (value || 0.0).toFixed(6);
+		return (flt(value) || 0.0).toFixed(6);
 	},
 	Int: function(value) {
 		return cint(value);
