@@ -156,6 +156,9 @@ wn.views.DocListPage = Class.extend({
 wn.views.DocListView = wn.views.ReportView.extend({
 	make_export: function() {
 		// pass
+	},
+	make_save: function() {
+		//
 	}
 });
 
@@ -167,7 +170,6 @@ wn.views.ListViewStats = Class.extend({
 		wn.call({
 			method: 'webnotes.widgets.doclistview.get_stats',
 			args: {
-				stats: me.stats,
 				doctype: me.doctype
 			},
 			callback: function(r) {

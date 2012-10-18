@@ -285,8 +285,9 @@ def delete_items():
 def get_stats():
 	"""get tag info"""
 	import json
-	tags = json.loads(webnotes.form_dict.get('stats'))
 	doctype = webnotes.form_dict['doctype']
+	tags = [x.strip() for x in (webnotes.conn.get_value("DocType", 
+		doctype, "quick_stat_fields") or "").split(",")] + ["_user_tags"]
 	stats = {}
 	
 	columns = get_table_columns(doctype)

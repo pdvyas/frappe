@@ -1,3 +1,25 @@
+// Copyright (c) 2012 Web Notes Technologies Pvt Ltd (http://erpnext.com)
+// 
+// MIT License (MIT)
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a 
+// copy of this software and associated documentation files (the "Software"), 
+// to deal in the Software without restriction, including without limitation 
+// the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+// and/or sell copies of the Software, and to permit persons to whom the 
+// Software is furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in 
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A 
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT 
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+// CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
+// OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+
 wn.views.ReportViewPage = Class.extend({
 	init: function(doctype, docname) {
 		this.doctype = doctype;
@@ -50,13 +72,18 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		// pre-select mandatory columns
 		var columns = [['name'], ['owner']];
 		$.each(wn.meta.docfield_list[this.doctype], function(i, df) {
-			if(df.in_listing && df.fieldname!='naming_series'
+			if(df.in_filter && df.fieldname!='naming_series'
 				&& !in_list(no_value_fields, df.fieldname)) {
 				columns.push([df.fieldname]);
 			}
 		});
+		this.set_columns(columns);
+	},
+	
+	set_columns: function(columns) {
 		this.columns = columns;
 	},
+	
 	setup: function() {
 		var me = this;
 		$("<div class='report-head'></div><div class='report-grid'></div>")
@@ -342,7 +369,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		this.sort_order_next_select = $(this.sort_dialog.body).find('.sort-order-1');
 		
 		// initial values
-		this.sort_by_select.val('modified');
+		this.sort_by_select.val(me.doctype + '.modified');
 		this.sort_order_select.val('desc');
 		
 		this.sort_by_next_select.val('');
@@ -450,12 +477,13 @@ wn.ui.ColumnPicker = Class.extend({
 		$(this.dialog.body).find('.btn-info').click(function() {
 			me.dialog.hide();
 			// selected columns as list of [column_name, table_name]
-			me.list.columns = [];
+			var columns = [];
 			$(me.dialog.body).find('select').each(function() {
 				var $selected = $(this).find('option:selected');
-				me.list.columns.push([$selected.attr('fieldname'), 
+				columns.push([$selected.attr('fieldname'), 
 					$selected.attr('table')]);
-			})
+			});
+			me.list.set_columns(columns);
 			me.list.run();
 		});
 		

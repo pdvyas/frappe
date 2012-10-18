@@ -35,5 +35,9 @@ wn.provide = function(namespace) {
 	}
 }
 
+wn._ = function(txt) {
+	return txt;
+};
+
 wn.provide('wn.settings');
 wn.provide('wn.ui');

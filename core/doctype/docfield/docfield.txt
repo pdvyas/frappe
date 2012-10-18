@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		u'creation': '2012-05-03 18:41:15',
+		u'creation': '2012-10-18 15:07:08',
 		u'docstatus': 0,
-		u'modified': '2012-10-18 14:03:08',
+		u'modified': '2012-10-18 18:12:09',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -130,7 +130,8 @@
 		'oldfieldname': u'permlevel',
 		'oldfieldtype': u'Int',
 		'reqd': 0,
-		'search_index': 0
+		'search_index': 0,
+		'width': u'80'
 	},
 
 	# DocField
@@ -199,7 +200,8 @@
 		'oldfieldname': u'print_hide',
 		'oldfieldtype': u'Check',
 		'reqd': 0,
-		'search_index': 0
+		'search_index': 0,
+		'width': u'71'
 	},
 
 	# DocField
@@ -210,7 +212,8 @@
 		'fieldtype': u'Check',
 		'label': u'Report Hide',
 		'oldfieldname': u'report_hide',
-		'oldfieldtype': u'Check'
+		'oldfieldtype': u'Check',
+		'width': u'85'
 	},
 
 	# DocField
@@ -227,20 +230,12 @@
 	# DocField
 	{
 		u'doctype': u'DocField',
-		'fieldname': u'in_listing',
-		'fieldtype': u'Check',
-		'label': u'In Listing'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
 		'fieldname': u'no_copy',
 		'fieldtype': u'Check',
 		'label': u'No Copy',
 		'oldfieldname': u'no_copy',
 		'oldfieldtype': u'Check',
-		'width': u'50px'
+		'width': u'66'
 	},
 
 	# DocField
@@ -250,7 +245,8 @@
 		'fieldtype': u'Check',
 		'label': u'Allow on Submit',
 		'oldfieldname': u'allow_on_submit',
-		'oldfieldtype': u'Check'
+		'oldfieldtype': u'Check',
+		'width': u'65'
 	},
 
 	# DocField

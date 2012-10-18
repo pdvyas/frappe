@@ -110,6 +110,7 @@
 			"lib/public/js/wn/ui/tree.js",
 			"lib/public/js/wn/upload.js",
 			"lib/public/js/wn/misc/about.js",
+			"lib/public/js/wn/views/moduleview.js",
 			"lib/public/js/wn/views/formview.js",
 			"lib/public/js/wn/views/load_reportview.js",
 			"lib/public/js/wn/views/reportview.js",

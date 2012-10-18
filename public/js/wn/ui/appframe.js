@@ -25,11 +25,7 @@ wn.ui.AppFrame = Class.extend({
 		this.title(txt);
 	},
 	set_marker: function(module) {
-		try {
-			var color = wn.module_css_classes[wn.module_css_map[module]].middle;			
-		} catch(e) {
-			var color = "#000";
-		}
+		var color = wn.get_module_color(module);
 		this.$titlebar.find(".appframe-marker")
 			.css({
 				"background-color": color
