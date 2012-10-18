@@ -41,9 +41,9 @@ wn.ui.FilterList = Class.extend({
 		});
 	},
 	
-	show_filters: function() {
-		this.$w.find('.show_filters').toggle();
-		if(!this.filters.length)
+	show_filters: function(show_none) {
+		this.$w.find('.show_filters').toggle(true);
+		if(!this.filters.length && !show_none)
 			this.add_filter();
 	},
 	
@@ -349,7 +349,7 @@ wn.ui.FieldSelect = Class.extend({
 			var label = df.label + ' (' + df.parent + ')';
 			var table = df.parent;
 		}
-		if(wn.model.no_value_type.indexOf(df.fieldtype)==-1 && 
+		if(no_value_fields.indexOf(df.fieldtype)==-1 && 
 			!(me.fields_by_name[df.parent] && me.fields_by_name[df.parent][df.fieldname])) {
 			this.$select.append($('<option>', {
 				value: table + "." + df.fieldname,

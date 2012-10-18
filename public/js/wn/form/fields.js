@@ -20,8 +20,6 @@
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // 
 
-var no_value_fields = ['Section Break', 'Column Break', 'HTML', 'Table', 'FlexTable', 'Button', 'Image'];
-
 function make_field(docfield, doctype, parent, frm, in_grid, hide_label) { // Factory
 	field_class = docfield.fieldtype.replace(/ /g, "") + "Field";
 	if(wn.form[field_class]) {

@@ -34,35 +34,39 @@ wn.views.doclistview.show = function(doctype) {
 				if(r && r['403']) {
 					return;
 				}
-				new wn.views.DocListView(route[1]);
+				new wn.views.DocListPage({
+					doctype:route[1]
+				});
 			});
 		}
 	}
 }
 
-wn.views.DocListView = wn.ui.Listing.extend({
-	init: function(doctype) {
-		this.doctype = doctype;
-		this.label = get_doctype_label(doctype);
-		this.label = (this.label.toLowerCase().substr(-4) == 'list') ?
-		 	this.label : (this.label + ' List');
+wn.views.DocListPage = Class.extend({
+	init: function(opts) {
+		$.extend(this, opts);
+		this.can_delete = wn.model.can_delete(this.doctype);
 		this.make_page();
-		this.setup();
+		this.setup_docstatus_filter();
+		this.setup_listview();
+		this.make_doclist();
+		this.init_stats();
+		this.listview.listing = this.listing;
+		this.listing.run();
 	},
-	
 	make_page: function() {
 		var me = this;
 		var page_name = wn.get_route_str();
-		var page = wn.container.add_page(page_name);
+		this.page = wn.container.add_page(page_name);
 		wn.container.change_to(page_name);
-		this.$page = $(page);
+		this.$page = $(this.page);
 
 		wn.dom.set_style(".show-docstatus div { font-size: 90%; }");
 		
 		this.$page.html('<div class="layout-wrapper layout-wrapper-background">\
 			<div class="appframe-area"></div>\
 			<div class="layout-main-section">\
-				<div class="wnlist-area" style="margin-top: -15px;"><div class="help">Loading...</div></div>\
+				<div class="wnlist-area" style="margin-top: -15px;"></div>\
 			</div>\
 			<div class="layout-side-section">\
 				<div class="show-docstatus hide section">\
@@ -74,8 +78,8 @@ wn.views.DocListView = wn.ui.Listing.extend({
 			</div>\
 			<div style="clear: both"></div>\
 		</div>');
-				
-		this.appframe = new wn.ui.AppFrame(this.$page.find('.appframe-area'));
+		
+		this.page.appframe = this.appframe = new wn.ui.AppFrame(this.$page.find('.appframe-area'));
 		var module = locals.DocType[this.doctype].module;
 		
 		this.appframe.set_marker(module);
@@ -85,21 +89,52 @@ wn.views.DocListView = wn.ui.Listing.extend({
 			module.toLowerCase()+'"></span>'+' <span>'
 			+ module + "</span>", 0.7, function() {
 			wn.set_route(wn.modules[module]);
-		})
+		});
 	},
-
-	setup: function() {
+	setup_listview: function() {
+		this.meta = locals.DocType[this.doctype];
+		if(this.meta.__listjs) {
+			eval(this.meta.__listjs);
+			this.listview = new wn.doclistviews[this.doctype]({
+				doctype: this.doctype,
+				can_delete: this.can_delete
+			});
+		} else {
+			this.listview = new wn.views.ListView({
+				doctype: this.doctype,
+				can_delete: this.can_delete				
+			});
+		}
+		this.listview.parent = this;
+	},
+	setup_docstatus_filter: function() {
 		var me = this;
-		me.can_delete = wn.model.can_delete(me.doctype);
-		me.meta = locals.DocType[me.doctype];
-		me.$page.find('.wnlist-area').empty(),
-		me.setup_docstatus_filter();
-		me.setup_listview();
-		me.init_list();
-		me.init_stats();
-		me.make_report_button();
-		me.add_delete_option();
-		me.make_help();
+		this.can_submit = $.map(locals.DocPerm, function(d) { 
+			if(d.parent==me.doctype && d.submit) return 1
+			else return null; 
+		}).length;
+		if(this.can_submit) {
+			this.$page.find('.show-docstatus').removeClass('hide');
+			this.$page.find('.show-docstatus input').click(function() {
+				me.listing.run();
+			})
+		}
+	},	
+	make_doclist: function() {
+		this.listing = new wn.views.DocListView({
+			doctype: this.doctype, 
+			page: this.page,
+			parent: $(this.page).find(".wnlist-area"),
+			no_title: true
+		});
+	},
+	init_stats: function() {
+		this.stats = new wn.views.ListViewStats({
+			doctype: this.doctype,
+			listing: this.listing,
+			$page: this.$page,
+			stats: this.listview.stats
+		})
 	},
 	make_report_button: function() {
 		var me = this;
@@ -115,151 +150,34 @@ wn.views.DocListView = wn.ui.Listing.extend({
 			this.appframe.add_help_button(wn.markdown('## ' + this.meta.name + '\n\n'
 				+ this.meta.description));
 		}
-	},
-	setup_docstatus_filter: function() {
-		var me = this;
-		this.can_submit = $.map(locals.DocPerm, function(d) { 
-			if(d.parent==me.meta.name && d.submit) return 1
-			else return null; 
-		}).length;
-		if(this.can_submit) {
-			this.$page.find('.show-docstatus').removeClass('hide');
-			this.$page.find('.show-docstatus input').click(function() {
-				me.run();
-			})
-		}
-	},
-	setup_listview: function() {
-		if(this.meta.__listjs) {
-			eval(this.meta.__listjs);
-			this.listview = new wn.doclistviews[this.doctype](this);
-		} else {
-			this.listview = new wn.views.ListView(this);
-		}
-		this.listview.parent = this;
-		this.wrapper = this.$page.find('.wnlist-area');
-		this.page_length = 20;
-		this.allow_delete = true;
-	},
-	init_list: function(auto_run) {
-		var me = this;
-		// init list
-		this.make({
-			method: 'webnotes.widgets.doclistview.get',
-			get_args: this.get_args,
-			parent: this.wrapper,
-			start: 0,
-			page_length: this.page_length,
-			show_filters: true,
-			show_grid: true,
-			new_doctype: this.doctype,
-			allow_delete: this.allow_delete,
-			no_result_message: this.make_no_result(),
-			columns: this.listview.fields,
-			custom_new_doc: me.listview.make_new_doc || undefined,
-		});
-		
-		// make_new_doc can be overridden so that default values can be prefilled
-		// for example - communication list in customer
-		$(this.wrapper).find('button[list_view_doc="'+me.doctype+'"]').click(function(){
-			(me.listview.make_new_doc || me.make_new_doc)(me.doctype);
-		});
-		
-		if((auto_run !== false) && (auto_run !== 0)) this.run();
-	},
-	
-	make_no_result: function() {
-		var no_result_message = repl('<div class="well">\
-		<p>No %(doctype_label)s found</p>\
-		<hr>\
-		<p><button class="btn btn-info btn-small" list_view_doc="%(doctype)s">\
-			Make a new %(doctype_label)s</button>\
-		</p></div>', {
-			doctype_label: get_doctype_label(this.doctype),
-			doctype: this.doctype
-		});
-		
-		return no_result_message;
-	},
-	render_row: function(row, data) {
-		$(row).css({
-			"margin-left": "-15px",
-			"margin-right": "-15px"
-		});
-		data.doctype = this.doctype;
-		this.listview.render(row, data, this);
-	},	
-	get_query_fields: function() {
-		return this.listview.fields;
-	},
-	get_args: function() {
-		var args = {
-			doctype: this.doctype,
-			fields: this.get_query_fields(),
-			filters: this.filter_list.get_filters(),
-			docstatus: this.can_submit ? $.map(this.$page.find('.show-docstatus :checked'), 
-				function(inp) { return $(inp).attr('data-docstatus') }) : [],
-			order_by: this.listview.order_by || undefined,
-			group_by: this.listview.group_by || undefined,
-		}
-		
-		// apply default filters, if specified for a listing
-		$.each((this.listview.default_filters || []), function(i, f) {
-		      args.filters.push(f);
-		});
-		
-		return args;
-	},
-	add_delete_option: function() {
-		var me = this;
-		if(this.can_delete) {
-			this.add_button('Delete', function() { me.delete_items(); }, 'icon-remove');
-			this.add_button('Select All', function() { 
-				var checks = me.$page.find('.list-delete');
-				checks.attr('checked', $(checks.get(0)).attr('checked') ? false : "checked");
-			}, 'icon-ok');
-		}
-	},
-	delete_items: function() {
-		var me = this;				
-		var dl = $.map(me.$page.find('.list-delete:checked'), function(e) {
-			return $(e).data('name');
-		});
-		if(!dl.length) 
-			return;
-		if(!confirm('This is PERMANENT action and you cannot undo. Continue?')) {
-			return;
-		}
-		
-		me.set_working(true);
-		wn.call({
-			method: 'webnotes.widgets.doclistview.delete_items',
-			args: {
-				items: dl,
-				doctype: me.doctype
-			},
-			callback: function() {
-				me.set_working(false);
-				me.refresh();
-			}
-		})
-	},
-	init_stats: function() {
+	}
+})
+
+wn.views.DocListView = wn.views.ReportView.extend({
+	make_export: function() {
+		// pass
+	}
+});
+
+// opts: stats, doctype, $page, doclistview
+wn.views.ListViewStats = Class.extend({
+	init: function(opts) {
+		$.extend(this, opts);
 		var me = this
 		wn.call({
 			method: 'webnotes.widgets.doclistview.get_stats',
 			args: {
-				stats: me.listview.stats,
+				stats: me.stats,
 				doctype: me.doctype
 			},
 			callback: function(r) {
 				// This gives a predictable stats order
-				$.each(me.listview.stats, function(i, v) {
+				$.each(me.stats, function(i, v) {
 					me.render_stat(v, r.message[v]);
 				});
 				
 				// reload button at the end
-				if(me.listview.stats.length) {
+				if(me.stats.length) {
 					$('<button class="btn btn-small"><i class="refresh"></i> Refresh</button>')
 						.click(function() {
 							me.reload_stats();
@@ -277,9 +195,7 @@ wn.views.DocListView = wn.ui.Listing.extend({
 			if(field=='_user_tags') {
 				this.$page.find('.layout-side-section')
 					.append('<div class="stat-wrapper section"><div class="section-head">Tags</div>\
-						<div class="help small"><i>No records tagged.</i><br><br> \
-						To add a tag, open the document and click on \
-						"Add Tag" on the sidebar</div></div>');
+						<div class="help small">No records tagged.</div></div>');
 			}
 			return;
 		}
@@ -302,12 +218,27 @@ wn.views.DocListView = wn.ui.Listing.extend({
 		
 		// render items
 		$.each(stat, function(i, v) { 
-			me.render_stat_item(i, v, sum, field).appendTo($w.find('.stat-grid'));
+			if(field=="_user_tags") {
+				me.get_tag_cloud(v).appendTo($w.find('.stat-grid'))
+			} else {				
+				me.get_progress_bar(i, v, sum, field).appendTo($w.find('.stat-grid'));
+			}
 		});
 		
 		$w.appendTo(this.$page.find('.layout-side-section'));
 	},
-	render_stat_item: function(i, v, max, field) {
+	get_tag_cloud: function(v) {
+		var me = this;
+		return $(repl("<span style='margin-right: 7px; cursor: pointer;' \
+			class='label label-info' data-field='_user_tags' data-label='%(label)s'>\
+			%(label)s(%(count)s)</span>", {
+				label: v[0],
+				count: v[1]
+			})).click(function() {
+				return me.set_filter(this);
+			});
+	},
+	get_progress_bar: function(i, v, max, field) {
 		var me = this;
 		var args = {}
 		args.label = v[0];
@@ -325,58 +256,29 @@ wn.views.DocListView = wn.ui.Listing.extend({
 			<div class="stat-label">\
 				<a href="#" data-label="%(label)s" data-field="%(field)s">\
 					%(label)s</a> (%(count)s)\
-		</div>', args));
+		</div>', args))
 		
-		this.setup_stat_item_click($item);
+		$item.find("a").click(function() {
+			return me.set_filter(this);
+		});
+		
 		return $item;
 	},
 	reload_stats: function() {
 		this.$page.find('.layout-side-section .stat-wrapper').remove();
-		this.init_stats();
+		this.init();
 	},
-	setup_stat_item_click: function($item) {
-		var me = this;
-		$item.find('a').click(function() {
-			var fieldname = $(this).attr('data-field');
-			var label = $(this).attr('data-label');
-			me.set_filter(fieldname, label);
-			return false;
-		});		
-	},
-	set_filter: function(fieldname, label) {
-		var filter = this.filter_list.get_filter(fieldname);
-		if(filter) {
-			var v = filter.field.get_value();
-			if(v.indexOf(label)!=-1) {
-				// already set
-				return false;
-			} else {
-				// second filter set for this field
-				if(fieldname=='_user_tags') {
-					// and for tags
-					this.filter_list.add_filter(this.doctype, fieldname, 'like', '%' + label);
-				} else {
-					// or for rest using "in"
-					filter.set_values(this.doctype, fieldname, 'in', v + ', ' + label);
-				}
-			}
-		} else {
-			// no filter for this item,
-			// setup one
-			if(fieldname=='_user_tags') {
-				this.filter_list.add_filter(this.doctype, fieldname, 'like', '%' + label);					
-			} else {
-				this.filter_list.add_filter(this.doctype, fieldname, '=', label);					
-			}
-		}
-		this.run();
+	set_filter: function(target) {
+		var fieldname = $(target).attr('data-field');
+		var label = $(target).attr('data-label');
+		this.listing.set_filter(fieldname, label);
+		return false;		
 	}
 });
 
 wn.views.ListView = Class.extend({
-	init: function(doclistview) {
-		this.doclistview = doclistview;
-		this.doctype = doclistview.doctype;
+	init: function(opts) {
+		$.extend(this, opts);
 		
 		var t = "`tab"+this.doctype+"`.";
 		this.fields = [t + 'name', t + 'owner', t + 'modified_by', t + 'docstatus', 
@@ -527,7 +429,7 @@ wn.views.ListView = Class.extend({
 					$('<span class="label label-info" style="cursor: pointer; line-height: 200%">' 
 						+ strip(t) + '</span>')
 						.click(function() {
-							me.doclistview.set_filter('_user_tags', $(this).text())
+							me.listing.set_filter('_user_tags', $(this).text())
 						})
 						.appendTo(parent);
 				}
@@ -535,7 +437,7 @@ wn.views.ListView = Class.extend({
 		}		
 	},
 	show_hide_check_column: function() {
-		if(!this.doclistview.can_delete) {
+		if(!this.can_delete) {
 			this.columns = $.map(this.columns, function(v, i) { if(v.content!='check') return v });
 		}
 	},
@@ -562,7 +464,9 @@ wn.views.RecordListView = wn.views.DocListView.extend({
 	init: function(doctype, wrapper, ListView) {
 		this.doctype = doctype;
 		this.wrapper = wrapper;
-		this.listview = new ListView(this);
+		this.listview = new ListView({
+			doctype: this.doctype
+		});
 		this.listview.parent = this;
 		this.setup();
 	},
@@ -570,19 +474,16 @@ wn.views.RecordListView = wn.views.DocListView.extend({
 	setup: function() {
 		var me = this;
 		me.page_length = 10;
-
 		$(me.wrapper).empty();
-
 		me.init_list();
+		me.run();
 	},
 
 	get_args: function() {
 		var args = this._super();
-		
 		$.each((this.default_filters || []), function(i, f) {
 		      args.filters.push(f);
 		});
-		
 		args.docstatus = args.docstatus.concat((this.default_docstatus || []));
 		return args;
 	},

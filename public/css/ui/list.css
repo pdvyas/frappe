@@ -132,6 +132,10 @@ div.stat-item {
 	overflow: hidden;
 }
 
+div.stat-grid .label {
+	white-space: normal !important;
+}
+
 table.doclist-row td {
 	overflow: hidden;
 	text-overflow: ellipsis;

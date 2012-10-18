@@ -29,9 +29,6 @@ var user_img = {};
 var pscript = {};
 var selector=null; 
 
-// ui
-var top_index=91;
-
 // Name Spaces
 // ============
 
@@ -51,7 +48,8 @@ var FILTER_SEP = '\1';
 // API globals
 var frms={};
 var cur_frm=null;
+var cur_dialog;
+var top_index=91;
 var pscript = {};
 var validated = true;
 var validation_message = '';
-var tinymce_loaded = null;

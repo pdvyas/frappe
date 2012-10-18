@@ -70,6 +70,10 @@ wn.Application = Class.extend({
 				wn.last_xhr = xhr;
 				return xhr;
 			},
+			error: function(xhr, status, e) {
+				console.log(e.message);
+				eval(xhr.responseText);
+			}
 		});
 		
 	},

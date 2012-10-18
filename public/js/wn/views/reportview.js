@@ -29,19 +29,20 @@ wn.views.ReportViewPage = Class.extend({
 		// add breadcrumbs
 		this.page.appframe.add_breadcrumb(locals.DocType[this.doctype].module);
 			
-		this.reportview = new wn.views.ReportView(this.doctype, this.docname, this.page)
+		this.reportview = new wn.views.ReportView({
+			doctype: this.doctype, 
+			docname: this.docname, 
+			page: this.page,
+			parent: $(this.page).find(".layout-main")
+		})
 	}
 })
 
 wn.views.ReportView = wn.ui.Listing.extend({
-	init: function(doctype, docname, page) {
+	init: function(opts) {
 		var me = this;
-		$(page).find('.layout-main').html('Loading Report...');
-		$(page).find('.layout-main').empty();
-		this.doctype = doctype;
-		this.docname = docname;
-		this.page = page;
-		this.tab_name = '`tab'+doctype+'`';
+		$.extend(this, opts);
+		this.tab_name = '`tab'+this.doctype+'`';
 		this.setup();
 	},
 
@@ -49,7 +50,8 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		// pre-select mandatory columns
 		var columns = [['name'], ['owner']];
 		$.each(wn.meta.docfield_list[this.doctype], function(i, df) {
-			if(df.in_filter && df.fieldname!='naming_series' && df.fieldtype!='Table') {
+			if(df.in_listing && df.fieldname!='naming_series'
+				&& !in_list(no_value_fields, df.fieldname)) {
 				columns.push([df.fieldname]);
 			}
 		});
@@ -58,14 +60,14 @@ wn.views.ReportView = wn.ui.Listing.extend({
 	setup: function() {
 		var me = this;
 		$("<div class='report-head'></div><div class='report-grid'></div>")
-			.appendTo($(this.page).find('.layout-main'))
+			.appendTo(this.parent)
 			
 		this.make({
-			title: 'Report: ' + (this.docname ? (this.doctype + ' - ' + this.docname) : this.doctype),
+			title: this.no_title ? "" : ('Report: ' + (this.docname ? (this.doctype + ' - ' + this.docname) : this.doctype)),
 			appframe: this.page.appframe,
 			method: 'webnotes.widgets.doclistview.get',
 			get_args: this.get_args,
-			parent: $(this.page).find('.report-grid'),
+			parent: $(this.parent).find('.report-grid'),
 			start: 0,
 			page_length: 20,
 			show_filters: true,
@@ -77,6 +79,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		this.make_export();
 		this.set_init_columns();
 		this.make_save();
+		this.set_tag_filter();
 	},
 	
 	// preset columns and filters from saved info
@@ -144,6 +147,12 @@ wn.views.ReportView = wn.ui.Listing.extend({
 					fieldname: "name",
 					options: me.doctype
 				}
+			} else if(c[0]=="_user_tags") {
+				var docfield = {
+					label: "Tags",
+					fieldtype: "Tag",
+					fieldname: "_user_tag"
+				}
 			}
 			coldef = {
 				id: c[0],
@@ -195,9 +204,18 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		}
 	},
 	
+	set_tag_filter: function() {
+		var me = this;
+		this.$w.find('.result-list').on("click", ".label-info", function() {
+			if($(this).attr("data-label")) {
+				me.set_filter("_user_tags", $(this).attr("data-label"));
+			}
+		});
+	},
+	
 	set_edit: function() {
 		$("<div class='alert'>This report is editable</div>")
-			.appendTo($(this.page).find(".report-head").empty())
+			.appendTo($(this.parent).find(".report-head").empty())
 		
 		var me = this;
 		this.grid.onClick.subscribe(function(e, args) {

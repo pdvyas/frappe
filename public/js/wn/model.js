@@ -22,9 +22,10 @@
 
 wn.provide('wn.model');
 
+var no_value_fields = ['Section Break', 'Column Break', 'HTML', 'Table', 
+'Button', 'Image'];
+
 wn.model = {
-	no_value_type: ['Section Break', 'Column Break', 'HTML', 'Table', 
- 	'Button', 'Image'],
 
 	new_names: {},
 

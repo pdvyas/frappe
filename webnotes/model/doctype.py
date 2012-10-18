@@ -211,12 +211,21 @@ def cache_name(doctype, processed):
 
 def clear_cache(doctype):
 	global doctype_cache
-	webnotes.cache().delete_value(cache_name(doctype, False))
-	webnotes.cache().delete_value(cache_name(doctype, True))
 
-	if doctype in doctype_cache:
-		del doctype_cache[doctype]
+	def clear_single(dt):
+		webnotes.cache().delete_value(cache_name(dt, False))
+		webnotes.cache().delete_value(cache_name(dt, True))
+
+		if doctype in doctype_cache:
+			del doctype_cache[dt]
+			
+	clear_single(doctype)
 	
+	# clear all parent doctypes
+	for dt in webnotes.conn.sql("""select parent from tabDocField 
+		where fieldtype="Table" and options=%s""", doctype):
+		clear_single(dt[0])
+
 def add_code(doctype, doclist):
 	import os, conf
 	from webnotes.modules import scrub, get_module_path
