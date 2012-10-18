@@ -352,3 +352,19 @@ class DocTypeDocList(webnotes.model.doclist.DocList):
 		
 	def get_table_fields(self):
 		return self.get({"doctype": "DocField", "fieldtype": "Table"})
+		
+	def get_precision_map(self, parent=None, parentfield=None):
+		"""get a map of fields of type 'currency' or 'float' with precision values"""
+		filters = {"doctype": "DocField", "fieldtype": ["in", ["Currency", "Float"]]}
+		if parentfield:
+			parent = self.get_options(parentfield)
+		if parent:
+			filters["parent"] = parent
+		
+		type_precision_map = {
+			"Currency": 2,
+			"Float": 4
+		}
+		
+		return dict((f.fieldname, type_precision_map[f.fieldtype]) 
+			for f in self.get(filters))

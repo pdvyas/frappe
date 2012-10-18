@@ -281,19 +281,23 @@ def has_common(l1, l2):
 	"""Returns truthy value if there are common elements in lists l1 and l2"""
 	return set(l1) & set(l2)
 	
-def flt(s):
+def flt(s, precision=None):
 	"""Convert to float (ignore commas)"""
-	if isinstance(s, basestring): # if string
+	if isinstance(s, basestring):
 		s = s.replace(',','')
-	try: tmp = float(s)
-	except: tmp = 0
-	return tmp
+	try:
+		num = float(s)
+		if precision:
+			num = round(s, precision)
+	except:
+		num = 0
+	return num
 
 def cint(s):
 	"""Convert to integer"""
-	try: tmp = int(float(s))
-	except: tmp = 0
-	return tmp
+	try: num = int(float(s))
+	except: num = 0
+	return num
 		
 def cstr(s):
 	if isinstance(s, unicode):
@@ -738,3 +742,7 @@ def comma_sep(some_list, sep):
 			return ", ".join(some_list[:-1]) + sep + some_list[-1]
 	else:
 		return some_list
+		
+def round_doc(doc, precision_map):
+	for fieldname, precision in precision_map.items():
+		doc.fields[fieldname] = flt(doc.fields.get(fieldname), precision)

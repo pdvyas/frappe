@@ -732,4 +732,3 @@ def getsingle(doctype):
 	"""get single doc as dict"""
 	dataset = webnotes.conn.sql("select field, value from tabSingles where doctype=%s", doctype)
 	return dict(dataset)
-	
