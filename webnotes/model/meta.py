@@ -57,8 +57,9 @@ def get_link_fields(doctype):
 		for d in doclist
 		if d.fields.get('doctype') == 'DocField' and d.fields.get('parent') == doctype
 		and d.fields.get('fieldname')!='owner'
+		and not d.fields.get('std_field')
 		and (d.fields.get('fieldtype') == 'Link' or
-			(	d.fields.get('fieldtype') == 'Select'
+			(d.fields.get('fieldtype') == 'Select'
 				and (d.fields.get('options') or '').startswith('link:'))
 			)
 	]

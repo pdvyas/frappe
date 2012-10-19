@@ -200,7 +200,12 @@ class Profile:
 						
 			webnotes.conn.sql("""update tabProfile set 
 				recent_documents=%s where name=%s""", (self.recent, self.name))
-			
+	
+	def build_page_permissions(self):
+		self.allow_pages = [p[0] for p in webnotes.conn.sql("""select parent 
+			from `tabPage Role`
+			where role in ('%s')""" % "', '".join(self.roles))]
+	
 	def load_profile(self):
 		"""
 	      	Return a dictionary of user properites to be stored in the session
@@ -210,6 +215,7 @@ class Profile:
 
 		if not self.can_read:
 			self.build_permissions()
+			self.build_page_permissions()
 
 		d = {}
 		d['name'] = self.name
@@ -231,6 +237,7 @@ class Profile:
 		d['allow_modules'] = self.allow_modules
 		d['all_read'] = self.all_read
 		d['can_search'] = list(set(self.can_search))
+		d['allow_pages'] = list(set(self.allow_pages))
 		
 		d['in_create'] = self.in_create
 		
@@ -247,6 +254,7 @@ class Profile:
 		self.can_cancel = d['can_cancel']
 		self.can_get_report = d['can_get_report']
 		self.allow_modules = d['allow_modules']
+		self.allow_pages = d.get("allow_pages",[])
 		self.all_read = d['all_read']
 		self.in_create = d['in_create']
 

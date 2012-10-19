@@ -63,8 +63,8 @@ wn.views.ModuleViewPage = Class.extend({
 			single_column: true
 		});
 		wn.container.change_to(this.page_name);
-		$("<div class='pull-left' style='width: 58%'></div>\
-			<div class='pull-right' style='width: 38%'></div>\
+		$("<div class='pull-left' style='width: 48%'><div class='alert'>Loading...</div></div>\
+			<div class='pull-right' style='width: 48%'></div>\
 			<div class='clearfix'></div>").appendTo($(this.page).find(".layout-main"));
 	},
 	load_items: function() {
@@ -81,13 +81,14 @@ wn.views.ModuleViewPage = Class.extend({
 		})
 	},
 	make_items: function() {
-		var $left = $(this.page).find(".pull-left");
+		var $left = $(this.page).find(".pull-left").empty();
 		var $right = $(this.page).find(".pull-right");
 
 		this.make_section('transaction', wn._("Transactions"), $left);
 		this.make_section('master', wn._("Masters"), $left);
-		this.make_section('tool', wn._("Tools"), $left);
 		this.make_section('setup', wn._("Setup"), $left);
+		this.make_section('other', wn._("Other"), $left);
+		this.make_section('tool', wn._("Tools"), $left);
 		this.make_section('query_report', wn._("Query Report"), $right);		
 		this.make_section('report', wn._("Report"), $right);		
 		this.make_section('search_criteria', wn._("Report (Old)"), $right);		
@@ -100,32 +101,56 @@ wn.views.ModuleViewPage = Class.extend({
 		$("<h4>" + title + "</h4>").appendTo(div);
 		$.each(this.items, function(i, item) {
 			if(item.item_type==section) {
-				(me.formatters[section] || me.formatters.def)(item)
-					.appendTo($("<p>").appendTo(div));
-				added = true;
+				if(me.has_permission(item)) {
+					(me.formatters[section] || me.formatters.def)(item)
+						.appendTo($("<p>").appendTo(div));
+					added = true;					
+				}
 			}
 		});
 		$("<hr>").appendTo(div);
 		
 		if(!added) div.toggle(false);
 	},
+	has_permission: function(item) {
+		if(item.item_type=="tool") {
+			if(wn.boot.profile.allow_pages.indexOf(item.name)!=-1)
+				return true;
+		} else if (item.item_type=="report") {
+			return wn.model.can_read(item.ref_doctype);
+		} else if (item.item_type=="search_criteria") {
+			return wn.model.can_read(item.doctype);
+		} else {
+			return wn.model.can_read(item.name);
+		}
+		return false
+	},
 	formatters: {
 		def: function(item) {
-			if(item.open_count) {
+			if(item.open_count!=null) {
 				item.open_count = '<span class="badge badge-important">'
 					+item.open_count+'</span>';
-			} else 
-				item.open_count = "";
+			} else {
+				item.open_count = "";				
+			}
 			
-			return $(repl("<a href='#List/%(name)s'><b>%(name)s</b></a> \
-				<span class='badge'>%(count)s</span> %(open_count)s", item));			
+			if(item.count!=null) {
+				item.count = "<span class='badge'>"+item.count+"</span>"
+			} else {
+				item.count = "";				
+			}
+			
+			return $(repl("<span style='display:inline-block; float: right;'>\
+				%(count)s %(open_count)s</span>\
+				<a href='#List/%(name)s'><b>%(name)s</b></a> \
+				", item));			
 		},
 		tool: function(item) {
 			if(!item.title) item.title = item.name;
 			return $(repl("<a href='#%(name)s'>%(title)s</a>", item));
 		},
 		report: function(item) {
-			return $(repl("<a href='#Report2/%(name)s'>%(name)s</a>", item));
+			return $(repl("<a href='#Report2/%(ref_doctype)s/%(name)s'>%(name)s</a>", item));
 		},
 		query_report: function(item) {
 			return $(repl("<a href='#query-report/%(name)s'>%(name)s</a>", item));
@@ -135,100 +160,3 @@ wn.views.ModuleViewPage = Class.extend({
 		}
 	}
 });
-
-
-
-
-wn.views.ModuleView = function(module, wrapper) {
-	var items = {};
-	wn.ui.make_app_page({
-		parent: wrapper,
-		title: wn._(module),
-		single_column: true
-	});
-
-	wn.call({
-		method: 'core.doctype.module_def.module_def.get_items',
-		args: {
-			module: module
-		},
-		callback: function(r) {
-			items = r.message;
-			make_section('transaction', wn._("Transactions"));
-			make_section('master', wn._("Masters"));
-			make_section('tool', wn._("Tools"));
-			make_section('setup', wn._("Setup"));
-			make_section('report', wn._("Report"));
-		}
-	})
-	
-	var make_section = function(name, title) {
-		if(!items[name].length) return;
-		
-		$(repl('<h4>%(title)s</h4><br><div class="%(name)s"></div><hr>', {title: title, name: name}))
-			.appendTo($(wrapper).find('.layout-main'));
-		
-		var $body = $(wrapper).find('.' + name);
-		
-		// get maxx
-		var maxx = Math.max.apply(this, $.map(items[name], function(v) {
-			if(v[0]=='DocType') {
-				var m = 0;
-				$.each(v[2], function(i,count) { m=m+count });
-				return m;
-			};
-		}));
-				
-		// items
-		$.each(items[name], function(i, v) {
-			make_item($body, v, name, parseInt(maxx));
-		});
-	}
-	
-	var make_item = function(parent, v, section_name, maxx) {
-		var icons = {
-			"DocType": "icon-pencil",
-			"Single": "icon-cog",
-			"Page": "icon-cog",
-			"Report": "icon-th"
-		};
-		if(section_name=='master') {
-			icons.DocType = "icon-flag";
-		}
-				
-		var routes = {
-			"DocType": "#List/%(name)s",
-			"Single": "#Form/%(name)s",
-			"Page": "#%(name)s",
-			"Report": "#Reports/%(doctype)s/%(name)s"
-		}
-				
-		var progress = '';
-		if(v[0]=='DocType' && maxx!=NaN) {
-			var progress = repl('<div style="width: 60%; float: left;">\
-				<div class="progress" style="width: 80%; float: left;">\
-					<div class="bar bar-info" style="width: %(ds_0)s%"></div>\
-					<div class="bar bar-success" style="width: %(ds_1)s%"></div>\
-					<div class="bar bar-danger" style="width: %(ds_2)s%"></div>\
-				</div> <div style="float: left; margin-left: 7px;">(%(maxx)s)</div>\
-			</div>', {
-				ds_0: v[2][0] / maxx * 100,
-				ds_1: v[2][1] / maxx * 100,
-				ds_2: v[2][2] / maxx * 100,
-				maxx: v[2][0] + v[2][1] + v[2][2]
-			});
-		} 
-		
-		$(repl('<div style="margin: 6px 0px; min-height: 40px;"> <div style="width: 30%; float: left;">\
-			<i class="icon %(icon)s"></i>\
-			<b><a href="%(route)s">%(title)s</a></b></div>\
-			%(progress)s\
-			<div style="clear: both;"></div>\
-			</div>', {
-				icon: icons[v[0]],
-				title: wn._(v[1]),
-				progress: progress,
-				route: repl(routes[v[0]], {name: v[1], doctype: v[2]})
-			})).appendTo(parent);
-	}
-}

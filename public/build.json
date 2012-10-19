@@ -58,6 +58,11 @@
 	
 	{
 		"public/css/all-app.css": [
+			"lib/public/js/lib/jquery/bootstrap_theme/jquery-ui.selected.css",
+			"lib/public/js/lib/tag-it/jquery.tagit.css",
+			"lib/public/js/lib/slickgrid/slick.grid.css",
+			"lib/public/js/lib/slickgrid/slick-default-theme.css",
+			"lib/public/js/lib/wysihtml5/bootstrap-wysihtml5.css",
 			"lib/public/css/bootstrap.css",
 			"lib/public/css/legacy/body.css",
 			"lib/public/css/legacy/forms.css",
@@ -69,11 +74,7 @@
 			"lib/public/css/ui/common.css",
 			"lib/public/css/ui/list.css",
 			"lib/public/css/ui/views.css",
-			"lib/public/css/ui/fonts.css",
-			"lib/public/js/lib/jquery/bootstrap_theme/jquery-ui.selected.css",
-			"lib/public/js/lib/tag-it/jquery.tagit.css",
-			'lib/public/js/lib/slickgrid/slick.grid.css',
-			'lib/public/js/lib/slickgrid/slick-default-theme.css',
+			"lib/public/css/ui/fonts.css"
 		]
 	},
 
@@ -151,7 +152,9 @@
 			'lib/public/js/lib/slickgrid/slick.formatters.js',
 			'lib/public/js/lib/slickgrid/slick.core.js',
 			'lib/public/js/lib/slickgrid/slick.grid.js',
-			'lib/public/js/lib/slickgrid/slick.dataview.js'
+			'lib/public/js/lib/slickgrid/slick.dataview.js',
+			'lib/public/js/lib/wysihtml5/wysihtml5.min.js',
+			'lib/public/js/lib/wysihtml5/bootstrap-wysihtml5.min.js'
 		]
 	}
 ]

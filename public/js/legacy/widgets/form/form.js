@@ -370,6 +370,10 @@ _f.Frm.prototype.setup_fields_std = function() {
 		if(f.fieldtype=='Section Break' && fl[i+1] && fl[i+1].fieldtype=='Section Break') 
 			continue;
 		
+		// no std fields for display
+		if(f.std_field) 
+			continue;
+		
 		var fn = f.fieldname?f.fieldname:f.label;
 				
 		var fld = make_field(f, this.doctype, this.layout.cur_cell, this);
@@ -1140,8 +1144,8 @@ _f.Frm.prototype.field_map = function(fnames, fn) {
 		}
 	}
 	$.each(fnames, function(i,f) {
-		//var field = cur_frm.fields_dict[f]; - much better design
-		var field = wn.meta.get_docfield(cur_frm.doctype, f, cur_frm.docname)
+		var field = cur_frm.fields_dict[f].df;
+		//var field = wn.meta.get_docfield(cur_frm.doctype, f, cur_frm.docname)
 		if(field) {
 			fn(field);
 			cur_frm.refresh_field(f);

@@ -209,7 +209,7 @@ wn.form.Field = Class.extend({
 		var ret;
 
 		// hidden
-		if(cint(this.df.hidden)) return "None";
+		if(this.df.hidden) return "None";
 
 		// permission level
 		if(this.frm.editable && p && p[WRITE] && !this.df.disabled)

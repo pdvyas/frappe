@@ -45,6 +45,9 @@ def get(arg=None):
 	
 	filters = json.loads(data['filters'])
 	fields = json.loads(data['fields'])
+	
+	if 'docstatus' not in fields: fields.append('docstatus')
+	
 	tables = get_tables()
 	load_doctypes()
 	
@@ -286,9 +289,9 @@ def get_stats():
 	"""get tag info"""
 	import json
 	doctype = webnotes.form_dict['doctype']
-	tags = [x.strip() for x in (webnotes.conn.get_value("DocType", 
-		doctype, "quick_stat_fields") or "").split(",")] + ["_user_tags"]
-	stats = {}
+	tags = ["_user_tags"] + [x.strip() for x in (webnotes.conn.get_value("DocType", 
+		doctype, "quick_stat_fields") or "").split(",")]
+	stat_data = {}
 	
 	columns = get_table_columns(doctype)
 	for tag in tags:
@@ -299,11 +302,14 @@ def get_stats():
 			group by %(tag)s;""" % locals(), as_list=1)
 			
 		if tag=='_user_tags':
-			stats[tag] = scrub_user_tags(tagcount)
+			stat_data[tag] = scrub_user_tags(tagcount)
 		else:
-			stats[tag] = tagcount
+			stat_data[tag] = tagcount
 			
-	return stats
+	return {
+		"stat_data": stat_data,
+		"tags": tags
+	}
 
 def scrub_user_tags(tagcount):
 	"""rebuild tag list for tags"""

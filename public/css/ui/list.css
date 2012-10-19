@@ -141,3 +141,35 @@ table.doclist-row td {
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
+
+/* row formatters */
+
+.row-blue {
+	background-color: #eef;
+}
+
+.row-red {
+	background-color: #fee;
+}
+
+.row-green {
+	background-color: #efe;
+}
+
+.row-yellow {
+	background-color: #ffe;
+}
+
+.row-orange {
+	background-color: #fff8ee;
+}
+
+.row-gray {
+	background-color: #eee;
+}
+
+.row-fade {
+	color: #777;
+}
+
+

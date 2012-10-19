@@ -55,7 +55,7 @@ wn.views.ReportViewPage = Class.extend({
 			doctype: this.doctype, 
 			docname: this.docname, 
 			page: this.page,
-			parent: $(this.page).find(".layout-main")
+			wrapper: $(this.page).find(".layout-main")
 		})
 	}
 })
@@ -70,7 +70,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 
 	set_init_columns: function() {
 		// pre-select mandatory columns
-		var columns = [['name'], ['owner']];
+		var columns = [['name'],];
 		$.each(wn.meta.docfield_list[this.doctype], function(i, df) {
 			if(df.in_filter && df.fieldname!='naming_series'
 				&& !in_list(no_value_fields, df.fieldname)) {
@@ -87,14 +87,14 @@ wn.views.ReportView = wn.ui.Listing.extend({
 	setup: function() {
 		var me = this;
 		$("<div class='report-head'></div><div class='report-grid'></div>")
-			.appendTo(this.parent)
+			.appendTo(this.wrapper)
 			
 		this.make({
 			title: this.no_title ? "" : ('Report: ' + (this.docname ? (this.doctype + ' - ' + this.docname) : this.doctype)),
 			appframe: this.page.appframe,
 			method: 'webnotes.widgets.doclistview.get',
 			get_args: this.get_args,
-			parent: $(this.parent).find('.report-grid'),
+			parent: $(this.wrapper).find('.report-grid'),
 			start: 0,
 			page_length: 20,
 			show_filters: true,
@@ -135,8 +135,12 @@ wn.views.ReportView = wn.ui.Listing.extend({
 			fields: $.map(this.columns, function(v) { return me.get_full_column_name(v) }),
 			order_by: this.get_order_by(),
 			filters: this.filter_list.get_filters(),
-			docstatus: ['0','1','2']
+			docstatus: this.get_docstatus()
 		}
+	},
+	
+	get_docstatus: function() {
+		return ['0', '1', '2']
 	},
 	
 	get_order_by: function() {
@@ -167,20 +171,6 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		var me = this;
 		return $.map(this.columns, function(c) {
 			var docfield = wn.meta.docfield_map[c[1] || me.doctype][c[0]];
-			if(c[0]=="name") {
-				var docfield = {
-					label: "ID",
-					fieldtype: "Link",
-					fieldname: "name",
-					options: me.doctype
-				}
-			} else if(c[0]=="_user_tags") {
-				var docfield = {
-					label: "Tags",
-					fieldtype: "Tag",
-					fieldname: "_user_tag"
-				}
-			}
 			coldef = {
 				id: c[0],
 				field: c[0],
@@ -207,6 +197,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		$.each(this.data, function(i, v) {
 			// add index
 			v._idx = i+1;
+			v.id = v._idx;
 		});
 
 		var options = {
@@ -215,10 +206,15 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		};
 
 		this.col_defs = columns;
+
+		this.dataView = new Slick.Data.DataView();
+		this.set_data(this.data);
+		this.set_row_formatters();		
+	
 		this.grid = new Slick.Grid(this.$w.find('.result-list')
 			.css('border', '1px solid grey')
 			.css('height', '500px')
-			.get(0), this.data, 
+			.get(0), this.dataView, 
 			columns, options);
 
 		if(in_list(wn.boot.profile.can_write, this.doctype)) {
@@ -231,6 +227,12 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		}
 	},
 	
+	set_data: function() {
+		this.dataView.beginUpdate();
+		this.dataView.setItems(this.data);
+		this.dataView.endUpdate();
+	},
+	
 	set_tag_filter: function() {
 		var me = this;
 		this.$w.find('.result-list').on("click", ".label-info", function() {
@@ -240,53 +242,79 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		});
 	},
 	
+	set_row_formatters: function() {
+		var me = this;
+		this.dataView.getItemMetadata = function(row) {
+			var item = me.data[row];
+			if(item.docstatus==1) {
+				return { cssClasses: "row-blue" }
+			} if(item.docstatus==2) {
+				return { cssClasses: "row-red" }			
+			}
+			
+		}
+	},
+	
 	set_edit: function() {
+		var $head = $(this.wrapper).find(".report-head");
 		$("<div class='alert'>This report is editable</div>")
-			.appendTo($(this.parent).find(".report-head").empty())
+			.appendTo($head.empty());
 		
 		var me = this;
 		this.grid.onClick.subscribe(function(e, args) {
 			// clicked on link
-			if(e.target.tagName.toLowerCase()=="a") return;
+			if(e.target.tagName.toLowerCase()=="a") {
+				e.stopImmediatePropagation();
+				return false;
+			}
 			
 			if(me.selected_row == args.row) {
 				var docfield = me.col_defs[args.cell].docfield;
-				var rowdata = me.data[args.row];
+				var item = me.data[args.row];
+				
+				if(cint(item.docstatus) > 0) {
+					msgprint("Cannot edit Submitted / Cancelled records");
+					e.stopImmediatePropagation();
+					return false;
+				}
 				
 				if(!docfield || in_list(['name', 'idx', 'owner', 'creation', 'modified_by', 
 					'modified', 'parent', 'parentfield', 'parenttype', 'file_list', 'trash_reason'], 
 					docfield.fieldname)) {
 					msgprint("This field is not editable");
-					return;
+					e.stopImmediatePropagation();
+					return false;
 				}
 				
 				if(docfield.permlevel!=0) {
 					msgprint("Not permitted to edit the field. (Permlevel is "+docfield.permlevel+")");
-					return;
+					e.stopImmediatePropagation();
+					return false;
 				}
 				
 				if(docfield.fieldtype=="Read Only") {
 					msgprint("Cannot edit read only field");
-					return;
+					e.stopImmediatePropagation();
+					return false;
 				}
 				
-				if(docfield && rowdata.name) {
+				if(docfield && item.name) {
 					var fieldname = docfield.fieldname;
 					var dialog = new wn.ui.Dialog({
-						title: rowdata.name,
+						title: item.name,
 						width: 700,
 						fields: [
 							copy_dict(docfield),
 								{fieldname:'update', label:'Update', fieldtype:'Button'}
 						]
 					});
-					dialog.fields_dict[fieldname].set_input(rowdata[fieldname])
+					dialog.fields_dict[fieldname].set_value(item[fieldname])
 					
 					dialog.fields_dict.update.$input.click(function() {
 						// parent
 						var call_args = {
 							doctype: me.doctype,
-							name: rowdata.name,
+							name: item.name,
 							fieldname: fieldname,
 							value: dialog.fields_dict[fieldname].get_value()
 						};
@@ -304,14 +332,15 @@ wn.views.ReportView = wn.ui.Listing.extend({
 									// update all rows from the doclist
 									$.each(me.data, function(i, row) {
 										$.each(r.message, function(j, d) {
-											if(row.name==d.name) {
+											if(row && d && row.name==d.name) {
 												$.extend(row, d);
 												r.message.splice(j, 1);
 											}
 										});
 									});
-									dialog.hide();									
-									me.grid.setData(me.data);
+									dialog.hide();
+									me.set_data(me.data);
+									me.grid.invalidate();
 									me.grid.render();
 								}
 							},

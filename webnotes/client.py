@@ -42,6 +42,7 @@ def save():
 @webnotes.whitelist()
 def update_value():
 	"""update a value"""
+	from webnotes.model.doctype import get_property
 	
 	globals().update(webnotes.form_dict)
 	
@@ -51,6 +52,12 @@ def update_value():
 		controller = Controller(doctype, name)
 
 	row = controller.doclist.get({"name": name})[0]
+	
+	# check permlevel = 0
+	
+	if (get_property(doctype, "permlevel", fieldname) or 0) != 0:
+		webnotes.msgprint("Direct edit only allowed if permlevel is 0", raise_exception=1)
+	
 	row.fields[fieldname] = value
 
 	if controller.doc.docstatus!=0:

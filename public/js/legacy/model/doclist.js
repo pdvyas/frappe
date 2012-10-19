@@ -133,6 +133,8 @@ function check_required(dt, dn, parent_dt) {
 	var all_clear = true;
 	var errfld = [];
 	for(var i=0;i<fl.length;i++) {
+		if(fl[i].std_field) continue;
+		
 		var key = fl[i].fieldname;
 		
 		var df = wn.meta.get_docfield(dt, key, dn);

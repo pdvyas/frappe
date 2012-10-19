@@ -64,10 +64,17 @@ wn.model = {
 		return wn.boot.profile.can_cancel.indexOf(doctype)!=-1;
 	},
 	
+	can_read: function(doctype) {
+		if(!doctype) return false;
+		return wn.boot.profile.can_read.indexOf(doctype)!=-1;
+	},
+	
 	has_value: function(dt, dn, fn) {
 		// return true if property has value
 		var val = locals[dt] && locals[dt][dn] && locals[dt][dn][fn];
 		var df = wn.meta.get_docfield(dt, fn, dn);
+		
+		if(!df) console.log("No field found for " + fn);
 		
 		if(df.fieldtype=='Table') {
 			var ret = false;

@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		u'creation': '2012-10-18 14:12:27',
+		u'creation': '2012-10-18 15:07:08',
 		u'docstatus': 0,
-		u'modified': '2012-10-18 14:55:04',
+		u'modified': '2012-10-19 12:21:14',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -103,7 +103,7 @@
 		'label': u'Document Type',
 		'oldfieldname': u'document_type',
 		'oldfieldtype': u'Select',
-		'options': u'\nMaster\nTransaction\nSystem\nOther'
+		'options': u'\nMaster\nTransaction\nSetup\nSystem\nOther'
 	},
 
 	# DocField

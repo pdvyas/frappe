@@ -211,7 +211,7 @@ wn.form.TableField = wn.form.Field.extend({
 		var me = this;
 		var columns = $.map(wn.meta.docfield_list[this.df.options], 
 			function(d) {
-				if(!d.hidden) {
+				if(!d.hidden && !d.std_field) {
 					var column = {
 						id: d.fieldname,
 						field: d.fieldname,

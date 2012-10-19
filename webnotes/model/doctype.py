@@ -84,6 +84,7 @@ def get_doctype_doclist(doctype):
 	"""get doclist of single doctype"""
 	from webnotes.model.controller import Controller
 	doclist = Controller('DocType', doctype).doclist
+	add_std_fields(doctype, doclist)
 	add_custom_fields(doctype, doclist)
 	apply_property_setters(doctype, doclist)
 	sort_fields(doclist)
@@ -136,6 +137,23 @@ def apply_property_setters(doctype, doclist):
 				ps['value'] = cint(ps['value'])
 				
 			docfield[0].fields[ps['property']] = ps['value']
+
+def add_std_fields(doctype, doclist):
+	"""metadata for reports / filters"""
+	for f in [
+		{"fieldname":"name", "fieldtype":"Link", "options":doctype, "label":"ID"}, 
+		{"fieldname":"_user_tags", "fieldtype":"Tag", "label":"Tags"},
+		{"fieldname":"owner", "fieldtype":"Data", "label":"Owner"},
+		{"fieldname":"modified_by", "fieldtype":"Data", "label":"Last Updated By"},
+		{"fieldname":"creation", "fieldtype":"Date", "label":"Created On"},
+		{"fieldname":"modified", "fieldtype":"Date", "label":"Last Updated On"}]:
+		f.update({
+			"name": doctype + "_" + f["fieldname"],
+			"parent": doctype,
+			"doctype":"DocField",
+			"std_field": 1
+		})
+		doclist.append(webnotes.model.doc.Document(fielddata = f))
 
 def add_custom_fields(doctype, doclist):
 	try:

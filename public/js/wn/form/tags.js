@@ -33,17 +33,25 @@ wn.ui.form.TagEditor = Class.extend({
 			placeholderText: 'Add Tag',
 			onTagAdded: function(ev, tag) {
 				if(!me.refreshing) {
+					var tagtxt = tag.find('.tagit-label').text();
 					wn.call({
 						method: 'webnotes.widgets.tags.add_tag',
-						args: me.get_args(tag.find('.tagit-label').text())
-					});					
+						args: me.get_args(tagtxt),
+						callback: function(r) {
+							me.frm.doc._user_tags += ',' + tagtxt;
+						}
+					});
 				}
 			},
 			onTagRemoved: function(ev, tag) {
 				if(!me.refreshing) {
+					var tagtxt = tag.find('.tagit-label').text();
 					wn.call({
 						method: 'webnotes.widgets.tags.remove_tag',
-						args: me.get_args(tag.find('.tagit-label').text())
+						args: me.get_args(tagtxt),
+						callback: function(r) {
+							me.frm.doc._user_tags.replace("," + tagtxt, "")
+						}
 					});
 				}
 			}
@@ -70,7 +78,7 @@ wn.ui.form.TagEditor = Class.extend({
 		me.$tags.tagit("removeAll");
 		if(user_tags) {
 			$.each(user_tags.split(','), function(i, v) {
-				me.$tags.tagit("createTag", v);
+				if(v)me.$tags.tagit("createTag", v);
 			});
 		}
 		this.refreshing = false;
