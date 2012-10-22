@@ -3,11 +3,11 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-05-10 13:55:07',
-		'docstatus': 0,
-		'modified': '2012-07-12 11:37:24',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
+		u'creation': '2012-10-18 15:07:09',
+		u'docstatus': 0,
+		u'modified': '2012-10-22 13:58:25',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
@@ -19,13 +19,13 @@
 		'autoname': u'field:page_name',
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
-		'doctype': 'DocType',
+		u'doctype': u'DocType',
 		'hide_heading': 0,
 		'hide_toolbar': 0,
 		'issingle': 0,
 		'istable': 0,
 		'module': u'Core',
-		'name': '__common__',
+		u'name': u'__common__',
 		'read_only': 0,
 		'section_style': u'Tabbed',
 		'server_code_error': u' ',
@@ -35,8 +35,8 @@
 
 	# These values are common for all DocField
 	{
-		'doctype': u'DocField',
-		'name': '__common__',
+		u'doctype': u'DocField',
+		u'name': u'__common__',
 		'parent': u'Page',
 		'parentfield': u'fields',
 		'parenttype': u'DocType',
@@ -47,9 +47,9 @@
 	{
 		'cancel': 0,
 		'create': 1,
-		'doctype': u'DocPerm',
+		u'doctype': u'DocPerm',
 		'execute': 0,
-		'name': '__common__',
+		u'name': u'__common__',
 		'parent': u'Page',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
@@ -62,18 +62,13 @@
 
 	# DocType, Page
 	{
-		'doctype': 'DocType',
-		'name': u'Page'
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm'
+		u'doctype': u'DocType',
+		u'name': u'Page'
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'page_html',
 		'fieldtype': u'Section Break',
 		'label': u'Page HTML',
@@ -82,7 +77,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'page_name',
 		'fieldtype': u'Data',
 		'label': u'Page Name',
@@ -93,7 +88,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'title',
 		'fieldtype': u'Data',
 		'label': u'Title'
@@ -101,14 +96,22 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
+		'fieldname': u'description',
+		'fieldtype': u'Small Text',
+		'label': u'Description'
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
 		'fieldname': u'column_break0',
 		'fieldtype': u'Column Break'
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'module',
 		'fieldtype': u'Select',
 		'label': u'Module',
@@ -120,7 +123,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'standard',
 		'fieldtype': u'Select',
 		'label': u'Standard',
@@ -133,14 +136,14 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'section_break0',
 		'fieldtype': u'Section Break'
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'content',
 		'fieldtype': u'Code',
 		'hidden': 0,
@@ -153,7 +156,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'permissions',
 		'fieldtype': u'Section Break',
 		'label': u'Permissions',
@@ -162,7 +165,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'roles',
 		'fieldtype': u'Table',
 		'hidden': 0,
@@ -176,14 +179,14 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'section_break1',
 		'fieldtype': u'Section Break'
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'script',
 		'fieldtype': u'Code',
 		'label': u'Script (JS)'
@@ -191,9 +194,14 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'style',
 		'fieldtype': u'Code',
 		'label': u'Style (CSS)'
+	},
+
+	# DocPerm
+	{
+		u'doctype': u'DocPerm'
 	}
 ]

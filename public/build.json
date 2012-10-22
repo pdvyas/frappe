@@ -122,7 +122,6 @@
 			"lib/public/js/legacy/widgets/export_query.js",
 			"lib/public/js/legacy/webpage/search.js",
 			"public/js/toolbar.min.js",
-			"lib/public/js/wn/views/breadcrumbs.js",
 			"lib/public/js/wn/form/fields.js",
 			"lib/public/js/wn/form/formatters.js",
 			"lib/public/js/wn/form/grid_editors.js",

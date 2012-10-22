@@ -32,7 +32,8 @@ def get_items():
 	out = []
 	
 	# doctypes
-	for dt in webnotes.conn.sql("""select name, document_type, issingle, open_count	
+	for dt in webnotes.conn.sql("""select name, document_type, issingle, 
+		open_count, ifnull(description, "") as description
 		from tabDocType where module=%s""", module, as_dict=1):
 		
 		if dt.document_type:
@@ -47,7 +48,7 @@ def get_items():
 			out.append(dt)
 	
 	# pages
-	out += webnotes.conn.sql("""select name, title, 
+	out += webnotes.conn.sql("""select name, title, description, 
 		"tool" as item_type from tabPage where module=%s""", 
 		module, as_dict=1)
 		

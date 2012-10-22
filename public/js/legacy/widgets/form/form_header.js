@@ -24,7 +24,6 @@
 // --------
 // toolbar - standard and custom
 // label - saved, submitted etc
-// breadcrumbs
 // save / submit button toggle based on "saved" or not
 // highlight and fade name based on refresh
 
@@ -39,15 +38,10 @@ _f.FrmHeader = Class.extend({
 				wn.set_route("List", frm.doctype);
 			});
 		}
-
-		this.appframe.add_tab('<span class="small-module-icons small-module-icons-'+
-			frm.meta.module.toLowerCase()+'"></span>'+
-			' <span>'+ frm.meta.module + "</span>", 0.7, function() {
-			wn.set_route(wn.modules[frm.meta.module])
-		});
+		
+		this.appframe.add_module_tab(frm.meta.module);
 	},
 	refresh: function() {
-		// refresh breadcrumbs
 		this.appframe.title(this.frm.docname);
 		
 		this.refresh_timestamps();

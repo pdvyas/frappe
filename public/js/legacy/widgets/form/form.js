@@ -654,7 +654,11 @@ _f.Frm.prototype.refresh_footer = function() {
 	var f = this.page_layout.footer;
 	if(f.save_area) {
 		if(this.editable && (!this.meta.in_dialog || this.in_form) 
-			&& this.doc.docstatus==0 && !this.meta.istable && this.get_doc_perms()[WRITE]
+			&& !this.meta.hide_toolbar
+			&& !this.meta.hide_heading
+			&& this.doc.docstatus==0 
+			&& !this.meta.istable 
+			&& this.get_doc_perms()[WRITE]
 			&& (this.fields && this.fields.length > 7)) {
 			f.show_save();
 		} else {

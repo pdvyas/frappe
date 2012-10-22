@@ -48,8 +48,10 @@ wn.views.ReportViewPage = Class.extend({
 		wn.container.change_to(this.page_name);
 	},
 	make_report_view: function() {
-		// add breadcrumbs
-		this.page.appframe.add_breadcrumb(locals.DocType[this.doctype].module);
+		var module = locals.DocType[this.doctype].module;
+		this.page.appframe.set_title(this.doctype);
+		this.page.appframe.set_marker(module);
+		this.page.appframe.add_module_tab(module);
 			
 		this.reportview = new wn.views.ReportView({
 			doctype: this.doctype, 
@@ -65,6 +67,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		var me = this;
 		$.extend(this, opts);
 		this.tab_name = '`tab'+this.doctype+'`';
+		this.meta = locals.DocType[this.doctype];
 		this.setup();
 	},
 
@@ -246,12 +249,21 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		var me = this;
 		this.dataView.getItemMetadata = function(row) {
 			var item = me.data[row];
+			var ret = null;
+			
 			if(item.docstatus==1) {
-				return { cssClasses: "row-blue" }
+				ret = { cssClasses: "row-blue" }
 			} if(item.docstatus==2) {
-				return { cssClasses: "row-red" }			
+				ret = { cssClasses: "row-gray" }			
 			}
 			
+			if(me.meta && me.meta.open_count) {
+				var condition = "item." + me.meta.open_count.replace("=", "==");
+				if(eval(condition)) {
+					ret = { cssClasses: 'row-red' }
+				}
+			}
+			return ret;
 		}
 	},
 	
@@ -262,6 +274,11 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		
 		var me = this;
 		this.grid.onClick.subscribe(function(e, args) {
+			// need to understand slickgrid event model
+			// a bit better. This function also gets called
+			// in form (??)
+			if(!$(me.wrapper).is(":visible")) return;
+			
 			// clicked on link
 			if(e.target.tagName.toLowerCase()=="a") {
 				e.stopImmediatePropagation();
@@ -300,7 +317,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 				
 				if(docfield && item.name) {
 					var fieldname = docfield.fieldname;
-					var dialog = new wn.ui.Dialog({
+					me.edit_dialog = new wn.ui.Dialog({
 						title: item.name,
 						width: 700,
 						fields: [
@@ -308,15 +325,15 @@ wn.views.ReportView = wn.ui.Listing.extend({
 								{fieldname:'update', label:'Update', fieldtype:'Button'}
 						]
 					});
-					dialog.fields_dict[fieldname].set_value(item[fieldname])
+					me.edit_dialog.fields_dict[fieldname].set_value(item[fieldname])
 					
-					dialog.fields_dict.update.$input.click(function() {
+					me.edit_dialog.fields_dict.update.$input.click(function() {
 						// parent
 						var call_args = {
 							doctype: me.doctype,
 							name: item.name,
 							fieldname: fieldname,
-							value: dialog.fields_dict[fieldname].get_value()
+							value: me.edit_dialog.fields_dict[fieldname].get_value()
 						};
 						
 						if(docfield.parent && docfield.parent!=me.doctype)
@@ -338,7 +355,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 											}
 										});
 									});
-									dialog.hide();
+									me.edit_dialog.hide();
 									me.set_data(me.data);
 									me.grid.invalidate();
 									me.grid.render();
@@ -347,8 +364,8 @@ wn.views.ReportView = wn.ui.Listing.extend({
 							btn: this
 						})
 					});
-					
-					dialog.show();
+										
+					me.edit_dialog.show();
 					
 				}
 			}

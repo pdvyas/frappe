@@ -32,7 +32,7 @@ wn.form.formatters = {
 		return cint(value);
 	},
 	Currency: function(value) {
-		return fmt_money(value);
+		return "<div style='text-align: right'>" + fmt_money(value) + "</div>";
 	},
 	Check: function(value) {
 		return value ? "<i class='icon-ok'></i>" : "";

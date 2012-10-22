@@ -49,9 +49,9 @@ wn.views.ModuleViewPage = Class.extend({
 			parent: this.page,
 			title: repl('<span \
 				style="margin-right: 3px; display: inline-block; \
-					margin-top: -9px; width: 34px; height: 27px; \
-					text-align: center; padding-top: 7px;\
-					border-radius: 34px; border: 2px solid #fff; \
+					margin-top: -6px; width: 28px; height: 24px; \
+					text-align: center; padding-top: 4px;\
+					border-radius: 28px; border: 2px solid #fff; \
 					background-color: %(back)s">\
 				<span \
 					class="small-module-icons small-module-icons-%(module_lower)s"></span>\
@@ -65,7 +65,10 @@ wn.views.ModuleViewPage = Class.extend({
 		wn.container.change_to(this.page_name);
 		$("<div class='pull-left' style='width: 48%'><div class='alert'>Loading...</div></div>\
 			<div class='pull-right' style='width: 48%'></div>\
-			<div class='clearfix'></div>").appendTo($(this.page).find(".layout-main"));
+			<div class='clearfix'></div>").appendTo($(this.page)
+				.find(".layout-main").css("min-height", "400px"));
+				
+		this.page.appframe.set_marker(this.module);
 	},
 	load_items: function() {
 		var me = this;
@@ -127,6 +130,8 @@ wn.views.ModuleViewPage = Class.extend({
 	},
 	formatters: {
 		def: function(item) {
+			// default formatter for doctypes
+			
 			if(item.open_count!=null) {
 				item.open_count = '<span class="badge badge-important">'
 					+item.open_count+'</span>';
@@ -140,14 +145,33 @@ wn.views.ModuleViewPage = Class.extend({
 				item.count = "";				
 			}
 			
-			return $(repl("<span style='display:inline-block; float: right;'>\
-				%(count)s %(open_count)s</span>\
-				<a href='#List/%(name)s'><b>%(name)s</b></a> \
-				", item));			
+			if(item.issingle) {
+				item.main_link = repl("<a href='#Form/%(name)s/%(name)s'>\
+					<b style='font-size: 110%'>%(name)s</b></a>", 
+					item);
+			} else {
+				item.main_link = repl("<a href='#List/%(name)s'>\
+					<b style='font-size: 110%'>%(name)s</b></a>", item);
+			}
+			
+			return $(repl("<span style='display:inline-block; \
+					float: right; max-width: 18%;'>\
+					%(count)s %(open_count)s</span>\
+				<span class='module-item'>\
+					%(main_link)s \
+					<span class='help' title='%(description)s'>\
+						%(description)s</span>\
+				</span>\
+				", item));
 		},
 		tool: function(item) {
 			if(!item.title) item.title = item.name;
-			return $(repl("<a href='#%(name)s'>%(title)s</a>", item));
+			if(!item.description) item.description = "";
+			return $(repl("<span class='module-item'>\
+				<a href='#%(name)s'>%(title)s</a>\
+				<span class='help' title='%(description)s'>\
+					%(description)s</span>\
+				</span>", item));
 		},
 		report: function(item) {
 			return $(repl("<a href='#Report2/%(ref_doctype)s/%(name)s'>%(name)s</a>", item));

@@ -152,6 +152,10 @@ table.doclist-row td {
 	background-color: #fee;
 }
 
+.row-red .slick-cell:first-child {
+	border-left: 4px solid #B94A48 !important;
+}
+
 .row-green {
 	background-color: #efe;
 }
@@ -166,6 +170,7 @@ table.doclist-row td {
 
 .row-gray {
 	background-color: #eee;
+	color: #777;
 }
 
 .row-fade {

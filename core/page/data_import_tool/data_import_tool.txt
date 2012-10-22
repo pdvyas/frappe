@@ -3,15 +3,16 @@
 
 	# These values are common in all dictionaries
 	{
-		u'creation': '2012-06-14 15:07:25',
+		u'creation': '2012-10-05 11:10:44',
 		u'docstatus': 0,
-		u'modified': '2012-10-04 16:54:24',
+		u'modified': '2012-10-22 14:02:34',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
 
 	# These values are common for all Page
 	{
+		'description': u'Bulk import from CSV files.',
 		u'doctype': u'Page',
 		'module': u'Core',
 		u'name': u'__common__',

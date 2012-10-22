@@ -88,13 +88,9 @@ wn.views.DocListPage = Class.extend({
 		var module = locals.DocType[this.doctype].module;
 		
 		this.appframe.set_marker(module);
-		
-		wn.views.breadcrumbs(this.appframe, locals.DocType[this.doctype].module, this.doctype);
-		this.appframe.add_tab('<span class="small-module-icons small-module-icons-'+
-			module.toLowerCase()+'"></span>'+' <span>'
-			+ module + "</span>", 0.7, function() {
-			wn.set_route(wn.modules[module]);
-		});
+		this.appframe.set_title(this.doctype);
+		this.appframe.set_help(locals.DocType[this.doctype].description || "")
+		this.appframe.add_module_tab(module);
 	},
 	setup_docstatus_filter: function() {
 		var me = this;
