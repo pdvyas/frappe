@@ -256,5 +256,3 @@ def delete_fields(args_dict, delete=0):
 				", ".join(["DROP COLUMN `%s`" % f for f in fields if f in existing_fields])
 			webnotes.conn.commit()
 			webnotes.conn.sql(query)
-				
-			

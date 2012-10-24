@@ -35,7 +35,7 @@ def walk_and_sync(start_path, force=0):
 	modules = []
 
 	for path, folders, files in os.walk(start_path):
-		if os.path.basename(os.path.dirname(path)) in ('doctype', 'page'):
+		if os.path.basename(os.path.dirname(path)) in ('doctype', 'page', 'search_criteria', 'Print Format', 'DocType Mapper'):
 			for f in files:				
 				if f.endswith(".txt"):
 					# great grand-parent folder is module_name
@@ -51,9 +51,9 @@ def walk_and_sync(start_path, force=0):
 				
 					if doctype == 'doctype':
 						sync(module_name, name, force)
-					elif doctype in ['page']:#, 'search_criteria', 'Print Format', 'DocType Mapper']:
-						if reload_doc(module_name, doctype, name):
-							print module_name + ' | ' + doctype + ' | ' + name
+					elif doctype in ['page']: #, 'search_criteria', 'Print Format', 'DocType Mapper']:
+						print module_name + ' | ' + doctype + ' | ' + name
+						reload_doc(module_name, doctype, name)
 					
 	return modules
 
