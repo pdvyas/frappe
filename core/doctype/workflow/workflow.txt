@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		u'creation': '2012-10-23 15:15:26',
+		u'creation': '2012-10-24 14:12:50',
 		u'docstatus': 0,
-		u'modified': '2012-10-23 15:27:57',
+		u'modified': '2012-10-24 15:05:11',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -33,6 +33,7 @@
 
 	# These values are common for all DocPerm
 	{
+		'cancel': 1,
 		'create': 1,
 		u'doctype': u'DocPerm',
 		u'name': u'__common__',

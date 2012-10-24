@@ -28,11 +28,13 @@ wn.ui.FormSidebar = Class.extend({
 	make: function() {
 		var me = this;
 		this.wrapper = $('<div class="section">\
-			<div class="btn-group states" style="display: block;">\
-				<button class="btn btn-small dropdown-toggle" data-toggle="dropdown">\
-				<i class="icon-small icon-pencil"></i> <span class="state-text"></span> <span class="caret"></span></button>\
-				<ul class="dropdown-menu">\
-				</ul>\
+			<div class="states">\
+				<div class="btn-group">\
+					<button class="btn btn-small dropdown-toggle" data-toggle="dropdown">\
+					<i class="icon-small icon-pencil"></i> <span class="state-text"></span> <span class="caret"></span></button>\
+					<ul class="dropdown-menu">\
+					</ul>\
+				</div>\
 				<hr />\
 			</div>\
 			<div></div>\

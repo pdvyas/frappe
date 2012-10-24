@@ -77,7 +77,7 @@ class Profile:
 		
 		self.perm_map = {}
 		for r in webnotes.conn.sql("""select parent, `read`, `write`, `create`, `submit`, `cancel` 
-			from tabDocPerm where docstatus=0 
+			from tabDocPerm where ifnull(docstatus,0)=0 
 			and ifnull(permlevel,0)=0
 			and parent not like "old_parent:%%" 
 			and role in ('%s')""" % "','".join(self.get_roles()), as_dict=1):
@@ -97,11 +97,10 @@ class Profile:
 			read_only => Not in Search
 			in_create => Not in create
 		
-		"""
-		
+		"""		
 		self.build_doctype_map()
 		self.build_perm_map()
-		
+				
 		for dt in self.doctype_map:
 			dtp = self.doctype_map[dt]
 			p = self.perm_map.get(dt, {})
@@ -209,7 +208,7 @@ class Profile:
 	def load_profile(self):
 		"""
 	      	Return a dictionary of user properites to be stored in the session
-		"""
+		"""		
 		t = webnotes.conn.sql("""select email, first_name, last_name, 
 			recent_documents from tabProfile where name = %s""", self.name)[0]
 
@@ -240,7 +239,6 @@ class Profile:
 		d['allow_pages'] = list(set(self.allow_pages))
 		
 		d['in_create'] = self.in_create
-		
 		return d
 		
 	def load_from_session(self, d):

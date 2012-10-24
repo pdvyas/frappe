@@ -87,5 +87,18 @@ wn.model = {
 			var ret = !is_null(val);			
 		}
 		return ret ? true : false;
+	},
+	
+	get: function(doctype, filters) {
+		var ret = [];
+		if(!locals[doctype]) return ret;
+		
+		$.each(locals[doctype], function(i, d) {
+			for(key in filters) {
+				if(d[key]!=filters[key]) return;
+			}
+			ret.push(d);
+		});
+		return ret;
 	}
 }

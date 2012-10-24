@@ -5,7 +5,7 @@
 	{
 		u'creation': '2012-10-23 15:09:58',
 		u'docstatus': 0,
-		u'modified': '2012-10-23 15:59:54',
+		u'modified': '2012-10-24 15:44:17',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -64,5 +64,14 @@
 		'fieldtype': u'Text',
 		'label': u'Message',
 		'reqd': 1
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'doc_status',
+		'fieldtype': u'Select',
+		'label': u'Doc Status',
+		'options': u'0\n1\n2'
 	}
 ]

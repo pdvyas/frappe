@@ -45,6 +45,8 @@ def clear_cache(user=''):
 		webnotes.cache().flush_keys("bootinfo:")
 		webnotes.cache().flush_keys("doctype:")
 
+	webnotes.session["data"] = None
+
 def get():
 	"""get session boot info"""
 	
@@ -59,5 +61,6 @@ def get():
 	from webnotes.boot import get_bootinfo
 	bootinfo = get_bootinfo()
 	webnotes.cache().set_value('bootinfo:' + webnotes.session.user, bootinfo)
-		
+	
+	bootinfo["fresh"] = 1
 	return bootinfo

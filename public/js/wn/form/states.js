@@ -23,8 +23,43 @@
 wn.ui.form.States = Class.extend({
 	init: function(opts) {
 		$.extend(this, opts);
+		this.bind_action();
 	},
+	
+	bind_action: function() {
+		var me = this;
+		$(this.parent).on("click", "[data-action]", function() {
+			var action = $(this).attr("data-action");
+			var next_state = wn.model.get("Workflow Transition", {
+				parent: me.frm.doctype,
+				action: action
+			})[0].next_state;
+			
+			me.frm.doc.workflow_state = next_state;
+			
+			var new_docstatus = wn.model.get("Workflow Document State", {
+				parent: me.frm.doctype,
+				state: next_state
+			})[0].doc_status;
+			
+			if(new_docstatus==1 && me.frm.doc.docstatus==0) {
+				me.frm.savesubmit();
+			} else if(new_docstatus==0 && me.frm.doc.docstatus==0) {
+				me.frm.save();
+			} else if(new_docstatus==2 && me.frm.doc.docstatus==1) {
+				me.frm.savecancel();
+			} else {
+				msgprint("Docstatus transition from " + me.frm.doc.docstatus + " to" + 
+					new_docstatus + " is not allowed.");
+				return;
+			}
+			
+			return false;
+		})
+	},
+	
 	refresh: function() {
+		// hide if its not yet saved
 		if(this.frm.doc.__islocal) {
 			this.parent.toggle(false);
 			return;
@@ -32,26 +67,50 @@ wn.ui.form.States = Class.extend({
 		this.parent.toggle(true);
 		
 		// state text
-		var state_text = this.get_state();
+		var state = this.get_state();
 		
-		if(state_text) {
+		if(state) {
 			// show current state on the button
-			this.parent.find(".state-text").text()
+			this.parent.find(".state-text").text(state);
+			
 			
 			// show actions from that state
+			this.show_actions(state);
+			
+			// disable if not allowed
 		} else {
 			this.parent.toggle(false);
 		}				
 	},
+	
+	show_actions: function(state) {
+		var $ul = this.parent.find("ul");
+		$ul.empty();
+		$.each(wn.model.get("Workflow Transition", {
+			parent: this.frm.doctype,
+			state: state,
+		}), function(i, d) {
+			if(in_list(user_roles, d.allowed)) {
+				$(repl('<li><a href="#" data-action="%(action)s">%(action)s</a></li>', d)).appendTo($ul);				
+			}
+		});
+		
+		// disable the button if user cannot change state
+		if(!$ul.find("li").length) {
+			this.parent.find('.btn').attr('disabled', true);
+		}
+	},
+	
 	get_state: function() {
 		if(!this.frm.doc.workflow_state) {
 			var me = this;
-			if(locals["Workflow Document State"]) {
-				$.each(locals["Workflow Document State"], function(i, d) {
-					if(d.parent==me.frm.doctype && d.idx==1)
-						me.frm.set_value_in_locals(me.frm.doctype, me.frm.docname, 'workflow_state', d.state);
-				});				
-			}
+			var d = wn.model.get("Workflow Document State", {
+				parent: me.frm.doctype,
+				idx: 1
+			});
+			
+			if(d.length)
+				me.frm.set_value_in_locals(me.frm.doctype, me.frm.docname, 'workflow_state', d[0].state);			
 		}
 		return this.frm.doc.workflow_state;
 	}

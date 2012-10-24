@@ -37,7 +37,7 @@ def get_bootinfo():
 
 	# profile
 	get_profile(bootinfo)
-	
+		
 	# control panel
 	cp = webnotes.model.doc.getsingle('Control Panel')
 
