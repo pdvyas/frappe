@@ -38,6 +38,16 @@ def save():
 	controller.save()
 	
 	return [d.fields for d in doclist]
+	
+@webnotes.whitelist()
+def set_default():
+	"""set a user default value"""
+	webnotes.conn.set_default(webnotes.form_dict.key, webnotes.form_dict.value, 
+		('parent' in webnotes.form_dict) and webntoes.form_dict.parent \
+			or webnotes.session.user)
+			
+	from webnotes.sessions import clear_cache
+	clear_cache(webnotes.session.user)
 
 @webnotes.whitelist()
 def update_value():

@@ -39,10 +39,14 @@ wn.form.formatters = {
 	},
 	Link: function(value, docfield) {
 		if(!value) return "";
-		return repl('<a href="#Form/%(doctype)s/%(name)s">%(name)s</a>', {
-			doctype: docfield.options,
-			name: value
-		});
+		if(docfield.options) {
+			return repl('<a href="#Form/%(doctype)s/%(name)s">%(name)s</a>', {
+				doctype: docfield.options,
+				name: value
+			});			
+		} else {
+			return value;
+		}
 	},
 	Date: function(value) {
 		return dateutil.str_to_user(value);

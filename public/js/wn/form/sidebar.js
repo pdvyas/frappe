@@ -28,6 +28,14 @@ wn.ui.FormSidebar = Class.extend({
 	make: function() {
 		var me = this;
 		this.wrapper = $('<div class="section">\
+			<div class="btn-group states" style="display: block;">\
+				<button class="btn btn-small dropdown-toggle" data-toggle="dropdown">\
+				<i class="icon-small icon-pencil"></i> <span class="state-text"></span> <span class="caret"></span></button>\
+				<ul class="dropdown-menu">\
+				</ul>\
+				<hr />\
+			</div>\
+			<div></div>\
 			<div class="btn-group" style="display: inline-block;">\
 				<button class="btn btn-small dropdown-toggle" data-toggle="dropdown">\
 				<i class="icon-small icon-asterisk"></i> Actions <span class="caret"></span></button>\
@@ -82,6 +90,11 @@ wn.ui.FormSidebar = Class.extend({
 			frm: this.frm			
 		});
 		
+		this.frm.states = new wn.ui.form.States({
+			parent: this.wrapper.find(".states"),
+			frm: this.frm
+		});
+		
 		// assign to
 		this.frm.assign_to = new wn.ui.form.AssignTo({
 			parent: this.wrapper.find(".assign_area"),
@@ -123,6 +136,7 @@ wn.ui.FormSidebar = Class.extend({
 			.toggle(can_delete ? true : false);
 		
 		this.frm.linked_with.refresh();
+		this.frm.states.refresh();
 		this.frm.tags.refresh();
 		this.frm.assign_to.refresh();
 		this.frm.attachments && this.frm.attachments.refresh();

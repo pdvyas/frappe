@@ -164,6 +164,10 @@ table.doclist-row td {
 	background-color: #ffe;
 }
 
+.row-yellow .slick-cell:first-child {
+	border-left: 4px solid #EFD24A !important;
+}
+
 .row-orange {
 	background-color: #fff8ee;
 }

@@ -34,8 +34,6 @@
 								+ this.layout
 								+ this.footer
 						+ this.sidebar
-				+ this.print_wrapper
-					+ this.head
 */
 
 wn.provide('_f');
@@ -66,13 +64,10 @@ _f.Frm = function(doctype, parent, in_form) {
 	// notify on rename
 	var me = this;
 	$(document).bind('rename', function(event, dt, old_name, new_name) {
-		//console.log(arguments)
 		if(dt==me.doctype)
 			me.rename_notify(dt, old_name, new_name)
 	});
 }
-
-// ======================================================================================
 
 _f.Frm.prototype.check_doctype_conflict = function(docname) {
 	var me = this;
@@ -101,7 +96,10 @@ _f.Frm.prototype.setup = function() {
 	this.wrapper = this.parent;
 	
 	// create area for print fomrat
-	this.setup_print_layout();
+	this.print_view = new wn.ui.form.PrintView({
+		frm: this,
+		parent: this.wrapper
+	})
 	
 	// 2 column layout
 	this.setup_std_layout();
@@ -112,39 +110,6 @@ _f.Frm.prototype.setup = function() {
 	this.setup_done = true;
 }
 
-// ======================================================================================
-
-_f.Frm.prototype.setup_print_layout = function() {
-	var me = this;
-	this.print_wrapper = $a(this.wrapper, 'div');
-	wn.ui.make_app_page({
-		parent: this.print_wrapper,
-		single_column: true,
-		title: me.doctype + ": Print View",
-		module: me.meta.module
-	});
-	
-	var appframe = this.print_wrapper.appframe;
-	appframe.add_button("View Details", function() {
-		me.edit_doc();
-	}).addClass("btn-success");
-	
-	appframe.add_button("Print", function() {
-		me.print_doc();
-	}, 'icon-print');
-	
-	appframe.add_ripped_paper_effect(this.print_wrapper);
-	
-	var layout_main = $(this.print_wrapper).find(".layout-main");
-	this.print_body = $("<div style='margin: 25px'>").appendTo(layout_main)
-		.css("min-height", "400px").get(0);
-		
-}
-
-
-_f.Frm.prototype.onhide = function() { if(_f.cur_grid_cell) _f.cur_grid_cell.grid.cell_deselect(); }
-
-// ======================================================================================
 
 _f.Frm.prototype.setup_std_layout = function() {
 	this.page_layout = $a(this.wrapper, 'div', 
@@ -180,7 +145,7 @@ _f.Frm.prototype.setup_std_layout = function() {
 		
 	// header - no headers for tables and guests
 	if(!(this.meta.istable || (this.meta.in_dialog && !this.in_form))) 
-		this.frm_head = new _f.FrmHeader(this.page_layout.head, this);
+		this.frm_head = new wn.ui.form.FormHeader(this.page_layout.head, this);
 			
 	// create fields
 	this.setup_fields_std();
@@ -429,39 +394,6 @@ _f.Frm.prototype.setup_client_script = function() {
 
 // --------------------------------------------------------------------------------------
 
-_f.Frm.prototype.refresh_print_layout = function() {
-	$ds(this.print_wrapper);
-	$dh(this.page_layout);
-
-	var me = this;
-	var print_callback = function(print_html) {
-		me.print_body.innerHTML = print_html;
-	}
-	
-	// print head
-	if(cur_frm.doc.select_print_heading)
-		cur_frm.set_print_heading(cur_frm.doc.select_print_heading)
-	
-	if(user!='Guest') {
-		$di(this.view_btn_wrapper);
-
-		// archive
-		if(cur_frm.doc.__archived) {
-			$dh(this.view_btn_wrapper);
-		}
-	} else {
-		$dh(this.view_btn_wrapper);		
-		$dh(this.print_close_btn);		
-	}
-
-	// create print format here
-	_p.build(this.default_format, print_callback, null, 1);
-}
-
-
-
-// --------------------------------------------------------------------------------------
-
 _f.Frm.prototype.show_the_frm = function() {
 	// show the dialog
 	if(this.meta.in_dialog && !this.parent.dialog.display) {
@@ -476,12 +408,6 @@ _f.Frm.prototype.set_print_heading = function(txt) {
 	this.pformat[cur_frm.docname] = txt;
 }
 
-// --------------------------------------------------------------------------------------
-
-_f.Frm.prototype.defocus_rest = function() {
-	// deselect others
-	if(_f.cur_grid_cell) _f.cur_grid_cell.grid.cell_deselect();
-}
 
 // -------- Permissions -------
 // Returns global permissions, at all levels
@@ -595,9 +521,9 @@ _f.Frm.prototype.refresh = function(docname) {
 			// ----------------------------------
 			this.layout.show();
 			
-			if(this.print_wrapper) {
-				$dh(this.print_wrapper);
-				$ds(this.page_layout);
+			if(this.print_view) {
+				$(this.print_view.wrapper).toggle(false);
+				$(this.page_layout).toggle(true);
 			}
 
 			// header
@@ -638,8 +564,8 @@ _f.Frm.prototype.refresh = function(docname) {
 			// show print layout
 			// ----------------------------------
 			this.refresh_header();
-			if(this.print_wrapper) {
-				this.refresh_print_layout();
+			if(this.print_view) {
+				this.print_view.refresh(true);
 			}
 			this.runclientscript('edit_status_changed');
 		}
@@ -668,8 +594,8 @@ _f.Frm.prototype.refresh_footer = function() {
 }
 
 _f.Frm.prototype.refresh_field = function(fname) {
-	cur_frm.fields_dict[fname] && cur_frm.fields_dict[fname].refresh
-		&& cur_frm.fields_dict[fname].refresh();
+	this.fields_dict[fname] && this.fields_dict[fname].refresh
+		&& this.fields_dict[fname].refresh();
 }
 
 _f.Frm.prototype.refresh_fields = function() {

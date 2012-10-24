@@ -547,7 +547,7 @@ $.extend(_p, {
 						data[i].label;
 					var field = fieldname ?
 						wn.meta.get_docfield(doctype, fieldname, docname) : data[i];
-					if(!field.print_hide) {
+					if(!field.print_hide && !field.std_field) {
 						if(cur_frm.pformat[field.fieldname]) {
 							// If there is a custom method to generate the HTML, then use it
 							this.generate_custom_html(field, doctype, docname);
@@ -673,7 +673,8 @@ print_table = function(dt, dn, fieldname, tabletype, cols, head_labels, widths, 
 			var fl = wn.meta.docfield_list[tabletype];
 			if(fl) {
 				for(var i=0; i<fl.length; i++) {
-					f_list.push(copy_dict(fl[i]));
+					if(!fl[i].std_field)
+						f_list.push(copy_dict(fl[i]));
 				}
 			}
 			return f_list;

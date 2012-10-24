@@ -156,10 +156,13 @@ wn.form.Field = Class.extend({
 		
 	run_trigger: function() {
 		if(!this.frm) return;
-		if(this.frm.cscript[this.df.fieldname])
-			this.frm.runclientscript(this.df.fieldname, this.doctype, this.docname);
+		
+		var target_frm = this.frm.parent_frm || this.frm;
+		
+		if(target_frm.cscript[this.df.fieldname])
+			target_frm.runclientscript(this.df.fieldname, this.doctype, this.docname);
 
-		this.frm.refresh_dependency();
+		target_frm.refresh_dependency();
 	},
 	
 	set_focus: function() {

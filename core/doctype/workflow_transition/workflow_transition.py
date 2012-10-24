@@ -18,46 +18,10 @@
 # HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
 # CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-# 
 
 from __future__ import unicode_literals
-"""
-Boot session from cache or build
-
-Session bootstraps info needed by common client side activities including
-permission, homepage, control panel variables, system defaults etc
-"""
 import webnotes
-import conf
-import json
 
-@webnotes.whitelist()
-def clear(user=None):
-	"""clear all cache"""
-	clear_cache(user)
-	webnotes.response['message'] = "Cache Cleared"
-
-def clear_cache(user=''):
-	"""clear cache"""
-	if user:
-		webnotes.cache().flush_keys("bootinfo:" + user)
-	else:
-		webnotes.cache().flush_keys("bootinfo:")
-		webnotes.cache().flush_keys("doctype:")
-
-def get():
-	"""get session boot info"""
-	
-	# check if cache exists
-	if not getattr(conf,'auto_cache_clear',None):
-		cache = webnotes.cache().get_value('bootinfo:' + webnotes.session.user)
-		if cache:
-			cache['from_cache'] = 1
-			return cache
-	
-	# if not create it
-	from webnotes.boot import get_bootinfo
-	bootinfo = get_bootinfo()
-	webnotes.cache().set_value('bootinfo:' + webnotes.session.user, bootinfo)
-		
-	return bootinfo
+class DocType:
+	def __init__(self, d, dl):
+		self.doc, self.doclist = d, dl

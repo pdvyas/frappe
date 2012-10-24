@@ -66,6 +66,7 @@ def get(doctype, processed=False):
 		add_print_formats(doclist)
 		add_search_fields(doclist)
 		add_linked_with(doclist)
+		add_workflows(doclist)
 		# update_language(doclist)
 
 	# add validators
@@ -79,6 +80,11 @@ def load_docfield_types():
 	global docfield_types
 	docfield_types = dict(webnotes.conn.sql("""select fieldname, fieldtype from tabDocField
 		where parent='DocField'"""))
+
+def add_workflows(doclist):
+	from webnotes.model.controller import Controller
+	if webnotes.conn.exists("Workflow", doclist[0].name):
+		doclist += Controller("Workflow", doclist[0].name).doclist
 
 def get_doctype_doclist(doctype):
 	"""get doclist of single doctype"""

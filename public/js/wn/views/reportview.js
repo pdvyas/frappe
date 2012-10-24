@@ -68,18 +68,24 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		$.extend(this, opts);
 		this.tab_name = '`tab'+this.doctype+'`';
 		this.meta = locals.DocType[this.doctype];
+		this.can_delete = wn.model.can_delete(this.doctype);
+		
 		this.setup();
 	},
 
 	set_init_columns: function() {
 		// pre-select mandatory columns
-		var columns = [['name'],];
-		$.each(wn.meta.docfield_list[this.doctype], function(i, df) {
-			if(df.in_filter && df.fieldname!='naming_series'
-				&& !in_list(no_value_fields, df.fieldname)) {
-				columns.push([df.fieldname]);
-			}
-		});
+		var columns = wn.user.get_default("_list_settings:" + this.doctype);
+		if(!columns) {
+			var columns = [['name'],];
+			$.each(wn.meta.docfield_list[this.doctype], function(i, df) {
+				if(df.in_filter && df.fieldname!='naming_series'
+					&& !in_list(no_value_fields, df.fieldname)) {
+					columns.push([df.fieldname]);
+				}
+			});			
+		}
+		
 		this.set_columns(columns);
 	},
 	
@@ -104,6 +110,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 			new_doctype: this.doctype,
 			allow_delete: true
 		});
+		this.make_delete();
 		this.make_column_picker();
 		this.make_sorter();
 		this.make_export();
@@ -194,7 +201,20 @@ wn.views.ReportView = wn.ui.Listing.extend({
 	render_list: function() {
 		var me = this;
 		//this.gridid = wn.dom.set_unique_id()
-		var columns = [{id:'_idx', field:'_idx', name: 'Sr.', width: 40}].concat(this.build_columns());
+		var std_columns = [{id:'_idx', field:'_idx', name: 'Sr.', width: 40}];
+		if(this.can_delete) {
+			std_columns = [{
+				id:'_check', field:'_check', name: "", width: 40, 
+					formatter: function(row, cell, value, columnDef, dataContext) {
+						return repl("<input type='checkbox' \
+							data-row='%(row)s' %(checked)s>", {
+								row: row,
+								checked: (dataContext._checked ? "checked" : "")
+							});
+					}
+			}]
+		}
+		var columns = std_columns.concat(this.build_columns());
 
 		// add sr in data
 		$.each(this.data, function(i, v) {
@@ -260,7 +280,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 			if(me.meta && me.meta.open_count) {
 				var condition = "item." + me.meta.open_count.replace("=", "==");
 				if(eval(condition)) {
-					ret = { cssClasses: 'row-red' }
+					ret = { cssClasses: 'row-yellow' }
 				}
 			}
 			return ret;
@@ -295,7 +315,9 @@ wn.views.ReportView = wn.ui.Listing.extend({
 					return false;
 				}
 				
-				if(!docfield || in_list(['name', 'idx', 'owner', 'creation', 'modified_by', 
+				if(!docfield) return false;
+				
+				if(in_list(['name', 'idx', 'owner', 'creation', 'modified_by', 
 					'modified', 'parent', 'parentfield', 'parenttype', 'file_list', 'trash_reason'], 
 					docfield.fieldname)) {
 					msgprint("This field is not editable");
@@ -444,6 +466,44 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		}
 	},
 	
+	make_delete: function() {
+		var me = this;
+		if(this.can_delete) {
+			$(this.page).on("click", "input[type='checkbox'][data-row]", function() {
+				me.data[$(this).attr("data-row")]._checked 
+					= this.checked ? true : false;
+			});
+			
+			this.page.appframe.add_button('Delete', function() {
+				var delete_list = []
+				$.each(me.data, function(i, d) {
+					if(d._checked) {
+						if(d.name)
+							delete_list.push(d.name);
+					}
+				});
+				
+				if(!delete_list.length) 
+					return;
+				if(!confirm(wn._("This is PERMANENT action and you cannot undo. Continue?"))) {
+					return;
+				}
+
+				wn.call({
+					method: 'webnotes.widgets.doclistview.delete_items',
+					args: {
+						items: delete_list,
+						doctype: me.doctype
+					},
+					callback: function() {
+						me.refresh();
+					}
+				})
+				
+			}, 'icon-remove');
+		}
+	},
+	
 	// save
 	make_save: function() {
 		var me = this;
@@ -529,6 +589,7 @@ wn.ui.ColumnPicker = Class.extend({
 				columns.push([$selected.attr('fieldname'), 
 					$selected.attr('table')]);
 			});
+			wn.user.set_default("_list_settings:" + me.doctype, columns);
 			me.list.set_columns(columns);
 			me.list.run();
 		});
