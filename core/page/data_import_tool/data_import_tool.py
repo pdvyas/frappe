@@ -70,7 +70,7 @@ def get_template():
 	def append_row(t, mandatory):
 		docfield = getdocfield(t)
 		if docfield and ((mandatory and docfield.reqd) or (not mandatory and not docfield.reqd)) \
-			and (t not in ('parenttype', 'trash_reason', 'file_list')):
+			and (t not in ('parenttype', 'trash_reason', 'file_list')) and not docfield.hidden:
 			fieldrow.append(t)
 			mandatoryrow.append(docfield.reqd and 'Yes' or 'No')
 			typerow.append(docfield.fieldtype)
@@ -167,7 +167,8 @@ def upload():
 				ret.append(import_doc(d, doctype, overwrite, row_idx))
 		except Exception, e:
 			error = True
-			ret.append('Error for row (#%d) %s : %s' % (row_idx, row[1], cstr(e)))
+			ret.append('Error for row (#%d) %s : %s' % (row_idx, 
+				len(row)>1 and row[1] or "", cstr(e)))
 			webnotes.errprint(webnotes.getTraceback())
 	
 	if error:

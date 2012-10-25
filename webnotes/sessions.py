@@ -37,7 +37,7 @@ def clear(user=None):
 	clear_cache(user)
 	webnotes.response['message'] = "Cache Cleared"
 
-def clear_cache(user=''):
+def clear_cache(user=None):
 	"""clear cache"""
 	if user:
 		webnotes.cache().flush_keys("bootinfo:" + user)
