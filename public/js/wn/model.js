@@ -100,5 +100,11 @@ wn.model = {
 			ret.push(d);
 		});
 		return ret;
-	}
+	},
+	
+	get_state_fieldname: function(doctype) {
+		if(locals.Workflow && locals.Workflow[doctype])
+			return locals.Workflow[doctype].workflow_state_field;
+	},
+	
 }

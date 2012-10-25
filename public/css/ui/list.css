@@ -144,37 +144,28 @@ table.doclist-row td {
 
 /* row formatters */
 
-.row-blue {
+.row-blue, .row-primary, .row-info {
 	background-color: #eef;
 }
 
-.row-red {
+.row-red, .row-danger {
 	background-color: #fee;
 }
 
-.row-red .slick-cell:first-child {
-	border-left: 4px solid #B94A48 !important;
-}
-
-.row-green {
+.row-green, .row-success {
 	background-color: #efe;
 }
 
-.row-yellow {
+.row-yellow, .row-warning {
 	background-color: #ffe;
-}
-
-.row-yellow .slick-cell:first-child {
-	border-left: 4px solid #EFD24A !important;
 }
 
 .row-orange {
 	background-color: #fff8ee;
 }
 
-.row-gray {
-	background-color: #eee;
-	color: #777;
+.row-gray, .row-inverse {
+	background-color: #ddd;
 }
 
 .row-fade {

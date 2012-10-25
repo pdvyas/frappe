@@ -289,8 +289,8 @@ def get_stats():
 	"""get tag info"""
 	import json
 	doctype = webnotes.form_dict['doctype']
-	tags = ["_user_tags"] + [x.strip() for x in (webnotes.conn.get_value("DocType", 
-		doctype, "quick_stat_fields") or "").split(",")]
+	tags = ["_user_tags"] + [x.strip() for x in (webnotes.conn.get_value("Workflow", 
+		doctype, "workflow_state_field") or "").split(",")]
 	stat_data = {}
 	
 	columns = get_table_columns(doctype)

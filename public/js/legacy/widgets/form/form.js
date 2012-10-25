@@ -120,6 +120,7 @@ _f.Frm.prototype.setup_std_layout = function() {
 	this.page_layout.main = $a(this.page_layout, 'div', 'layout-main-section');
 	this.page_layout.sidebar_area = $a(this.page_layout, 'div', 'layout-side-section');
 	$a(this.page_layout, 'div', '', {clear:'both'});
+	this.page_layout.body_header 	= $a(this.page_layout.main, 'div');
 	this.page_layout.body 			= $a(this.page_layout.main, 'div');
 	this.page_layout.footer 		= $a(this.page_layout.main, 'div');
 

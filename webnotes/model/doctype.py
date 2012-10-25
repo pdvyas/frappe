@@ -85,6 +85,11 @@ def add_workflows(doclist):
 	from webnotes.model.controller import Controller
 	if webnotes.conn.exists("Workflow", doclist[0].name):
 		doclist += Controller("Workflow", doclist[0].name).doclist
+		
+	# add workflow states (for icons and style)
+	for state in map(lambda d: d.state, doclist.get({"doctype":"Workflow Document State"})):
+		doclist += Controller("Workflow State", state).doclist
+	
 
 def get_doctype_doclist(doctype):
 	"""get doclist of single doctype"""

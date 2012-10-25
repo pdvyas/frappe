@@ -5,7 +5,7 @@
 	{
 		u'creation': '2012-10-24 14:12:50',
 		u'docstatus': 0,
-		u'modified': '2012-10-24 15:05:11',
+		u'modified': '2012-10-25 14:44:52',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -27,8 +27,7 @@
 		'parent': u'Workflow',
 		'parentfield': u'fields',
 		'parenttype': u'DocType',
-		'permlevel': 0,
-		'reqd': 1
+		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
@@ -58,7 +57,16 @@
 		'fieldname': u'document_type',
 		'fieldtype': u'Link',
 		'label': u'Document Type',
-		'options': u'DocType'
+		'options': u'DocType',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'workflow_state_field',
+		'fieldtype': u'Data',
+		'label': u'Workflow State Field'
 	},
 
 	# DocField
@@ -67,7 +75,8 @@
 		'fieldname': u'workflow_document_states',
 		'fieldtype': u'Table',
 		'label': u'Workflow Document States',
-		'options': u'Workflow Document State'
+		'options': u'Workflow Document State',
+		'reqd': 1
 	},
 
 	# DocField
@@ -76,7 +85,8 @@
 		'fieldname': u'workflow_transitions',
 		'fieldtype': u'Table',
 		'label': u'Workflow Transitions',
-		'options': u'Workflow Transition'
+		'options': u'Workflow Transition',
+		'reqd': 1
 	},
 
 	# DocPerm

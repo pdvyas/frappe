@@ -266,23 +266,23 @@ wn.views.ReportView = wn.ui.Listing.extend({
 	},
 	
 	set_row_formatters: function() {
+		// setup workflow metadata
 		var me = this;
+
+		this.state_fieldname = wn.model.get_state_fieldname(this.doctype);
+		this.state_map = {};
+		$.each(wn.model.get("Workflow State"), function(i, d) {
+			me.state_map[d.name] = d;
+		})
+		
 		this.dataView.getItemMetadata = function(row) {
 			var item = me.data[row];
 			var ret = null;
 			
-			if(item.docstatus==1) {
-				ret = { cssClasses: "row-blue" }
-			} if(item.docstatus==2) {
-				ret = { cssClasses: "row-gray" }			
+			if(me.state_map[item[me.state_fieldname]]) {
+				ret = { cssClasses: 'row-' + me.state_map[item[me.state_fieldname]].style.toLowerCase() }
 			}
-			
-			if(me.meta && me.meta.open_count) {
-				var condition = "item." + me.meta.open_count.replace("=", "==");
-				if(eval(condition)) {
-					ret = { cssClasses: 'row-yellow' }
-				}
-			}
+
 			return ret;
 		}
 	},

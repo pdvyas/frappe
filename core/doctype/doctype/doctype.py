@@ -128,13 +128,13 @@ class DocType:
 		
 	def export_doc(self):
 		from webnotes.modules.export_module import export_to_files
-		from webnotes.modules import get_module_path
+		from webnotes.modules import get_module_path, scrub
 
 		export_to_files(record_list=[['DocType', self.doc.name]])
 		
 		# bootstrap a .py file from the template
-		pypath = os.path.join(get_module_path(self.doc.module), 'doctype', self.doc.name,
-			self.doc.name + '.py')
+		pypath = os.path.join(get_module_path(self.doc.module), 'doctype', scrub(self.doc.name),
+			scrub(self.doc.name) + '.py')
 
 		if not os.path.exists(pypath):
 			with open(pypath, 'w') as pyfile:
