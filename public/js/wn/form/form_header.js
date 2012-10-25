@@ -73,6 +73,9 @@ wn.ui.form.FormHeader = Class.extend({
 				+" on "+this.frm.doc.modified
 		});
 		
+		this.$w.find('.avatar img').centerImage();
+		
+		
 		
 	},
 	refresh_labels: function() {

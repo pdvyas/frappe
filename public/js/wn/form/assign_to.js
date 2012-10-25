@@ -72,6 +72,8 @@ wn.ui.form.AssignTo = Class.extend({
 				<a class="close" href="#" style="top: 4px;"\
 					data-owner="%(owner)s">&times;</a></div>', d[i]))
 				.appendTo(this.$list);
+				
+			this.$list.find('.avatar img').centerImage();
 		}
 
 		// set remove

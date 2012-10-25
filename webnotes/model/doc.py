@@ -240,7 +240,12 @@ class Document:
 		# unable to determine a name, use a serial number!
 		if not self.name:
 			self.name = make_autoname('#########', self.doctype)
-					
+		
+		# local name from client?
+		if self.name.startswith("New " + self.doctype):
+			webnotes.msgprint("""No name set for %s, please setup a naming system.""" % self.doctype,
+				raise_exception=True)
+		
 	# Validate Name
 	# ---------------------------------------------------------------------------
 	

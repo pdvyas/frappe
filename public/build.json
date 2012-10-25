@@ -106,6 +106,7 @@
 			"lib/public/js/lib/jquery/jquery.ui.datepicker.min.js",
 			"lib/public/js/lib/jquery/jquery.ui.autocomplete.min.js",
 			"lib/public/js/lib/mousetrap.min.js",
+			"lib/public/js/lib/center_image.js",
 			"lib/public/js/legacy/utils/printElement.js",
 			"lib/public/js/wn/ui/search.js",
 			"lib/public/js/wn/ui/tree.js",
