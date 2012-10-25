@@ -109,7 +109,8 @@ def remove_user_tags(fields):
 	"""remove column _user_tags if not in table"""
 	for fld in fields:
 		if '_user_tags' in fld:
-			if not '_user_tags' in get_table_columns(webnotes.form_dict['doctype']):
+			if not '_user_tags' in \
+					webnotes.conn.get_table_columns(webnotes.form_dict['doctype']):
 				del fields[fields.index(fld)]
 				break
 
@@ -288,7 +289,7 @@ def get_stats():
 	doctype = webnotes.form_dict['doctype']
 	stats = {}
 	
-	columns = get_table_columns(doctype)
+	columns = webnotes.conn.get_table_columns(doctype)
 	for tag in tags:
 		if not tag in columns: continue
 		tagcount = webnotes.conn.sql("""select %(tag)s, count(*) 
@@ -321,7 +322,3 @@ def scrub_user_tags(tagcount):
 		rlist.append([tag, rdict[tag]])
 	
 	return rlist
-
-def get_table_columns(table):
-	res = webnotes.conn.sql("DESC `tab%s`" % table, as_dict=1)
-	if res: return [r['Field'] for r in res]

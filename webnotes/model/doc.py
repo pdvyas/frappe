@@ -27,8 +27,11 @@ Contains the Document class representing an object / record
 
 import webnotes
 import webnotes.model.meta
+import webnotes.model
 
 from webnotes.utils import *
+
+valid_fields_map = {}
 
 class Document:
 	"""
@@ -347,10 +350,7 @@ class Document:
 			WHERE name = %s""" % (dt, '%s'), dn)
 		return tmp and tmp[0][0] or ''# match case
 
-	# Update query
-	# ---------------------------------------------------------------------------
-		
-	def _update_values(self, issingle, link_list, ignore_fields=0):
+	def _update_values(self, issingle, link_list):
 		if issingle:
 			self._update_single(link_list)
 		else:
@@ -358,41 +358,51 @@ class Document:
 			# set modified timestamp
 			self.modified = now()
 			self.modified_by = webnotes.session['user']
-			for f in self.fields.keys():
-				if (not (f in ('doctype', 'name', 'perm', 'localname', 'creation','_user_tags'))) \
-					and (not f.startswith('__')): # fields not saved
+			
+			for f in self.get_valid_fields():
+				if (not (f in ('doctype', 'name', 'perm', 'localname',
+						'creation','_user_tags'))) and (not f.startswith('__')): 
+						# fields not saved
 					
 					# validate links
 					if link_list and link_list.get(f):
-						self.fields[f] = self._validate_link(link_list[f][0], self.fields[f])
+						self.fields[f] = self._validate_link(link_list[f][0],
+							self.fields.get(f))
 
-					if self.fields[f]==None or self.fields[f]=='':
+					if self.fields.get(f) is None or self.fields.get(f)=='':
 						update_str.append("`%s`=NULL" % f)
-						if ignore_fields:
-							try: r = webnotes.conn.sql("update `tab%s` set `%s`=NULL where name=%s" % (self.doctype, f, '%s'), self.name)
-							except: pass
 					else:
-						values.append(self.fields[f])
+						values.append(self.fields.get(f))
 						update_str.append("`%s`=%s" % (f, '%s'))
-						if ignore_fields:
-							try: r = webnotes.conn.sql("update `tab%s` set `%s`=%s where name=%s" % (self.doctype, f, '%s', '%s'), (self.fields[f], self.name))
-							except: pass
 			if values:
-				if not ignore_fields:
-					# update all in one query
-					r = webnotes.conn.sql("update `tab%s` set %s where name='%s'" % (self.doctype, ', '.join(update_str), self.name), values)
+				values.append(self.name)
+				r = webnotes.conn.sql("update `tab%s` set %s where name=%s" % \
+					(self.doctype, ', '.join(update_str), "%s"), values)
+	
+	def get_valid_fields(self):
+		global valid_fields_map
+		if not valid_fields_map.get(self.doctype):
+			import webnotes.model.doctype
+			if cint(webnotes.conn.get_value("DocType", self.doctype, "issingle")):
+				doctypelist = webnotes.model.doctype.get(self.doctype)
+				valid_fields_map[self.doctype] = doctypelist.get_fieldnames({
+					"fieldtype": ["not in", webnotes.model.no_value_fields]})
+			else:
+				valid_fields_map[self.doctype] = \
+					webnotes.conn.get_table_columns(self.doctype)
+			
+		return valid_fields_map.get(self.doctype)
+		
 
 	# Save values
 	# ---------------------------------------------------------------------------
 	
-	def save(self, new=0, check_links=1, ignore_fields=0, make_autoname = 1):
+	def save(self, new=0, check_links=1, make_autoname = 1):
 		"""
 	      Saves the current record in the database. If new = 1, creates a new instance of the record.
 	      Also clears temperory fields starting with `__`
 	      
 	      * if check_links is set, it validates all `Link` fields
-	      * if ignore_fields is sets, it does not throw an exception for any field that does not exist in the 
-		database table
 		"""	
 		res = webnotes.model.meta.get_dt_values(self.doctype, 'autoname, issingle, istable, name_case', as_dict=1)
 		res = res and res[0] or {}
@@ -412,7 +422,7 @@ class Document:
 				return r
 				
 		# save the values
-		self._update_values(res.get('issingle'), check_links and self.make_link_list() or {}, ignore_fields)
+		self._update_values(res.get('issingle'), check_links and self.make_link_list() or {})
 		self._clear_temp_fields()
 
 	def update_parentinfo(self):

@@ -70,6 +70,9 @@ def get(doctype, processed=False):
 
 	# add validators
 	#add_validators(doctype, doclist)
+	
+	# add precision
+	add_precision(doctype, doclist)
 
 	to_cache(doctype, processed, doclist)
 		
@@ -324,6 +327,14 @@ def update_language(doclist):
 		# attach translations to client
 		doc["__messages"] = _messages
 
+def add_precision(doctype, doclist):
+	type_precision_map = {
+		"Currency": 2,
+		"Float": 4
+	}
+	for df in doclist.get({"doctype": "DocField", 
+			"fieldtype": ["in", type_precision_map.keys()]}):
+		df.precision = type_precision_map[df.fieldtype]
 
 class DocTypeDocList(webnotes.model.doclist.DocList):
 	def get_field(self, fieldname, parent=None, parentfield=None):
@@ -360,14 +371,10 @@ class DocTypeDocList(webnotes.model.doclist.DocList):
 			parent = self.get_options(parentfield)
 		if parent:
 			filters["parent"] = parent
+		else:
+			filters["parent"] = self[0].name
 		
-		type_precision_map = {
-			"Currency": 2,
-			"Float": 4
-		}
-		
-		return dict((f.fieldname, type_precision_map[f.fieldtype]) 
-			for f in self.get(filters))
+		return dict((f.fieldname, f.precision) for f in self.get(filters))
 
 def rename_field(doctype, old_fieldname, new_fieldname, lookup_field=None):
 	"""this function assumes that sync is NOT performed"""

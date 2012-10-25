@@ -21,6 +21,7 @@
 //
 
 wn.provide('wn.model');
+wn.provide("wn.model.precision_maps");
 
 wn.model = {
 	no_value_type: ['Section Break', 'Column Break', 'HTML', 'Table', 
@@ -79,5 +80,61 @@ wn.model = {
 			var ret = !is_null(val);			
 		}
 		return ret ? true : false;
+	},
+	
+	get_precision_map: function(doctype) {
+		if(wn.model.precision_maps[doctype])
+			return wn.model.precision_maps[doctype];
+		
+		wn.model.precision_maps[doctype] = {};
+		this.with_doctype(doctype, function(r) {
+			if(r && r['403']) {
+				console.log("Error in get_precision_map for DocType:" + doctype)
+				return;
+			}
+			
+			$.each(make_doclist("DocType", doctype), function(i, d) {
+				if(d.doctype == "DocField" && in_list(["Currency", "Float"], d.fieldtype))
+					wn.model.precision_maps[doctype][d.fieldname] = d.precision;
+			});
+			
+			return wn.model.precision_maps[doctype];
+		});
+	},
+	map_doclist: function(from_to_list, from_docname, callback) {
+		// create a new doclist using doctype mapper
+		// TODO: change call to map_doclist(from_doctype, from_docname, to_doctype)
+		
+		var to_doctype = from_to_list[0][1];
+		var to_docname = createLocal(to_doctype);
+		
+		if(!callback)
+			callback = function(to_docname) {
+				loaddoc(to_doctype, to_docname);
+			};
+		
+		wn.call({
+			method: "dt_map",
+			callback: function() { callback(to_docname); },
+			args: {
+				"docs": compress_doclist([locals[to_doctype][to_docname]]),
+				"from_doctype": from_to_list[0][0],
+				"from_docname": from_docname,
+				"to_doctype": from_to_list[0][1],
+				"from_to_list": JSON.stringify(from_to_list),
+			}
+		});
+	},
+	has_children: function(parent_doctype, parent, table_field) {
+		var table_doctype = null;
+		$.each(make_doclist("DocType", parent_doctype), function(i, d) {
+			if(d.doctype == "DocField" && d.fieldname == table_field) {
+				table_doctype = d.options.split("\n")[0];
+				
+				// break the loop
+				return false;
+			}
+		});
+		return getchildren(table_doctype, parent, table_field, parent_doctype).length > 0;
 	}
 }

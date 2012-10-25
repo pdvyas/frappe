@@ -157,15 +157,15 @@ function nth(number) {
 	return number+s;
 }
 
-function flt(v,decimals) { 
+function flt(v,decimals) {
 	if(v==null || v=='')return 0;
 	v=(v+'').replace(/,/g,'');
 
 	v=parseFloat(v); 
 	if(isNaN(v))
-		v=0; 
+		v=0;
 	if(decimals!=null)
-		return parseFloat(v.toFixed(decimals));
+		return parseFloat(roundNumber(v, decimals));
 	return v; 
 }
 

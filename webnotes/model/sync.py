@@ -102,13 +102,12 @@ def delete_doctype_docfields(doclist):
 def save_doctype_docfields(doclist):
 	from webnotes.model.doc import Document
 	parent_doc = Document(fielddata=doclist[0])
-	parent_doc.save(1, check_links=0,
-			ignore_fields=1)
+	parent_doc.save(1, check_links=0)
 	idx = 1
 	for d in doclist:
 		if d.get('doctype') != 'DocField': continue
 		d['idx'] = idx
-		Document(fielddata=d).save(1, check_links=0, ignore_fields=1)
+		Document(fielddata=d).save(1, check_links=0)
 		idx += 1
 	
 	update_schema(parent_doc.name)
@@ -125,7 +124,7 @@ def save_perms_if_none_exist(doclist):
 	from webnotes.model.doc import Document
 	for d in doclist:
 		if d.get('doctype') != 'DocPerm': continue
-		Document(fielddata=d).save(1, check_links=0, ignore_fields=1)
+		Document(fielddata=d).save(1, check_links=0)
 
 def sync_install(force=1):
 	# sync all doctypes

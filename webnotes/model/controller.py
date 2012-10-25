@@ -282,3 +282,10 @@ def trigger(method, doc):
 		
 	if hasattr(startup.event_handlers, 'doclist_all'):
 		startup.event_handlers.doclist_all(doc, method)
+		
+class DocListController(object):
+	def __init__(self, doc, doclist):
+		self.doc, self.doclist = doc, doclist
+		if hasattr(self, "setup"):
+			self.setup()
+	

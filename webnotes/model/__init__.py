@@ -256,3 +256,9 @@ def delete_fields(args_dict, delete=0):
 				", ".join(["DROP COLUMN `%s`" % f for f in fields if f in existing_fields])
 			webnotes.conn.commit()
 			webnotes.conn.sql(query)
+
+def get_prevdoc_fields(doctype):
+	from webnotes.modules import scrub
+	prevdoc_fields = [scrub(dt[0]) for dt in webnotes.conn.sql("""select from_doctype
+		from `tabDocType Mapper` where to_doctype=%s""", (doctype,))]
+	return prevdoc_fields
