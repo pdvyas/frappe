@@ -22,7 +22,6 @@ $.fn.centerImage = function(method, callback) {
     // parent CSS should be in stylesheet, but to reinforce:
     $div.css({
       overflow: 'hidden',
-      position: 'relative'
     });
 
     // temporarily set the image size naturally so we can get the aspect ratio
@@ -37,20 +36,29 @@ $.fn.centerImage = function(method, callback) {
     // now resize
     var div = { w: $div.width(), h: $div.height(), r: $div.width() / $div.height() };
     var img = { w: $img.width(), h: $img.height(), r: $img.width() / $img.height() };
+	var width  = Math.round((div.r > img.r) ^ method ? '100%' : div.h / img.h * img.w);
+	var height = Math.round((div.r < img.r) ^ method ? '100%' : div.w / img.w * img.h);
+
+	if(width) width++;
+	if(height) height++;
+
     $img.css({
       'max-width':  'none',
       'max-height': 'none',
-      'width':      Math.round((div.r > img.r) ^ method ? '100%' : div.h / img.h * img.w),
-      'height':     Math.round((div.r < img.r) ^ method ? '100%' : div.w / img.w * img.h)
+      'width': width,
+      'height': height,
     });
 
     // now center - but portrait images need to be centered slightly above halfway (33%)
     var div = { w: $div.width(), h: $div.height() };
     var img = { w: $img.width(), h: $img.height() };
+
+	var left = Math.round((div.w - img.w) / 2);
+	var top = Math.round((div.h - img.h) / 3);
+
     $img.css({
-      'position': 'absolute',
-      'left':     Math.round((div.w - img.w) / 2),
-      'top':      Math.round((div.h - img.h) / 3)
+      'margin-left': left,
+      'margin-top':  top
     });
 
     callbackWrapped(img)
