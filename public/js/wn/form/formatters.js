@@ -35,7 +35,7 @@ wn.form.formatters = {
 		return "<div style='text-align: right'>" + fmt_money(value) + "</div>";
 	},
 	Check: function(value) {
-		return value ? "<i class='icon-ok'></i>" : "";
+		return value ? "<i class='icon-ok'></i>" : "<i class='icon'></i>";
 	},
 	Link: function(value, docfield) {
 		if(!value) return "";

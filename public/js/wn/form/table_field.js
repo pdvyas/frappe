@@ -144,6 +144,7 @@ wn.form.TableField = wn.form.Field.extend({
 		this.setup_permissions();
 		this.setup_drag_and_drop();
 		this.setup_add_row();
+		this.setup_edit_dialog();
 		wn.slickgrid_tools.add_property_setter_on_resize(this.slickgrid);
 
 		// description
@@ -154,9 +155,18 @@ wn.form.TableField = wn.form.Field.extend({
 		}
 	},
 	
+	setup_edit_dialog: function() {
+		var me = this;
+		this.slickgrid.onDblClick.subscribe(function(e, args) {
+			var d = me.data[args.row];
+			_f.edit_record(d.doctype, d.name, me.frm, me)			
+		})
+		
+	},
+	
 	setup_permissions: function() {
 		var me = this;
-		this.slickgrid.onBeforeEditCell.subscribe(function(e, args) {
+		this.slickgrid.onBeforeEditCell.subscribe(function(e, args) {			
 			var df = args.column.docfield;
 			if(me.disp_status=="Write") {
 				if(me.frm.perm[me.df.permlevel]
@@ -221,7 +231,7 @@ wn.form.TableField = wn.form.Field.extend({
 		
 		$(window).on('resize', function() { 
 			$grid = me.$wrapper.find('.ui-widget:first');
-			$grid.css('width', $(this.parent).width());
+			$grid.css('width', $(me.parent).width());
 			me.slickgrid.resizeCanvas(); 
 		});
 		

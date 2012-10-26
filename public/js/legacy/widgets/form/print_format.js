@@ -640,7 +640,7 @@ $.extend(_p, {
 				row = _p.field_tab(layout.cur_cell);
 				
 				// Add label
-				row.cells[0].innerHTML = f.label ? f.label : f.fieldname;
+				row.cells[0].innerHTML = (f.label ? f.label : f.fieldname) + ": ";
 				$s(row.cells[1], val, f.fieldtype);
 				
 				// left align currency in normal display
@@ -658,8 +658,8 @@ $.extend(_p, {
 		_p.row = row; // Don't know this line's purpose
 		row.insertCell(0);
 		row.insertCell(1);
-		row.cells[0].className = 'datalabelcell';
-		row.cells[1].className = 'datainputcell';
+		$(row.cells[0]).css({"width":"40%", "text-align":"right", 
+			"font-weight":"bold", "padding-right":"6px"});
 		return row;
 	}
 });

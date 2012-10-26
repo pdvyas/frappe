@@ -118,7 +118,7 @@ class DocType:
 		self.change_modified_of_parent()
 		
 		import conf
-		from webnotes.utils.transfer import in_transfer
+		from webnotes.modules.import_merge import in_transfer
 
 		if (not in_transfer) and getattr(conf,'developer_mode', 0):
 			self.export_doc()
@@ -127,7 +127,7 @@ class DocType:
 		clear_cache(self.doc.name)
 		
 	def export_doc(self):
-		from webnotes.modules.export_module import export_to_files
+		from webnotes.modules.export_file import export_to_files
 		from webnotes.modules import get_module_path, scrub
 
 		export_to_files(record_list=[['DocType', self.doc.name]])
@@ -138,7 +138,7 @@ class DocType:
 
 		if not os.path.exists(pypath):
 			with open(pypath, 'w') as pyfile:
-				with (os.path.join(get_module_path("core"), "doctype", "doctype", 
+				with open(os.path.join(get_module_path("core"), "doctype", "doctype", 
 					"doctype_template.py"), 'r') as srcfile:
 					pyfile.write(srcfile.read())
 		

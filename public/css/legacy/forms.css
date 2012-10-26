@@ -119,7 +119,7 @@ div.time_field select{
 	background-color: #eee;
 	padding: 2px;
 	border: 1px solid #ddd;
-	min-height: 16px;
+	min-height: 14px;
 	
 	-webkit-border-radius: 3px;
 	-moz-border-radius: 3px;
@@ -139,6 +139,21 @@ div.time_field select{
 	border: 0px;
 	background-color: #fff;
 	padding: 0px;
+}
+
+.field-check .disp_area {
+	margin-right: 4px;
+	width: 14px;
+	height: 14px;
+	display: inline-block;
+	vertical-align: middle;
+}
+.field-check .disp_area .icon-ok {
+	margin-top: -3px;
+}
+
+.field-check .label_area {
+	display: inline-block;	
 }
 
 .field-button .disp_area, .field-button .label_area  {

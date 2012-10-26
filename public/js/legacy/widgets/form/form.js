@@ -37,6 +37,12 @@
 */
 
 wn.provide('_f');
+wn.ui.form.Controller = Class.extend({
+	init: function(opts) {
+		$.extend(this, opts);
+	}
+});
+
 
 _f.frms = {};
 
@@ -50,7 +56,9 @@ _f.Frm = function(doctype, parent, in_form) {
 	this.opendocs = {};
 	this.sections = [];
 	this.grids = [];
-	this.cscript = {};
+	
+	this.cscript = new wn.ui.form.Controller({frm:this});
+		
 	this.pformat = {};
 	this.fetch_dict = {};
 	this.parent = parent;
@@ -410,10 +418,6 @@ _f.Frm.prototype.set_print_heading = function(txt) {
 }
 
 
-// -------- Permissions -------
-// Returns global permissions, at all levels
-// ======================================================================================
-
 _f.Frm.prototype.get_doc_perms = function() {
 	var p = [0,0,0,0,0,0];
 	for(var i=0; i<this.perm.length; i++) {
@@ -428,8 +432,6 @@ _f.Frm.prototype.get_doc_perms = function() {
 	return p;
 }
 
-// refresh
-// ======================================================================================
 _f.Frm.prototype.refresh_header = function() {
 	// set title
 	// main title
