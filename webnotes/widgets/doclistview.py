@@ -46,9 +46,11 @@ def get(arg=None):
 	filters = json.loads(data['filters'])
 	fields = json.loads(data['fields'])
 	
-	if 'docstatus' not in fields: fields.append('docstatus')
-	
 	tables = get_tables()
+	
+	if '%s.docstatus' % tables[0] not in fields:
+		fields.append('%s.docstatus' % tables[0])
+	
 	load_doctypes()
 	
 	remove_user_tags(fields)

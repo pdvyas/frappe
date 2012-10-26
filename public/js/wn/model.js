@@ -144,7 +144,7 @@ wn.model = {
 			}
 		});
 		return getchildren(table_doctype, parent, table_field, parent_doctype).length > 0;
-	}
+	},
 
 	get: function(doctype, filters) {
 		var ret = [];
