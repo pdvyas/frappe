@@ -5,8 +5,10 @@ wn.ui.AppFrame = Class.extend({
 				
 		this.$titlebar = $('<div class="appframe-titlebar">\
 			<div class="appframe-marker"></div>\
-			<span class="appframe-title"></span>\
-			<span class="appframe-subject"></span>\
+			<span class="appframe-center">\
+				<span class="appframe-title"></span>\
+				<span class="appframe-subject"></span>\
+			</span>\
 			<span class="close" style="margin-top: 5px; margin-right: 7px;">&times;</span>\
 		</div>').appendTo(this.$w);
 
@@ -20,16 +22,13 @@ wn.ui.AppFrame = Class.extend({
 	},
 	title: function(txt) {
 		this.$titlebar.find(".appframe-title").html(txt);
+		document.title = txt;
 	},
 	set_title: function(txt) {
 		this.title(txt);
 	},
 	set_marker: function(module) {
-		try {
-			var color = wn.module_css_classes[wn.module_css_map[module]].middle;			
-		} catch(e) {
-			var color = "#000";
-		}
+		var color = wn.get_module_color(module);
 		this.$titlebar.find(".appframe-marker")
 			.css({
 				"background-color": color
@@ -41,6 +40,15 @@ wn.ui.AppFrame = Class.extend({
 		opacity && span.css("opacity", opacity);
 		click && span.click(click);
 		return span
+	},
+	add_module_tab: function(module) {
+		this.add_tab('<span class="small-module-icons small-module-icons-'+
+			module.toLowerCase()+'"></span>'+' <span>'
+			+ module + "</span>", 0.7, function() {
+			wn.modules[module] 
+				? wn.set_route(wn.modules[module]) 
+				: wn.set_route("Module", module);
+		});	
 	},
 	add_button: function(label, click, icon) {
 		this.add_toolbar();
@@ -64,22 +72,6 @@ wn.ui.AppFrame = Class.extend({
 	},
 	clear_buttons: function() {
 		this.toolbar && this.toolbar.empty();
-	},
-	add_breadcrumb: function(html) {
-		if(!this.$breadcrumbs)
-			this.$breadcrumbs = $('</span>\
-				<span class="breadcrumb-area"></span>').appendTo(this.$titlebar);
-		
-		var crumb = $('<span>').html(html);
-		
-		// first breadcrumb is a title
-		if(!this.$breadcrumbs.find('span').length) {
-			crumb.addClass('appframe-title');
-		}
-		crumb.appendTo(this.$breadcrumbs);
-	},
-	clear_breadcrumbs: function() {
-		this.$breadcrumbs && this.$breadcrumbs.empty();
 	},
 	add_toolbar: function() {
 		if(!this.toolbar)
@@ -115,6 +107,9 @@ wn.ui.AppFrame = Class.extend({
 		$('<div class="ripped-paper-border"></div>')
 			.prependTo(layout_main)
 			.css({"width": $(layout_main).width()});
+	},
+	set_help: function(txt) {
+		this.$w.find(".appframe-subject").html("<span class='help'>" + txt + "</span>");
 	}
 });
 

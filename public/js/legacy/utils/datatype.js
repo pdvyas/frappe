@@ -88,45 +88,8 @@ function is_null(v) {
 	}
 }
 
-function $s(ele, v, ftype, fopt) { 	
-	if(v==null)v='';
-					
-	if(ftype =='Text'|| ftype =='Small Text') {
-		ele.innerHTML = v?v.replace(/\n/g, '<br>'):'';
-	} else if(ftype =='Date') {
-		v = dateutil.str_to_user(v);
-		if(v==null)v=''
-		ele.innerHTML = v;
-	} else if(ftype =='Link' && fopt) {
-		ele.innerHTML = '';
-		doc_link(ele, fopt, v);
-	} else if(ftype =='Currency') {
-		ele.style.textAlign = 'right';
-		if(is_null(v))
-			ele.innerHTML = '';
-		else
-			ele.innerHTML = fmt_money(v);
-	} else if(ftype =='Int') {
-		ele.style.textAlign = 'right';
-		ele.innerHTML = v;
-	} else if(ftype == 'Check') {
-		if(v) ele.innerHTML = '<img src="lib/images/ui/tick.gif">';
-		else ele.innerHTML = '';
-	} else {
-		ele.innerHTML = v;
-	}
-}
-
-function clean_smart_quotes(s) {
-	if(s) {
-	    s = s.replace( /\u2018/g, "'" );
-	    s = s.replace( /\u2019/g, "'" );
-	    s = s.replace( /\u201c/g, '"' );
-	    s = s.replace( /\u201d/g, '"' );
-	    s = s.replace( /\u2013/g, '-' );
-	    s = s.replace( /\u2014/g, '--' );
-	}
-    return s;
+function $s(ele, v, ftype, fopt) { 
+	ele.innerHTML = wn.form.get_formatter(ftype)(v, {options: fopt});
 }
 
 function copy_dict(d) {
@@ -135,11 +98,6 @@ function copy_dict(d) {
 	return n;
 }
 
-function $p(ele,top,left) {
- ele.style.position = 'absolute';
- ele.style.top = top+'px';
- ele.style.left = left+'px';
-}
 function replace_newlines(t) {
 	return t?t.replace(/\n/g, '<br>'):'';
 }
@@ -168,8 +126,6 @@ function flt(v,decimals) {
 		return parseFloat(roundNumber(v, decimals));
 	return v; 
 }
-
-function esc_quotes(s) { if(s==null)s=''; return s.replace(/'/, "\'");}
 
 var crop = function(s, len) {
 	if(s.length>len)
@@ -256,12 +212,6 @@ function add_lists(l1, l2) {
 function docstring(obj)  {
 	return JSON.stringify(obj);
 }
-
-function DocLink(p, doctype, name, onload) {
-	var a = $a(p,'span','link_type'); a.innerHTML = a.dn = name; a.dt = doctype;
-	a.onclick=function() { loaddoc(this.dt,this.dn,onload) }; return a;
-}
-var doc_link = DocLink;
 
 function roundNumber(num, dec) {
 	var result = Math.round(num*Math.pow(10,dec))/Math.pow(10,dec);

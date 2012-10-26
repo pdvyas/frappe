@@ -1,0 +1,72 @@
+# DocType, Workflow Transition
+[
+
+	# These values are common in all dictionaries
+	{
+		u'creation': '2012-10-23 15:12:10',
+		u'docstatus': 0,
+		u'modified': '2012-10-23 16:00:03',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'description': u'Defines actions on states and the next step and allowed roles.',
+		u'doctype': u'DocType',
+		'istable': 1,
+		'module': u'Core',
+		u'name': u'__common__',
+		'version': 1
+	},
+
+	# These values are common for all DocField
+	{
+		u'doctype': u'DocField',
+		'fieldtype': u'Link',
+		u'name': u'__common__',
+		'parent': u'Workflow Transition',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocType, Workflow Transition
+	{
+		u'doctype': u'DocType',
+		u'name': u'Workflow Transition'
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'state',
+		'label': u'State',
+		'options': u'Workflow State'
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'action',
+		'label': u'Action',
+		'options': u'Workflow Action'
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'next_state',
+		'label': u'Next State',
+		'options': u'Workflow State'
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'allowed',
+		'label': u'Allowed',
+		'options': u'Role'
+	}
+]

@@ -43,6 +43,26 @@ wn.form.TableField = wn.form.Field.extend({
 			+"</span></div>").appendTo(this.$wrapper);
 			
 		btn_group = $('<div class="btn-group" style="float: right;">').appendTo(this.toolbar);
+		
+		$('<button class="btn btn-small">\
+			<i class="icon-small icon-edit"></i> Edit</button>')
+			.appendTo(btn_group)
+			.click(function() {
+				var active_cell = me.slickgrid.getActiveCell();
+				
+				if(!active_cell) {
+					msgprint("Click on a row to select first and then click 'Edit'.");
+					return;
+				}
+				
+				var d = me.data[active_cell.row];
+				if(!d) return;
+
+				_f.edit_record(d.doctype, d.name, me.frm, me)
+				
+			})
+		
+		
 		$('<button class="btn btn-small">\
 			<i class="icon-small icon-plus-sign"></i> Insert</button>')
 			.appendTo(btn_group)
@@ -211,7 +231,7 @@ wn.form.TableField = wn.form.Field.extend({
 		var me = this;
 		var columns = $.map(wn.meta.docfield_list[this.df.options], 
 			function(d) {
-				if(!d.hidden) {
+				if(!d.hidden && !d.std_field) {
 					var column = {
 						id: d.fieldname,
 						field: d.fieldname,

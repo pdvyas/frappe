@@ -18,45 +18,15 @@ wn.avatar_dims = {};
 wn.avatar = function(user, large, title) {
 	var image = wn.user_info(user).image;
 	var to_size = large ? 72 : 30;
-	
-	var get_adj = function(large, small) {
-		if(small==0); return 0;
-		return cint((flt(large) / flt(small) * 72 - 72) / 2);
-	}
-	
-	// find the smaller dim by rendering in hidden div
-	if(!wn.avatar_dims[image]) {
-		var img = $('<img src="'+image+'">').appendTo("#dialog-container").toggle(false);
-		if(img.width() < img.height()) {
-			var opts = {
-				smaller_dim: "width",
-				adjust_dim: "margin-top",
-				adjust_len_large: get_adj(img.height(), img.width())
-			}
-		} else {
-			var opts = {
-				smaller_dim: "height",
-				adjust_dim: "margin-left",
-				adjust_len_large: get_adj(img.width(), img.height())
-			}
-		}
-		opts.adjust_len_small = flt(opts.adjust_len_large) * 30 / 72;
-		wn.avatar_dims[image] =  opts;
-	}
-	
-	var dims = wn.avatar_dims[image];
-	
-	return repl('<span class="avatar" %(title)s style="width: %(len)s; height: %(len)s;\
-		border-radius: %(len)s;">\
-		<img src="%(image)s" style="%(smaller_dim)s: %(len)s; \
-			%(adjust_dim)s: -%(adjust_len)spx;"></span>', {
+	if(!title) title = wn.user_info(user).fullname;
+
+	return repl('<span class="avatar" title="%(title)s" style="width: %(len)s; \
+		height: %(len)s; border-radius: %(len)s; overflow: hidden;">\
+		<img src="%(image)s"></span>', {
 			image: image,
-			smaller_dim: dims.smaller_dim,
 			len: to_size + "px",
-			adjust_dim: dims.adjust_dim,
-			adjust_len: large ? dims.adjust_len_large : dims.adjust_len_small,
-			title: title ? ('title="' + title + '"') : ""
-		});
+			title: title
+		});	
 }
 
 wn.provide('wn.user');
@@ -73,6 +43,30 @@ $.extend(wn.user, {
 	},
 	is_report_manager: function() {
 		return wn.user.has_role(['Administrator', 'System Manager', 'Report Manager']);
+	},
+	set_default: function(key, value) {
+		if(typeof value=="string")
+			value = JSON.stringify(value);
+			
+		wn.boot.profile.defaults[key] = value;
+		wn.call({
+			method: "webnotes.client.set_default",
+			args: {
+				key: key,
+				value: value
+			},
+			callback: function(r) {}
+		});
+	},
+	get_default: function(key) {
+		var value = wn.boot.profile.defaults[key];
+		if(value) {
+			try {
+				return JSON.parse(value)
+			} catch(e) {
+				return value;
+			}			
+		}
 	}
 })
 

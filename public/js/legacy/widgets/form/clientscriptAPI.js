@@ -49,8 +49,10 @@ get_server_fields = function(method, arg, table_field, doc, dt, dn, allow_edit, 
 			var field_dict = r.message;
 			for(var key in field_dict) {
 				d[key] = field_dict[key];
-				if (table_field) refresh_field(key, d.name, table_field);
-				else refresh_field(key);
+				if (table_field) 
+					refresh_field(key, d.name, table_field);
+				else 
+					refresh_field(key);
 			}
 		}
 		if(call_back){
@@ -93,11 +95,18 @@ set_field_tip = function(n,txt) {
 }
 
 var refresh_field = function(n, docname, table_field) {
+	if(typeof n=="string") n = [n];
 	// multiple
 	if(table_field) {
+		// editing
+		if(_f.frm_dialog.dialog.display) {
+			// refersh in dialog form
+			$.each(n, function(i, v) { _f.frm_dialog.cur_frm.refresh_field(v); });
+		}
+		
+		// refresh grid
 		cur_frm.fields_dict[table_field].refresh_data();
 	} else {
-		if(typeof n=="string") n = [n];
 		$.each(n, function(i, v) { cur_frm.refresh_field(v); });
 	}
 }

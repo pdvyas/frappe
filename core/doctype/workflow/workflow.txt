@@ -1,0 +1,96 @@
+# DocType, Workflow
+[
+
+	# These values are common in all dictionaries
+	{
+		u'creation': '2012-10-24 14:12:50',
+		u'docstatus': 0,
+		u'modified': '2012-10-25 14:44:52',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'autoname': u'field:document_type',
+		'description': u'Defines workflow states and rules for a document.',
+		u'doctype': u'DocType',
+		'module': u'Core',
+		u'name': u'__common__',
+		'version': 1
+	},
+
+	# These values are common for all DocField
+	{
+		u'doctype': u'DocField',
+		u'name': u'__common__',
+		'parent': u'Workflow',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
+		'permlevel': 0
+	},
+
+	# These values are common for all DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		u'doctype': u'DocPerm',
+		u'name': u'__common__',
+		'parent': u'Workflow',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
+		'permlevel': 0,
+		'read': 1,
+		'role': u'System Manager',
+		'write': 1
+	},
+
+	# DocType, Workflow
+	{
+		u'doctype': u'DocType',
+		u'name': u'Workflow'
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'document_type',
+		'fieldtype': u'Link',
+		'label': u'Document Type',
+		'options': u'DocType',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'workflow_state_field',
+		'fieldtype': u'Data',
+		'label': u'Workflow State Field'
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'workflow_document_states',
+		'fieldtype': u'Table',
+		'label': u'Workflow Document States',
+		'options': u'Workflow Document State',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'workflow_transitions',
+		'fieldtype': u'Table',
+		'label': u'Workflow Transitions',
+		'options': u'Workflow Transition',
+		'reqd': 1
+	},
+
+	# DocPerm
+	{
+		u'doctype': u'DocPerm'
+	}
+]

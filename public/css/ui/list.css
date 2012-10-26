@@ -132,8 +132,44 @@ div.stat-item {
 	overflow: hidden;
 }
 
+div.stat-grid .label {
+	white-space: normal !important;
+}
+
 table.doclist-row td {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
+
+/* row formatters */
+
+.row-blue, .row-primary, .row-info {
+	background-color: #eef;
+}
+
+.row-red, .row-danger {
+	background-color: #fee;
+}
+
+.row-green, .row-success {
+	background-color: #efe;
+}
+
+.row-yellow, .row-warning {
+	background-color: #ffe;
+}
+
+.row-orange {
+	background-color: #fff8ee;
+}
+
+.row-gray, .row-inverse {
+	background-color: #ddd;
+}
+
+.row-fade {
+	color: #777;
+}
+
+

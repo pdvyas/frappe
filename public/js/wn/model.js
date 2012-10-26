@@ -23,9 +23,10 @@
 wn.provide('wn.model');
 wn.provide("wn.model.precision_maps");
 
+var no_value_fields = ['Section Break', 'Column Break', 'HTML', 'Table', 
+'Button', 'Image'];
+
 wn.model = {
-	no_value_type: ['Section Break', 'Column Break', 'HTML', 'Table', 
- 	'Button', 'Image'],
 
 	new_names: {},
 
@@ -64,10 +65,17 @@ wn.model = {
 		return wn.boot.profile.can_cancel.indexOf(doctype)!=-1;
 	},
 	
+	can_read: function(doctype) {
+		if(!doctype) return false;
+		return wn.boot.profile.can_read.indexOf(doctype)!=-1;
+	},
+	
 	has_value: function(dt, dn, fn) {
 		// return true if property has value
 		var val = locals[dt] && locals[dt][dn] && locals[dt][dn][fn];
 		var df = wn.meta.get_docfield(dt, fn, dn);
+		
+		if(!df) console.log("No field found for " + fn);
 		
 		if(df.fieldtype=='Table') {
 			var ret = false;
@@ -137,4 +145,23 @@ wn.model = {
 		});
 		return getchildren(table_doctype, parent, table_field, parent_doctype).length > 0;
 	}
+
+	get: function(doctype, filters) {
+		var ret = [];
+		if(!locals[doctype]) return ret;
+		
+		$.each(locals[doctype], function(i, d) {
+			for(key in filters) {
+				if(d[key]!=filters[key]) return;
+			}
+			ret.push(d);
+		});
+		return ret;
+	},
+	
+	get_state_fieldname: function(doctype) {
+		if(locals.Workflow && locals.Workflow[doctype])
+			return locals.Workflow[doctype].workflow_state_field;
+	},
+	
 }

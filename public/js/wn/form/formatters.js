@@ -26,23 +26,27 @@ wn.form.formatters = {
 		return value==null ? "" : value
 	},
 	Float: function(value) {
-		return (value || 0.0).toFixed(6);
+		return (flt(value) || 0.0).toFixed(6);
 	},
 	Int: function(value) {
 		return cint(value);
 	},
 	Currency: function(value) {
-		return fmt_money(value);
+		return "<div style='text-align: right'>" + fmt_money(value) + "</div>";
 	},
 	Check: function(value) {
 		return value ? "<i class='icon-ok'></i>" : "";
 	},
 	Link: function(value, docfield) {
 		if(!value) return "";
-		return repl('<a href="#Form/%(doctype)s/%(name)s">%(name)s</a>', {
-			doctype: docfield.options,
-			name: value
-		});
+		if(docfield.options) {
+			return repl('<a href="#Form/%(doctype)s/%(name)s">%(name)s</a>', {
+				doctype: docfield.options,
+				name: value
+			});			
+		} else {
+			return value;
+		}
 	},
 	Date: function(value) {
 		return dateutil.str_to_user(value);
@@ -53,6 +57,15 @@ wn.form.formatters = {
 
 		return wn.form.formatters.Data(value);
 	},
+	Tag: function(value) {
+		var html = "";
+		$.each((value || "").split(","), function(i, v) {
+			if(v) html+= '<span class="label label-info" \
+				style="margin-right: 7px; cursor: pointer;"\
+				data-field="_user_tags" data-label="'+v+'">'+v +'</span>';
+		});
+		return html;
+	}
 }
 
 wn.form.get_formatter = function(fieldtype) {

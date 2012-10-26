@@ -64,6 +64,10 @@ class DocType:
 		# this is used in on_update call
 		self.is_new = self.doc.fields.get("__islocal")
 		
+		# clear cache
+		from webnotes.sessions import clear_cache
+		clear_cache(self.doc.name)
+		
 	def logout_if_disabled(self):
 		"""logout if disabled"""
 		if not cint(self.doc.enabled):

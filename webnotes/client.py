@@ -38,10 +38,21 @@ def save():
 	controller.save()
 	
 	return [d.fields for d in doclist]
+	
+@webnotes.whitelist()
+def set_default():
+	"""set a user default value"""
+	webnotes.conn.set_default(webnotes.form_dict.key, webnotes.form_dict.value, 
+		('parent' in webnotes.form_dict) and webntoes.form_dict.parent \
+			or webnotes.session.user)
+			
+	from webnotes.sessions import clear_cache
+	clear_cache(webnotes.session.user)
 
 @webnotes.whitelist()
 def update_value():
 	"""update a value"""
+	from webnotes.model.doctype import get_property
 	
 	globals().update(webnotes.form_dict)
 	
@@ -51,6 +62,12 @@ def update_value():
 		controller = Controller(doctype, name)
 
 	row = controller.doclist.get({"name": name})[0]
+	
+	# check permlevel = 0
+	
+	if (get_property(doctype, "permlevel", fieldname) or 0) != 0:
+		webnotes.msgprint("Direct edit only allowed if permlevel is 0", raise_exception=1)
+	
 	row.fields[fieldname] = value
 
 	if controller.doc.docstatus!=0:
@@ -59,6 +76,6 @@ def update_value():
 	
 	controller.save()
 	
-	return row.fields
+	return [d.fields for d in controller.doclist]
 	
 	

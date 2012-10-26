@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		u'creation': '2012-08-13 13:16:36',
+		u'creation': '2012-10-18 15:07:09',
 		u'docstatus': 0,
-		u'modified': '2012-09-28 16:41:27',
+		u'modified': '2012-10-22 16:24:50',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -77,6 +77,7 @@
 		u'doctype': u'DocField',
 		'fieldname': u'enabled',
 		'fieldtype': u'Check',
+		'in_filter': 1,
 		'label': u'Enabled',
 		'oldfieldname': u'enabled',
 		'oldfieldtype': u'Check',
@@ -136,6 +137,7 @@
 		u'doctype': u'DocField',
 		'fieldname': u'first_name',
 		'fieldtype': u'Data',
+		'in_filter': 1,
 		'label': u'First Name',
 		'oldfieldname': u'first_name',
 		'oldfieldtype': u'Data',
@@ -159,6 +161,7 @@
 		u'doctype': u'DocField',
 		'fieldname': u'last_name',
 		'fieldtype': u'Data',
+		'in_filter': 1,
 		'label': u'Last Name',
 		'oldfieldname': u'last_name',
 		'oldfieldtype': u'Data',

@@ -1,0 +1,85 @@
+# DocType, Workflow State
+[
+
+	# These values are common in all dictionaries
+	{
+		u'creation': '2012-10-23 15:06:19',
+		u'docstatus': 0,
+		u'modified': '2012-10-25 15:55:12',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'autoname': u'field:workflow_state_name',
+		'description': u'Workflow state represents the current state of a document.',
+		u'doctype': u'DocType',
+		'document_type': u'Master',
+		'module': u'Core',
+		u'name': u'__common__',
+		'version': 1
+	},
+
+	# These values are common for all DocField
+	{
+		u'doctype': u'DocField',
+		u'name': u'__common__',
+		'parent': u'Workflow State',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# These values are common for all DocPerm
+	{
+		'create': 1,
+		u'doctype': u'DocPerm',
+		u'name': u'__common__',
+		'parent': u'Workflow State',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
+		'permlevel': 0,
+		'read': 1,
+		'role': u'System Manager',
+		'write': 1
+	},
+
+	# DocType, Workflow State
+	{
+		u'doctype': u'DocType',
+		u'name': u'Workflow State'
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'workflow_state_name',
+		'fieldtype': u'Data',
+		'label': u'Workflow State Name'
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'icon',
+		'fieldtype': u'Select',
+		'label': u'Icon',
+		'options': u'\nglass\nmusic\nsearch\nenvelope\nheart\nstar\nstar-empty\nuser\nfilm\nth-large\nth\nth-list\nok\nremove\nzoom-in\nzoom-out\noff\nsignal\ncog\ntrash\nhome\nfile\ntime\nroad\ndownload-alt\ndownload\nupload\ninbox\nplay-circle\nrepeat\nrefresh\nlist-alt\nlock\nflag\nheadphones\nvolume-off\nvolume-down\nvolume-up\nqrcode\nbarcode\ntag\ntags\nbook\nbookmark\nprint\ncamera\nfont\nbold\nitalic\ntext-height\ntext-width\nalign-left\nalign-center\nalign-right\nalign-justify\nlist\nindent-left\nindent-right\nfacetime-video\npicture\npencil\nmap-marker\nadjust\ntint\nedit\nshare\ncheck\nmove\nstep-backward\nfast-backward\nbackward\nplay\npause\nstop\nforward\nfast-forward\nstep-forward\neject\nchevron-left\nchevron-right\nplus-sign\nminus-sign\nremove-sign\nok-sign\nquestion-sign\ninfo-sign\nscreenshot\nremove-circle\nok-circle\nban-circle\narrow-left\narrow-right\narrow-up\narrow-down\nshare-alt\nresize-full\nresize-small\nplus\nminus\nasterisk\nexclamation-sign\ngift\nleaf\nfire\neye-open\neye-close\nwarning-sign\nplane\ncalendar\nrandom\ncomment\nmagnet\nchevron-up\nchevron-down\nretweet\nshopping-cart\nfolder-close\nfolder-open\nresize-vertical\nresize-horizontal\nhdd\nbullhorn\nbell\ncertificate\nthumbs-up\nthumbs-down\nhand-right\nhand-left\nhand-up\nhand-down\ncircle-arrow-right\ncircle-arrow-left\ncircle-arrow-up\ncircle-arrow-down\nglobe\nwrench\ntasks\nfilter\nbriefcase\nfullscreen'
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'style',
+		'fieldtype': u'Select',
+		'label': u'Style',
+		'options': u'\nPrimary\nInfo\nSuccess\nWarning\nDanger\nInverse\n'
+	},
+
+	# DocPerm
+	{
+		u'doctype': u'DocPerm'
+	}
+]

@@ -178,10 +178,6 @@ wn.form.TextEditorField = wn.form.Field.extend({
 		
 		this.myid = wn.dom.set_unique_id(this.$input.get(0));
 
-		wn.require('lib/js/lib/wysihtml5/bootstrap-wysihtml5.css');
-		wn.require('lib/js/lib/wysihtml5/wysihtml5.min.js');
-		wn.require('lib/js/lib/wysihtml5/bootstrap-wysihtml5.min.js');
-
 		this.editor = this.$input.wysihtml5({
 			"html": true,
 			"color": true,

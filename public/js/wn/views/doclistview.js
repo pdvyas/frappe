@@ -34,35 +34,44 @@ wn.views.doclistview.show = function(doctype) {
 				if(r && r['403']) {
 					return;
 				}
-				new wn.views.DocListView(route[1]);
+				new wn.views.DocListPage({
+					doctype:route[1]
+				});
 			});
 		}
 	}
 }
 
-wn.views.DocListView = wn.ui.Listing.extend({
-	init: function(doctype) {
-		this.doctype = doctype;
-		this.label = get_doctype_label(doctype);
-		this.label = (this.label.toLowerCase().substr(-4) == 'list') ?
-		 	this.label : (this.label + ' List');
+wn.views.DocListPage = Class.extend({
+	init: function(opts) {
+		$.extend(this, opts);
+		var me = this;
+
+		this.can_delete = wn.model.can_delete(this.doctype);
+		this.can_submit = $.map(locals.DocPerm, function(d) { 
+			if(d.parent==me.doctype && d.submit) return 1
+			else return null; 
+		}).length;
+		
 		this.make_page();
-		this.setup();
+		this.setup_docstatus_filter();
+		this.make_doclistview();
+		this.init_stats();
+		this.listing.run();
 	},
-	
 	make_page: function() {
 		var me = this;
 		var page_name = wn.get_route_str();
-		var page = wn.container.add_page(page_name);
+		this.page = wn.container.add_page(page_name);
 		wn.container.change_to(page_name);
-		this.$page = $(page);
+		this.$page = $(this.page);
 
 		wn.dom.set_style(".show-docstatus div { font-size: 90%; }");
 		
 		this.$page.html('<div class="layout-wrapper layout-wrapper-background">\
 			<div class="appframe-area"></div>\
 			<div class="layout-main-section">\
-				<div class="wnlist-area" style="margin-top: -15px;"><div class="help">Loading...</div></div>\
+				<div class="wnlist-area" style="margin-top: -15px;"></div>\
 			</div>\
 			<div class="layout-side-section">\
 				<div class="show-docstatus hide section">\
@@ -74,32 +83,40 @@ wn.views.DocListView = wn.ui.Listing.extend({
 			</div>\
 			<div style="clear: both"></div>\
 		</div>');
-				
-		this.appframe = new wn.ui.AppFrame(this.$page.find('.appframe-area'));
+		
+		this.page.appframe = this.appframe = new wn.ui.AppFrame(this.$page.find('.appframe-area'));
 		var module = locals.DocType[this.doctype].module;
 		
 		this.appframe.set_marker(module);
-		
-		wn.views.breadcrumbs(this.appframe, locals.DocType[this.doctype].module, this.doctype);
-		this.appframe.add_tab('<span class="small-module-icons small-module-icons-'+
-			module.toLowerCase()+'"></span>'+' <span>'
-			+ module + "</span>", 0.7, function() {
-			wn.set_route(wn.modules[module]);
-		})
+		this.appframe.set_title(this.doctype);
+		this.appframe.set_help(locals.DocType[this.doctype].description || "")
+		this.appframe.add_module_tab(module);
 	},
-
-	setup: function() {
+	setup_docstatus_filter: function() {
 		var me = this;
-		me.can_delete = wn.model.can_delete(me.doctype);
-		me.meta = locals.DocType[me.doctype];
-		me.$page.find('.wnlist-area').empty(),
-		me.setup_docstatus_filter();
-		me.setup_listview();
-		me.init_list();
-		me.init_stats();
-		me.make_report_button();
-		me.add_delete_option();
-		me.make_help();
+		if(this.can_submit) {
+			this.$page.find('.show-docstatus').removeClass('hide');
+			this.$page.find('.show-docstatus input').click(function() {
+				me.listing.run();
+			})
+		}
+	},	
+	make_doclistview: function() {
+		this.listing = new wn.views.DocListView({
+			doctype: this.doctype, 
+			page: this.page,
+			wrapper: $(this.page).find(".wnlist-area"),
+			no_title: true,
+			can_submit: this.can_submit
+		});
+		$(this.page).find(".report-head").remove();
+	},
+	init_stats: function() {
+		this.stats = new wn.views.ListViewStats({
+			doctype: this.doctype,
+			listing: this.listing,
+			$page: this.$page,
+		})
 	},
 	make_report_button: function() {
 		var me = this;
@@ -115,151 +132,64 @@ wn.views.DocListView = wn.ui.Listing.extend({
 			this.appframe.add_help_button(wn.markdown('## ' + this.meta.name + '\n\n'
 				+ this.meta.description));
 		}
+	}
+})
+
+wn.views.DocListView = wn.views.ReportView.extend({
+	make_export: function() {
+		// pass
 	},
-	setup_docstatus_filter: function() {
+	make_save: function() {
 		var me = this;
-		this.can_submit = $.map(locals.DocPerm, function(d) { 
-			if(d.parent==me.meta.name && d.submit) return 1
-			else return null; 
-		}).length;
-		if(this.can_submit) {
-			this.$page.find('.show-docstatus').removeClass('hide');
-			this.$page.find('.show-docstatus input').click(function() {
-				me.run();
-			})
+		if(wn.boot.profile.can_get_report.indexOf(this.doctype)!=-1) {
+			this.appframe.add_button(wn._("Build Report"), function() {
+				wn.set_route('Report2', me.doctype);
+			}, 'icon-th');
 		}
 	},
-	setup_listview: function() {
-		if(this.meta.__listjs) {
-			eval(this.meta.__listjs);
-			this.listview = new wn.doclistviews[this.doctype](this);
-		} else {
-			this.listview = new wn.views.ListView(this);
-		}
-		this.listview.parent = this;
-		this.wrapper = this.$page.find('.wnlist-area');
-		this.page_length = 20;
-		this.allow_delete = true;
+	get_docstatus: function() {
+		return this.can_submit ? $.map($(this.page).find('.show-docstatus :checked'), 
+			function(inp) { return $(inp).attr('data-docstatus') }) : [];
 	},
-	init_list: function(auto_run) {
-		var me = this;
-		// init list
-		this.make({
-			method: 'webnotes.widgets.doclistview.get',
-			get_args: this.get_args,
-			parent: this.wrapper,
-			start: 0,
-			page_length: this.page_length,
-			show_filters: true,
-			show_grid: true,
-			new_doctype: this.doctype,
-			allow_delete: this.allow_delete,
-			no_result_message: this.make_no_result(),
-			columns: this.listview.fields,
-			custom_new_doc: me.listview.make_new_doc || undefined,
-		});
-		
-		// make_new_doc can be overridden so that default values can be prefilled
-		// for example - communication list in customer
-		$(this.wrapper).find('button[list_view_doc="'+me.doctype+'"]').click(function(){
-			(me.listview.make_new_doc || me.make_new_doc)(me.doctype);
-		});
-		
-		if((auto_run !== false) && (auto_run !== 0)) this.run();
-	},
-	
-	make_no_result: function() {
-		var no_result_message = repl('<div class="well">\
-		<p>No %(doctype_label)s found</p>\
+	get_no_result_message: function() {
+		var no_result_message = repl('<div class="well" style="margin-top: 15px;">\
+		<p>%(not_found)s: %(doctype_label)s</p>\
 		<hr>\
-		<p><button class="btn btn-info btn-small" list_view_doc="%(doctype)s">\
-			Make a new %(doctype_label)s</button>\
+		<p><button class="btn btn-info btn-small" onclick="newdoc(\'%(doctype)s\')">\
+			%(new)s %(doctype_label)s</button>\
 		</p></div>', {
-			doctype_label: get_doctype_label(this.doctype),
+			"new": wn._("New"),
+			not_found: wn._("Not Found"),
+			doctype_label: wn._(this.doctype),
 			doctype: this.doctype
 		});
 		
 		return no_result_message;
 	},
-	render_row: function(row, data) {
-		$(row).css({
-			"margin-left": "-15px",
-			"margin-right": "-15px"
-		});
-		data.doctype = this.doctype;
-		this.listview.render(row, data, this);
-	},	
-	get_query_fields: function() {
-		return this.listview.fields;
-	},
-	get_args: function() {
-		var args = {
-			doctype: this.doctype,
-			fields: this.get_query_fields(),
-			filters: this.filter_list.get_filters(),
-			docstatus: this.can_submit ? $.map(this.$page.find('.show-docstatus :checked'), 
-				function(inp) { return $(inp).attr('data-docstatus') }) : [],
-			order_by: this.listview.order_by || undefined,
-			group_by: this.listview.group_by || undefined,
-		}
-		
-		// apply default filters, if specified for a listing
-		$.each((this.listview.default_filters || []), function(i, f) {
-		      args.filters.push(f);
-		});
-		
-		return args;
-	},
-	add_delete_option: function() {
-		var me = this;
-		if(this.can_delete) {
-			this.add_button('Delete', function() { me.delete_items(); }, 'icon-remove');
-			this.add_button('Select All', function() { 
-				var checks = me.$page.find('.list-delete');
-				checks.attr('checked', $(checks.get(0)).attr('checked') ? false : "checked");
-			}, 'icon-ok');
-		}
-	},
-	delete_items: function() {
-		var me = this;				
-		var dl = $.map(me.$page.find('.list-delete:checked'), function(e) {
-			return $(e).data('name');
-		});
-		if(!dl.length) 
-			return;
-		if(!confirm('This is PERMANENT action and you cannot undo. Continue?')) {
-			return;
-		}
-		
-		me.set_working(true);
-		wn.call({
-			method: 'webnotes.widgets.doclistview.delete_items',
-			args: {
-				items: dl,
-				doctype: me.doctype
-			},
-			callback: function() {
-				me.set_working(false);
-				me.refresh();
-			}
-		})
-	},
-	init_stats: function() {
+	
+});
+
+// opts: stats, doctype, $page, doclistview
+wn.views.ListViewStats = Class.extend({
+	init: function(opts) {
+		$.extend(this, opts);
 		var me = this
 		wn.call({
 			method: 'webnotes.widgets.doclistview.get_stats',
 			args: {
-				stats: me.listview.stats,
 				doctype: me.doctype
 			},
 			callback: function(r) {
 				// This gives a predictable stats order
-				$.each(me.listview.stats, function(i, v) {
-					me.render_stat(v, r.message[v]);
+				me.stats = r.message.tags;
+				me.stat_data = r.message.stat_data;
+				
+				$.each(me.stats, function(i, v) {
+					me.render_stat(v, me.stat_data[v]);
 				});
 				
 				// reload button at the end
-				if(me.listview.stats.length) {
+				if(me.stats.length) {
 					$('<button class="btn btn-small"><i class="refresh"></i> Refresh</button>')
 						.click(function() {
 							me.reload_stats();
@@ -277,9 +207,7 @@ wn.views.DocListView = wn.ui.Listing.extend({
 			if(field=='_user_tags') {
 				this.$page.find('.layout-side-section')
 					.append('<div class="stat-wrapper section"><div class="section-head">Tags</div>\
-						<div class="help small"><i>No records tagged.</i><br><br> \
-						To add a tag, open the document and click on \
-						"Add Tag" on the sidebar</div></div>');
+						<div class="help small">No records tagged.</div></div>');
 			}
 			return;
 		}
@@ -302,12 +230,27 @@ wn.views.DocListView = wn.ui.Listing.extend({
 		
 		// render items
 		$.each(stat, function(i, v) { 
-			me.render_stat_item(i, v, sum, field).appendTo($w.find('.stat-grid'));
+			if(field=="_user_tags") {
+				me.get_tag_cloud(v).appendTo($w.find('.stat-grid'))
+			} else {				
+				me.get_progress_bar(i, v, sum, field).appendTo($w.find('.stat-grid'));
+			}
 		});
 		
 		$w.appendTo(this.$page.find('.layout-side-section'));
 	},
-	render_stat_item: function(i, v, max, field) {
+	get_tag_cloud: function(v) {
+		var me = this;
+		return $(repl("<span style='margin-right: 7px; cursor: pointer;' \
+			class='label label-info' data-field='_user_tags' data-label='%(label)s'>\
+			%(label)s(%(count)s)</span>", {
+				label: v[0],
+				count: v[1]
+			})).click(function() {
+				return me.set_filter(this);
+			});
+	},
+	get_progress_bar: function(i, v, max, field) {
 		var me = this;
 		var args = {}
 		args.label = v[0];
@@ -316,274 +259,28 @@ wn.views.DocListView = wn.ui.Listing.extend({
 		args.field = field;
 		args.bar_style = "";
 		
-		try { args.bar_style = "bar-" + me.listview.label_style[field][args.label]; } 
-		catch(e) { }
-
 		$item = $(repl('<div class="progress">\
 				<div class="bar %(bar_style)s" style="width: %(width)s%"></div>\
 			</div>\
 			<div class="stat-label">\
 				<a href="#" data-label="%(label)s" data-field="%(field)s">\
 					%(label)s</a> (%(count)s)\
-		</div>', args));
+		</div>', args))
 		
-		this.setup_stat_item_click($item);
+		$item.find("a").click(function() {
+			return me.set_filter(this);
+		});
+		
 		return $item;
 	},
 	reload_stats: function() {
 		this.$page.find('.layout-side-section .stat-wrapper').remove();
-		this.init_stats();
+		this.init();
 	},
-	setup_stat_item_click: function($item) {
-		var me = this;
-		$item.find('a').click(function() {
-			var fieldname = $(this).attr('data-field');
-			var label = $(this).attr('data-label');
-			me.set_filter(fieldname, label);
-			return false;
-		});		
-	},
-	set_filter: function(fieldname, label) {
-		var filter = this.filter_list.get_filter(fieldname);
-		if(filter) {
-			var v = filter.field.get_value();
-			if(v.indexOf(label)!=-1) {
-				// already set
-				return false;
-			} else {
-				// second filter set for this field
-				if(fieldname=='_user_tags') {
-					// and for tags
-					this.filter_list.add_filter(this.doctype, fieldname, 'like', '%' + label);
-				} else {
-					// or for rest using "in"
-					filter.set_values(this.doctype, fieldname, 'in', v + ', ' + label);
-				}
-			}
-		} else {
-			// no filter for this item,
-			// setup one
-			if(fieldname=='_user_tags') {
-				this.filter_list.add_filter(this.doctype, fieldname, 'like', '%' + label);					
-			} else {
-				this.filter_list.add_filter(this.doctype, fieldname, '=', label);					
-			}
-		}
-		this.run();
+	set_filter: function(target) {
+		var fieldname = $(target).attr('data-field');
+		var label = $(target).attr('data-label');
+		this.listing.set_filter(fieldname, label);
+		return false;		
 	}
-});
-
-wn.views.ListView = Class.extend({
-	init: function(doclistview) {
-		this.doclistview = doclistview;
-		this.doctype = doclistview.doctype;
-		
-		var t = "`tab"+this.doctype+"`.";
-		this.fields = [t + 'name', t + 'owner', t + 'modified_by', t + 'docstatus', 
-			t + '_user_tags', t + 'modified'];
-		this.stats = ['_user_tags'];
-		this.show_hide_check_column();
-
-	},
-	columns: [
-		{width: '3%', content:'check'},
-		{width: '5%', content:'avatar'},
-		{width: '3%', content:'docstatus', css: {"text-align": "center"}},
-		{width: '35%', content:'name'},
-		{width: '39%', content:'tags', css: {'color':'#aaa'}},
-		{width: '15%', content:'modified', css: {'text-align': 'right', 'color':'#222'}}		
-	],
-	render_column: function(data, parent, opts) {
-		var me = this;
-		
-		// style
-		if(opts.css) {
-			$.each(opts.css, function(k, v) { $(parent).css(k, v)});
-		}
-		
-		// multiple content
-		if(opts.content.indexOf && opts.content.indexOf('+')!=-1) {
-			$.map(opts.content.split('+'), function(v) {
-				me.render_column(data, parent, {content:v});
-			});
-			return;
-		}
-		
-		// content
-		if(typeof opts.content=='function') {
-			opts.content(parent, data, me);
-		}
-		else if(opts.content=='name') {
-			$(parent).append(repl('<a href="#!Form/%(doctype)s/%(name)s">%(name)s</a>', data));
-		} 
-		else if(opts.content=='avatar') {
-			$(parent).append(wn.avatar(data.modified_by))
-				.css("padding-left", "0px")
-				.attr("title", "Last Updated By: " + wn.user_info(data.modified_by).fullname);
-		}
-		else if(opts.content=='check') {
-			$(parent).append('<input class="list-delete" type="checkbox">');
-			$(parent).find('input').data('name', data.name);			
-		}
-		else if(opts.content=='docstatus') {
-			$(parent).append(repl('<span class="docstatus"><i class="%(docstatus_icon)s" \
-				title="%(docstatus_title)s"></i></span>', data));			
-		}
-		else if(opts.content=='tags') {
-			this.add_user_tags(parent, data);
-		}
-		else if(opts.content=='modified') {
-			$(parent).append(data.when);
-		}
-		else if(opts.type=='bar-graph') {
-			this.render_bar_graph(parent, data, opts.content, opts.label);
-		}
-		else if(opts.type=='link' && opts.doctype) {
-			$(parent).append(repl('<a href="#!Form/'+opts.doctype+'/'
-				+data[opts.content]+'">'+data[opts.content]+'</a>', data));
-		}
-		else if(opts.template) {
-			$(parent).append(repl(opts.template, data));
-		}
-		else if(data[opts.content]) {
-			if(opts.type=="date") {
-				data[opts.content] = wn.datetime.str_to_user(data[opts.content])
-			}
-			$(parent).append(repl('<span title="%(title)s"> %(content)s</span>', {
-				"title": opts.title || opts.content, "content": data[opts.content]}));
-		}
-		
-	},
-	render: function(row, data) {
-		var me = this;
-		this.prepare_data(data);
-		rowhtml = '';
-				
-		// make table
-		$.each(this.columns, function(i, v) {
-			rowhtml += repl('<td style="width: %(width)s"></td>', v);
-		});
-		var tr = $(row).html('<table class="doclist-row"><tbody><tr>' + rowhtml + '</tr></tbody></table>').find('tr').get(0);
-		
-		// render cells
-		$.each(this.columns, function(i, v) {
-			me.render_column(data, tr.cells[i], v);
-		});
-	},
-	prepare_data: function(data) {
-		data.fullname = wn.user_info(data.owner).fullname;
-		data.avatar = wn.user_info(data.owner).image;
-
-		data.fullname_modified = wn.user_info(data.modified_by).fullname;
-		data.avatar_modified = wn.user_info(data.modified_by).image;
-		
-		if(data.modified)
-			this.prepare_when(data, data.modified);
-		
-		// docstatus
-		if(data.docstatus==0 || data.docstatus==null) {
-			data.docstatus_icon = 'icon-pencil';
-			data.docstatus_title = 'Editable';
-		} else if(data.docstatus==1) {
-			data.docstatus_icon = 'icon-lock';			
-			data.docstatus_title = 'Submitted';
-		} else if(data.docstatus==2) {
-			data.docstatus_icon = 'icon-remove';			
-			data.docstatus_title = 'Cancelled';
-		}
-		
-		// nulls as strings
-		for(key in data) {
-			if(data[key]==null) {
-				data[key]='';
-			}
-		}
-	},
-	
-	prepare_when: function(data, date_str) {
-		if (!date_str) date_str = data.modified;
-		// when
-		data.when = (dateutil.str_to_user(date_str)).split(' ')[0];
-		var diff = dateutil.get_diff(dateutil.get_today(), date_str.split(' ')[0]);
-		if(diff==0) {
-			data.when = dateutil.comment_when(date_str);
-		}
-		if(diff == 1) {
-			data.when = 'Yesterday'
-		}
-		if(diff == 2) {
-			data.when = '2 days ago'
-		}
-	},
-	
-	add_user_tags: function(parent, data) {
-		var me = this;
-		if(data._user_tags) {
-			if($(parent).html().length > 0) {
-				$(parent).append('<br />');
-			}
-			$.each(data._user_tags.split(','), function(i, t) {
-				if(t) {
-					$('<span class="label label-info" style="cursor: pointer; line-height: 200%">' 
-						+ strip(t) + '</span>')
-						.click(function() {
-							me.doclistview.set_filter('_user_tags', $(this).text())
-						})
-						.appendTo(parent);
-				}
-			});
-		}		
-	},
-	show_hide_check_column: function() {
-		if(!this.doclistview.can_delete) {
-			this.columns = $.map(this.columns, function(v, i) { if(v.content!='check') return v });
-		}
-	},
-	render_bar_graph: function(parent, data, field, label) {
-		var args = {
-			percent: data[field],
-			fully_delivered: (data[field] > 99 ? 'bar-complete' : ''),
-			label: label
-		}
-		$(parent).append(repl('<span class="bar-outer" style="width: 30px; float: right" \
-			title="%(percent)s% %(label)s">\
-			<span class="bar-inner %(fully_delivered)s" \
-				style="width: %(percent)s%;"></span>\
-		</span>', args));
-	},
-	render_icon: function(parent, icon_class, label) {
-		var icon_html = "<i class='%(icon_class)s' title='%(label)s'></i>";
-		$(parent).append(repl(icon_html, {icon_class: icon_class, label: label || ''}));
-	}
-});
-
-wn.provide('wn.views.RecordListView');
-wn.views.RecordListView = wn.views.DocListView.extend({
-	init: function(doctype, wrapper, ListView) {
-		this.doctype = doctype;
-		this.wrapper = wrapper;
-		this.listview = new ListView(this);
-		this.listview.parent = this;
-		this.setup();
-	},
-
-	setup: function() {
-		var me = this;
-		me.page_length = 10;
-
-		$(me.wrapper).empty();
-
-		me.init_list();
-	},
-
-	get_args: function() {
-		var args = this._super();
-		
-		$.each((this.default_filters || []), function(i, f) {
-		      args.filters.push(f);
-		});
-		
-		args.docstatus = args.docstatus.concat((this.default_docstatus || []));
-		return args;
-	},
 });

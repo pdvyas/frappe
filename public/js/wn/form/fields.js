@@ -20,8 +20,6 @@
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // 
 
-var no_value_fields = ['Section Break', 'Column Break', 'HTML', 'Table', 'FlexTable', 'Button', 'Image'];
-
 function make_field(docfield, doctype, parent, frm, in_grid, hide_label) { // Factory
 	field_class = docfield.fieldtype.replace(/ /g, "") + "Field";
 	if(wn.form[field_class]) {
@@ -158,10 +156,13 @@ wn.form.Field = Class.extend({
 		
 	run_trigger: function() {
 		if(!this.frm) return;
-		if(this.frm.cscript[this.df.fieldname])
-			this.frm.runclientscript(this.df.fieldname, this.doctype, this.docname);
+		
+		var target_frm = this.frm.parent_frm || this.frm;
+		
+		if(target_frm.cscript[this.df.fieldname])
+			target_frm.runclientscript(this.df.fieldname, this.doctype, this.docname);
 
-		this.frm.refresh_dependency();
+		target_frm.refresh_dependency();
 	},
 	
 	set_focus: function() {
@@ -211,7 +212,7 @@ wn.form.Field = Class.extend({
 		var ret;
 
 		// hidden
-		if(cint(this.df.hidden)) return "None";
+		if(this.df.hidden) return "None";
 
 		// permission level
 		if(this.frm.editable && p && p[WRITE] && !this.df.disabled)

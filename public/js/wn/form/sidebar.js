@@ -82,6 +82,11 @@ wn.ui.FormSidebar = Class.extend({
 			frm: this.frm			
 		});
 		
+		this.frm.states = new wn.ui.form.States({
+			parent: this.wrapper.find(".states"),
+			frm: this.frm
+		});
+		
 		// assign to
 		this.frm.assign_to = new wn.ui.form.AssignTo({
 			parent: this.wrapper.find(".assign_area"),
@@ -123,6 +128,7 @@ wn.ui.FormSidebar = Class.extend({
 			.toggle(can_delete ? true : false);
 		
 		this.frm.linked_with.refresh();
+		this.frm.states.refresh();
 		this.frm.tags.refresh();
 		this.frm.assign_to.refresh();
 		this.frm.attachments && this.frm.attachments.refresh();

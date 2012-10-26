@@ -41,9 +41,9 @@ wn.ui.FilterList = Class.extend({
 		});
 	},
 	
-	show_filters: function() {
-		this.$w.find('.show_filters').toggle();
-		if(!this.filters.length)
+	show_filters: function(show_none) {
+		this.$w.find('.show_filters').toggle(true);
+		if(!this.filters.length && !show_none)
 			this.add_filter();
 	},
 	
@@ -292,19 +292,7 @@ wn.ui.FieldSelect = Class.extend({
 	build_options: function() {
 		var me = this;
 		me.table_fields = [];
-		var std_filters = [
-			{fieldname:'name', fieldtype:'Data', label:'ID', parent:me.doctype},
-			{fieldname:'modified', fieldtype:'Date', label:'Last Modified',
-				parent:me.doctype},
-			{fieldname:'owner', fieldtype:'Data', label:'Created By',
-				parent:me.doctype},
-			{fieldname:'creation', fieldtype:'Date', label:'Created On',
-				parent:me.doctype},
-			{fieldname:'_user_tags', fieldtype:'Data', label:'Tags',
-				parent:me.doctype},
-			{fieldname:'docstatus', fieldtype:'Int', label:'Doc Status',
-				parent:me.doctype},
-		];
+		var std_filters = [];
 		
 		// add parenttype column
 		var doctype_obj = locals['DocType'][me.doctype];
@@ -349,7 +337,7 @@ wn.ui.FieldSelect = Class.extend({
 			var label = df.label + ' (' + df.parent + ')';
 			var table = df.parent;
 		}
-		if(wn.model.no_value_type.indexOf(df.fieldtype)==-1 && 
+		if(no_value_fields.indexOf(df.fieldtype)==-1 && 
 			!(me.fields_by_name[df.parent] && me.fields_by_name[df.parent][df.fieldname])) {
 			this.$select.append($('<option>', {
 				value: table + "." + df.fieldname,

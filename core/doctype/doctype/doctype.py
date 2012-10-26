@@ -22,12 +22,10 @@
 
 from __future__ import unicode_literals
 import webnotes
+import os
 
 from webnotes.utils import now, cint
 msgprint = webnotes.msgprint
-
-
-
 
 class DocType:
 	def __init__(self, doc=None, doclist=[]):
@@ -45,6 +43,10 @@ class DocType:
 		for d in self.doclist:
 			if d.parent and d.fieldtype:
 				if (not d.fieldname):
+					if not d.label:
+						webnotes.msgprint("Either Fieldname or Label is mandatory (row %s)" % d.idx, 
+							raise_exception=1)
+						
 					d.fieldname = d.label.strip().lower().replace(' ','_')
 					if d.fieldname in restricted:
 						d.fieldname = d.fieldname + '1'
@@ -124,7 +126,19 @@ class DocType:
 		
 	def export_doc(self):
 		from webnotes.modules.export_module import export_to_files
+		from webnotes.modules import get_module_path, scrub
+
 		export_to_files(record_list=[['DocType', self.doc.name]])
+		
+		# bootstrap a .py file from the template
+		pypath = os.path.join(get_module_path(self.doc.module), 'doctype', scrub(self.doc.name),
+			scrub(self.doc.name) + '.py')
+
+		if not os.path.exists(pypath):
+			with open(pypath, 'w') as pyfile:
+				with (os.path.join(get_module_path("core"), "doctype", "doctype", 
+					"doctype_template.py"), 'r') as srcfile:
+					pyfile.write(srcfile.read())
 		
 	def import_doc(self):
 		from webnotes.modules.import_module import import_from_files

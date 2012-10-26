@@ -37,14 +37,15 @@ def clear(user=None):
 	clear_cache(user)
 	webnotes.response['message'] = "Cache Cleared"
 
-def clear_cache(user=''):
+def clear_cache(user=None):
 	"""clear cache"""
-	webnotes.cache().flush_keys("bootinfo:")
-	webnotes.cache().flush_keys("doctype:")
+	if user:
+		webnotes.cache().flush_keys("bootinfo:" + user)
+	else:
+		webnotes.cache().flush_keys("bootinfo:")
+		webnotes.cache().flush_keys("doctype:")
 
-	# rebuild a cache for guest
-	if webnotes.session:
-		webnotes.session['data'] = {}
+	if webnotes.session: webnotes.session["data"] = None
 
 def get():
 	"""get session boot info"""
@@ -60,5 +61,6 @@ def get():
 	from webnotes.boot import get_bootinfo
 	bootinfo = get_bootinfo()
 	webnotes.cache().set_value('bootinfo:' + webnotes.session.user, bootinfo)
-		
+	
+	bootinfo["fresh"] = 1
 	return bootinfo

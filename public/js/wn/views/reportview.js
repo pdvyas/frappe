@@ -1,3 +1,25 @@
+// Copyright (c) 2012 Web Notes Technologies Pvt Ltd (http://erpnext.com)
+// 
+// MIT License (MIT)
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a 
+// copy of this software and associated documentation files (the "Software"), 
+// to deal in the Software without restriction, including without limitation 
+// the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+// and/or sell copies of the Software, and to permit persons to whom the 
+// Software is furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in 
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A 
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT 
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+// CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
+// OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+
 wn.views.ReportViewPage = Class.extend({
 	init: function(doctype, docname) {
 		this.doctype = doctype;
@@ -26,57 +48,75 @@ wn.views.ReportViewPage = Class.extend({
 		wn.container.change_to(this.page_name);
 	},
 	make_report_view: function() {
-		// add breadcrumbs
-		this.page.appframe.add_breadcrumb(locals.DocType[this.doctype].module);
+		var module = locals.DocType[this.doctype].module;
+		this.page.appframe.set_title(this.doctype);
+		this.page.appframe.set_marker(module);
+		this.page.appframe.add_module_tab(module);
 			
-		this.reportview = new wn.views.ReportView(this.doctype, this.docname, this.page)
+		this.reportview = new wn.views.ReportView({
+			doctype: this.doctype, 
+			docname: this.docname, 
+			page: this.page,
+			wrapper: $(this.page).find(".layout-main")
+		})
 	}
 })
 
 wn.views.ReportView = wn.ui.Listing.extend({
-	init: function(doctype, docname, page) {
+	init: function(opts) {
 		var me = this;
-		$(page).find('.layout-main').html('Loading Report...');
-		$(page).find('.layout-main').empty();
-		this.doctype = doctype;
-		this.docname = docname;
-		this.page = page;
-		this.tab_name = '`tab'+doctype+'`';
+		$.extend(this, opts);
+		this.tab_name = '`tab'+this.doctype+'`';
+		this.meta = locals.DocType[this.doctype];
+		this.can_delete = wn.model.can_delete(this.doctype);
+		
 		this.setup();
 	},
 
 	set_init_columns: function() {
 		// pre-select mandatory columns
-		var columns = [['name'], ['owner']];
-		$.each(wn.meta.docfield_list[this.doctype], function(i, df) {
-			if(df.in_filter && df.fieldname!='naming_series' && df.fieldtype!='Table') {
-				columns.push([df.fieldname]);
-			}
-		});
+		var columns = wn.user.get_default("_list_settings:" + this.doctype);
+		if(!columns) {
+			var columns = [['name'],];
+			$.each(wn.meta.docfield_list[this.doctype], function(i, df) {
+				if(df.in_filter && df.fieldname!='naming_series'
+					&& !in_list(no_value_fields, df.fieldname)) {
+					columns.push([df.fieldname]);
+				}
+			});			
+		}
+		
+		this.set_columns(columns);
+	},
+	
+	set_columns: function(columns) {
 		this.columns = columns;
 	},
+	
 	setup: function() {
 		var me = this;
 		$("<div class='report-head'></div><div class='report-grid'></div>")
-			.appendTo($(this.page).find('.layout-main'))
+			.appendTo(this.wrapper)
 			
 		this.make({
-			title: 'Report: ' + (this.docname ? (this.doctype + ' - ' + this.docname) : this.doctype),
+			title: this.no_title ? "" : ('Report: ' + (this.docname ? (this.doctype + ' - ' + this.docname) : this.doctype)),
 			appframe: this.page.appframe,
 			method: 'webnotes.widgets.doclistview.get',
 			get_args: this.get_args,
-			parent: $(this.page).find('.report-grid'),
+			parent: $(this.wrapper).find('.report-grid'),
 			start: 0,
 			page_length: 20,
 			show_filters: true,
 			new_doctype: this.doctype,
 			allow_delete: true
 		});
+		this.make_delete();
 		this.make_column_picker();
 		this.make_sorter();
 		this.make_export();
 		this.set_init_columns();
 		this.make_save();
+		this.set_tag_filter();
 	},
 	
 	// preset columns and filters from saved info
@@ -105,8 +145,12 @@ wn.views.ReportView = wn.ui.Listing.extend({
 			fields: $.map(this.columns, function(v) { return me.get_full_column_name(v) }),
 			order_by: this.get_order_by(),
 			filters: this.filter_list.get_filters(),
-			docstatus: ['0','1','2']
+			docstatus: this.get_docstatus()
 		}
+	},
+	
+	get_docstatus: function() {
+		return ['0', '1', '2']
 	},
 	
 	get_order_by: function() {
@@ -137,14 +181,6 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		var me = this;
 		return $.map(this.columns, function(c) {
 			var docfield = wn.meta.docfield_map[c[1] || me.doctype][c[0]];
-			if(c[0]=="name") {
-				var docfield = {
-					label: "ID",
-					fieldtype: "Link",
-					fieldname: "name",
-					options: me.doctype
-				}
-			}
 			coldef = {
 				id: c[0],
 				field: c[0],
@@ -165,12 +201,26 @@ wn.views.ReportView = wn.ui.Listing.extend({
 	render_list: function() {
 		var me = this;
 		//this.gridid = wn.dom.set_unique_id()
-		var columns = [{id:'_idx', field:'_idx', name: 'Sr.', width: 40}].concat(this.build_columns());
+		var std_columns = [{id:'_idx', field:'_idx', name: 'Sr.', width: 40}];
+		if(this.can_delete) {
+			std_columns = [{
+				id:'_check', field:'_check', name: "", width: 40, 
+					formatter: function(row, cell, value, columnDef, dataContext) {
+						return repl("<input type='checkbox' \
+							data-row='%(row)s' %(checked)s>", {
+								row: row,
+								checked: (dataContext._checked ? "checked" : "")
+							});
+					}
+			}]
+		}
+		var columns = std_columns.concat(this.build_columns());
 
 		// add sr in data
 		$.each(this.data, function(i, v) {
 			// add index
 			v._idx = i+1;
+			v.id = v._idx;
 		});
 
 		var options = {
@@ -179,10 +229,15 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		};
 
 		this.col_defs = columns;
+
+		this.dataView = new Slick.Data.DataView();
+		this.set_data(this.data);
+		this.set_row_formatters();		
+	
 		this.grid = new Slick.Grid(this.$w.find('.result-list')
 			.css('border', '1px solid grey')
 			.css('height', '500px')
-			.get(0), this.data, 
+			.get(0), this.dataView, 
 			columns, options);
 
 		if(in_list(wn.boot.profile.can_write, this.doctype)) {
@@ -195,45 +250,112 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		}
 	},
 	
+	set_data: function() {
+		this.dataView.beginUpdate();
+		this.dataView.setItems(this.data);
+		this.dataView.endUpdate();
+	},
+	
+	set_tag_filter: function() {
+		var me = this;
+		this.$w.find('.result-list').on("click", ".label-info", function() {
+			if($(this).attr("data-label")) {
+				me.set_filter("_user_tags", $(this).attr("data-label"));
+			}
+		});
+	},
+	
+	set_row_formatters: function() {
+		// setup workflow metadata
+		var me = this;
+
+		this.state_fieldname = wn.model.get_state_fieldname(this.doctype);
+		this.state_map = {};
+		$.each(wn.model.get("Workflow State"), function(i, d) {
+			me.state_map[d.name] = d;
+		})
+		
+		this.dataView.getItemMetadata = function(row) {
+			var item = me.data[row];
+			var ret = null;
+			
+			if(me.state_map[item[me.state_fieldname]]) {
+				ret = { cssClasses: 'row-' + me.state_map[item[me.state_fieldname]].style.toLowerCase() }
+			}
+
+			return ret;
+		}
+	},
+	
 	set_edit: function() {
+		var $head = $(this.wrapper).find(".report-head");
 		$("<div class='alert'>This report is editable</div>")
-			.appendTo($(this.page).find(".report-head").empty())
+			.appendTo($head.empty());
 		
 		var me = this;
 		this.grid.onClick.subscribe(function(e, args) {
+			// need to understand slickgrid event model
+			// a bit better. This function also gets called
+			// in form (??)
+			if(!$(me.wrapper).is(":visible")) return;
+			
 			// clicked on link
-			if(e.target.tagName.toLowerCase()=="a") return;
+			if(e.target.tagName.toLowerCase()=="a") {
+				e.stopImmediatePropagation();
+				return false;
+			}
 			
 			if(me.selected_row == args.row) {
 				var docfield = me.col_defs[args.cell].docfield;
-				var rowdata = me.data[args.row];
+				var item = me.data[args.row];
 				
-				if(!docfield || in_list(['name', 'idx', 'owner', 'creation', 'modified_by', 
-					'modified', 'parent', 'parentfield', 'parenttype'], 
-					docfield.fieldname)) {
-					msgprint("This field is not editable");
-					return;
+				if(cint(item.docstatus) > 0) {
+					msgprint("Cannot edit Submitted / Cancelled records");
+					e.stopImmediatePropagation();
+					return false;
 				}
 				
-				if(docfield && rowdata.name) {
+				if(!docfield) return false;
+				
+				if(in_list(['name', 'idx', 'owner', 'creation', 'modified_by', 
+					'modified', 'parent', 'parentfield', 'parenttype', 'file_list', 'trash_reason'], 
+					docfield.fieldname)) {
+					msgprint("This field is not editable");
+					e.stopImmediatePropagation();
+					return false;
+				}
+				
+				if(docfield.permlevel!=0) {
+					msgprint("Not permitted to edit the field. (Permlevel is "+docfield.permlevel+")");
+					e.stopImmediatePropagation();
+					return false;
+				}
+				
+				if(docfield.fieldtype=="Read Only") {
+					msgprint("Cannot edit read only field");
+					e.stopImmediatePropagation();
+					return false;
+				}
+				
+				if(docfield && item.name) {
 					var fieldname = docfield.fieldname;
-					var dialog = new wn.ui.Dialog({
-						title: rowdata.name,
+					me.edit_dialog = new wn.ui.Dialog({
+						title: item.name,
 						width: 700,
 						fields: [
 							copy_dict(docfield),
 								{fieldname:'update', label:'Update', fieldtype:'Button'}
 						]
 					});
-					dialog.fields_dict[fieldname].set_input(rowdata[fieldname])
+					me.edit_dialog.fields_dict[fieldname].set_value(item[fieldname])
 					
-					dialog.fields_dict.update.$input.click(function() {
+					me.edit_dialog.fields_dict.update.$input.click(function() {
 						// parent
 						var call_args = {
 							doctype: me.doctype,
-							name: rowdata.name,
+							name: item.name,
 							fieldname: fieldname,
-							value: dialog.fields_dict[fieldname].get_value()
+							value: me.edit_dialog.fields_dict[fieldname].get_value()
 						};
 						
 						if(docfield.parent && docfield.parent!=me.doctype)
@@ -246,17 +368,26 @@ wn.views.ReportView = wn.ui.Listing.extend({
 								if(r.exc) {
 									msgprint('Could not update');
 								} else {
-									$.extend(me.data[args.row], r.message);
-									dialog.hide();									
-									me.grid.setData(me.data);
+									// update all rows from the doclist
+									$.each(me.data, function(i, row) {
+										$.each(r.message, function(j, d) {
+											if(row && d && row.name==d.name) {
+												$.extend(row, d);
+												r.message.splice(j, 1);
+											}
+										});
+									});
+									me.edit_dialog.hide();
+									me.set_data(me.data);
+									me.grid.invalidate();
 									me.grid.render();
 								}
 							},
 							btn: this
 						})
 					});
-					
-					dialog.show();
+										
+					me.edit_dialog.show();
 					
 				}
 			}
@@ -306,7 +437,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		this.sort_order_next_select = $(this.sort_dialog.body).find('.sort-order-1');
 		
 		// initial values
-		this.sort_by_select.val('modified');
+		this.sort_by_select.val(me.doctype + '.modified');
 		this.sort_order_select.val('desc');
 		
 		this.sort_by_next_select.val('');
@@ -332,6 +463,44 @@ wn.views.ReportView = wn.ui.Listing.extend({
 				args.cmd = 'webnotes.widgets.doclistview.export_query'
 				open_url_post(wn.request.url, args);
 			}, 'icon-download-alt');
+		}
+	},
+	
+	make_delete: function() {
+		var me = this;
+		if(this.can_delete) {
+			$(this.page).on("click", "input[type='checkbox'][data-row]", function() {
+				me.data[$(this).attr("data-row")]._checked 
+					= this.checked ? true : false;
+			});
+			
+			this.page.appframe.add_button('Delete', function() {
+				var delete_list = []
+				$.each(me.data, function(i, d) {
+					if(d._checked) {
+						if(d.name)
+							delete_list.push(d.name);
+					}
+				});
+				
+				if(!delete_list.length) 
+					return;
+				if(!confirm(wn._("This is PERMANENT action and you cannot undo. Continue?"))) {
+					return;
+				}
+
+				wn.call({
+					method: 'webnotes.widgets.doclistview.delete_items',
+					args: {
+						items: delete_list,
+						doctype: me.doctype
+					},
+					callback: function() {
+						me.refresh();
+					}
+				})
+				
+			}, 'icon-remove');
 		}
 	},
 	
@@ -414,12 +583,14 @@ wn.ui.ColumnPicker = Class.extend({
 		$(this.dialog.body).find('.btn-info').click(function() {
 			me.dialog.hide();
 			// selected columns as list of [column_name, table_name]
-			me.list.columns = [];
+			var columns = [];
 			$(me.dialog.body).find('select').each(function() {
 				var $selected = $(this).find('option:selected');
-				me.list.columns.push([$selected.attr('fieldname'), 
+				columns.push([$selected.attr('fieldname'), 
 					$selected.attr('table')]);
-			})
+			});
+			wn.user.set_default("_list_settings:" + me.doctype, columns);
+			me.list.set_columns(columns);
 			me.list.run();
 		});
 		

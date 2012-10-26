@@ -66,6 +66,7 @@ def get(doctype, processed=False):
 		add_print_formats(doclist)
 		add_search_fields(doclist)
 		add_linked_with(doclist)
+		add_workflows(doclist)
 		# update_language(doclist)
 
 	# add validators
@@ -83,10 +84,21 @@ def load_docfield_types():
 	docfield_types = dict(webnotes.conn.sql("""select fieldname, fieldtype from tabDocField
 		where parent='DocField'"""))
 
+def add_workflows(doclist):
+	from webnotes.model.controller import Controller
+	if webnotes.conn.exists("Workflow", doclist[0].name):
+		doclist += Controller("Workflow", doclist[0].name).doclist
+		
+	# add workflow states (for icons and style)
+	for state in map(lambda d: d.state, doclist.get({"doctype":"Workflow Document State"})):
+		doclist += Controller("Workflow State", state).doclist
+	
+
 def get_doctype_doclist(doctype):
 	"""get doclist of single doctype"""
 	from webnotes.model.controller import Controller
 	doclist = Controller('DocType', doctype).doclist
+	add_std_fields(doctype, doclist)
 	add_custom_fields(doctype, doclist)
 	apply_property_setters(doctype, doclist)
 	sort_fields(doclist)
@@ -139,6 +151,23 @@ def apply_property_setters(doctype, doclist):
 				ps['value'] = cint(ps['value'])
 				
 			docfield[0].fields[ps['property']] = ps['value']
+
+def add_std_fields(doctype, doclist):
+	"""metadata for reports / filters"""
+	for f in [
+		{"fieldname":"name", "fieldtype":"Link", "options":doctype, "label":"ID"}, 
+		{"fieldname":"_user_tags", "fieldtype":"Tag", "label":"Tags"},
+		{"fieldname":"owner", "fieldtype":"Data", "label":"Owner"},
+		{"fieldname":"modified_by", "fieldtype":"Data", "label":"Last Updated By"},
+		{"fieldname":"creation", "fieldtype":"Date", "label":"Created On"},
+		{"fieldname":"modified", "fieldtype":"Date", "label":"Last Updated On"}]:
+		f.update({
+			"name": doctype + "_" + f["fieldname"],
+			"parent": doctype,
+			"doctype":"DocField",
+			"std_field": 1
+		})
+		doclist.append(webnotes.model.doc.Document(fielddata = f))
 
 def add_custom_fields(doctype, doclist):
 	try:
@@ -214,12 +243,21 @@ def cache_name(doctype, processed):
 
 def clear_cache(doctype):
 	global doctype_cache
-	webnotes.cache().delete_value(cache_name(doctype, False))
-	webnotes.cache().delete_value(cache_name(doctype, True))
 
-	if doctype in doctype_cache:
-		del doctype_cache[doctype]
+	def clear_single(dt):
+		webnotes.cache().delete_value(cache_name(dt, False))
+		webnotes.cache().delete_value(cache_name(dt, True))
+
+		if doctype in doctype_cache:
+			del doctype_cache[dt]
+			
+	clear_single(doctype)
 	
+	# clear all parent doctypes
+	for dt in webnotes.conn.sql("""select parent from tabDocField 
+		where fieldtype="Table" and options=%s""", doctype):
+		clear_single(dt[0])
+
 def add_code(doctype, doclist):
 	import os, conf
 	from webnotes.modules import scrub, get_module_path

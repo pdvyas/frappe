@@ -44,6 +44,11 @@ wn.form.SlickEditorAdapter = function(args) {
 			}
 		});
 		me.field.set_focus();
+		
+		// set default value in select if not set
+		if(df.fieldtype=="Select" && !args.item[df.fieldname]) {
+			me.field.set_model(me.field.$input.val());
+		}
 	}
 
 	this.destroy = function () {

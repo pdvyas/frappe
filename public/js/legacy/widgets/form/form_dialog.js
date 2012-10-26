@@ -65,7 +65,7 @@ _f.FrmDialog = function() {
 		d.done_btn = $btn(d.done_btn_area, 'Save', null, null, 'green');
 		d.done_btn.onclick = function() { me.on_complete() };
 		if(me.table_form) {
-			d.set_title("Editing Row #" + (_f.cur_grid_ridx+1));
+			d.set_title("Editing Row #" + (locals[me.dt][me.dn].idx));
 			d.done_btn.innerHTML = 'Done Editing';
 		} else {
 			d.set_title(cur_frm.doctype==cur_frm.doctype ? (cur_frm.doctype) : (cur_frm.doctype + ': ' + cur_frm.docname));
@@ -77,8 +77,8 @@ _f.FrmDialog = function() {
 	// -------------------------------------------
 	d.onhide = function() {
 		// if called from grid, refresh the row
-		if(_f.cur_grid) {
-			_f.cur_grid.refresh_row(_f.cur_grid_ridx, me.dn);			
+		if(me.table_field) {
+			me.table_field.refresh();
 		}
 		
 		// set the new global cur_frm (if applicable)
@@ -92,14 +92,13 @@ _f.FrmDialog = function() {
 		}
 		
 		// hide the form
-		//console.log(me.cur_frm.wrapper);
 		$(me.cur_frm.page_layout.wrapper).toggle(false);
 	}
 	this.dialog = d;
 }
 
 // called from table edit
-_f.edit_record = function(dt, dn) {
+_f.edit_record = function(dt, dn, frm, table_field) {
 	if(!_f.frm_dialog) {
 		_f.frm_dialog = new _f.FrmDialog();		
 	}
@@ -113,21 +112,25 @@ _f.edit_record = function(dt, dn) {
 			}
 			var f = _f.frms[dt];
 			if(f.meta.istable) {
-				f.parent_doctype = cur_frm.doctype;
-				f.parent_docname = cur_frm.docname;
+				f.parent_doctype = frm.doctype;
+				f.parent_docname = frm.docname;
+				f.parent_frm = frm;
 			}
 			
 			d.cur_frm = f;
+			d.dt = dt;
 			d.dn = dn;
 			d.table_form = f.meta.istable;
+			d.frm = frm;
+			d.table_field = table_field;
+			
+			d.dialog.show();
 
 			// show the form
 			f.refresh(dn);
 
 			$(f.page_layout.wrapper).removeClass('layout-wrapper')
 				.removeClass('layout-wrapper-background').toggle(true);
-			
-			d.dialog.show();
 		})
 	})
 }

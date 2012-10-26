@@ -68,7 +68,8 @@ wn.ui.form.Comments = Class.extend({
 		$.each(comment_list, function(i, c) {
 			me.get_comment(c).appendTo(me.$list);
 		});
-		this.refresh_latest_comment();		
+		this.refresh_latest_comment();
+		this.$list.find('.avatar img').centerImage();
 	},
 	get_comment: function(c, width) {
 		$.extend(c, wn.user_info(c.comment_by));
@@ -97,6 +98,7 @@ wn.ui.form.Comments = Class.extend({
 				me.wrapper.find("input").val("");
 				me.comment_list = [args].concat(me.comment_list || []);
 				me.get_comment(args).prependTo(me.$list);
+				me.$list.find('.avatar img').centerImage();
 				me.refresh_latest_comment();
 			}
 		});

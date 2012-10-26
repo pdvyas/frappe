@@ -315,5 +315,34 @@ wn.ui.Listing = Class.extend({
 	add_limits: function(query) {
 		query += ' LIMIT ' + this.start + ',' + (this.page_length+1);
 		return query
-	}
+	},
+	set_filter: function(fieldname, label) {
+		var filter = this.filter_list.get_filter(fieldname);
+		this.filter_list.show_filters(true);
+		if(filter) {
+			var v = filter.field.get_value();
+			if(v.indexOf(label)!=-1) {
+				// already set
+				return false;
+			} else {
+				// second filter set for this field
+				if(fieldname=='_user_tags') {
+					// and for tags
+					this.filter_list.add_filter(this.doctype, fieldname, 'like', '%' + label);
+				} else {
+					// or for rest using "in"
+					filter.set_values(this.doctype, fieldname, 'in', v + ', ' + label);
+				}
+			}
+		} else {
+			// no filter for this item,
+			// setup one
+			if(fieldname=='_user_tags') {
+				this.filter_list.add_filter(this.doctype, fieldname, 'like', '%' + label);					
+			} else {
+				this.filter_list.add_filter(this.doctype, fieldname, '=', label);					
+			}
+		}
+		this.run();
+	}	
 });

@@ -24,11 +24,10 @@
 // --------
 // toolbar - standard and custom
 // label - saved, submitted etc
-// breadcrumbs
 // save / submit button toggle based on "saved" or not
 // highlight and fade name based on refresh
 
-_f.FrmHeader = Class.extend({
+wn.ui.form.FormHeader = Class.extend({
 	init: function(parent, frm) {
 		this.frm = frm;
 		this.appframe = new wn.ui.AppFrame(parent, null, frm.meta.module)
@@ -39,15 +38,10 @@ _f.FrmHeader = Class.extend({
 				wn.set_route("List", frm.doctype);
 			});
 		}
-
-		this.appframe.add_tab('<span class="small-module-icons small-module-icons-'+
-			frm.meta.module.toLowerCase()+'"></span>'+
-			' <span>'+ frm.meta.module + "</span>", 0.7, function() {
-			wn.set_route(wn.modules[frm.meta.module])
-		});
+		
+		this.appframe.add_module_tab(frm.meta.module);
 	},
 	refresh: function() {
-		// refresh breadcrumbs
 		this.appframe.title(this.frm.docname);
 		
 		this.refresh_timestamps();
@@ -79,21 +73,24 @@ _f.FrmHeader = Class.extend({
 				+" on "+this.frm.doc.modified
 		});
 		
+		this.$w.find('.avatar img').centerImage();
+		
+		
 		
 	},
 	refresh_labels: function() {
-		cur_frm.doc = get_local(cur_frm.doc.doctype, cur_frm.doc.name);
+		this.frm.doc = get_local(this.frm.doc.doctype, this.frm.doc.name);
 		var labinfo = {
 			0: ['Saved', 'label-success'],
 			1: ['Submitted', 'label-info'],
 			2: ['Cancelled', 'label-important']
-		}[cint(cur_frm.doc.docstatus)];
+		}[cint(this.frm.doc.docstatus)];
 		
-		if(labinfo[0]=='Saved' && cur_frm.meta.is_submittable) {
+		if(labinfo[0]=='Saved' && this.frm.meta.is_submittable) {
 			labinfo[0]='Saved, to Submit';
 		}
 		
-		if(cur_frm.doc.__unsaved || cur_frm.doc.__islocal) {
+		if(this.frm.doc.__unsaved || this.frm.doc.__islocal) {
 			labinfo[0] = 'Not Saved';
 			labinfo[1] = 'label-warning'
 		}
@@ -101,7 +98,7 @@ _f.FrmHeader = Class.extend({
 		this.set_label(labinfo);
 		
 		// show update button if unsaved
-		if(cur_frm.doc.__unsaved && cint(cur_frm.doc.docstatus)==1 && this.appframe.buttons['Update']) {
+		if(this.frm.doc.__unsaved && cint(this.frm.doc.docstatus)==1 && this.appframe.buttons['Update']) {
 			this.appframe.buttons['Update'].toggle(true);
 		}
 		
@@ -116,55 +113,56 @@ _f.FrmHeader = Class.extend({
 	},
 	refresh_toolbar: function() {
 		// clear
+		var me = this;
 		
-		if(cur_frm.meta.hide_toolbar) {
+		if(this.frm.meta.hide_toolbar) {
 			$('.appframe-toolbar').toggle(false);
 			return;
 		}
 		
 		this.appframe.clear_buttons();
-		var p = cur_frm.get_doc_perms();
+		var p = this.frm.get_doc_perms();
 
 		// Edit
-		if(cur_frm.meta.read_only_onload && !cur_frm.doc.__islocal) {
-			if(!cur_frm.editable)
+		if(this.frm.meta.read_only_onload && !this.frm.doc.__islocal) {
+			if(!this.frm.editable)
 				this.appframe.add_button('Edit', function() { 
-					cur_frm.edit_doc();
+					me.frm.edit_doc();
 				},'icon-pencil');
 			else
 				this.appframe.add_button('Print View', function() { 
-					cur_frm.is_editable[cur_frm.docname] = 0;				
-					cur_frm.refresh(); }, 'icon-print' );	
+					me.frm.is_editable[me.frm.docname] = 0;				
+					me.frm.refresh(); }, 'icon-print' );	
 		}
 
-		var docstatus = cint(cur_frm.doc.docstatus);
+		var docstatus = cint(this.frm.doc.docstatus);
 		// Save
 		if(docstatus==0 && p[WRITE]) {
-			this.appframe.add_button('Save', function() { cur_frm.save('Save');}, '');
+			this.appframe.add_button('Save', function() { me.frm.save('Save');}, '');
 			this.appframe.buttons['Save'].addClass('btn-info').text("Save (Ctrl+S)");			
 		}
 		// Submit
-		if(docstatus==0 && p[SUBMIT] && (!cur_frm.doc.__islocal))
-			this.appframe.add_button('Submit', function() { cur_frm.savesubmit();}, 'icon-lock');
+		if(docstatus==0 && p[SUBMIT] && (!me.frm.doc.__islocal))
+			this.appframe.add_button('Submit', function() { me.frm.savesubmit();}, 'icon-lock');
 
 		// Update after sumit
 		if(docstatus==1 && p[SUBMIT]) {
-			this.appframe.add_button('Update', function() { cur_frm.saveupdate();}, '');
-			if(!cur_frm.doc.__unsaved) this.appframe.buttons['Update'].toggle(false);
+			this.appframe.add_button('Update', function() { me.frm.saveupdate();}, '');
+			if(!me.frm.doc.__unsaved) this.appframe.buttons['Update'].toggle(false);
 		}
 
 		// Cancel
 		if(docstatus==1  && p[CANCEL])
-			this.appframe.add_button('Cancel', function() { cur_frm.savecancel() }, 'icon-remove');
+			this.appframe.add_button('Cancel', function() { me.frm.savecancel() }, 'icon-remove');
 
 		// Amend
 		if(docstatus==2  && p[AMEND])
-			this.appframe.add_button('Amend', function() { cur_frm.amend_doc() }, 'icon-pencil');
+			this.appframe.add_button('Amend', function() { me.frm.amend_doc() }, 'icon-pencil');
 			
 		// Help
-		if(cur_frm.meta.description) {
-			this.appframe.add_help_button(wn.markdown('## ' + cur_frm.doctype + '\n\n'
-				+ cur_frm.meta.description));
+		if(me.frm.meta.description) {
+			this.appframe.add_help_button(wn.markdown('## ' + me.frm.doctype + '\n\n'
+				+ me.frm.meta.description));
 		}
 
 	},

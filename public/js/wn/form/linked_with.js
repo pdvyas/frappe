@@ -101,7 +101,7 @@ wn.ui.form.LinkedWith = Class.extend({
 						doctype: me.is_table ? data.parenttype : me.doctype,
 						modified: dateutil.comment_when(data.modified),
 						name: me.is_table ? data.parent : data.name
-					}));
+					})).find('.avatar img').centerImage();
 			},
 			get_no_result_message: function() {
 				return repl("<div class='alert'>%(name)s is not linked in any %(doctype)s</div>", {

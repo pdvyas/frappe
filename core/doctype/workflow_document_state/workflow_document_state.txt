@@ -1,0 +1,77 @@
+# DocType, Workflow Document State
+[
+
+	# These values are common in all dictionaries
+	{
+		u'creation': '2012-10-23 15:09:58',
+		u'docstatus': 0,
+		u'modified': '2012-10-24 15:44:17',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'description': u'Represents the states allowed in one document and role assigned to change the state.',
+		u'doctype': u'DocType',
+		'document_type': u'Master',
+		'istable': 1,
+		'module': u'Core',
+		u'name': u'__common__',
+		'version': 1
+	},
+
+	# These values are common for all DocField
+	{
+		u'doctype': u'DocField',
+		u'name': u'__common__',
+		'parent': u'Workflow Document State',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
+		'permlevel': 0
+	},
+
+	# DocType, Workflow Document State
+	{
+		u'doctype': u'DocType',
+		u'name': u'Workflow Document State'
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'state',
+		'fieldtype': u'Link',
+		'label': u'State',
+		'options': u'Workflow State',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'allow_edit',
+		'fieldtype': u'Link',
+		'label': u'Allow Edit',
+		'options': u'Role',
+		'reqd': 0
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'message',
+		'fieldtype': u'Text',
+		'label': u'Message',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'doc_status',
+		'fieldtype': u'Select',
+		'label': u'Doc Status',
+		'options': u'0\n1\n2'
+	}
+]

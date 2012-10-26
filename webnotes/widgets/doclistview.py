@@ -45,6 +45,9 @@ def get(arg=None):
 	
 	filters = json.loads(data['filters'])
 	fields = json.loads(data['fields'])
+	
+	if 'docstatus' not in fields: fields.append('docstatus')
+	
 	tables = get_tables()
 	load_doctypes()
 	
@@ -285,9 +288,10 @@ def delete_items():
 def get_stats():
 	"""get tag info"""
 	import json
-	tags = json.loads(webnotes.form_dict.get('stats'))
 	doctype = webnotes.form_dict['doctype']
-	stats = {}
+	tags = ["_user_tags"] + [x.strip() for x in (webnotes.conn.get_value("Workflow", 
+		doctype, "workflow_state_field") or "").split(",")]
+	stat_data = {}
 	
 	columns = webnotes.conn.get_table_columns(doctype)
 	for tag in tags:
@@ -298,11 +302,14 @@ def get_stats():
 			group by %(tag)s;""" % locals(), as_list=1)
 			
 		if tag=='_user_tags':
-			stats[tag] = scrub_user_tags(tagcount)
+			stat_data[tag] = scrub_user_tags(tagcount)
 		else:
-			stats[tag] = tagcount
+			stat_data[tag] = tagcount
 			
-	return stats
+	return {
+		"stat_data": stat_data,
+		"tags": tags
+	}
 
 def scrub_user_tags(tagcount):
 	"""rebuild tag list for tags"""

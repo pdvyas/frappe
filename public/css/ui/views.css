@@ -25,7 +25,7 @@
 	float: left;
 	padding: 15px;
 	background-color: #FFF;
-	min-height: 600px;
+	min-height: 540px;
 	-moz-box-shadow:    1px 0px 1px #ccc;
 	-webkit-box-shadow: 1px 0px 1px #ccc;
 	box-shadow:         1px 0px 1px #ccc;
@@ -37,7 +37,7 @@
 	color: #606060; 
 	overflow-x: hidden;
 	padding: 15px;
-	min-height: 600px;
+	min-height: 540px;
 }
 
 .breadcrumb-area, .breadcrumb-area span {
@@ -59,6 +59,14 @@ div.appframe-marker {
 	width: 7px; 
 	margin: -6px; margin-left: -13px;
 	height: 42px;
+}
+
+.appframe-center {
+	display: inline-block;
+	overflow-x: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	width: 60%;
 }
 
 .appframe-title {
@@ -123,4 +131,18 @@ div.ripped-paper-border {
 	margin-top: -25px;
 	padding-right: 30px;
 	height: 15px;
+}
+
+/* modules */
+
+.module-item {
+	display: inline-block; 
+	width: 80%;
+	text-overflow: ellipsis; 
+	white-space: nowrap; 
+	overflow: hidden;	
+}
+
+.module-item .help {
+	font-size: 95%;
 }
