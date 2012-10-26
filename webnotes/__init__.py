@@ -26,16 +26,6 @@ globals attached to webnotes module
 + some utility functions that should probably be moved
 """
 
-code_fields_dict = {
-	'Page':[('script', 'js'), ('content', 'html'), ('style', 'css'), ('static_content', 'html'), ('server_code', 'py')],
-	'DocType':[('server_code_core', 'py'), ('client_script_core', 'js')],
-	'Search Criteria':[('report_script', 'js'), ('server_script', 'py'), ('custom_query', 'sql')],
-	'Patch':[('patch_code', 'py')],
-	'Stylesheet':['stylesheet', 'css'],
-	'Page Template':['template', 'html'],
-	'Control Panel':[('startup_code', 'js'), ('startup_css', 'css')]
-}
-
 class DictObj(dict):
 	"""dict like object that exposes keys as attributes"""
 	def __getattr__(self, key):

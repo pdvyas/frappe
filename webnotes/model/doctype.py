@@ -86,12 +86,23 @@ def load_docfield_types():
 
 def add_workflows(doclist):
 	from webnotes.model.controller import Controller
-	if webnotes.conn.exists("Workflow", doclist[0].name):
-		doclist += Controller("Workflow", doclist[0].name).doclist
+	doctype = doclist[0].name
+	
+	# get active workflow
+	workflow_name = webnotes.conn.get_value("Workflow", {"document_type": doctype, 
+		"is_active": "1"}, "name")
+	
+	# no active? get default workflow
+	if not workflow_name:
+		workflow_name = webnotes.conn.get_value("Workflow", {"document_type": doctype, 
+			"is_custom": "No"}, "name")
+
+	if workflow_name and webnotes.conn.exists("Workflow", workflow_name):
+		doclist += Controller("Workflow", workflow_name).doclist
 		
-	# add workflow states (for icons and style)
-	for state in map(lambda d: d.state, doclist.get({"doctype":"Workflow Document State"})):
-		doclist += Controller("Workflow State", state).doclist
+		# add workflow states (for icons and style)
+		for state in map(lambda d: d.state, doclist.get({"doctype":"Workflow Document State"})):
+			doclist += Controller("Workflow State", state).doclist
 	
 
 def get_doctype_doclist(doctype):

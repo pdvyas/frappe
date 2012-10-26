@@ -35,7 +35,7 @@ def walk_and_sync(start_path, force=0):
 	modules = []
 
 	for path, folders, files in os.walk(start_path):
-		if os.path.basename(os.path.dirname(path)) in ('doctype', 'page', 'search_criteria', 'Print Format', 'DocType Mapper'):
+		if os.path.basename(os.path.dirname(path)) in ('doctype', 'page', 'workflow'):
 			for f in files:				
 				if f.endswith(".txt"):
 					# great grand-parent folder is module_name
@@ -51,7 +51,7 @@ def walk_and_sync(start_path, force=0):
 				
 					if doctype == 'doctype':
 						sync(module_name, name, force)
-					elif doctype in ['page']: #, 'search_criteria', 'Print Format', 'DocType Mapper']:
+					elif doctype in ['page', 'workflow', 'module_def']:#, 'search_criteria', 'Print Format', 'DocType Mapper']:
 						print module_name + ' | ' + doctype + ' | ' + name
 						reload_doc(module_name, doctype, name)
 					
@@ -62,14 +62,17 @@ def walk_and_sync(start_path, force=0):
 def sync(module_name, docname, force=0):
 	"""sync doctype from file if modified"""
 	with open(get_file_path(module_name, docname), 'r') as f:
-		from webnotes.model.utils import peval_doclist
+		from webnotes.modules.utils import peval_doclist
 		doclist = peval_doclist(f.read())
 		modified = doclist[0]['modified']
 		if not doclist:
 			raise Exception('DocList could not be evaluated')
-		if modified == str(webnotes.conn.get_value(doclist[0].get('doctype'), 
-			doclist[0].get('name'), 'modified')) and not force:
+		db_modified = str(webnotes.conn.get_value(doclist[0].get('doctype'), 
+			doclist[0].get('name'), 'modified'))
+
+		if modified == db_modified and not force:
 			return
+		
 		webnotes.conn.begin()
 		
 		delete_doctype_docfields(doclist)
@@ -159,47 +162,4 @@ def create_doc(data):
 	d.fields.update(data)
 	d.save()
 	print 'Created %(doctype)s %(name)s' % d.fields
-
-import unittest
-class TestSync(unittest.TestCase):
-	def setUp(self):
-		self.test_case = {
-			'module_name': 'selling',
-			'docname': 'sales_order'
-		}
-		webnotes.conn.begin()
-
-	def tearDown(self):
-		pass
-		#from webnotes.utils import cstr
-		#webnotes.conn.rollback()
-
-	def test_sync(self):
-		#old_doctype, old_docfields = self.query('Profile')
-		#self.parent = sync(self.test_case.get('module_name'), self.test_case.get('docname'))
-		#new_doctype, new_docfields = self.query(self.parent)
-		#self.assertNotEqual(old_doctype, new_doctype)
-		#self.assertNotEqual(old_docfields, new_docfields)
-
-		#from webnotes.utils import cstr
-		#print new_doctype[0]
-		#print
-		#print "\n".join((cstr(d) for d in new_docfields))
-		#print "\n\n"
-		pass
-
-	def test_sync_all(self):
-		sync_all()
-
-	def query(self, parent):
-		doctype = webnotes.conn.sql("SELECT name FROM `tabDocType` \
-			WHERE name=%s", parent)
-		docfields = webnotes.conn.sql("SELECT idx, fieldname, label, fieldtype FROM `tabDocField` \
-			WHERE parent=%s order by idx", parent)
-		#doctype = webnotes.conn.sql("SELECT * FROM `tabDocType` \
-		#	WHERE name=%s", parent)
-		#docfields = webnotes.conn.sql("SELECT * FROM `tabDocField` \
-		#	WHERE parent=%s order by idx", parent)
-		return doctype, docfields
-
 

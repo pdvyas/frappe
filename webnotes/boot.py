@@ -48,6 +48,9 @@ def get_bootinfo():
 	bootinfo['sysdefaults'] = webnotes.utils.get_defaults()
 
 	if webnotes.session['user'] != 'Guest':
+		doclist += webnotes.conn.sql("""select name, label, gradient, style, route,
+		 	"Desktop Item" as `doctype` from `tabDesktop Item` 
+			where ifnull(disabled, "No")="No" """, as_dict=1)
 		bootinfo['user_info'] = get_fullnames()
 		bootinfo['sid'] = webnotes.session['sid'];
 		

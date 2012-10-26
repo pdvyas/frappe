@@ -25,18 +25,12 @@ import webnotes
 class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
-	
+		
 	def autoname(self):
-		if webnotes.session.user=="Administrator":
-			self.doc.name = self.doc.document_type
-		else:
-			# add a numeric suffix to the custom name
-			from webnotes.model.doc import make_autoname
-			self.doc.name = make_autoname(self.doc.document_type + "-.##", self.doc.doctype)
-	
+		self.doc.name = self.doc.label
+		
 	def validate(self):
 		self.set_custom()
-		self.set_active()
 		
 	def set_custom(self):
 		if not self.doc.is_custom:
@@ -44,17 +38,9 @@ class DocType:
 				self.doc.is_custom = "No"
 			else:
 				self.doc.is_custom = "Yes"
-				
-	def set_active(self):
-		if int(self.doc.is_active or 0):
-			# clear all other
-			webnotes.conn.sql("""update tabWorkflow set is_active=0 
-				where document_type=%s""",
-				self.doc.document_type)
-				
+								
 	def on_update(self):
 		if self.doc.is_custom=="No":
 			from webnotes.modules.export_file import export_to_files
-			export_to_files(record_list=[['Workflow', self.doc.name]])
-		
-	
+			export_to_files(record_list=[['Desktop Item', self.doc.name]])
+			

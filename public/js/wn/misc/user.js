@@ -44,7 +44,7 @@ $.extend(wn.user, {
 	is_report_manager: function() {
 		return wn.user.has_role(['Administrator', 'System Manager', 'Report Manager']);
 	},
-	set_default: function(key, value) {
+	set_default: function(key, value, callback) {
 		if(typeof value=="string")
 			value = JSON.stringify(value);
 			
@@ -55,7 +55,7 @@ $.extend(wn.user, {
 				key: key,
 				value: value
 			},
-			callback: function(r) {}
+			callback: callback || function(r) {}
 		});
 	},
 	get_default: function(key) {
@@ -66,6 +66,19 @@ $.extend(wn.user, {
 			} catch(e) {
 				return value;
 			}			
+		}
+	},
+	get_desktop_items: function() {
+		// get sorted / user defined seqeunce of desktop items by label
+		var default_list = wn.user.get_default("_desktop_items");
+		if(default_list) {
+			return $.map(default_list, function(d) { 
+				if(locals["Desktop Item"][d]) return locals["Desktop Item"][d];
+			});
+		} else {
+			return $.map(wn.model.get("Desktop Item"), function(d) {
+				return d;
+			}).sort(function(a, b) { return a.label > b.label ? 1 : -1 });
 		}
 	}
 })

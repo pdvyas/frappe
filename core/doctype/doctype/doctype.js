@@ -36,16 +36,15 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
-	if(in_list(user_roles, 'System Manager') && !in_list(user_roles, 'Administrator')) {
+	if(!doc.custom && !in_list(user_roles, 'Administrator')) {
 		// make the document read-only
-		cur_frm.perm = [[1,0,0]]
+		cur_frm.perm[0][WRITE] = 0;
 		
-		// make help heading
-		msgprint('<b>Cannot Edit DocType directly</b>: \
-			To edit DocType properties, \
-			create / update <a href="#!List/Custom%20Field">Custom Field</a>, \
-			<a href="#!List/Custom%20Script">Custom Script</a> \
-			and <a href="#!List/Property%20Setter">Property Setter</a>')
+		cur_frm.set_intro('<b>System DocType can be edited by Administrator only</b>:<br> \
+			To edit DocType properties, use the following tools:<br>\
+			1. <a href="#Form/Customize Form/Customize Form">Customize Form Tool</a><br>\
+			2. <a href="#List/Custom%20Field">Custom Fields</a><br>\
+			3. <a href="#!List/Custom%20Script">Custom Script</a><br>')		
 	}
 }
 

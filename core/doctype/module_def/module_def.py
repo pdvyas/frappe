@@ -25,3 +25,18 @@ import webnotes
 class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
+		
+	def validate(self):
+		self.set_custom()
+		
+	def set_custom(self):
+		if not self.doc.is_custom:
+			if webnotes.session.user=="Administrator":
+				self.doc.is_custom = "No"
+			else:
+				self.doc.is_custom = "Yes"
+				
+	def on_update(self):
+		if self.doc.is_custom=="No":
+			from webnotes.modules.export_file import export_to_files
+			export_to_files(record_list=[['Module Def', self.doc.name]])

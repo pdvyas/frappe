@@ -1,0 +1,100 @@
+[
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-10-26 15:22:48", 
+  "modified_by": "Administrator", 
+  "modified": "2012-10-26 15:39:50"
+ }, 
+ {
+  "description": "Desktop Item is shown as an Icon on desktop and toolbar.", 
+  "doctype": "DocType", 
+  "module": "Core", 
+  "document_type": "Setup", 
+  "name": "__common__"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Desktop Item", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "parentfield": "fields"
+ }, 
+ {
+  "parent": "Desktop Item", 
+  "read": 1, 
+  "cancel": 0, 
+  "name": "__common__", 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "parenttype": "DocType", 
+  "role": "System Manager", 
+  "permlevel": 0, 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Desktop Item", 
+  "doctype": "DocType"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Disabled", 
+  "options": "No\nYes", 
+  "fieldname": "disabled", 
+  "fieldtype": "Select", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Label", 
+  "fieldname": "label", 
+  "fieldtype": "Data", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "description": "URL Route e.g. Module/Accounts", 
+  "doctype": "DocField", 
+  "label": "Route", 
+  "fieldname": "route", 
+  "fieldtype": "Data", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Module", 
+  "options": "Module Def", 
+  "fieldname": "module", 
+  "fieldtype": "Link", 
+  "permlevel": 0
+ }, 
+ {
+  "description": "Gradient shades for icon e.g. #A90329, #8F0222, #6D0019", 
+  "doctype": "DocField", 
+  "label": "Gradient", 
+  "fieldname": "gradient", 
+  "fieldtype": "Data", 
+  "permlevel": 0
+ }, 
+ {
+  "description": "CSS Class for the icon", 
+  "doctype": "DocField", 
+  "label": "Style", 
+  "fieldname": "style", 
+  "fieldtype": "Data", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Is Custom", 
+  "options": "No\nYes", 
+  "fieldname": "is_custom", 
+  "fieldtype": "Select", 
+  "permlevel": 1
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

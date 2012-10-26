@@ -1,96 +1,99 @@
-# DocType, Workflow
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-10-24 14:12:50',
-		u'docstatus': 0,
-		u'modified': '2012-10-25 14:44:52',
-		u'modified_by': u'Administrator',
-		u'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'autoname': u'field:document_type',
-		'description': u'Defines workflow states and rules for a document.',
-		u'doctype': u'DocType',
-		'module': u'Core',
-		u'name': u'__common__',
-		'version': 1
-	},
-
-	# These values are common for all DocField
-	{
-		u'doctype': u'DocField',
-		u'name': u'__common__',
-		'parent': u'Workflow',
-		'parentfield': u'fields',
-		'parenttype': u'DocType',
-		'permlevel': 0
-	},
-
-	# These values are common for all DocPerm
-	{
-		'cancel': 1,
-		'create': 1,
-		u'doctype': u'DocPerm',
-		u'name': u'__common__',
-		'parent': u'Workflow',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'permlevel': 0,
-		'read': 1,
-		'role': u'System Manager',
-		'write': 1
-	},
-
-	# DocType, Workflow
-	{
-		u'doctype': u'DocType',
-		u'name': u'Workflow'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'document_type',
-		'fieldtype': u'Link',
-		'label': u'Document Type',
-		'options': u'DocType',
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'workflow_state_field',
-		'fieldtype': u'Data',
-		'label': u'Workflow State Field'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'workflow_document_states',
-		'fieldtype': u'Table',
-		'label': u'Workflow Document States',
-		'options': u'Workflow Document State',
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'workflow_transitions',
-		'fieldtype': u'Table',
-		'label': u'Workflow Transitions',
-		'options': u'Workflow Transition',
-		'reqd': 1
-	},
-
-	# DocPerm
-	{
-		u'doctype': u'DocPerm'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-10-24 14:12:50", 
+  "modified_by": "Administrator", 
+  "modified": "2012-10-26 14:52:52"
+ }, 
+ {
+  "autoname": "field:document_type", 
+  "description": "Defines workflow states and rules for a document.", 
+  "doctype": "DocType", 
+  "module": "Core", 
+  "name": "__common__"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Workflow", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "parentfield": "fields"
+ }, 
+ {
+  "parent": "Workflow", 
+  "read": 1, 
+  "cancel": 1, 
+  "name": "__common__", 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "parenttype": "DocType", 
+  "role": "System Manager", 
+  "permlevel": 0, 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Workflow", 
+  "doctype": "DocType"
+ }, 
+ {
+  "description": "DocType on which this Workflow is applicable.", 
+  "doctype": "DocField", 
+  "label": "Document Type", 
+  "options": "DocType", 
+  "fieldname": "document_type", 
+  "fieldtype": "Link", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "description": "If checked, all other workflows become inactive.", 
+  "doctype": "DocField", 
+  "label": "Is Active", 
+  "fieldname": "is_active", 
+  "fieldtype": "Check", 
+  "permlevel": 0
+ }, 
+ {
+  "description": "Field that represents the Workflow State of the transaction.", 
+  "doctype": "DocField", 
+  "label": "Workflow State Field", 
+  "fieldname": "workflow_state_field", 
+  "fieldtype": "Data", 
+  "permlevel": 0
+ }, 
+ {
+  "description": "All possible Workflow States and roles of the workflow.", 
+  "doctype": "DocField", 
+  "label": "Workflow Document States", 
+  "options": "Workflow Document State", 
+  "fieldname": "workflow_document_states", 
+  "fieldtype": "Table", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "description": "Rules defining transition of state in the workflow.", 
+  "doctype": "DocField", 
+  "label": "Workflow Transitions", 
+  "options": "Workflow Transition", 
+  "fieldname": "workflow_transitions", 
+  "fieldtype": "Table", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "description": "Custom is \"yes\" if designed by System Manager, \"No\" for Administrator.", 
+  "no_copy": 1, 
+  "doctype": "DocField", 
+  "label": "Is Custom", 
+  "options": "No\nYes", 
+  "fieldname": "is_custom", 
+  "fieldtype": "Select", 
+  "permlevel": 1
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
 ]

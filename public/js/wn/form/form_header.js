@@ -55,8 +55,8 @@ wn.ui.form.FormHeader = Class.extend({
 			return;
 		
 		$(repl('%(avatar_owner)s %(avatar_mod)s', {
-			avatar_owner: wn.avatar(this.frm.doc.owner),
-			avatar_mod: wn.avatar(this.frm.doc.modified_by)
+			avatar_owner: wn.avatar(this.frm.doc.owner, null, "Created By"),
+			avatar_mod: wn.avatar(this.frm.doc.modified_by, null, "Last Updated By")
 		})).insertAfter(this.$w.find(".appframe-title"));
 		
 		this.$w.find(".avatar:eq(0)").popover({
