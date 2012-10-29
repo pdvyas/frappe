@@ -27,7 +27,7 @@ class DocType:
 		self.doc, self.doclist = d, dl
 	
 	def autoname(self):
-		if webnotes.session.user=="Administrator":
+		if webnotes.session['user']=="Administrator":
 			self.doc.name = self.doc.document_type
 		else:
 			# add a numeric suffix to the custom name
