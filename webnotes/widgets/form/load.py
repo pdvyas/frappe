@@ -79,7 +79,7 @@ def getdoctype():
 	# load search criteria for reports (all)
 	doclist +=get_search_criteria(dt)
 
-	webnotes.response['docs'] = doclist
+	webnotes.response['metadata'] = doclist
 
 def load_single_doc(dt, dn, user):
 	"""load doc and call onload methods"""

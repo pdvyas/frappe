@@ -87,7 +87,10 @@ wn.request.cleanup = function(opts, r) {
 
 	// sync docs
 	if(r.docs) {
-		LocalDB.sync(r.docs);
+		wn.model.sync(r.docs);
+	}
+	if(r.metadata) {
+		wn.model.sync(r.metadata, wn.metadata)
 	}
 	
 	wn.last_response = r;

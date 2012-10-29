@@ -138,22 +138,28 @@ wn.ui.form.FormHeader = Class.extend({
 		var docstatus = cint(this.frm.doc.docstatus);
 		// Save
 		if(docstatus==0 && p[WRITE]) {
-			this.appframe.add_button('Save', function() { me.frm.save('Save');}, '');
+			this.appframe.add_button('Save', function() { 
+				me.frm.save(null, me.appframe.buttons['Save']); }, '');
 			this.appframe.buttons['Save'].addClass('btn-info').text("Save (Ctrl+S)");			
 		}
 		// Submit
 		if(docstatus==0 && p[SUBMIT] && (!me.frm.doc.__islocal))
-			this.appframe.add_button('Submit', function() { me.frm.savesubmit();}, 'icon-lock');
+			this.appframe.add_button('Submit', function() { 
+				me.frm.savesubmit(null, me.appframe.buttons['Submit']);}, 'icon-lock');
 
 		// Update after sumit
 		if(docstatus==1 && p[SUBMIT]) {
-			this.appframe.add_button('Update', function() { me.frm.saveupdate();}, '');
-			if(!me.frm.doc.__unsaved) this.appframe.buttons['Update'].toggle(false);
+			this.appframe.add_button('Update', function() { 
+				me.frm.saveupdate(null, me.appframe.buttons['Update']);}, '');
+			if(!me.frm.doc.__unsaved) 
+				this.appframe.buttons['Update'].toggle(false);
 		}
 
 		// Cancel
 		if(docstatus==1  && p[CANCEL])
-			this.appframe.add_button('Cancel', function() { me.frm.savecancel() }, 'icon-remove');
+			this.appframe.add_button('Cancel', function() { 
+				me.frm.savecancel(null, me.appframe.buttons['Cancel']) 
+			}, 'icon-remove');
 
 		// Amend
 		if(docstatus==2  && p[AMEND])

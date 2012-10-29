@@ -102,7 +102,8 @@ wn.form.TableField = wn.form.Field.extend({
 				var d = me.data[active_cell.row];
 				if(!d) return;
 
-				LocalDB.delete_record(d.doctype, d.name);
+				// clear from locals
+				wn.model.clear_doc(d.doctype, d.name);
 
 				// renum
 				me.get_data();
@@ -189,7 +190,7 @@ wn.form.TableField = wn.form.Field.extend({
 	},
 	
 	add_row: function() {
-		var d = LocalDB.add_child(this.frm.doc, this.df.options, this.df.fieldname);
+		var d = wn.model.add_child(this.frm.doc, this.df.options, this.df.fieldname);
 		this.data.push(d);
 		this.set_height(this.data);
 		return d;

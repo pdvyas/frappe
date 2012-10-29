@@ -32,7 +32,8 @@ wn.views.ReportViewPage = Class.extend({
 			me.make_report_view();
 			if(docname) {
 				wn.model.with_doc('Report', docname, function(r) {
-					me.reportview.set_columns_and_filters(JSON.parse(locals['Report'][docname].json));
+					me.reportview.set_columns_and_filters(
+						JSON.parse(wn.model.get("Report", docname)[0].json));
 					me.reportview.run();
 				});
 			} else {
@@ -48,7 +49,7 @@ wn.views.ReportViewPage = Class.extend({
 		wn.container.change_to(this.page_name);
 	},
 	make_report_view: function() {
-		var module = locals.DocType[this.doctype].module;
+		var module = wn.metadata.DocType[this.doctype].module;
 		this.page.appframe.set_title(this.doctype);
 		this.page.appframe.set_marker(module);
 		this.page.appframe.add_module_tab(module);
@@ -67,7 +68,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		var me = this;
 		$.extend(this, opts);
 		this.tab_name = '`tab'+this.doctype+'`';
-		this.meta = locals.DocType[this.doctype];
+		this.meta = wn.metadata.DocType[this.doctype];
 		this.can_delete = wn.model.can_delete(this.doctype);
 		
 		this.setup();
@@ -271,7 +272,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 
 		this.state_fieldname = wn.model.get_state_fieldname(this.doctype);
 		this.state_map = {};
-		$.each(wn.model.get("Workflow State"), function(i, d) {
+		$.each(wn.meta.get("Workflow State"), function(i, d) {
 			me.state_map[d.name] = d;
 		})
 		

@@ -23,6 +23,7 @@
 wn.provide('wn.meta.docfield_map');
 wn.provide('wn.meta.docfield_list');
 wn.provide('wn.meta.doctypes');
+wn.provide("wn.metadata");
 
 $.extend(wn.meta, {
 	// build docfield_map and docfield_list
@@ -47,5 +48,9 @@ $.extend(wn.meta, {
 		} else {
 			return wn.meta.docfield_map[dt][fn];
 		}
-	}
+	},
+	get: function(doctype, filters) {
+		if(!wn.metadata[doctype]) return [];
+		return wn.utils.filter_dict(wn.metadata[doctype], filters);
+	},
 });

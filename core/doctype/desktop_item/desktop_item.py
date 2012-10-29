@@ -20,18 +20,48 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from __future__ import unicode_literals
-import webnotes
+import webnotes, json
 
 class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
+		self.temp = []
 		
 	def autoname(self):
 		self.doc.name = self.doc.label
 		
 	def validate(self):
+		if self.doc.fields.get('__temp'):
+			self.temp = json.loads(self.doc.fields['__temp'])
+			del self.doc.fields['__temp']
+
 		self.set_custom()
 		
+	def on_update(self):
+		self.update_roles()
+
+		if self.doc.is_custom=="No":
+			from webnotes.modules.export_file import export_to_files
+			export_to_files(record_list=[['Desktop Item', self.doc.name]])
+		
+	def update_roles(self):
+		from webnotes.model.doc import Document
+		if self.temp:
+			# remove
+			webnotes.conn.sql("""delete from `tabDesktop Item Role` 
+				where parent=%s""", self.doc.name)
+				
+			# add
+			for role in self.temp:
+				Document(fielddata = {
+					"doctype": "Desktop Item Role",
+					"parent": self.doc.name,
+					"parenttype": "Desktop Item",
+					"parentfield": "desktop_item_roles",
+					"role": role,
+					"__islocal": 1
+				}).save()
+						
 	def set_custom(self):
 		if not self.doc.is_custom:
 			if webnotes.session.user=="Administrator":
@@ -39,8 +69,7 @@ class DocType:
 			else:
 				self.doc.is_custom = "Yes"
 								
-	def on_update(self):
-		if self.doc.is_custom=="No":
-			from webnotes.modules.export_file import export_to_files
-			export_to_files(record_list=[['Desktop Item', self.doc.name]])
-			
+@webnotes.whitelist()
+def get_roles():
+	return [r[0] for r in webnotes.conn.sql("""select role from `tabDesktop Item Role`
+		where parent=%s""", webnotes.form_dict.desktop_item)]

@@ -2491,7 +2491,7 @@ if (typeof Slick === "undefined") {
       if (getEditorLock().commitCurrentEdit()) {
         setFocus();
         if (options.autoEdit) {
-          navigateDown();
+          navigateRight();
         }
       }
     }

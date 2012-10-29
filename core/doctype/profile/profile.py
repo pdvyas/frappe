@@ -257,25 +257,6 @@ Thank you,<br>
 		
 		# update __Auth table
 		webnotes.conn.sql("""update __Auth set user=%s where user=%s""", (newdn, olddn))
-						
-@webnotes.whitelist()
-def get_all_roles(arg=None):
-	"""return all roles"""
-	return [r[0] for r in webnotes.conn.sql("""select name from tabRole
-		where name not in ('Administrator', 'Guest', 'All') order by name""")]
-		
-@webnotes.whitelist()
-def get_user_roles(arg=None):
-	"""get roles for a user"""
-	return webnotes.get_roles(webnotes.form_dict['uid'])
-
-@webnotes.whitelist()
-def get_perm_info(arg=None):
-	"""get permission info"""
-	return webnotes.conn.sql("""select parent, permlevel, `read`, `write`, submit,
-		cancel, amend from tabDocPerm where role=%s 
-		and docstatus<2 order by parent, permlevel""", 
-			webnotes.form_dict['role'], as_dict=1)
 
 @webnotes.whitelist()
 def get_defaults(arg=None):

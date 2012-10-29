@@ -1,0 +1,35 @@
+[
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-10-29 11:38:08", 
+  "modified_by": "Administrator", 
+  "modified": "2012-10-29 11:38:08"
+ }, 
+ {
+  "istable": 1, 
+  "description": "Roles assigned to the Desktop Item", 
+  "doctype": "DocType", 
+  "module": "Core", 
+  "name": "__common__"
+ }, 
+ {
+  "parent": "Desktop Item Role", 
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "label": "Role", 
+  "parenttype": "DocType", 
+  "options": "Role", 
+  "fieldname": "role", 
+  "fieldtype": "Link", 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "Desktop Item Role", 
+  "doctype": "DocType"
+ }, 
+ {
+  "doctype": "DocField"
+ }
+]

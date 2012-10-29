@@ -39,7 +39,8 @@ class DocType:
 			sql('UPDATE tabDocType SET modified="%s" WHERE `name`="%s"' % (now(), p[0]))
 
 	def scrub_field_names(self):
-		restricted = ('name','parent','idx','owner','creation','modified','modified_by','parentfield','parenttype')
+		restricted = ('name','parent','idx','owner','creation','modified',
+			'modified_by','parentfield','parenttype','localname','doctype')
 		for d in self.doclist:
 			if d.parent and d.fieldtype:
 				if (not d.fieldname):
@@ -49,7 +50,8 @@ class DocType:
 						
 					d.fieldname = d.label.strip().lower().replace(' ','_')
 					if d.fieldname in restricted:
-						d.fieldname = d.fieldname + '1'
+						webnotes.msgprint("%s is a restricted fieldname, please rename" % d.fieldname,
+							raise_exception=1)
 	
 	def set_version(self):
 		self.doc.version = cint(self.doc.version) + 1

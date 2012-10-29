@@ -18,32 +18,10 @@
 # HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
 # CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-# 
 
 from __future__ import unicode_literals
 import webnotes
 
-@webnotes.whitelist()
-def savedocs():
-	"""save / submit / cancel / update doclist"""
-	try:
-		from webnotes.model.controller import Controller
-		form = webnotes.form_dict
-
-		doclist = Controller()
-		doclist.from_compressed(form.get('docs'))
-		doclist.save()
-		
-		# update recent documents
-		webnotes.user.update_recent(doclist.doc.doctype, doclist.doc.name)
-
-		# send updated docs
-		webnotes.response['main_doc_name'] = doclist.doc.name
-		webnotes.response['doctype'] = doclist.doc.doctype
-		webnotes.response['docname'] = doclist.doc.name
-		webnotes.response['docs'] = doclist.doclist
-
-	except Exception, e:
-		webnotes.msgprint('Did not save')
-		webnotes.errprint(webnotes.utils.getTraceback())
-		raise e
+class DocType:
+	def __init__(self, d, dl):
+		self.doc, self.doclist = d, dl

@@ -39,8 +39,8 @@ def expand(docs):
 
 	docs = load_json(docs)
 	clist = []
-	for d in docs['_vl']:
-		doc = xzip(docs['_kl'][d[0]], d);
+	for d in docs['values']:
+		doc = xzip(docs['keys'][d[0]], d);
 		clist.append(doc)
 	return clist
 
@@ -52,17 +52,13 @@ def compress(doclist):
 	docs = [hasattr(d, 'fields') and d.fields or d for d in doclist]
 	
 	kl, vl = {}, []
-	forbidden = ['server_code_compiled']
+	forbidden = []
 
 	# scan for keys & values
 	for d in docs:
 		dt = d['doctype']
 		if not (dt in kl.keys()):
-			kl[dt] = ['doctype','localname','__oldparent','__unsaved']	
-
-		# add client script for doctype, doctype due to ambiguity
-		if dt=='DocType' and '__client_script' not in kl[dt]: 
-			kl[dt].append('__client_script')
+			kl[dt] = ['doctype','localname']
 
 		for f in d.keys():
 			if not (f in kl[dt]) and not (f in forbidden):
@@ -78,7 +74,7 @@ def compress(doclist):
 			tmp.append(v)
 
 		vl.append(tmp)
-	return {'_vl':vl,'_kl':kl}
+	return {'values':vl,'keys':kl}
 
 
 def getlist(doclist, field):

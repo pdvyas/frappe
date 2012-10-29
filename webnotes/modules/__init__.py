@@ -67,7 +67,7 @@ def get_module_path(module):
 
 def reload_doc(module, dt=None, dn=None):
 	from webnotes.modules.import_file import import_files
-	import_files(module, dt, dn)
+	return import_files(module, dt, dn)
 
 def export_doc(doctype, name, module=None):
 	"""write out a doc"""
