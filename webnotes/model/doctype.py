@@ -395,6 +395,8 @@ class DocTypeDocList(webnotes.model.doclist.DocList):
 
 		if parent:
 			filters["parent"] = parent
+		else:
+			filters["parent"] = self[0].name
 		
 		return self.getone(filters)
 		
@@ -423,7 +425,9 @@ class DocTypeDocList(webnotes.model.doclist.DocList):
 		else:
 			filters["parent"] = self[0].name
 		
-		return dict((f.fieldname, f.precision) for f in self.get(filters))
+		from webnotes import DictObj
+		return DictObj((f.fieldname, f.precision) for f in self.get(filters))
+
 
 def rename_field(doctype, old_fieldname, new_fieldname, lookup_field=None):
 	"""this function assumes that sync is NOT performed"""

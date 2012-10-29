@@ -269,8 +269,9 @@ def formatdate(string_date=None):
 		user_format = webnotes.conn.get_value('Control Panel', None, 'date_format')
 		
 	out = user_format
-	return out.replace("dd", date.strftime("%d")).replace("mm", date.strftime("%m"))\
-		.replace("yyyy", date.strftime("%Y"))
+	return out.replace("dd", string_date.strftime("%d"))\
+		.replace("mm", string_date.strftime("%m"))\
+		.replace("yyyy", string_date.strftime("%Y"))
 		
 def global_date_format(date):
 	"""returns date as 1 January 2012"""

@@ -158,11 +158,12 @@ def get_obj(dt = None, dn = None, doc=None, doclist=[], with_children = 0):
 	   Returns the instantiated `DocType` object. Here you can pass the DocType and name (ID) to get the object.
 	   If with_children is true, then all child records will be laoded and added in the doclist.
 	"""	
+	from webnotes.model.doclist import DocList
 	if doc and doclist:
-		return get_server_obj(doc, doclist)
+		return get_server_obj(doc, DocList(doclist))
 		
 	if doc:
-		return get_server_obj(doc, [doc])
+		return get_server_obj(doc, DocList([doc]))
 	
 	if dt:
 		import webnotes.model.doc
@@ -175,7 +176,7 @@ def get_obj(dt = None, dn = None, doc=None, doclist=[], with_children = 0):
 		else:
 			doclist = webnotes.model.doc.get(dt, dn, with_children = 0, from_get_obj=1)
 		
-		return get_server_obj(doclist[0], doclist)
+		return get_server_obj(doclist[0], DocList(doclist))
 		
 #=================================================================================
 # get object and run method

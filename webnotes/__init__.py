@@ -94,6 +94,9 @@ def errprint(msg):
 	from utils import cstr
 	debug_log.append(cstr(msg or ''))
 
+def _(string):
+	return string
+
 def msgprint(msg, small=0, raise_exception=0, as_table=False):
 	"""
 	   Append to the :data:`message_log`
@@ -155,7 +158,7 @@ def connect(db_name=None, password=None):
 	conn = webnotes.db.Database(user=db_name, password=password)
 	
 	global session
-	session = {'user':'Administrator'}
+	session = DictObj({'user':'Administrator'})
 	
 	import webnotes.profile
 	global user
