@@ -100,7 +100,7 @@ def getpage():
 	doclist = get(page)
 	
 	if has_permission(doclist):
-		webnotes.response['docs'] = doclist
+		webnotes.response['metadata'] = doclist
 	else:
 		webnotes.response['403'] = 1
 		raise webnotes.PermissionError, 'No read permission for Page %s' % \

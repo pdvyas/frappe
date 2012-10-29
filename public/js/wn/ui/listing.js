@@ -63,8 +63,6 @@ wn.ui.Listing = Class.extend({
 		if(this.opts.new_doctype) {
 			if(wn.boot.profile.can_create.indexOf(this.opts.new_doctype)==-1) {
 				this.opts.new_doctype = null;
-			} else {
-				this.opts.new_doctype = get_doctype_label(this.opts.new_doctype);
 			}
 		}
 	},

@@ -121,9 +121,7 @@ wn.Application = Class.extend({
 	},
 	load_bootinfo: function() {
 		if(wn.boot) {
-			LocalDB.sync(wn.boot.docs);
 			wn.control_panel = wn.boot.control_panel;
-
 			this.set_globals();
 		} else {
 			this.set_as_guest();

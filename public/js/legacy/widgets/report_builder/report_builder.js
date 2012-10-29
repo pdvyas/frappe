@@ -205,7 +205,7 @@ _r.ReportBuilder.prototype.save_criteria = function(save_as) {
 		if(!criteria_name)
 			return;
 	
-		var dn = createLocal('Search Criteria');
+		var dn = wn.model.make_new_doc_and_get_name('Search Criteria');
 		var doc = locals['Search Criteria'][dn];
 
 		doc.criteria_name = criteria_name;
@@ -248,7 +248,7 @@ _r.ReportBuilder.prototype.save_criteria = function(save_as) {
 	//	msgprint('Filters and Columns Synchronized. You must also "Save" the Search Criteria to update');
 	//	loaddoc('Search Criteria', this.sc_dict[this.current_loaded]);
 	//} else {
-	save_doclist(doc.doctype, doc.name, 'Save', fn); // server-side save
+	new wn.model.DocList(doc.doctype, doc.name).save(fn); // server-side save
 	//}
 }
 
@@ -565,7 +565,7 @@ _r.ReportBuilder.prototype.set_sort_options = function(l) {
 // -------------------------------------------------------------------------------------
 
 _r.ReportBuilder.prototype.validate_permissions = function(onload) {
-	this.perm = get_perm(this.parent_dt ? this.parent_dt : this.doctype);
+	this.perm = wn.perm.get_perm(this.parent_dt ? this.parent_dt : this.doctype);
 	if(!this.perm[0][READ]) {
 		this.forbidden = 1;
 		if(user=='Guest') {
@@ -585,7 +585,7 @@ _r.ReportBuilder.prototype.setup_doctype = function(onload) {
 	// load doctype
 	var me = this;
 	
-	if(!locals['DocType'][this.doctype]) {
+	if(!wn.meta.get('DocType', this.doctype)[0]) {
 		this.load_doctype_from_server(onload);
 	} else {
 		// find parent dt if required

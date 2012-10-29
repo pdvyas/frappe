@@ -74,7 +74,8 @@ def get_bootinfo():
 		pass
 	
 	from webnotes.model.utils import compress
-	bootinfo['docs'] = compress(bootinfo['docs'])
+	bootinfo['metadata'] = compress(bootinfo['docs'])
+	del bootinfo['docs']
 	
 	return bootinfo
 

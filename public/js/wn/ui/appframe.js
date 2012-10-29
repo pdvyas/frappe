@@ -45,9 +45,7 @@ wn.ui.AppFrame = Class.extend({
 		this.add_tab('<span class="small-module-icons small-module-icons-'+
 			module.toLowerCase()+'"></span>'+' <span>'
 			+ module + "</span>", 0.7, function() {
-			wn.modules[module] 
-				? wn.set_route(wn.modules[module]) 
-				: wn.set_route("Module", module);
+				wn.set_route("Module", module);
 		});	
 	},
 	add_button: function(label, click, icon) {

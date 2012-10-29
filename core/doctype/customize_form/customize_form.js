@@ -21,7 +21,7 @@
 // 
 
 cur_frm.cscript.doc_type = function(doc, dt, dn) {
-	$c_obj(make_doclist(dt, dn), 'get', '', function(r, rt) {
+	$c_obj(wn.model.get_doclist(dt, dn), 'get', '', function(r, rt) {
 		cur_frm.refresh();
 	});
 }
@@ -37,7 +37,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 
 	cur_frm.add_custom_button('Update', function() {
 		if(cur_frm.fields_dict['doc_type'].value) {
-			$c_obj(make_doclist(dt, dn), 'post', '', function(r, rt) {
+			$c_obj(wn.model.get_doclist(dt, dn), 'post', '', function(r, rt) {
 				if(r.exc) {
 					msgprint(r.exc);
 				} else {
@@ -104,7 +104,7 @@ cur_frm.confirm = function(msg, doc, dt, dn) {
 	$y(button_wrapper, {paddingTop: '15px'});
 	
 	var proceed_btn = $btn(button_wrapper, 'Proceed', function() {
-		$c_obj(make_doclist(dt, dn), 'delete', '', function(r, rt) {
+		$c_obj(wn.model.get_doclist(dt, dn), 'delete', '', function(r, rt) {
 			//console.log(arguments);
 			if(r.exc) {
 				msgprint(r.exc);

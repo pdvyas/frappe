@@ -57,8 +57,12 @@ def startup():
 
 def cleanup_docs():
 	import webnotes.model.utils
-	if webnotes.response.get('docs') and type(webnotes.response['docs'])!=dict:
-		webnotes.response['docs'] = webnotes.model.utils.compress(webnotes.response['docs'])
+	def compress_if_reqd(key):
+		if webnotes.response.get(key) and type(webnotes.response[key])!=dict:
+			webnotes.response[key] = webnotes.model.utils.compress(webnotes.response[key])
+	
+	compress_if_reqd('docs')
+	compress_if_reqd('metadata')
 
 # server calls
 # ------------------------------------------------------------------------------------

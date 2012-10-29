@@ -73,10 +73,10 @@ $.extend(wn.user, {
 		var default_list = wn.user.get_default("_desktop_items");
 		if(default_list) {
 			return $.map(default_list, function(d) { 
-				if(locals["Desktop Item"][d]) return locals["Desktop Item"][d];
+				if(wn.metadata["Desktop Item"][d]) return wn.metadata["Desktop Item"][d];
 			});
 		} else {
-			return $.map(wn.model.get("Desktop Item"), function(d) {
+			return $.map(wn.meta.get("Desktop Item"), function(d) {
 				return d;
 			}).sort(function(a, b) { return a.label > b.label ? 1 : -1 });
 		}

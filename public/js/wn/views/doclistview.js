@@ -48,14 +48,11 @@ wn.views.DocListPage = Class.extend({
 		var me = this;
 
 		this.can_delete = wn.model.can_delete(this.doctype);
-		this.can_submit = $.map(locals.DocPerm, function(d) { 
-			if(d.parent==me.doctype && d.submit) return 1
-			else return null; 
-		}).length;
+		this.can_submit = wn.meta.get("DocPerm", {parent:me.doctype, submit:1}).length;
 		
 		this.make_page();
 		this.setup_docstatus_filter();
-		this.make_doclistview();
+		this.make_listing();
 		this.init_stats();
 		this.listing.run();
 	},
@@ -85,11 +82,11 @@ wn.views.DocListPage = Class.extend({
 		</div>');
 		
 		this.page.appframe = this.appframe = new wn.ui.AppFrame(this.$page.find('.appframe-area'));
-		var module = locals.DocType[this.doctype].module;
+		var module = wn.metadata.DocType[this.doctype].module;
 		
 		this.appframe.set_marker(module);
 		this.appframe.set_title(this.doctype);
-		this.appframe.set_help(locals.DocType[this.doctype].description || "")
+		this.appframe.set_help(wn.metadata.DocType[this.doctype].description || "")
 		this.appframe.add_module_tab(module);
 	},
 	setup_docstatus_filter: function() {
@@ -101,7 +98,7 @@ wn.views.DocListPage = Class.extend({
 			})
 		}
 	},	
-	make_doclistview: function() {
+	make_listing: function() {
 		this.listing = new wn.views.DocListView({
 			doctype: this.doctype, 
 			page: this.page,

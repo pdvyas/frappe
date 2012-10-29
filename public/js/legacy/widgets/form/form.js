@@ -254,8 +254,8 @@ _f.Frm.prototype.rename_notify = function(dt, old, name) {
 // SETUP
 
 _f.Frm.prototype.setup_meta = function(doctype) {
-	this.meta = get_local('DocType',this.doctype);
-	this.perm = get_perm(this.doctype); // for create
+	this.meta = wn.meta.get('DocType', this.doctype)[0];
+	this.perm = wn.perm.get_perm(this.doctype); // for create
 	if(this.meta.istable) { this.meta.in_dialog = 1 }
 	this.setup_print();
 }
@@ -456,8 +456,13 @@ _f.Frm.prototype.check_doc_perm = function() {
 	// get perm
 	var dt = this.parent_doctype?this.parent_doctype : this.doctype;
 	var dn = this.parent_docname?this.parent_docname : this.docname;
-	this.perm = get_perm(dt, dn);
-	this.orig_perm = get_perm(dt, dn, 1);
+
+	this.orig_perm = this.perm = wn.perm.get_perm(dt, dn);
+
+	// update permissions for submitted / cancelled
+	if(locals[dt][dn].docstatus > 0) {
+		$.each(this.perm, function(i, p) { p[WRITE] = 0; });		
+	}
 				  
 	if(!this.perm[0][READ]) { 
 		if(user=='Guest') {
@@ -751,94 +756,55 @@ _f.Frm.prototype.show_doc = function(dn) {
 
 // ======================================================================================
 var validated; // bad design :(
-_f.Frm.prototype.save = function(save_action, call_back) {
+_f.Frm.prototype.save = function(callback, btn) {
+	var me = this;
+
 	// removes focus from a field before save, 
 	// so that its change event gets triggered before saving
 	$(document.activeElement).blur();
 	
-	//alert(save_action);
-	if(!save_action) {
-		if(cint(this.doc.docstatus) > 0) return;
-		save_action = 'Save';
-	}
-
-	var me = this;
-	if(this.savingflag) {
-		msgprint("Document is currently saving....");
-		return; // already saving (do not double save)
-	}
-
-	if(save_action=='Submit') {
-		locals[this.doctype][this.docname].submitted_on = dateutil.full_str();
-		locals[this.doctype][this.docname].submitted_by = user;
-	}
+	var doclist = new wn.model.DocList(this.doctype, this.docname);
 	
-	if(save_action=='Trash') {
-		var reason = prompt('Reason for trash (mandatory)', '');
-		if(!strip(reason)) {
-			msgprint('Reason is mandatory, not trashed');
-			return;
-		}
-		locals[this.doctype][this.docname].trash_reason = reason;
-	}
-
-	// run validations
-	if(save_action=='Cancel') {
-		var reason = prompt('Reason for cancellation (mandatory)', '');
-		if(!strip(reason)) {
-			msgprint('Reason is mandatory, not cancelled');
-			return;
-		}
-		locals[this.doctype][this.docname].cancel_reason = reason;
-		locals[this.doctype][this.docname].cancelled_on = dateutil.full_str();
-		locals[this.doctype][this.docname].cancelled_by = user;
-	} else if(save_action=='Update') {
-		// no validation for update
-	} else { // no validation for cancellation
+	// validate
+	if(doclist.doc.docstatus<2) {
 		validated = true;
 		if(this.cscript.validate)
 			this.runclientscript('validate');
 	
 		if(!validated) {
-			this.savingflag = false;
-			return 'Error';
+			return;
 		}
 	}
- 	
 	
-	var ret_fn = function(r) {
-		me.savingflag = false;		
-		if(!me.meta.istable && r) {
-			me.refresh(r.docname);
+	doclist.save(function(r) {
+		if(r.exc) {
+			//
+		} else {
+			me.refresh();
 		}
-
-		if(call_back){
-			call_back(r);
-		}		
-	}
-
-	var me = this;
-	var ret_fn_err = function(r) {
-		var doc = locals[me.doctype][me.docname];
-		me.savingflag = false;
-		ret_fn(r);
-	}
-	
-	this.savingflag = true;
-	if(this.docname && validated) {
-		// scroll to top
-		scroll(0, 0);
-		
-		return this.savedoc(save_action, ret_fn, ret_fn_err);
-	}
+		callback && callback(r);
+	}, btn);
 }
 
+_f.Frm.prototype.savesubmit = function(btn) {
+	this.frm.doc.docstatus = 1;
+	this.save(function(r) {
+		if(!r.exc && me.cscript.on_submit) {
+			me.runclientscript('on_submit', me.doctype, me.docname);
+		}
+	}, btn);
+}
+
+_f.Frm.prototype.savecancel = function(btn) {
+	this.frm.doc.docstatus = 2;
+	this.save(btn);
+}
 
 _f.Frm.prototype.runscript = function(scriptname, callingfield, onrefresh) {
 	var me = this;
 	if(this.docname) {
 		// make doc list
-		var doclist = compress_doclist(make_doclist(this.doctype, this.docname));
+		var doclist = wn.model.compress(wn.model.get_doclist(this.doctype, this.docname));
 		// send to run
 		if(callingfield)
 			$(callingfield.input).set_working();
@@ -878,7 +844,7 @@ _f.Frm.prototype.runclientscript = function(caller, cdt, cdn) {
 
 	if(caller && caller.toLowerCase()=='setup') {
 
-		var doctype = get_local('DocType', this.doctype);
+		var doctype = wn.meta.get('DocType', this.doctype)[0];
 		
 		// js
 		var cs = doctype.__js || (doctype.client_script_core + doctype.client_script);
@@ -909,14 +875,14 @@ _f.Frm.prototype.copy_doc = function(onload, from_amend) {
 	
 	var dn = this.docname;
 	// copy parent
-	var newdoc = LocalDB.copy(this.doctype, dn, from_amend);
+	var newdoc = wn.model.copy_doc(this.doctype, dn, from_amend);
 
 	// do not copy attachments
 	if(this.meta.allow_attach && newdoc.file_list && !from_amend)
 		newdoc.file_list = null;
 	
 	// copy chidren
-	var dl = make_doclist(this.doctype, dn);
+	var dl = wn.model.get_doclist(this.doctype, dn);
 
 	// table fields dict - for no_copy check
 	var tf_dict = {};
@@ -930,7 +896,7 @@ _f.Frm.prototype.copy_doc = function(onload, from_amend) {
 		}
 		
 		if(d1.parent==dn && cint(tf_dict[d1.parentfield].no_copy)!=1) {
-			var ch = LocalDB.copy(d1.doctype, d1.name, from_amend);
+			var ch = wn.model.copy_doc(d1.doctype, d1.name, from_amend);
 			ch.parent = newdoc.name;
 			ch.docstatus = 0;
 			ch.owner = user;
@@ -971,41 +937,17 @@ _f.Frm.prototype.reload_doc = function() {
 	}
 }
 
-
-_f.Frm.prototype.savedoc = function(save_action, onsave, onerr) {
-	save_doclist(this.doctype, this.docname, save_action, onsave, onerr);
-}
-
-_f.Frm.prototype.saveupdate = function() {
-	this.save('Update');
-}
-
-_f.Frm.prototype.savesubmit = function() {
-	var answer = confirm("Permanently Submit "+this.docname+"?");
-	var me = this;
-	if(answer) {
-		this.save('Submit', function(r) {
-			if(!r.exc && me.cscript.on_submit) {
-				me.runclientscript('on_submit', me.doctype, me.docname);
-			}
-		});
-	}
-}
-
-_f.Frm.prototype.savecancel = function() {
-	var answer = confirm("Permanently Cancel "+this.docname+"?");
-	if(answer) this.save('Cancel');
-}
-
 // delete the record
-_f.Frm.prototype.savetrash = function() {
+_f.Frm.prototype.savetrash = function(btn) {
 	var me = this;
 	var answer = confirm("Permanently Delete "+this.docname+"? This action cannot be reversed");
 	if(answer) {
+		$(btn).attr("disabled", true);
 		$c('webnotes.model.delete_doc', {dt:this.doctype, dn:this.docname}, function(r,rt) {
+			$(btn).attr("disabled", false);
 			if(r.message=='okay') {
 				// delete from locals
-				LocalDB.delete_doc(me.doctype, me.docname);
+				wn.model.clear_doclist(me.doctype, me.docname)
 				
 				// delete from recent
 				if(wn.ui.toolbar.recent) wn.ui.toolbar.recent.remove(me.doctype, me.docname);
@@ -1065,7 +1007,7 @@ _f.Frm.prototype.get_doc = function() {
 }
 
 _f.Frm.prototype.get_doclist = function() {
-	return make_doclist(this.doctype, this.docname);
+	return wn.model.get_doclist(this.doctype, this.docname);
 }
 
 _f.Frm.prototype.field_map = function(fnames, fn) {
@@ -1078,7 +1020,6 @@ _f.Frm.prototype.field_map = function(fnames, fn) {
 	}
 	$.each(fnames, function(i,f) {
 		var field = cur_frm.fields_dict[f].df;
-		//var field = wn.meta.get_docfield(cur_frm.doctype, f, cur_frm.docname)
 		if(field) {
 			fn(field);
 			cur_frm.refresh_field(f);

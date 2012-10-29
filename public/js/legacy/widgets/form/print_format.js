@@ -237,7 +237,7 @@ $.extend(_p, {
 	*/	
 	show_draft: function(args) {
 		var is_doctype_submittable = 0;
-		var plist = locals['DocPerm'];
+		var plist = wn.metadata['DocPerm'];
 		for(var perm in plist) {
 			var p = plist[perm];
 			if((p.parent==args.doc.doctype) && (p.submit==1)){
@@ -424,7 +424,9 @@ $.extend(_p, {
 		// Get doctype, docname, layout for a doctype
 		var docname = cur_frm.docname;
 		var doctype = cur_frm.doctype;
-		var data = getchildren('DocField', doctype, 'fields', 'DocType');
+		var data = wn.meta.get('DocField', {parent:doctype});
+		data.sort(function(a, b) { a.idx - b.idx });
+
 		var layout = _p.add_layout(doctype);
 		this.pf_list = [layout];
 		var me = this;
@@ -588,7 +590,7 @@ $.extend(_p, {
 		var layout = new Layout();
 		layout.addrow();
 		
-		if(locals['DocType'][doctype].print_outline == 'Yes') {
+		if(wn.meta.get('DocType', doctype).print_outline == 'Yes') {
 			layout.with_border = 1
 		}
 		

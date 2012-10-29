@@ -1,5 +1,8 @@
-wn.dom.set_style(".user-role {
+wn.dom.set_style(".user-role {\
 	padding: 5px; width: 45%; float: left;\
+}\
+.user-role input[type='checkbox'] {\
+	margin-top: 0px;\
 }\
 table.user-perm {\
 	border-collapse: collapse;\
@@ -12,17 +15,17 @@ table.user-perm td, table.user-perm th {\
 // get roles (permissions)
 
 wn.RoleEditor = Class.extend({
-	init: function(wrapper) {
-		this.wrapper = wrapper;
+	init: function(opts) {
+		$.extend(this, opts);
 		this.make_body();
 	},
 	
 	make_body: function() {
 		var me = this;
 
-		$(wrapper).html('<div class="help">Loading...</div>');
+		$(this.wrapper).html('<div class="help">Loading...</div>');
 		wn.call({
-			method:'core.doctype.profile.profile.get_all_roles',
+			method:'webnotes.widgets.role_editor.get_all_roles',
 			callback: function(r) {
 				me.roles = r.message;
 				me.show_roles();
@@ -87,7 +90,7 @@ wn.RoleEditor = Class.extend({
 			this.make_perm_dialog()
 		$(this.perm_dialog.body).empty();
 		wn.call({
-			method:'core.doctype.profile.profile.get_perm_info',
+			method:'webnotes.widgets.role_editor.get_perm_info',
 			args: {role: role},
 			callback: function(r) {
 				var $body = $(me.perm_dialog.body);
