@@ -41,8 +41,11 @@ class DocType:
 		self.update_roles()
 
 		if self.doc.is_custom=="No":
+			from webnotes.modules.import_merge import in_transfer
 			from webnotes.modules.export_file import export_to_files
-			export_to_files(record_list=[['Desktop Item', self.doc.name]])
+			
+			if not in_transfer:
+				export_to_files(record_list=[['Desktop Item', self.doc.name]])
 		
 	def update_roles(self):
 		from webnotes.model.doc import Document

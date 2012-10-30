@@ -55,6 +55,8 @@ class DocType:
 	def on_update(self):
 		if self.doc.is_custom=="No":
 			from webnotes.modules.export_file import export_to_files
-			export_to_files(record_list=[['Workflow', self.doc.name]])
+			from webnotes.modules.import_merge import in_transfer
+			if not in_transfer:
+				export_to_files(record_list=[['Workflow', self.doc.name]])
 		
 	
