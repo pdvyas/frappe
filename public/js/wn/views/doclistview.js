@@ -48,14 +48,11 @@ wn.views.DocListPage = Class.extend({
 		var me = this;
 
 		this.can_delete = wn.model.can_delete(this.doctype);
-		this.can_submit = $.map(locals.DocPerm, function(d) { 
-			if(d.parent==me.doctype && d.submit) return 1
-			else return null; 
-		}).length;
+		this.can_submit = wn.meta.get("DocPerm", {parent:me.doctype, submit:1}).length;
 		
 		this.make_page();
 		this.setup_docstatus_filter();
-		this.make_doclistview();
+		this.make_listing();
 		this.init_stats();
 		this.listing.run();
 	},
@@ -85,11 +82,11 @@ wn.views.DocListPage = Class.extend({
 		</div>');
 		
 		this.page.appframe = this.appframe = new wn.ui.AppFrame(this.$page.find('.appframe-area'));
-		var module = locals.DocType[this.doctype].module;
+		var module = wn.metadata.DocType[this.doctype].module;
 		
 		this.appframe.set_marker(module);
 		this.appframe.set_title(this.doctype);
-		this.appframe.set_help(locals.DocType[this.doctype].description || "")
+		this.appframe.set_help(wn.metadata.DocType[this.doctype].description || "")
 		this.appframe.add_module_tab(module);
 	},
 	setup_docstatus_filter: function() {
@@ -101,7 +98,7 @@ wn.views.DocListPage = Class.extend({
 			})
 		}
 	},	
-	make_doclistview: function() {
+	make_listing: function() {
 		this.listing = new wn.views.DocListView({
 			doctype: this.doctype, 
 			page: this.page,
@@ -112,10 +109,13 @@ wn.views.DocListPage = Class.extend({
 		$(this.page).find(".report-head").remove();
 	},
 	init_stats: function() {
+		var me = this;
 		this.stats = new wn.views.ListViewStats({
 			doctype: this.doctype,
-			listing: this.listing,
 			$page: this.$page,
+			set_filter: function(fieldname, label) {
+				me.listing.set_filter(fieldname, label);
+			}
 		})
 	},
 	make_report_button: function() {
@@ -183,23 +183,27 @@ wn.views.ListViewStats = Class.extend({
 				// This gives a predictable stats order
 				me.stats = r.message.tags;
 				me.stat_data = r.message.stat_data;
-				
-				$.each(me.stats, function(i, v) {
-					me.render_stat(v, me.stat_data[v]);
-				});
-				
-				// reload button at the end
-				if(me.stats.length) {
-					$('<button class="btn btn-small"><i class="refresh"></i> Refresh</button>')
-						.click(function() {
-							me.reload_stats();
-						}).appendTo($('<div class="stat-wrapper">')
-							.appendTo(me.$page.find('.layout-side-section')))					
-				}
-				
+				me.render();
 			}
 		});
 	},
+	
+	render: function() {
+		var me = this;
+		$.each(me.stats, function(i, v) {
+			me.render_stat(v, me.stat_data[v]);
+		});
+		
+		// reload button at the end
+		if(me.stats.length) {
+			$('<button class="btn btn-small"><i class="refresh"></i> Refresh</button>')
+				.click(function() {
+					me.reload_stats();
+				}).appendTo($('<div class="stat-wrapper">')
+					.appendTo(me.$page.find('.layout-side-section')))					
+		}		
+	},
+	
 	render_stat: function(field, stat) {
 		var me = this;
 		
@@ -239,17 +243,21 @@ wn.views.ListViewStats = Class.extend({
 		
 		$w.appendTo(this.$page.find('.layout-side-section'));
 	},
+	
 	get_tag_cloud: function(v) {
 		var me = this;
-		return $(repl("<span style='margin-right: 7px; cursor: pointer;' \
-			class='label label-info' data-field='_user_tags' data-label='%(label)s'>\
+		return $(repl("<span class='label label-info tag-style' \
+			data-field='_user_tags' data-label='%(label)s'>\
 			%(label)s(%(count)s)</span>", {
 				label: v[0],
 				count: v[1]
 			})).click(function() {
-				return me.set_filter(this);
+				var fieldname = $(this).attr('data-field');
+				var label = $(this).attr('data-label');
+				return me.set_filter(fieldname, label);
 			});
 	},
+	
 	get_progress_bar: function(i, v, max, field) {
 		var me = this;
 		var args = {}
@@ -268,19 +276,17 @@ wn.views.ListViewStats = Class.extend({
 		</div>', args))
 		
 		$item.find("a").click(function() {
-			return me.set_filter(this);
+			var fieldname = $(this).attr('data-field');
+			var label = $(this).attr('data-label');
+			me.set_filter(fieldname, label);
+			return false;
 		});
 		
 		return $item;
 	},
+	
 	reload_stats: function() {
 		this.$page.find('.layout-side-section .stat-wrapper').remove();
 		this.init();
-	},
-	set_filter: function(target) {
-		var fieldname = $(target).attr('data-field');
-		var label = $(target).attr('data-label');
-		this.listing.set_filter(fieldname, label);
-		return false;		
 	}
 });

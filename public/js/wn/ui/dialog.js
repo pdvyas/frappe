@@ -82,10 +82,10 @@ wn.ui.Dialog = wn.ui.FieldGroup.extend({
 		this.set_postion()
 
 		// show it
-		$ds(this.wrapper);
+		$(this.wrapper).toggle(true);
 		
 		// hide background
-		freeze();
+		wn.dom.freeze();
 
 		this.display = true;
 		cur_dialog = this;
@@ -101,8 +101,8 @@ wn.ui.Dialog = wn.ui.FieldGroup.extend({
 		if(this.onhide) this.onhide();
 
 		// hide
-		unfreeze();
-		$dh(this.wrapper);
+		wn.dom.unfreeze();
+		$(this.wrapper).toggle(false);
 
 		// flags
 		this.display = false;

@@ -2,7 +2,7 @@ wn.provide('wn.views.pageview');
 
 wn.views.pageview = {
 	with_page: function(name, callback) {
-		if((locals.Page && locals.Page[name]) || name==window.page_name) {
+		if((wn.meta.get("Page", name)[0]) || name==window.page_name) {
 			callback();
 		} else {
 			wn.call({
@@ -36,7 +36,7 @@ wn.views.Page = Class.extend({
 			this.wrapper.page_name = window.page_name;
 			wn.pages[window.page_name] = this.wrapper;
 		} else {
-			this.pagedoc = locals.Page[this.name];
+			this.pagedoc = wn.meta.get("Page", name)[0];
 			this.wrapper = wn.container.add_page(this.name);
 			this.wrapper.label = this.pagedoc.title || this.pagedoc.name;
 			this.wrapper.page_name = this.pagedoc.name;

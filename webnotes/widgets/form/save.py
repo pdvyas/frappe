@@ -31,20 +31,13 @@ def savedocs():
 		form = webnotes.form_dict
 
 		doclist = Controller()
-		doclist.from_compressed(form.get('docs'), form.get('docname'))
-
-		# action
-		action = form.get('action')
-
-		if action=='Update': action='update_after_submit'
-
-		getattr(doclist, action.lower())()
-
+		doclist.from_compressed(form.get('docs'))
+		doclist.save()
+		
 		# update recent documents
 		webnotes.user.update_recent(doclist.doc.doctype, doclist.doc.name)
 
 		# send updated docs
-		webnotes.response['saved'] = '1'
 		webnotes.response['main_doc_name'] = doclist.doc.name
 		webnotes.response['doctype'] = doclist.doc.doctype
 		webnotes.response['docname'] = doclist.doc.name

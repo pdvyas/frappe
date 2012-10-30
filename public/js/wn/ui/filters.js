@@ -202,7 +202,6 @@ wn.ui.Filter = Class.extend({
 		
 		var field_area = me.$w.find('.filter_field').empty().get(0);
 		f = make_field(df, null, field_area, null, 0, 1);
-		f.df.single_select = 1;
 		f.make_inline();
 		f.refresh();
 		$(field_area).find("input").css("margin-top", "-9px"); 
@@ -237,7 +236,7 @@ wn.ui.Filter = Class.extend({
 		if(df.fieldtype=='Check') {
 			df.fieldtype='Select';
 			df.options='No\nYes';
-		} else if(['Text','Text Editor','Code','Link'].indexOf(df.fieldtype)!=-1) {
+		} else if(['Text','Text Editor','Code','Link','Tag'].indexOf(df.fieldtype)!=-1) {
 			df.fieldtype = 'Data';				
 		}
 	},
@@ -295,7 +294,7 @@ wn.ui.FieldSelect = Class.extend({
 		var std_filters = [];
 		
 		// add parenttype column
-		var doctype_obj = locals['DocType'][me.doctype];
+		var doctype_obj = wn.meta.get('DocType', me.doctype);
 		if(doctype_obj && cint(doctype_obj.istable)) {
 			std_filters = std_filters.concat([{
 				fieldname: 'parent',

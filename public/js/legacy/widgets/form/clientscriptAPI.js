@@ -42,7 +42,7 @@ $c_get_values = function(args, doc, dt, dn, user_callback) {
 
 get_server_fields = function(method, arg, table_field, doc, dt, dn, allow_edit, call_back) {
 	if(!allow_edit)freeze('Fetching Data...');
-	$c('runserverobj', args={'method':method, 'docs':compress_doclist(make_doclist(doc.doctype, doc.name)), 'arg':arg},
+	$c('runserverobj', args={'method':method, 'docs':wn.model.compress(wn.model.get_doclist(doc.doctype, doc.name)), 'arg':arg},
 	function(r, rt) {
 		if (r.message)  {
 			var d = locals[dt][dn];
@@ -59,7 +59,7 @@ get_server_fields = function(method, arg, table_field, doc, dt, dn, allow_edit, 
 			doc = locals[doc.doctype][doc.name];
 			call_back(doc, dt, dn);
 		}
-		if(!allow_edit)unfreeze();
+		if(!allow_edit) wn.doc.unfreeze();
     }
   );
 }
@@ -121,7 +121,7 @@ set_field_permlevel = function(n, level) {
 }
 
 toggle_field = function(n, hidden) {
-	var df = Meta.get_field(cur_frm.doctype, n, cur_frm.docname);
+	var df = wn.meta.get_docfield(cur_frm.doctype, n, cur_frm.docname);
 	if(df) {
 		df.hidden = hidden;
 		refresh_field(n);

@@ -23,6 +23,7 @@
 
 wn.ui.toolbar.Toolbar = Class.extend({
 	init: function() {
+		this.pending_requests = 0;
 		this.make();
 		this.make_home();
 		this.make_document();
@@ -92,6 +93,7 @@ wn.ui.toolbar.Toolbar = Class.extend({
 				Download Backup</a></li>');
 		}
 	},
+	
 	set_user_name: function() {
 		var fn = user_fullname;
 		if(fn.length > 15) fn = fn.substr(0,12) + '...';

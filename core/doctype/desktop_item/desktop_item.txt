@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2012-10-26 15:22:48", 
   "modified_by": "Administrator", 
-  "modified": "2012-10-26 15:39:50"
+  "modified": "2012-10-29 11:40:17"
  }, 
  {
   "description": "Desktop Item is shown as an Icon on desktop and toolbar.", 
@@ -71,6 +71,12 @@
   "permlevel": 0
  }, 
  {
+  "doctype": "DocField", 
+  "fieldname": "cb0", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
   "description": "Gradient shades for icon e.g. #A90329, #8F0222, #6D0019", 
   "doctype": "DocField", 
   "label": "Gradient", 
@@ -93,6 +99,30 @@
   "fieldname": "is_custom", 
   "fieldtype": "Select", 
   "permlevel": 1
+ }, 
+ {
+  "description": "Check roles that are allowed to view this Desktop Item", 
+  "doctype": "DocField", 
+  "label": "Roles", 
+  "fieldname": "roles", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Roles HTML", 
+  "fieldname": "roles_html", 
+  "fieldtype": "HTML", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Desktop Item Roles", 
+  "options": "Desktop Item Role", 
+  "fieldname": "desktop_item_roles", 
+  "fieldtype": "Table", 
+  "hidden": 1, 
+  "permlevel": 0
  }, 
  {
   "doctype": "DocPerm"

@@ -33,6 +33,7 @@ wn.provide = function(namespace) {
 		}
 		parent = parent[n];
 	}
+	return parent;
 }
 
 wn._ = function(txt) {
