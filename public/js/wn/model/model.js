@@ -272,7 +272,7 @@ wn.model = {
 
 		$.each(wn.meta.get("DocField", {parent:doctype, fieldtype:"Table"}), 
 			function(i, table_field) {
-				doclist.concat(wn.model.get(table_field.options, {
+				doclist = doclist.concat(wn.model.get(table_field.options, {
 					parent:name, parenttype: doctype, parentfield: table_field.fieldname})
 				);
 			}

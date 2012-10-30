@@ -75,11 +75,11 @@ wn.model.DocList = Class.extend({
 					}
 					
 				}
-				if(error_fields.length)
-					msgprint('<b>Mandatory fields required in '+ (doc.parenttype 
-						? (wn.meta.docfield_map[doc.parenttype][doc.parentfield].label + ' (Table)') 
-						: doc.doctype) + ':</b>\n' + error_fields.join('\n'));	
 			});
+			if(error_fields.length)
+				msgprint('<b>Mandatory fields required in '+ (doc.parenttype 
+					? (wn.meta.docfield_map[doc.parenttype][doc.parentfield].label + ' (Table)') 
+					: doc.doctype) + ':</b>\n' + error_fields.join('\n'));	
 		});
 		
 		return !has_errors;
