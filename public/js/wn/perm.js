@@ -21,6 +21,9 @@
 // 
 
 wn.provide("wn.perm");
+var READ = 0, WRITE = 1, CREATE = 2; 
+var SUBMIT = 3, CANCEL = 4, AMEND = 5;
+
 $.extend(wn.perm, {
 	
 	get_perm: function(doctype, dn, ignore_submit) {

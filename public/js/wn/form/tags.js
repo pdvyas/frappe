@@ -22,65 +22,28 @@
 
 wn.provide("wn.ui.form");
 
-wn.ui.form.TagEditor = Class.extend({
+wn.ui.form.TagEditor = wn.ui.TagEditor.extend({
 	init: function(opts) {
-		$.extend(this, opts);
 		var me = this;
-		this.$w = $('<div class="tag-line">').appendTo(this.parent);
-		$('<div class="clear">').appendTo(this.parent);
-		this.$tags = $('<ul>').prependTo(this.$w).tagit({
-			animate: false,
-			placeholderText: 'Add Tag',
-			onTagAdded: function(ev, tag) {
-				if(!me.refreshing) {
-					var tagtxt = tag.find('.tagit-label').text();
-					wn.call({
-						method: 'webnotes.widgets.tags.add_tag',
-						args: me.get_args(tagtxt),
-						callback: function(r) {
-							me.frm.doc._user_tags += ',' + tagtxt;
-						}
-					});
-				}
-			},
-			onTagRemoved: function(ev, tag) {
-				if(!me.refreshing) {
-					var tagtxt = tag.find('.tagit-label').text();
-					wn.call({
-						method: 'webnotes.widgets.tags.remove_tag',
-						args: me.get_args(tagtxt),
-						callback: function(r) {
-							me.frm.doc._user_tags.replace("," + tagtxt, "")
-						}
-					});
-				}
-			}
-		});	
-	},
-	get_args: function(tag) {
-		return {
-			tag: tag,
-			dt: this.frm.doctype,
-			dn: this.frm.docname,
+		opts.callback = function(r) {
+			me.frm.doc._user_tags += ',' + tagtxt;			
 		}
+		opts.doctype = opts.frm.doctype;
+		this._super(opts);
 	},
 	refresh: function() {
+		// show if saved
+		if(!this.show_if_saved()) return;
+		this.docname = this.frm.docname;
+		this.user_tags = this.frm.doc._user_tags;
+		this._super();
+	},
+	show_if_saved: function() {
 		if(this.frm.doc.__islocal) {
 			this.parent.toggle(false);
-			return;
+			return false;
 		}
 		this.parent.toggle(true);
-
-		// render from user tags
-		var me = this;
-		var user_tags = this.frm.doc._user_tags;
-		this.refreshing = true;
-		me.$tags.tagit("removeAll");
-		if(user_tags) {
-			$.each(user_tags.split(','), function(i, v) {
-				if(v)me.$tags.tagit("createTag", v);
-			});
-		}
-		this.refreshing = false;
+		return true;
 	}
 });

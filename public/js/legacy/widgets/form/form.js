@@ -239,9 +239,7 @@ _f.Frm.prototype.rename_notify = function(dt, old, name) {
 
 	// cleanup
 	if(this && this.opendocs[old]) {
-		// local doctype copy
-		local_dt[dt][name] = local_dt[dt][old];
-		local_dt[dt][old] = null;
+		wn.meta.rename_field_copy(old, name)
 	}
 
 	delete this.opendocs[old];
@@ -613,7 +611,7 @@ _f.Frm.prototype.refresh_fields = function() {
 		f.perm = this.perm;
 		f.docname = this.docname;
 				
-		// if field is identifiable (not blank section or column break)
+		// if field is identifiable (not blank section or coluakemn break)
 		// get the "customizable" parameters for this record
 		var fn = f.df.fieldname || f.df.label;
 		if(fn)
@@ -726,7 +724,7 @@ _f.Frm.prototype.setnewdoc = function(docname) {
 
 	// make a copy of the doctype for client script settings
 	// each record will have its own client script
-	Meta.make_local_dt(this.doctype,docname);
+	wn.meta.make_field_copy_for_doc(this.doctype,docname);
 
 	this.docname = docname;
 	var me = this;

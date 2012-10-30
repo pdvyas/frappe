@@ -21,15 +21,13 @@
 //
 
 wn.provide('wn.model');
-wn.provide('wn.data');
-var locals = wn.data;
+
+var locals = {'DocType':{}};
 
 wn.provide("wn.model.precision_maps");
 
 var no_value_fields = ['Section Break', 'Column Break', 'HTML', 'Table', 
 'Button', 'Image'];
-
-
 
 wn.model = {
 
@@ -245,9 +243,23 @@ wn.model = {
 		return wn.utils.filter_dict(locals[doctype], filters);
 	},
 	
+	getchildren: function(child_dt, parent, parentfield, parenttype) { 
+		if(parenttype) {
+			var l = wn.model.get(child_dt, {parent:parent, 
+				parentfield:parentfield, parenttype:parenttype});
+		} else {
+			var l = wn.model.get(child_dt, {parent:parent, 
+				parentfield:parentfield});				
+		}
+
+		l.sort(function(a,b) { return cint(a.idx) - cint(b.idx) }); 
+		$.each(l, function(i, v) { v.idx = i+1; }); // for chrome bugs ???
+		return l; 
+	},
+
 	get_state_fieldname: function(doctype) {
-		if(locals.Workflow && locals.Workflow[doctype])
-			return locals.Workflow[doctype].workflow_state_field;
+		var wf = wn.meta.get("Workflow", {document_type: doctype});
+		return wf.length ? wf[0].workflow_state_field : null;
 	},
 
 	get_doclist: function(doctype, name) {
@@ -277,92 +289,10 @@ wn.model = {
 	clear_doc: function(doctype, name) {
 		delete locals[doctype][name];		
 	},
-	
-	sync: function(doclist, sync_in) {		
-		if(!sync_in) 
-			sync_in = locals;
-		if(doclist.keys)
-			doclist = wn.model.expand(doclist);
-		if (doclist && sync_in==locals)
-			wn.model.clear_doclist(doclist[0].doctype, doclist[0].name)
-				
-		$.each(doclist, function(i, d) {
-			if(!d.name) // get name (local if required)
-				d.name = wn.model.get_new_name(d.doctype);
-				
-			if(!sync_in[d.doctype])
-				sync_in[d.doctype] = {};
-
-			sync_in[d.doctype][d.name] = d;
-			
-			if(cur_frm && cur_frm.doctype==d.doctype && cur_frm.docname==d.name) {
-				cur_frm.doc = d;
-			}
-
-			if(d.doctype=='DocField') wn.meta.add_field(d);
-			
-			if(d.localname) {
-				wn.model.new_names[d.localname] = d.name;
-				$(document).trigger('rename', [d.doctype, d.localname, d.name]);
-				delete sync_in[d.doctype][d.localname];
-			}	
-		});
-	},
-	
-	expand: function(data) {
-		function zip(k,v) {
-			var obj = {};
-			for(var i=0;i<k.length;i++) {
-				obj[k[i]] = v[i];
-			}
-			return obj;
-		}
-
-		var l = [];
-		for(var i=0;i<data.values.length;i++) 
-			l[l.length] = zip(data.keys[data.values[i][0]], data.values[i]);
-		return l;
-	},
-	
-	compress: function(doclist) {
-		var keys = {}; var values = [];
-		
-		function get_key_list(doctype) {
-			var key_list = ['doctype', 'name', 'docstatus', 'owner', 'parent', 
-				'parentfield', 'parenttype', 'idx', 'creation', 'modified', 
-				'modified_by', '__islocal', '__newname', '__modified', 
-				'_user_tags', '__temp'];
-
-			for(key in wn.meta.docfield_map[doctype]) { // all other values
-				if(!in_list(key_list, key) 
-					&& !in_list(no_value_fields, wn.meta.docfield_map[doctype][key].fieldtype)
-					&& !wn.meta.docfield_map[doctype][key].no_column) {
-						key_list[key_list.length] = key
-					}
-			}
-			return key_list;
-		}
-		
-		for(var i=0; i<doclist.length;i++) {
-			var doc = doclist[i];
-			
-			// make keys
-			if(!keys[doc.doctype]) { 
-				keys[doc.doctype] = get_key_list(doc.doctype);
-				// doctype must be first
-			}
-			
-			var row = []
-			var key_list = keys[doc.doctype];
-			
-			// make data rows
-			for(var j=0;j<key_list.length;j++) {
-				row.push(doc[key_list[j]]);
-			}
-			
-			values.push(row);
-		}
-
-		return JSON.stringify({'values':values, 'keys':keys});
-	}
 }
+
+// for old code
+function get_local(dt, dn) { return locals[dt] ? locals[dt][dn] : null; };
+function get_doctype_label(dt) { return dt };
+function get_label_doctype(label) { return label };
+var getchildren = wn.model.getchildren;

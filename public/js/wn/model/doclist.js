@@ -95,14 +95,13 @@ wn.model.DocList = Class.extend({
 
 	_save: function(callback, btn) {
 		$(btn).attr("disabled", true);
-		freeze();
 		wn.call({
+			freeze: true,
 			method: 'webnotes.widgets.form.save.savedocs',
 			args: {
 				docs: wn.model.compress(doclist),
 			},
 			callback: function(r) {
-				unfreeze();
 				$(btn).attr("disabled", false);
 				callback && callback(r);
 			}
