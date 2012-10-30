@@ -28,12 +28,12 @@ def insert_test_data(doctype, sort_fn=None):
 		data = sorted(data, key=sort_fn)
 
 	for doclist in data:
-		webnotes.model.insert(doclist)
+		webnotes.insert(doclist)
 
 def get_test_doclist(doctype, name=None):
 	"""get test doclist, collection of doclists"""
 	import os, conf, webnotes
-	from webnotes.modules.utils import peval_doclist
+	from webnotes.model.utils import peval_doclist
 	from webnotes.modules import scrub
 
 	doctype = scrub(doctype)

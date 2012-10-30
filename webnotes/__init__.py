@@ -58,30 +58,25 @@ def cache():
 		from webnotes.memc import MClient
 		_memc = MClient(['localhost:11211'])
 	return _memc
-		
-class ValidationError(Exception):
-	pass
-	
-class AuthenticationError(Exception):
-	pass
 
-class PermissionError(Exception):
-	pass
-	
-class OutgoingEmailError(ValidationError):
-	pass
-
-class UnknownDomainError(Exception):
-	def __init__(self, value):
-		self.value = value
-	def __str__(self):
-		return repr(self.value)	
-
-class SessionStopped(Exception):
-	def __init__(self, value):
-		self.value = value
-	def __str__(self):
-		return repr(self.value)	
+# exceptions
+class ValidationError(Exception): pass
+class AuthenticationError(Exception): pass
+class PermissionError(Exception): pass
+class UnknownDomainError(Exception): pass
+class SessionStopped(Exception): pass
+class HandlerError(Exception): pass
+class OutgoingEmailError(ValidationError): pass
+class DuplicateEntryError(ValidationError): pass
+class InvalidLinkError(ValidationError): pass
+class LinkFilterError(ValidationError): pass
+class ConditionalPropertyError(ValidationError): pass
+class MandatoryError(ValidationError): pass
+class NameError(ValidationError): pass
+class DocStatusError(ValidationError): pass
+class IntegrityError(ValidationError): pass
+class CircularLinkError(ValidationError): pass
+class DependencyError(ValidationError): pass
 		
 def getTraceback():
 	import utils
@@ -253,3 +248,56 @@ def generate_hash():
 	"""Generates random hash for session id"""
 	import hashlib, time
 	return hashlib.sha224(str(time.time())).hexdigest()
+
+def get_controller(doctype, name=None):
+	from webnotes.model.code import get_obj
+	
+	doclist = doctype
+	if isinstance(doclist, list):
+		from webnotes.model.doclist import objectify
+		doclist = objectify(doclist)
+		doctype = doclist[0].doctype
+		doc = doclist[0]
+		
+		return get_obj(doctype, name, doc=doclist[0], doclist=doclist)
+	else:
+		return get_obj(doctype, name)
+	
+
+def get_doctype(doctype, processed=False):
+	import webnotes.model.doctype
+	return webnotes.model.doctype.get(doctype, processed)
+
+def get_doclist(doctype, name=None):
+	return get_controller(doctype, name).doclist
+	
+def insert(doclist):
+	if not isinstance(doclist, list):
+		doclist = [doclist]
+
+	from webnotes.model.controller import Controller
+	for d in doclist:
+		d["__islocal"] = 1
+	dl = Controller(doclist)
+	dl.save()
+	
+	return dl
+
+def insert_variants(base, variants):
+	for v in variants:
+		base_copy = []
+		if isinstance(base, list):
+			for i, b in enumerate(base):
+				new = b.copy()
+				new.update(v[i])
+				base_copy.append(new)
+		else:
+			new = base.copy()
+			new.update(v)
+			base_copy.append(new)
+			
+		insert(base_copy)
+		
+def get_label(doctype, fieldname, parent=None, parentfield=None):
+	doctypelist = get_doctype(doctype)
+	return doctypelist.get_label(fieldname, parent, parentfield)

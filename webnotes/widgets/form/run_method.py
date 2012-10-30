@@ -34,13 +34,13 @@ def runserverobj():
 
 	doclist = None
 	method = webnotes.form_dict.get('method')
-	arg = webnotes.form_dict.get('arg')
-	dt = webnotes.form_dict.get('doctype')
-	dn = webnotes.form_dict.get('docname')
+	args = webnotes.form_dict.get('arg') or webnotes.form_dict.get("args")
+	doctype = webnotes.form_dict.get('doctype')
+	docname = webnotes.form_dict.get('docname')
 
-	if dt: # not called from a doctype (from a page)
-		if not dn: dn = dt # single
-		so = webnotes.model.code.get_obj(dt, dn)
+	if doctype: # not called from a doctype (from a page)
+		if not docname: docname = doctype # single
+		so = webnotes.model.code.get_obj(doctype, docname)
 
 	else:
 		doclist = Controller()
@@ -51,7 +51,7 @@ def runserverobj():
 	check_guest_access(so.doc)
 	
 	if so:
-		r = webnotes.model.code.run_server_obj(so, method, arg)
+		r = webnotes.model.code.run_server_obj(so, method, args)
 		if r:
 			#build output as csv
 			if cint(webnotes.form_dict.get('as_csv')):
