@@ -75,7 +75,7 @@ wn.slickgrid_tools = {
 			$.each(grid.getColumns(), function(i, col) {
 				if(col.docfield && col.previousWidth != col.width) {
 					wn.call({
-						method:"webnotes.client.save",
+						method:"webnotes.client.make_width_property_setter",
 						args: {
 							doclist: [{
 								doctype:'Property Setter',

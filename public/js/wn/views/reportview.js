@@ -78,13 +78,13 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		// pre-select mandatory columns
 		var columns = wn.user.get_default("_list_settings:" + this.doctype);
 		if(!columns) {
-			var columns = [['name'],];
+			var columns = [['name', this.doctype],];
 			$.each(wn.meta.docfield_list[this.doctype], function(i, df) {
 				if(df.in_filter && df.fieldname!='naming_series'
 					&& !in_list(no_value_fields, df.fieldname)) {
-					columns.push([df.fieldname]);
+					columns.push([df.fieldname, df.parent]);
 				}
-			});			
+			});
 		}
 		
 		this.set_columns(columns);
@@ -102,7 +102,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		this.make({
 			title: this.no_title ? "" : ('Report: ' + (this.docname ? (this.doctype + ' - ' + this.docname) : this.doctype)),
 			appframe: this.page.appframe,
-			method: 'webnotes.widgets.doclistview.get',
+			method: 'webnotes.widgets.reportview.get',
 			get_args: this.get_args,
 			parent: $(this.wrapper).find('.report-grid'),
 			start: 0,
@@ -142,6 +142,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 	get_args: function() {
 		var me = this;
 		return {
+			from_reportview: 1,
 			doctype: this.doctype,
 			fields: $.map(this.columns, function(v) { return me.get_full_column_name(v) }),
 			order_by: this.get_order_by(),
@@ -182,9 +183,10 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		var me = this;
 		return $.map(this.columns, function(c) {
 			var docfield = wn.meta.docfield_map[c[1] || me.doctype][c[0]];
+			var id = c[1] + ":" + c[0];
 			coldef = {
-				id: c[0],
-				field: c[0],
+				id: id,
+				field: id,
 				docfield: docfield,
 				name: (docfield ? docfield.label : toTitle(c[0])),
 				width: (docfield ? cint(docfield.width) : 120) || 120,
@@ -308,6 +310,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 			
 			if(me.selected_row == args.row) {
 				var docfield = me.col_defs[args.cell].docfield;
+				var fieldname = me.col_defs[args.cell].field;
 				var item = me.data[args.row];
 				
 				if(cint(item.docstatus) > 0) {
@@ -338,29 +341,33 @@ wn.views.ReportView = wn.ui.Listing.extend({
 					return false;
 				}
 				
-				if(docfield && item.name) {
-					var fieldname = docfield.fieldname;
+				var name_field = docfield.parent + ":name";
+				if(docfield && item[name_field]) {
 					me.edit_dialog = new wn.ui.Dialog({
-						title: item.name,
+						title: item[name_field],
 						width: 700,
 						fields: [
 							copy_dict(docfield),
-								{fieldname:'update', label:'Update', fieldtype:'Button'}
+							{fieldname:'update', label:'Update', fieldtype:'Button'}
 						]
 					});
-					me.edit_dialog.fields_dict[fieldname].set_value(item[fieldname])
+					me.edit_dialog.fields_dict[docfield.fieldname].set_value(item[fieldname])
 					
 					me.edit_dialog.fields_dict.update.$input.click(function() {
 						// parent
 						var call_args = {
 							doctype: me.doctype,
-							name: item.name,
-							fieldname: fieldname,
-							value: me.edit_dialog.fields_dict[fieldname].get_value()
+							name: item[name_field],
+							fieldname: docfield.fieldname,
+							value: {
+								value: me.edit_dialog.fields_dict[docfield.fieldname].get_value()
+							}
 						};
 						
-						if(docfield.parent && docfield.parent!=me.doctype)
-							call_args.parent = docfield.parent;
+						if(docfield.parent && docfield.parent!=me.doctype) {
+							call_args.parenttype = docfield.parent;
+							call_args.parent = item[me.doctype + ":name"];
+						}
 	
 						wn.call({
 							method: 'webnotes.client.update_value',
@@ -372,8 +379,10 @@ wn.views.ReportView = wn.ui.Listing.extend({
 									// update all rows from the doclist
 									$.each(me.data, function(i, row) {
 										$.each(r.message, function(j, d) {
-											if(row && d && row.name==d.name) {
-												$.extend(row, d);
+											if(row && d && row[d.doctype + ":name"]==d.name) {
+												for(key in d) {
+													row[d.doctype + ":" + key] = d[key];
+												}
 												r.message.splice(j, 1);
 											}
 										});
@@ -461,7 +470,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		if(wn.user.is_report_manager()) {
 			this.page.appframe.add_button('Export', function() {
 				var args = me.get_args();
-				args.cmd = 'webnotes.widgets.doclistview.export_query'
+				args.cmd = 'webnotes.widgets.reportview.export_query'
 				open_url_post(wn.request.url, args);
 			}, 'icon-download-alt');
 		}
@@ -491,7 +500,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 				}
 
 				wn.call({
-					method: 'webnotes.widgets.doclistview.delete_items',
+					method: 'webnotes.widgets.reportview.delete_items',
 					args: {
 						items: delete_list,
 						doctype: me.doctype
@@ -522,7 +531,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 				
 				// callback
 				wn.call({
-					method: 'webnotes.widgets.doclistview.save_report',
+					method: 'webnotes.widgets.reportview.save_report',
 					args: {
 						name: name,
 						doctype: me.doctype,

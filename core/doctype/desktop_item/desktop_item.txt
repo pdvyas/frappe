@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2012-10-26 15:22:48", 
   "modified_by": "Administrator", 
-  "modified": "2012-10-29 11:40:17"
+  "modified": "2012-10-30 16:11:05"
  }, 
  {
   "description": "Desktop Item is shown as an Icon on desktop and toolbar.", 
@@ -27,7 +27,7 @@
   "name": "__common__", 
   "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
+  "write": 0, 
   "parenttype": "DocType", 
   "role": "System Manager", 
   "permlevel": 0, 

@@ -39,7 +39,14 @@ def save(doclist=None):
 	controller.save()
 	
 	return [d.fields for d in doclist]
-	
+
+@webnotes.whitelist()
+def make_width_property_setter():
+	doclist = json.loads(webnotes.form_dict.doclist)
+	if doclist[0]["DocType"]=="Property Setter" and doclist[0]["field_name"]=="width":
+		controller = Controller(doclist)
+		controller.save()
+
 @webnotes.whitelist()
 def set_default():
 	"""set a user default value"""
@@ -52,10 +59,13 @@ def set_default():
 
 @webnotes.whitelist()
 def update_value():
-	"""update a value"""
+	""" update a value: 
+		value must be in json to preserve datatype (string or number)"""
 	from webnotes.model.doctype import get_property
 	
 	globals().update(webnotes.form_dict)
+	
+	v = json.loads(value).get("value")
 	
 	if "parent" in webnotes.form_dict:
 		controller = Controller(doctype, parent)	
@@ -69,7 +79,7 @@ def update_value():
 	if (get_property(doctype, "permlevel", fieldname) or 0) != 0:
 		webnotes.msgprint("Direct edit only allowed if permlevel is 0", raise_exception=1)
 	
-	row.fields[fieldname] = value
+	row.fields[fieldname] = v
 
 	if controller.doc.docstatus!=0:
 		webnotes.msgprint("Cannot update Submitted / Cancelled document", 

@@ -175,7 +175,7 @@ wn.views.ListViewStats = Class.extend({
 		$.extend(this, opts);
 		var me = this
 		wn.call({
-			method: 'webnotes.widgets.doclistview.get_stats',
+			method: 'webnotes.widgets.reportview.get_stats',
 			args: {
 				doctype: me.doctype
 			},
