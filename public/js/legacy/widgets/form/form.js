@@ -239,7 +239,7 @@ _f.Frm.prototype.rename_notify = function(dt, old, name) {
 
 	// cleanup
 	if(this && this.opendocs[old]) {
-		wn.meta.rename_field_copy(old, name)
+		wn.meta.rename_field_copy(this.doctype, old, name)
 	}
 
 	delete this.opendocs[old];

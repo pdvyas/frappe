@@ -3,8 +3,9 @@ wn.provide('wn.utils');
 wn.utils = {
 	filter_dict: function(dict, filters) {
 		var ret = [];
-		if(typeof filters=='string')
-			filters = {name:filters}
+		if(typeof filters=='string') {
+			return [dict[filters]]
+		}
 		$.each(dict, function(i, d) {
 			for(key in filters) {
 				if(d[key]!=filters[key]) return;

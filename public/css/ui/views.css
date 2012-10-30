@@ -137,7 +137,7 @@ div.ripped-paper-border {
 
 .module-item {
 	display: inline-block; 
-	width: 80%;
+	width: 70%;
 	text-overflow: ellipsis; 
 	white-space: nowrap; 
 	overflow: hidden;	

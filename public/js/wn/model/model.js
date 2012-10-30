@@ -35,6 +35,7 @@ wn.model = {
 	new_name_count: {},
 
 	get_new_doc: function(doctype) {
+		wn.provide("locals." + doctype);
 		var doc = {
 			docstatus: 0,
 			doctype: doctype,
@@ -43,7 +44,7 @@ wn.model = {
 			owner: user
 		};
 		wn.model.set_default_values(doc);
-		locals[doctype][new_name] = doc;
+		locals[doctype][doc.name] = doc;
 		return doc;		
 	},
 	

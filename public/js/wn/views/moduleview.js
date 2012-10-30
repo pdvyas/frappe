@@ -133,14 +133,15 @@ wn.views.ModuleViewPage = Class.extend({
 			// default formatter for doctypes
 			
 			if(item.open_count!=null) {
-				item.open_count = '<span class="badge badge-important">'
+				item.open_count = '<span class="badge badge-important" \
+					style="float:right; margin-right: 4px;">'
 					+item.open_count+'</span>';
 			} else {
 				item.open_count = "";				
 			}
 			
 			if(item.count!=null) {
-				item.count = "<span class='badge'>"+item.count+"</span>"
+				item.count = "<span class='badge' style='float: right;'>"+item.count+"</span>"
 			} else {
 				item.count = "";				
 			}
@@ -154,8 +155,7 @@ wn.views.ModuleViewPage = Class.extend({
 					<b style='font-size: 110%'>%(name)s</b></a>", item);
 			}
 			
-			return $(repl("<span style='display:inline-block; \
-					float: right; max-width: 18%;'>\
+			return $(repl("<span style='display:inline-block; float: right; width: 20%;'>\
 					%(count)s %(open_count)s</span>\
 				<span class='module-item'>\
 					%(main_link)s \
