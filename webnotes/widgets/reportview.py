@@ -54,6 +54,9 @@ def get(arg=None):
 	load_doctypes()
 	
 	remove_user_tags(fields)
+	add_name_field_for_all_tables(tables, fields)
+	set_field_labels_as_doctype_colon_fieldname(fields)
+
 	# conditions
 	conditions = build_conditions(filters)
 	
@@ -77,7 +80,34 @@ def get(arg=None):
 	query = """select %(fields)s from %(tables)s where %(conditions)s
 		%(group_by)s order by %(order_by)s %(limit)s""" % data
 
-	return webnotes.conn.sql(query, as_dict=1)
+	return compress(webnotes.conn.sql(query, as_dict=1))
+
+def compress(data):
+	"""separate keys and values"""
+	if not data: return data
+	values = []
+	keys = data[0].keys()
+	for row in data:
+		new_row = []
+		for key in keys:
+			new_row.append(row[key])
+		values.append(new_row)
+		
+	return {
+		"keys": keys,
+		"values": values
+	}
+
+def add_name_field_for_all_tables(tables, fields):
+	for t in tables:
+		if not t + ".name" in fields:
+			fields.append(t + ".name")
+
+def set_field_labels_as_doctype_colon_fieldname(fields):
+	for i, field in enumerate(fields):
+		doctype, fieldname = field.split("`.")
+		fields[i] = field + (" as `%s:%s`" % (doctype.split("`tab")[-1], fieldname))
+		
 
 def check_sort_by_table(sort_by, tables):
 	"""check atleast 1 column selected from the sort by table """

@@ -56,6 +56,8 @@ def update_value():
 	
 	globals().update(webnotes.form_dict)
 	
+	v = json.loads(value).get("value")
+	
 	if "parent" in webnotes.form_dict:
 		controller = Controller(doctype, parent)	
 	else:
@@ -68,7 +70,7 @@ def update_value():
 	if (get_property(doctype, "permlevel", fieldname) or 0) != 0:
 		webnotes.msgprint("Direct edit only allowed if permlevel is 0", raise_exception=1)
 	
-	row.fields[fieldname] = value
+	row.fields[fieldname] = v
 
 	if controller.doc.docstatus!=0:
 		webnotes.msgprint("Cannot update Submitted / Cancelled document", 

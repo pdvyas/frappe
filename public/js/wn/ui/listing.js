@@ -261,8 +261,10 @@ wn.ui.Listing = Class.extend({
 		
 		this.$w.find('.btn-more').toggle(false);
 
-		if(r.message) r.values = r.message;
-
+		if(r.message) {
+			r.values = this.get_values_from_response(r.message);
+		}
+				
 		if(r.values && r.values.length) {
 			this.data = this.data.concat(r.values);
 			this.render_list(r.values);
@@ -285,6 +287,23 @@ wn.ui.Listing = Class.extend({
 		// callbacks
 		if(this.onrun) this.onrun();
 		if(this.callback) this.callback(r);
+	},
+	
+	get_values_from_response: function(data) {
+		// make dictionaries from keys and values
+		if(data.keys) {
+			var values = [];
+			$.each(data.values, function(row_idx, row) {
+				var new_row = {};
+				$.each(data.keys, function(key_idx, key) {
+					new_row[key] = row[key_idx];
+				})
+				values.push(new_row);
+			});
+			return values;
+		} else {
+			return data;
+		}
 	},
 
 	render_list: function(values) {		

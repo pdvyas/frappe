@@ -56,6 +56,7 @@ wn.views.reportview = {
 // `Report/[doctype]` shows report for that doctype
 // `Report/[doctype]/[report_name]` loads report with that name
 
+wn.provide('wn.views.reports_views');
 wn.views.reportview2 = {
 	show: function(dt) {
 		var page_name = wn.get_route_str();
@@ -64,7 +65,7 @@ wn.views.reportview2 = {
 		} else {
 			var route = wn.get_route();
 			if(route[1]) {
-				new wn.views.ReportViewPage(route[1], route[2]);				
+				wn.views.reports_views[route[1]] = new wn.views.ReportViewPage(route[1], route[2]);				
 			} else {
 				wn.set_route('404');
 			}
