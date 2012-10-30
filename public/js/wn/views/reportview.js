@@ -142,6 +142,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 	get_args: function() {
 		var me = this;
 		return {
+			from_reportview: 1,
 			doctype: this.doctype,
 			fields: $.map(this.columns, function(v) { return me.get_full_column_name(v) }),
 			order_by: this.get_order_by(),

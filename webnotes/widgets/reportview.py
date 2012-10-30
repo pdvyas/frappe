@@ -54,8 +54,11 @@ def get(arg=None):
 	load_doctypes()
 	
 	remove_user_tags(fields)
-	add_name_field_for_all_tables(tables, fields)
-	set_field_labels_as_doctype_colon_fieldname(fields)
+	
+	# only if from report view
+	if data.from_reportview:
+		add_name_field_for_all_tables(tables, fields)
+		set_field_labels_as_doctype_colon_fieldname(fields)
 
 	# conditions
 	conditions = build_conditions(filters)
