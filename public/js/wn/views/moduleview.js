@@ -36,6 +36,15 @@ wn.views.moduleview = {
 	}
 }
 
+wn.get_module_color = function(module) {
+	try {
+		var color = wn.meta.get("Desktop Item", {label:module})[0].gradient.split(",")[1];
+	} catch(e) {
+		var color = "#000";
+	}
+	return color;
+}
+
 wn.views.ModuleViewPage = Class.extend({
 	init: function(module) {
 		this.module = module;

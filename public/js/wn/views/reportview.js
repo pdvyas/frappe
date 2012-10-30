@@ -78,13 +78,13 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		// pre-select mandatory columns
 		var columns = wn.user.get_default("_list_settings:" + this.doctype);
 		if(!columns) {
-			var columns = [['name'],];
+			var columns = [['name', this.doctype],];
 			$.each(wn.meta.docfield_list[this.doctype], function(i, df) {
 				if(df.in_filter && df.fieldname!='naming_series'
 					&& !in_list(no_value_fields, df.fieldname)) {
-					columns.push([df.fieldname]);
+					columns.push([df.fieldname, df.parent]);
 				}
-			});			
+			});
 		}
 		
 		this.set_columns(columns);
