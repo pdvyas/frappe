@@ -44,7 +44,7 @@ def runserverobj():
 
 	else:
 		doclist = Controller()
-		doclist.from_compressed(webnotes.form_dict.get('docs'), dn)
+		doclist.from_compressed(webnotes.form_dict.get('docs'))
 		so = doclist.make_obj()
 		doclist.check_if_latest()
 

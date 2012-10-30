@@ -773,7 +773,6 @@ _f.Frm.prototype.save = function(callback, btn) {
 			return;
 		}
 	}
-	
 	doclist.save(function(r) {
 		if(r.exc) {
 			//
@@ -785,7 +784,7 @@ _f.Frm.prototype.save = function(callback, btn) {
 }
 
 _f.Frm.prototype.savesubmit = function(btn) {
-	this.frm.doc.docstatus = 1;
+	this.doc.docstatus = 1;
 	this.save(function(r) {
 		if(!r.exc && me.cscript.on_submit) {
 			me.runclientscript('on_submit', me.doctype, me.docname);
@@ -794,8 +793,8 @@ _f.Frm.prototype.savesubmit = function(btn) {
 }
 
 _f.Frm.prototype.savecancel = function(btn) {
-	this.frm.doc.docstatus = 2;
-	this.save(btn);
+	this.doc.docstatus = 2;
+	this.save(null, btn);
 }
 
 _f.Frm.prototype.runscript = function(scriptname, callingfield, onrefresh) {
