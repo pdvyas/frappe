@@ -179,38 +179,44 @@ def check_duplicate(doclist, combination, key="item_code"):
 	existing = []
 	for doc in doclist:
 		match = [(doc.fields.get(field) or None) for field in combination]
+		
 		if match in existing:
-			from webnotes.model import doctype
+			import webnotes.model.doctype
 			from webnotes.utils import comma_or
-			doctypelist = doctype.get(doc.parenttype or doc.doctype)
+			doctypelist = webnotes.model.doctype.get(doc.parenttype or doc.doctype)
+			
 			msgprint(_("""%(key_label)s %(key)s appears more than once.
-			Please change atleast one of %(labels)s to continue \
-			or remove the duplicate rows.""") % {
-				"key_label": doctypelist.get_label(key, 
-					parentfield=doc.parentfield or None),
-				"key": doc.fields.get(key),
-				"labels": comma_or([doctypelist.get_label(field,
-					parentfield=doc.parentfield or None) for field in combination])
-			}, raise_exception=1)
+				Please change atleast one of %(labels)s to continue \
+				or remove the duplicate rows.""") % {
+					"key_label": doctypelist.get_label(key, 
+						parentfield=doc.parentfield or None),
+					"key": doc.fields.get(key),
+					"labels": comma_or([doctypelist.get_label(field,
+						parentfield=doc.parentfield or None) for field in combination])
+				}, raise_exception=1)
 		else:
 			existing.append(match)
 	
 def validate_condition(doclist, field, condition, expected_value):
-	if isinstance(doclist, Document):
-		doclist = DocList([Document])
-	elif isinstance(doclist, dict):
-		doclist = DocList(objectify([doclist]))
+	from webnotes.model.doclist import objectify
 	
-	for doc in doclist:
+	if isinstance(doclist, (Document, dict)):
+		doclist = [doclist]
+
+	for doc in objectify(doclist):
 		if not check(doc.fields.get(field), condition, expected_value):
-			from webnotes.model import doctype
+			import webnotes.model.doctype
+			
 			msg = doc.idx and _("Row # %(idx)s: ") or ""
+			
 			if condition == "startswith":
 				msg += _("""%(label)s should start with %(expected_value)s""")
 			else:
 				msg += _("""%(label)s should be %(condition)s %(expected_value)s""")
-			label = doctype.get(doc.parenttype or doc.doctype).get_label(field,
-				parentfield=doc.parentfield or None)
+			
+			label = webnotes.model.doctype.get(doc.parenttype or doc.doctype)\
+				.get_label(field, parentfield=doc.parentfield or None)
+			
 			msgprint(msg % {"label": label, "condition": condition, 
 				"expected_value": expected_value}, raise_exception=1)
 	
