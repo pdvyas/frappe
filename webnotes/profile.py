@@ -215,7 +215,7 @@ class Profile:
 			self.build_permissions()
 			self.build_page_permissions()
 
-		d = {}
+		d = webnotes.DictObj()
 		d['name'] = self.name
 		d['email'] = t[0] or ''
 		d['first_name'] = t[1] or ''

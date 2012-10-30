@@ -8,6 +8,7 @@ wn.core.DesktopItem = wn.ui.form.Controller.extend({
 		// make role editor
 		this.frm.roles_editor = new wn.RoleEditor({
 			wrapper: this.frm.fields_dict.roles_html.$wrapper,
+			include_all: true,
 			get_selected_roles: function(callback) {
 				wn.call({
 					method:'core.doctype.desktop_item.desktop_item.get_roles',

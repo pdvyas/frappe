@@ -42,6 +42,9 @@ def import_file(module, dt, dn, force=False):
 	path = os.path.join(get_module_path(module), 
 		os.path.join(dt, dn, dn + '.txt'))
 		
+	import_file_by_path(path, force)
+
+def import_file_by_path(path, force=False):
 	if os.path.exists(path):
 		from webnotes.modules.utils import peval_doclist
 		

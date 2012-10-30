@@ -48,9 +48,7 @@ def get_bootinfo():
 	bootinfo['sysdefaults'] = webnotes.utils.get_defaults()
 
 	if webnotes.session['user'] != 'Guest':
-		doclist += webnotes.conn.sql("""select name, label, gradient, style, route,
-		 	"Desktop Item" as `doctype` from `tabDesktop Item` 
-			where ifnull(disabled, "No")="No" """, as_dict=1)
+		add_desktop_items(doclist, bootinfo.profile.roles)
 		bootinfo['user_info'] = get_fullnames()
 		bootinfo['sid'] = webnotes.session['sid'];
 		
@@ -78,6 +76,15 @@ def get_bootinfo():
 	del bootinfo['docs']
 	
 	return bootinfo
+
+def add_desktop_items(doclist, roles):
+	doclist += webnotes.conn.sql("""select t1.name as name, label, gradient, 
+		style, route, "Desktop Item" as `doctype` 
+		from `tabDesktop Item` t1, `tabDesktop Item Role` t2
+		where ifnull(disabled, "No")="No" 
+		and t1.name = t2.parent
+		and t2.role in ("%s")""" % '", "'.join(roles), as_dict=1)
+
 
 def get_fullnames():
 	"""map of user fullnames"""

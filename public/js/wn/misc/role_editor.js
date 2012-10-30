@@ -28,6 +28,8 @@ wn.RoleEditor = Class.extend({
 			method:'webnotes.widgets.role_editor.get_all_roles',
 			callback: function(r) {
 				me.roles = r.message;
+				if(me.include_all)
+					me.roles.push("All");
 				me.show_roles();
 			}
 		});		
