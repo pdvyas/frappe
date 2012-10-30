@@ -145,12 +145,12 @@ wn.ui.form.FormHeader = Class.extend({
 		// Submit
 		if(docstatus==0 && p[SUBMIT] && (!me.frm.doc.__islocal))
 			this.appframe.add_button('Submit', function() { 
-				me.frm.savesubmit(null, me.appframe.buttons['Submit']);}, 'icon-lock');
+				me.frm.savesubmit(me.appframe.buttons['Submit']);}, 'icon-lock');
 
 		// Update after sumit
 		if(docstatus==1 && p[SUBMIT]) {
 			this.appframe.add_button('Update', function() { 
-				me.frm.saveupdate(null, me.appframe.buttons['Update']);}, '');
+				me.frm.save(me.appframe.buttons['Update']);}, '');
 			if(!me.frm.doc.__unsaved) 
 				this.appframe.buttons['Update'].toggle(false);
 		}
@@ -158,7 +158,7 @@ wn.ui.form.FormHeader = Class.extend({
 		// Cancel
 		if(docstatus==1  && p[CANCEL])
 			this.appframe.add_button('Cancel', function() { 
-				me.frm.savecancel(null, me.appframe.buttons['Cancel']) 
+				me.frm.savecancel(me.appframe.buttons['Cancel']) 
 			}, 'icon-remove');
 
 		// Amend
