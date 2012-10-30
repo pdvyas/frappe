@@ -21,6 +21,9 @@
 # 
 
 from __future__ import unicode_literals
+from webnotes.model.doc import Document
+from webnotes import _, msgprint, DictObj
+from webnotes.utils import getdate
 """
 Model utilities, unclassified functions
 """
@@ -166,3 +169,77 @@ def _make_html(doc, link_list):
 
 	out += '</table>'
 	return out
+
+def check_duplicate(doclist, combination, key="item_code"):
+	"""combination is a list of fieldnames"""
+	existing = []
+	for doc in doclist:
+		match = [(doc.fields.get(field) or None) for field in combination]
+		
+		if match in existing:
+			import webnotes.model.doctype
+			from webnotes.utils import comma_or
+			doctypelist = webnotes.model.doctype.get(doc.parenttype or doc.doctype)
+			
+			msgprint(_("""%(key_label)s %(key)s appears more than once.
+				Please change atleast one of %(labels)s to continue \
+				or remove the duplicate rows.""") % {
+					"key_label": doctypelist.get_label(key, 
+						parentfield=doc.parentfield or None),
+					"key": doc.fields.get(key),
+					"labels": comma_or([doctypelist.get_label(field,
+						parentfield=doc.parentfield or None) for field in combination])
+				}, raise_exception=1)
+		else:
+			existing.append(match)
+	
+def validate_condition(doclist, field, condition, expected_value):
+	from webnotes.model.doclist import objectify
+	
+	if isinstance(doclist, (Document, dict)):
+		doclist = [doclist]
+
+	for doc in objectify(doclist):
+		if not check(doc.fields.get(field), condition, expected_value):
+			import webnotes.model.doctype
+			
+			msg = doc.idx and _("Row # %(idx)s: ") or ""
+			
+			if condition == "startswith":
+				msg += _("""%(label)s should start with %(expected_value)s""")
+			else:
+				msg += _("""%(label)s should be %(condition)s %(expected_value)s""")
+			
+			label = webnotes.model.doctype.get(doc.parenttype or doc.doctype)\
+				.get_label(field, parentfield=doc.parentfield or None)
+			
+			msgprint(msg % {"label": label, "condition": condition, 
+				"expected_value": expected_value}, raise_exception=1)
+	
+def check(val1, condition, val2):
+	"""
+		check based on condition
+			* val1 is the actual value
+			* val2 is the one saved in filter
+	"""
+	import datetime
+	if isinstance(val1, datetime.date) or isinstance(val2, datetime.date):
+		val1 = getdate(val1)
+		val2 = getdate(val2)
+
+	if condition == 'in':
+		return val1 in [v.strip() for v in val2.split(",")]
+	elif condition == "startswith":
+		return (val1 or "").startswith(val2)
+	elif condition=='=':
+		return val1 == val2
+	elif condition=='>':
+		return val1 > val2
+	elif condition=='<':
+		return val1 < val2
+	elif condition=='>=':
+		return val1 >= val2
+	elif condition=='<=':
+		return val1 <= val2
+	elif condition=='!=':
+		return val1 != val2

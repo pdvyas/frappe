@@ -135,5 +135,5 @@ def objectify(doclist):
 		if isinstance(d, webnotes.model.doc.Document):
 			doclist_obj.append(d)
 		else:
-			doclist_obj.append(webnotes.model.doc.Document(fielddata = d, session = session))
+			doclist_obj.append(webnotes.model.doc.Document(fielddata = d))
 	return doclist_obj

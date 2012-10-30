@@ -277,4 +277,6 @@ class DocListController(object):
 		self.doc, self.doclist = doc, doclist
 		if hasattr(self, "setup"):
 			self.setup()
+		if hasattr(self, "load_precision_maps"):
+			self.load_precision_maps()
 	
