@@ -62,7 +62,9 @@ def runserverobj():
 		webnotes.response['docs'] = so.doclist
 
 def check_guest_access(doc):
-	if webnotes.session['user']=='Guest' and not webnotes.conn.sql("select name from tabDocPerm where role='Guest' and parent=%s and ifnull(`read`,0)=1", doc.doctype):
+	if webnotes.session['user']=='Guest' and not 
+		webnotes.conn.sql("""select name from tabDocPerm where role='Guest' 
+			and document_type=%s and ifnull(`read`,0)=1""", doc.doctype):
 		webnotes.msgprint("Guest not allowed to call this object")
 		raise Exception
 

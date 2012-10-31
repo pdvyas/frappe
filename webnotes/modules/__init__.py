@@ -24,7 +24,7 @@ from __future__ import unicode_literals
 """
 	Utilities for using modules
 """
-import webnotes
+import webnotes, os, conf
 
 transfer_types = ['Role', 'Print Format','DocType','Page','DocType Mapper',
 	'GL Mapper','Search Criteria', 'Patch', 'Report']
@@ -55,7 +55,6 @@ def scrub_dt_dn(dt, dn):
 			
 def get_module_path(module):
 	"""Returns path of the given module"""
-	import os, conf
 	m = scrub(module)
 	
 	app_path = os.path.dirname(conf.__file__)
@@ -64,6 +63,10 @@ def get_module_path(module):
 		return os.path.join(app_path, 'lib', 'core')
 	else:
 		return os.path.join(app_path, 'app', m)
+
+def get_doc_path(doc):
+	dt, dn = scrub_dt_dn(doc.doctype, doc.name)
+	return os.path.join(get_module_path(doc.module), dt, dn)
 
 def reload_doc(module, dt=None, dn=None):
 	from webnotes.modules.import_file import import_files

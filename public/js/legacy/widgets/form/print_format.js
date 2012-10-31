@@ -236,15 +236,7 @@ $.extend(_p, {
 		Display draft in header if true
 	*/	
 	show_draft: function(args) {
-		var is_doctype_submittable = 0;
-		var plist = wn.metadata['DocPerm'];
-		for(var perm in plist) {
-			var p = plist[perm];
-			if((p.parent==args.doc.doctype) && (p.submit==1)){
-				is_doctype_submittable = 1;
-				break;
-			}
-		}
+		var is_doctype_submittable = wn.meta.is_submittable(args.doc.doctype);
 
 		if(args.doc && cint(args.doc.docstatus)==0 && is_doctype_submittable) {
 			draft = _p.head_banner_format();

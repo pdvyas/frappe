@@ -64,5 +64,8 @@ $.extend(wn.meta, {
 		var d = wn.meta.docfields[doctype];
 		d[newname] = d[oldname];
 		d[oldname] = null;
+	},
+	is_submittable: function(doctype) {
+		return wn.meta.get("DocPerm", {document_type: doctype, submit:1}).length;
 	}
 });

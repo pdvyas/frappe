@@ -48,7 +48,7 @@ wn.views.DocListPage = Class.extend({
 		var me = this;
 
 		this.can_delete = wn.model.can_delete(this.doctype);
-		this.can_submit = wn.meta.get("DocPerm", {parent:me.doctype, submit:1}).length;
+		this.can_submit = wn.meta.is_submittable(this.doctype);
 		
 		this.make_page();
 		this.setup_docstatus_filter();

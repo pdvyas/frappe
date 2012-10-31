@@ -1,0 +1,18 @@
+[
+ {
+  "execute": null, 
+  "name": "PERM01732", 
+  "idx": 1, 
+  "amend": null, 
+  "create": 1, 
+  "submit": null, 
+  "write": 0, 
+  "read": 1, 
+  "role": "System Manager", 
+  "cancel": 0, 
+  "docstatus": 0, 
+  "document_type": "Desktop Item", 
+  "permlevel": 0, 
+  "match": null
+ }
+]

@@ -83,7 +83,8 @@ def get_sql_meta(tl):
 # ====================================================================
 
 def getmatchcondition(dt, ud, ur):
-	res = sql("SELECT `role`, `match` FROM tabDocPerm WHERE parent = '%s' AND (`read`=1) AND permlevel = 0" % dt)
+	res = sql("""select `role`, `match` FROM tabDocPerm 
+		WHERE document_type=%s AND (`read`=1) AND permlevel = 0""", dt)
 	cond = []
 	for r in res:
 		if r[0] in ur: # role applicable to user

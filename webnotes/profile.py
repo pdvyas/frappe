@@ -76,13 +76,12 @@ class Profile:
 		"""build map of permissions at level 0"""
 		
 		self.perm_map = {}
-		for r in webnotes.conn.sql("""select parent, `read`, `write`, `create`, `submit`, `cancel` 
+		for r in webnotes.conn.sql("""select document_type, `read`, `write`, `create`, `submit`, `cancel` 
 			from tabDocPerm where ifnull(docstatus,0)=0 
 			and ifnull(permlevel,0)=0
-			and parent not like "old_parent:%%" 
 			and role in ('%s')""" % "','".join(self.get_roles()), as_dict=1):
 			
-			dt = r['parent']
+			dt = r['document_type']
 			
 			if not dt in  self.perm_map:
 				self.perm_map[dt] = {}

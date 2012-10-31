@@ -31,7 +31,7 @@ $.extend(wn.perm, {
 		if(in_list(user_roles, 'Administrator')) 
 			perm[0][READ] = 1;		
 		
-		$.each(wn.meta.get("DocPerm", {parent:doctype}), function(i, p) {
+		$.each(wn.meta.get("DocPerm", {document_type:doctype}), function(i, p) {
 			var pl = cint(p.permlevel?p.permlevel:0);
 			// if user role
 			if(in_list(user_roles, p.role)) {

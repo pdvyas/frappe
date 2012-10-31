@@ -448,6 +448,9 @@ class Document:
 			self.parenttype = tmp[0][0]
 			self.parentfield = tmp[0][1]
 
+	def set_locals(self):
+		self.fields["__islocal"] = 1
+		
 	def set_idx(self):
 		"""set idx"""
 		self.idx = (webnotes.conn.sql("""select max(idx) from `tab%s` 
@@ -460,7 +463,7 @@ class Document:
 	def _get_perms(self):
 		if not self._perms:
 			self._perms = webnotes.conn.sql("""select role, `match` from tabDocPerm
-				where parent=%s and ifnull(`read`,0) = 1 
+				where document_type=%s and ifnull(`read`,0) = 1 
 				and ifnull(permlevel,0)=0""", self.doctype)
 
 	def _get_roles(self):
