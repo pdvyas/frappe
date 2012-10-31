@@ -30,8 +30,9 @@ wn.model.DocList = Class.extend({
 	
 	save: function(callback, btn) {
 		this.check_name();
-		if(this.check_mandatory())
+		if(this.check_mandatory()) {
 			this._save(callback, btn);
+		}
 	},
 	
 	check_name: function() {
@@ -54,7 +55,7 @@ wn.model.DocList = Class.extend({
 		var has_errors = false;
 		this.scroll_set = false;
 		
-		if(this.doc.docstatus==2) return; // don't check for cancel
+		if(this.doc.docstatus==2) return true; // don't check for cancel
 		
 		$.each(this.doclist, function(i, doc) {
 			

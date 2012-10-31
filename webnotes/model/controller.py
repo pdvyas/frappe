@@ -114,6 +114,7 @@ class Controller:
 				self.run_method("on_update_after_submit")
 		
 		elif self.doc.docstatus==2:
+			# QUESTION: shouldn't on_cancel be called here?
 			self.run_method('on_trash')
 			
 		else:
