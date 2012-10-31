@@ -128,7 +128,7 @@ class DocType:
 		self.export_permissions()
 
 	@property
-	def perm_path(self):
+	def permpath(self):
 		from webnotes.modules import get_doc_path
 		return os.path.join(get_doc_path(self.doc), 'permissions.json')
 		
@@ -146,6 +146,7 @@ class DocType:
 		with open(self.permpath, 'r') as permfile:
 			for perm in json.loads(permfile.read()):
 				permdoc = Document(fielddata = perm)
+				permdoc.doctype = "DocPerm"
 				permdoc.name = None
 				permdoc.save(new=True)
 	

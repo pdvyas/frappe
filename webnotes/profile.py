@@ -81,7 +81,7 @@ class Profile:
 			and ifnull(permlevel,0)=0
 			and role in ('%s')""" % "','".join(self.get_roles()), as_dict=1):
 			
-			dt = r['document_type']
+			dt = r.document_type
 			
 			if not dt in  self.perm_map:
 				self.perm_map[dt] = {}
@@ -89,7 +89,7 @@ class Profile:
 			for k in ('read', 'write', 'create', 'submit', 'cancel'):
 				if not self.perm_map[dt].get(k):
 					self.perm_map[dt][k] = r.get(k)
-						
+								
 	def build_permissions(self):
 		"""build lists of what the user can read / write / create
 		quirks: 

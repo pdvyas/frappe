@@ -206,7 +206,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		//this.gridid = wn.dom.set_unique_id()
 		var std_columns = [{id:'_idx', field:'_idx', name: 'Sr.', width: 40}];
 		if(this.can_delete) {
-			std_columns = [{
+			std_columns = std_columns.concat([{
 				id:'_check', field:'_check', name: "", width: 40, 
 					formatter: function(row, cell, value, columnDef, dataContext) {
 						return repl("<input type='checkbox' \
@@ -215,7 +215,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 								checked: (dataContext._checked ? "checked" : "")
 							});
 					}
-			}]
+			}])
 		}
 		var columns = std_columns.concat(this.build_columns());
 
