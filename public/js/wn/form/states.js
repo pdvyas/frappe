@@ -23,7 +23,7 @@
 wn.ui.form.States = Class.extend({
 	init: function(opts) {
 		$.extend(this, opts);
-		this.state_fieldname = wn.model.get_state_fieldname(this.frm.doctype);
+		this.state_fieldname = wn.meta.get_state_fieldname(this.frm.doctype);
 		this.make();
 		this.bind_action();
 	},
@@ -55,7 +55,7 @@ wn.ui.form.States = Class.extend({
 			// show current state on the button
 			this.$wrapper.find(".state-text").text(state);
 			
-			var state_doc = wn.model.get("Workflow State", {name:state})[0];
+			var state_doc = wn.meta.get("Workflow State", {name:state})[0];
 
 			// set the icon
 			this.$wrapper.find('.icon-small').removeClass()
@@ -79,12 +79,12 @@ wn.ui.form.States = Class.extend({
 	show_actions: function(state) {
 		var $ul = this.$wrapper.find("ul");
 		$ul.empty();
-		$.each(wn.model.get("Workflow Transition", {
+		$.each(wn.meta.get("Workflow Transition", {
 			parent: this.frm.doctype,
 			state: state,
 		}), function(i, d) {
 			if(in_list(user_roles, d.allowed)) {
-				d.icon = wn.model.get("Workflow State", {name:d.next_state})[0].icon;
+				d.icon = wn.meta.get("Workflow State", {name:d.next_state})[0].icon;
 				
 				$(repl('<li><a href="#" data-action="%(action)s">\
 					<i class="icon icon-%(icon)s"></i> %(action)s</a></li>', d))
@@ -97,7 +97,7 @@ wn.ui.form.States = Class.extend({
 	},
 
 	set_default_state: function() {
-		var d = wn.model.get("Workflow Document State", {
+		var d = wn.meta.get("Workflow Document State", {
 			parent: this.frm.doctype,
 			idx: 1
 		});
@@ -112,7 +112,7 @@ wn.ui.form.States = Class.extend({
 	get_state: function() {
 		if(!this.frm.doc[this.state_fieldname]) {
 			this.set_default_state();
-		}
+		}			
 		return this.frm.doc[this.state_fieldname];
 	},
 	
@@ -120,14 +120,14 @@ wn.ui.form.States = Class.extend({
 		var me = this;
 		$(this.$wrapper).on("click", "[data-action]", function() {
 			var action = $(this).attr("data-action");
-			var next_state = wn.model.get("Workflow Transition", {
+			var next_state = wn.meta.get("Workflow Transition", {
 				parent: me.frm.doctype,
 				action: action
 			})[0].next_state;
 			
 			me.frm.doc[me.state_fieldname] = next_state;
 			
-			var new_docstatus = wn.model.get("Workflow Document State", {
+			var new_docstatus = wn.meta.get("Workflow Document State", {
 				parent: me.frm.doctype,
 				state: next_state
 			})[0].doc_status;

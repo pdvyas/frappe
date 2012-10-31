@@ -109,15 +109,14 @@ wn.model = {
 	},
 	
 	copy_doc: function(dt, dn, from_amend) {
-		var no_copy_list = ['amended_from','amendment_date','cancel_reason'];
+		var no_copy_list = ['name','amended_from','amendment_date','cancel_reason'];
 		var newdoc = wn.model.get_new_doc(dt);
 
 		for(var key in locals[dt][dn]) {
 			// dont copy name and blank fields
 			var df = wn.meta.get_docfield(dt, key);
 			
-			if(key!=='name' 
-				&& key.substr(0,2)!='__' 
+			if(key.substr(0,2)!='__' 
 				&& !in_list(no_copy_list, key) 
 				&& !(df && (!from_amend && cint(df.no_copy)==1))) { 
 				newdoc[key] = locals[dt][dn][key];
@@ -256,11 +255,6 @@ wn.model = {
 		l.sort(function(a,b) { return cint(a.idx) - cint(b.idx) }); 
 		$.each(l, function(i, v) { v.idx = i+1; }); // for chrome bugs ???
 		return l; 
-	},
-
-	get_state_fieldname: function(doctype) {
-		var wf = wn.meta.get("Workflow", {document_type: doctype});
-		return wf.length ? wf[0].workflow_state_field : null;
 	},
 
 	get_doclist: function(doctype, name) {

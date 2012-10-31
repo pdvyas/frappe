@@ -136,8 +136,9 @@ class DocType:
 		"""export permissions file"""
 		permissions = webnotes.conn.sql("""select * from tabDocPerm 
 			where document_type=%s""", self.doc.name, as_dict=True, no_system_fields=True)
-		with open(self.permpath, 'w') as permfile:
-			permfile.write(json.dumps(permissions, indent=1))
+		if permissions:
+			with open(self.permpath, 'w') as permfile:
+				permfile.write(json.dumps(permissions, indent=1))
 			
 	def reset_permissions(self):
 		from webnotes.model.doc import Document

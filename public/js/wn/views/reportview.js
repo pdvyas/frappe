@@ -272,7 +272,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		// setup workflow metadata
 		var me = this;
 
-		this.state_fieldname = wn.model.get_state_fieldname(this.doctype);
+		this.state_fieldname = wn.meta.get_state_fieldname(this.doctype);
 		this.state_map = {};
 		$.each(wn.meta.get("Workflow State"), function(i, d) {
 			me.state_map[d.name] = d;
