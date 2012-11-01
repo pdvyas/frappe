@@ -99,6 +99,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		$("<div class='report-head'></div><div class='report-grid'></div>")
 			.appendTo(this.wrapper)
 			
+		this.state_fieldname = wn.meta.get_state_fieldname(this.doctype);
 		this.make({
 			title: this.no_title ? "" : ('Report: ' + (this.docname ? (this.doctype + ' - ' + this.docname) : this.doctype)),
 			appframe: this.page.appframe,
@@ -192,7 +193,13 @@ wn.views.ReportView = wn.ui.Listing.extend({
 				width: (docfield ? cint(docfield.width) : 120) || 120,
 				formatter: function(row, cell, value, columnDef, dataContext) {
 					var docfield = columnDef.docfield;
-					return wn.form.get_formatter(docfield ? docfield.fieldtype : "Data")(value, docfield);
+					
+					// workflow state formatter
+					if(docfield.fieldname==me.state_fieldname) {
+						return wn.form.formatters.WorkflowState(value);
+					} else {
+						return wn.form.get_formatter(docfield ? docfield.fieldtype : "Data")(value, docfield);
+					}
 				}
 			}
 
@@ -230,25 +237,33 @@ wn.views.ReportView = wn.ui.Listing.extend({
 			enableCellNavigation: true,
 			enableColumnReorder: false
 		};
+		
+		if(this.slickgrid_options) {
+			$.extend(options, this.slickgrid_options);
+		}
 
 		this.col_defs = columns;
 
 		this.dataView = new Slick.Data.DataView();
 		this.set_data(this.data);
-		this.set_row_formatters();		
 	
-		this.grid = new Slick.Grid(this.$w.find('.result-list')
-			.css('border', '1px solid grey')
-			.css('height', '500px')
+		grid_wrapper = this.$w.find('.result-list');
+		
+		this.grid = new Slick.Grid(grid_wrapper
+			.css('border', '1px solid #ccc')
+			.css('border-top', '0px')
 			.get(0), this.dataView, 
 			columns, options);
+			
+		// set height if not auto
+		if(!options.autoHeight) grid_wrapper.css('height', '500px');
 
 		if(in_list(wn.boot.profile.can_write, this.doctype)) {
 			this.grid.setSelectionModel(new Slick.RowSelectionModel());
 			this.set_edit();
 		}
 		wn.slickgrid_tools.add_property_setter_on_resize(this.grid);
-		if(this.start!=0) {
+		if(this.start!=0 && !options.autoHeight) {
 			this.grid.scrollRowIntoView(this.data.length-1);
 		}
 	},
@@ -267,146 +282,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 			}
 		});
 	},
-	
-	set_row_formatters: function() {
-		// setup workflow metadata
-		var me = this;
-
-		this.state_fieldname = wn.meta.get_state_fieldname(this.doctype);
-		this.state_map = {};
-		$.each(wn.meta.get("Workflow State"), function(i, d) {
-			me.state_map[d.name] = d;
-		})
 		
-		this.dataView.getItemMetadata = function(row) {
-			var item = me.data[row];
-			var ret = null;
-			
-			if(me.state_map[item[me.state_fieldname]]) {
-				ret = { cssClasses: 'row-' + me.state_map[item[me.state_fieldname]].style.toLowerCase() }
-			}
-
-			return ret;
-		}
-	},
-	
-	set_edit: function() {
-		var $head = $(this.wrapper).find(".report-head");
-		$("<div class='alert'>This report is editable</div>")
-			.appendTo($head.empty());
-		
-		var me = this;
-		this.grid.onClick.subscribe(function(e, args) {
-			// need to understand slickgrid event model
-			// a bit better. This function also gets called
-			// in form (??)
-			if(!$(me.wrapper).is(":visible")) return;
-			
-			// clicked on link
-			if(e.target.tagName.toLowerCase()=="a") {
-				e.stopImmediatePropagation();
-				return false;
-			}
-			
-			if(me.selected_row == args.row) {
-				var docfield = me.col_defs[args.cell].docfield;
-				var fieldname = me.col_defs[args.cell].field;
-				var item = me.data[args.row];
-				
-				if(cint(item.docstatus) > 0) {
-					msgprint("Cannot edit Submitted / Cancelled records");
-					e.stopImmediatePropagation();
-					return false;
-				}
-				
-				if(!docfield) return false;
-				
-				if(in_list(['name', 'idx', 'owner', 'creation', 'modified_by', 
-					'modified', 'parent', 'parentfield', 'parenttype', 'file_list', 'trash_reason'], 
-					docfield.fieldname)) {
-					msgprint("This field is not editable");
-					e.stopImmediatePropagation();
-					return false;
-				}
-				
-				if(docfield.permlevel!=0) {
-					msgprint("Not permitted to edit the field. (Permlevel is "+docfield.permlevel+")");
-					e.stopImmediatePropagation();
-					return false;
-				}
-				
-				if(docfield.fieldtype=="Read Only") {
-					msgprint("Cannot edit read only field");
-					e.stopImmediatePropagation();
-					return false;
-				}
-				
-				var name_field = docfield.parent + ":name";
-				if(docfield && item[name_field]) {
-					me.edit_dialog = new wn.ui.Dialog({
-						title: item[name_field],
-						width: 700,
-						fields: [
-							copy_dict(docfield),
-							{fieldname:'update', label:'Update', fieldtype:'Button'}
-						]
-					});
-					me.edit_dialog.fields_dict[docfield.fieldname].set_value(item[fieldname])
-					
-					me.edit_dialog.fields_dict.update.$input.click(function() {
-						// parent
-						var call_args = {
-							doctype: me.doctype,
-							name: item[name_field],
-							fieldname: docfield.fieldname,
-							value: {
-								value: me.edit_dialog.fields_dict[docfield.fieldname].get_value()
-							}
-						};
-						
-						if(docfield.parent && docfield.parent!=me.doctype) {
-							call_args.parenttype = docfield.parent;
-							call_args.parent = item[me.doctype + ":name"];
-						}
-	
-						wn.call({
-							method: 'webnotes.client.update_value',
-							args: call_args,
-							callback: function(r) {
-								if(r.exc) {
-									msgprint('Could not update');
-								} else {
-									// update all rows from the doclist
-									$.each(me.data, function(i, row) {
-										$.each(r.message, function(j, d) {
-											if(row && d && row[d.doctype + ":name"]==d.name) {
-												for(key in d) {
-													row[d.doctype + ":" + key] = d[key];
-												}
-												r.message.splice(j, 1);
-											}
-										});
-									});
-									me.edit_dialog.hide();
-									me.set_data(me.data);
-									me.grid.invalidate();
-									me.grid.render();
-								}
-							},
-							btn: this
-						})
-					});
-										
-					me.edit_dialog.show();
-					
-				}
-			}
-			me.selected_row = args.row;
-			return false;
-		});
-		
-	},
-	
 	// setup column picker
 	make_column_picker: function() {
 		var me = this;
@@ -552,7 +428,125 @@ wn.views.ReportView = wn.ui.Listing.extend({
 				});
 			}, 'icon-upload');
 		}
-	}
+	},
+
+	set_edit: function() {
+		var $head = $(this.wrapper).find(".report-head");
+		$("<div class='alert'>This report is editable</div>")
+			.appendTo($head.empty());
+		
+		var me = this;
+		this.grid.onClick.subscribe(function(e, args) {
+			// need to understand slickgrid event model
+			// a bit better. This function also gets called
+			// in form (??)
+			if(!$(me.wrapper).is(":visible")) return;
+			
+			// clicked on link
+			if(e.target.tagName.toLowerCase()=="a") {
+				e.stopImmediatePropagation();
+				return false;
+			}
+			
+			if(me.selected_row == args.row) {
+				var docfield = me.col_defs[args.cell].docfield;
+				var fieldname = me.col_defs[args.cell].field;
+				var item = me.data[args.row];
+				
+				if(cint(item.docstatus) > 0) {
+					msgprint("Cannot edit Submitted / Cancelled records");
+					e.stopImmediatePropagation();
+					return false;
+				}
+				
+				if(!docfield) return false;
+				
+				if(in_list(['name', 'idx', 'owner', 'creation', 'modified_by', 
+					'modified', 'parent', 'parentfield', 'parenttype', 'file_list', 'trash_reason'], 
+					docfield.fieldname)) {
+					msgprint("This field is not editable");
+					e.stopImmediatePropagation();
+					return false;
+				}
+				
+				if(docfield.permlevel!=0) {
+					msgprint("Not permitted to edit the field. (Permlevel is "+docfield.permlevel+")");
+					e.stopImmediatePropagation();
+					return false;
+				}
+				
+				if(docfield.fieldtype=="Read Only") {
+					msgprint("Cannot edit read only field");
+					e.stopImmediatePropagation();
+					return false;
+				}
+				
+				var name_field = docfield.parent + ":name";
+				if(docfield && item[name_field]) {
+					me.edit_dialog = new wn.ui.Dialog({
+						title: item[name_field],
+						width: 700,
+						fields: [
+							copy_dict(docfield),
+							{fieldname:'update', label:'Update', fieldtype:'Button'}
+						]
+					});
+					me.edit_dialog.fields_dict[docfield.fieldname].set_value(item[fieldname])
+					
+					me.edit_dialog.fields_dict.update.$input.click(function() {
+						// parent
+						var call_args = {
+							doctype: me.doctype,
+							name: item[name_field],
+							fieldname: docfield.fieldname,
+							value: {
+								value: me.edit_dialog.fields_dict[docfield.fieldname].get_value()
+							}
+						};
+						
+						if(docfield.parent && docfield.parent!=me.doctype) {
+							call_args.parenttype = docfield.parent;
+							call_args.parent = item[me.doctype + ":name"];
+						}
+	
+						wn.call({
+							method: 'webnotes.client.update_value',
+							args: call_args,
+							callback: function(r) {
+								if(r.exc) {
+									msgprint('Could not update');
+								} else {
+									// update all rows from the doclist
+									$.each(me.data, function(i, row) {
+										$.each(r.message, function(j, d) {
+											if(row && d && row[d.doctype + ":name"]==d.name) {
+												for(key in d) {
+													row[d.doctype + ":" + key] = d[key];
+												}
+												r.message.splice(j, 1);
+											}
+										});
+									});
+									me.edit_dialog.hide();
+									me.set_data(me.data);
+									me.grid.invalidate();
+									me.grid.render();
+								}
+							},
+							btn: this
+						})
+					});
+										
+					me.edit_dialog.show();
+					
+				}
+			}
+			me.selected_row = args.row;
+			return false;
+		});
+		
+	},
+	
 });
 
 wn.ui.ColumnPicker = Class.extend({
