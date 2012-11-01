@@ -789,8 +789,11 @@ _f.Frm.prototype.savesubmit = function(btn) {
 }
 
 _f.Frm.prototype.savecancel = function(btn) {
-	this.doc.docstatus = 2;
-	this.save(null, btn);
+	var me = this;
+	var doclist = new wn.model.DocList(this.doctype, this.docname);
+	doclist.cancel(function(r) {
+		if(!r.exc) me.refresh();
+	}, btn);
 }
 
 _f.Frm.prototype.runscript = function(scriptname, callingfield, onrefresh) {

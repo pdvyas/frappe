@@ -114,8 +114,7 @@ class Controller:
 				self.run_method("on_update_after_submit")
 		
 		elif self.doc.docstatus==2:
-			# QUESTION: shouldn't on_cancel be called here?
-			self.run_method('on_trash')
+			self.run_method('on_cancel')
 			
 		else:
 			webnotes.msgprint("docstatus must be one of (0, 1, 2)")
@@ -189,8 +188,11 @@ class Controller:
 			d.docstatus = self.doc.docstatus
 
 	def check_docstatus(self):
-		self.cur_docstatus = webnotes.conn.get_value(self.doc.doctype, 
-			self.doc.name, "docstatus")
+		# if docstatus is None, it gets stored as 0
+		self.doc.docstatus = cint(self.doc.docstatus)
+		
+		self.cur_docstatus = cint(webnotes.conn.get_value(self.doc.doctype, 
+			self.doc.name, "docstatus"))
 			
 		if self.doc.docstatus==0 and self.cur_docstatus > 0:
 			webnotes.msgprint("""Document cannot be coverted back to Draft, please cancel and amend.""",
