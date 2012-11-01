@@ -87,6 +87,8 @@ wn.form.TableField = wn.form.Field.extend({
 
 				me.slickgrid.setActiveCell(newrow.idx-1, 
 					active_cell ? active_cell.cell : 2);
+				me.slickgrid.editActiveCell();
+					
 				me.frm.set_unsaved();
 			});
 		$('<button class="btn btn-small"><i class="icon-small icon-remove"></i> Delete</button>')
@@ -160,15 +162,17 @@ wn.form.TableField = wn.form.Field.extend({
 	setup_edit_dialog: function() {
 		var me = this;
 		this.slickgrid.onDblClick.subscribe(function(e, args) {
-			var d = me.data[args.row];
-			_f.edit_record(d.doctype, d.name, me.frm, me)			
+			if(args.cell==0 || args.cell==1) {
+				var d = me.data[args.row];
+				_f.edit_record(d.doctype, d.name, me.frm, me);				
+			}
 		})
 		
 	},
 	
 	setup_permissions: function() {
 		var me = this;
-		this.slickgrid.onBeforeEditCell.subscribe(function(e, args) {			
+		this.slickgrid.onBeforeEditCell.subscribe(function(e, args) {
 			var df = args.column.docfield;
 			if(me.disp_status=="Write") {
 				if(me.frm.perm[me.df.permlevel]
@@ -253,9 +257,7 @@ wn.form.TableField = wn.form.Field.extend({
 						docfield: d,
 						frm: me.frm,
 						table_field: me,
-						editor: (d.fieldtype=="Text" || d.fieldtype=="Small Text" 
-							? wn.form.SlickLongTextEditorAdapter 
-							: wn.form.SlickEditorAdapter),
+						editor: wn.form.get_editor(d),
 						formatter: function(row, cell, value, columnDef, dataContext) {
 							var docfield = columnDef.docfield;
 							return wn.form.get_formatter(docfield ? docfield.fieldtype : "Data")(value, docfield);
@@ -317,8 +319,8 @@ wn.form.TableField = wn.form.Field.extend({
 			// set active
 			if(active_cell) {
 				this.slickgrid.setActiveCell(active_cell.row, active_cell.cell);
+				this.slickgrid.editActiveCell();
 			}
-			$('.slick-cell.active').click();
 			
 		}
 

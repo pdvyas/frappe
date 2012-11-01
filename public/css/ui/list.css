@@ -145,20 +145,26 @@ table.doclist-row td {
 /* slickgrid formatters */
 .listview-area .slick-cell {
 	border: 0px;
+	cursor: pointer;
 }
+
 
 /* slickgrid formatters */
 .listview-area .slick-header-column {
 	border: 0px;
 }
 
-.listview-area .slick-row.odd .slick-cell {
-	background-color: #eeeef2;
+.slick-row.odd {
+	background-color: #f3f3f8;
 }
 /* row formatters */
 
 .row-blue, .row-primary, .row-info {
 	background-color: #eef;
+}
+
+.listview-area .slick-row:hover {
+	background-color: #e8e8f2;
 }
 
 .row-red, .row-danger {

@@ -40,7 +40,9 @@ wn.form.formatters = {
 	Link: function(value, docfield) {
 		if(!value) return "";
 		if(docfield.options) {
-			return repl('<a href="#Form/%(doctype)s/%(name)s">%(name)s</a>', {
+			return repl('<a href="#Form/%(doctype)s/%(name)s">\
+				<i class="icon icon-share" title="Open %(name)s" \
+				style="margin-top:-1px"></i></a> %(name)s', {
 				doctype: docfield.options,
 				name: value
 			});			
@@ -70,7 +72,8 @@ wn.form.formatters = {
 		workflow_state = wn.meta.get("Workflow State", value)[0];
 		if(workflow_state) {
 			return repl("<span class='label label-%(style)s' \
-				style='padding-bottom: 4px;'>\
+				data-workflow-state='%(value)s'\
+				style='padding-bottom: 4px; cursor: pointer;'>\
 				<i class='icon-small icon-white icon-%(icon)s'></i> %(value)s</span>", {
 					value: value,
 					style: workflow_state.style.toLowerCase(),

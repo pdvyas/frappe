@@ -118,7 +118,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		this.make_export();
 		this.set_init_columns();
 		this.make_save();
-		this.set_tag_filter();
+		this.set_tag_and_status_filter();
 	},
 	
 	// preset columns and filters from saved info
@@ -200,7 +200,8 @@ wn.views.ReportView = wn.ui.Listing.extend({
 					} else {
 						return wn.form.get_formatter(docfield ? docfield.fieldtype : "Data")(value, docfield);
 					}
-				}
+				},
+				editor: (docfield ? wn.form.get_editor(docfield) : null)
 			}
 
 			return coldef;
@@ -235,7 +236,9 @@ wn.views.ReportView = wn.ui.Listing.extend({
 
 		var options = {
 			enableCellNavigation: true,
-			enableColumnReorder: false
+			enableColumnReorder: false,
+			editable: in_list(wn.boot.profile.can_write, this.doctype) ? true : false,
+			rowHeight: 30
 		};
 		
 		if(this.slickgrid_options) {
@@ -254,14 +257,12 @@ wn.views.ReportView = wn.ui.Listing.extend({
 			.css('border-top', '0px')
 			.get(0), this.dataView, 
 			columns, options);
+		
+		if(options.editable) this.setup_edit();
 			
 		// set height if not auto
 		if(!options.autoHeight) grid_wrapper.css('height', '500px');
 
-		if(in_list(wn.boot.profile.can_write, this.doctype)) {
-			this.grid.setSelectionModel(new Slick.RowSelectionModel());
-			this.set_edit();
-		}
 		wn.slickgrid_tools.add_property_setter_on_resize(this.grid);
 		if(this.start!=0 && !options.autoHeight) {
 			this.grid.scrollRowIntoView(this.data.length-1);
@@ -274,11 +275,17 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		this.dataView.endUpdate();
 	},
 	
-	set_tag_filter: function() {
+	set_tag_and_status_filter: function() {
 		var me = this;
 		this.$w.find('.result-list').on("click", ".label-info", function() {
 			if($(this).attr("data-label")) {
 				me.set_filter("_user_tags", $(this).attr("data-label"));
+			}
+		});
+		this.$w.find('.result-list').on("click", "[data-workflow-state]", function() {
+			if($(this).attr("data-workflow-state")) {
+				me.set_filter(me.state_fieldname, 
+					$(this).attr("data-workflow-state"));
 			}
 		});
 	},
@@ -430,123 +437,101 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		}
 	},
 
-	set_edit: function() {
+	setup_edit: function() {
+		var me = this;
+		
+		// make editable label
 		var $head = $(this.wrapper).find(".report-head");
 		$("<div class='alert'>This report is editable</div>")
 			.appendTo($head.empty());
+
+		this.setup_check_if_cell_is_editable();
 		
-		var me = this;
-		this.grid.onClick.subscribe(function(e, args) {
-			// need to understand slickgrid event model
-			// a bit better. This function also gets called
-			// in form (??)
-			if(!$(me.wrapper).is(":visible")) return;
+		$(this.wrapper).on("field-change", function(e, docfield, item, value) {
+			var name_field = docfield.parent + ":name";
 			
-			// clicked on link
-			if(e.target.tagName.toLowerCase()=="a") {
-				e.stopImmediatePropagation();
-				return false;
+			var call_args = {
+				doctype: me.doctype,
+				name: item[name_field],
+				fieldname: docfield.fieldname,
+				value: {
+					value: value
+				}
+			};
+			
+			if(docfield.parent && docfield.parent!=me.doctype) {
+				call_args.parenttype = docfield.parent;
+				call_args.parent = item[me.doctype + ":name"];
 			}
-			
-			if(me.selected_row == args.row) {
-				var docfield = me.col_defs[args.cell].docfield;
-				var fieldname = me.col_defs[args.cell].field;
-				var item = me.data[args.row];
-				
-				if(cint(item.docstatus) > 0) {
-					msgprint("Cannot edit Submitted / Cancelled records");
-					e.stopImmediatePropagation();
-					return false;
-				}
-				
-				if(!docfield) return false;
-				
-				if(in_list(['name', 'idx', 'owner', 'creation', 'modified_by', 
-					'modified', 'parent', 'parentfield', 'parenttype', 'file_list', 'trash_reason'], 
-					docfield.fieldname)) {
-					msgprint("This field is not editable");
-					e.stopImmediatePropagation();
-					return false;
-				}
-				
-				if(docfield.permlevel!=0) {
-					msgprint("Not permitted to edit the field. (Permlevel is "+docfield.permlevel+")");
-					e.stopImmediatePropagation();
-					return false;
-				}
-				
-				if(docfield.fieldtype=="Read Only") {
-					msgprint("Cannot edit read only field");
-					e.stopImmediatePropagation();
-					return false;
-				}
-				
-				var name_field = docfield.parent + ":name";
-				if(docfield && item[name_field]) {
-					me.edit_dialog = new wn.ui.Dialog({
-						title: item[name_field],
-						width: 700,
-						fields: [
-							copy_dict(docfield),
-							{fieldname:'update', label:'Update', fieldtype:'Button'}
-						]
-					});
-					me.edit_dialog.fields_dict[docfield.fieldname].set_value(item[fieldname])
-					
-					me.edit_dialog.fields_dict.update.$input.click(function() {
-						// parent
-						var call_args = {
-							doctype: me.doctype,
-							name: item[name_field],
-							fieldname: docfield.fieldname,
-							value: {
-								value: me.edit_dialog.fields_dict[docfield.fieldname].get_value()
-							}
-						};
-						
-						if(docfield.parent && docfield.parent!=me.doctype) {
-							call_args.parenttype = docfield.parent;
-							call_args.parent = item[me.doctype + ":name"];
-						}
-	
-						wn.call({
-							method: 'webnotes.client.update_value',
-							args: call_args,
-							callback: function(r) {
-								if(r.exc) {
-									msgprint('Could not update');
-								} else {
-									// update all rows from the doclist
-									$.each(me.data, function(i, row) {
-										$.each(r.message, function(j, d) {
-											if(row && d && row[d.doctype + ":name"]==d.name) {
-												for(key in d) {
-													row[d.doctype + ":" + key] = d[key];
-												}
-												r.message.splice(j, 1);
-											}
-										});
-									});
-									me.edit_dialog.hide();
-									me.set_data(me.data);
-									me.grid.invalidate();
-									me.grid.render();
+
+			wn.call({
+				method: 'webnotes.client.update_value',
+				args: call_args,
+				callback: function(r) {
+					if(r.exc) {
+						msgprint('Could not update');
+					} else {
+						// update all rows from the doclist
+						$.each(me.data, function(i, row) {
+							$.each(r.message, function(j, d) {
+								if(row && d && row[d.doctype + ":name"]==d.name) {
+									for(key in d) {
+										row[d.doctype + ":" + key] = d[key];
+									}
+									r.message.splice(j, 1);
 								}
-							},
-							btn: this
-						})
-					});
-										
-					me.edit_dialog.show();
-					
+							});
+						});
+						me.set_data(me.data);
+						me.grid.invalidate();
+						me.grid.render();
+					}
 				}
-			}
-			me.selected_row = args.row;
-			return false;
+			});			
 		});
-		
 	},
 	
+	not_editable: function(e, item) {
+		e.stopImmediatePropagation();
+		return false;		
+	},
+	
+	setup_check_if_cell_is_editable: function() {
+		var me = this;
+		this.grid.onBeforeEditCell.subscribe(function(e, args) {
+			if(e.target && e.target.tagName == "i") {
+				return;
+			}
+
+			var item = me.data[args.row];
+
+			var docfield = args.column.docfield;
+			if(!docfield) {
+				return me.not_editable(e, item, docfield);
+			}
+					
+			if(!wn.perm.has_perm(me.doctype, docfield.permlevel, WRITE)) {
+				return me.not_editable(e, item, docfield);
+			}
+			
+			
+			if(cint(item[me.doctype + ":docstatus"]) > 0) {
+				return me.not_editable(e, item, docfield);
+			}
+			
+			
+			if(in_list(['name', 'idx', 'owner', 'creation', 'modified_by', 
+				'modified', 'parent', 'parentfield', 'parenttype', 'file_list', 'trash_reason'], 
+				docfield.fieldname)) {
+				return me.not_editable(e, item, docfield);
+			}
+						
+			if(!in_list(['Data', "Text", 'Small Text', 'Int', 
+				'Select', 'Link', 'Currency', 'Float'], docfield.fieldtype)) {
+				return me.not_editable(e, item, docfield);
+			}
+		});
+	}
 });
 
 wn.ui.ColumnPicker = Class.extend({
@@ -601,13 +586,18 @@ wn.ui.ColumnPicker = Class.extend({
 		this.dialog.show();
 	},
 	add_column: function(c) {
-		var w = $('<div style="padding: 5px 5px 5px 35px; background-color: #eee; width: 70%; \
-			margin-bottom: 10px; border-radius: 3px; cursor: move;">\
+		var w = $('<div style="padding: 5px; background-color: #eee; \
+			width: 90%; margin-bottom: 10px; border-radius: 3px; cursor: move;">\
+			<img src="lib/images/ui/drag-handle.png" style="margin-right: 10px;">\
 			<a class="close" style="margin-top: 5px;">&times</a>\
 			</div>')
 			.appendTo($(this.dialog.body).find('.column-list'));
+		
 		var fieldselect = new wn.ui.FieldSelect(w, this.doctype);
-		fieldselect.$select.css('width', '90%').val((c[1] || this.doctype) + "." + c[0]);
+		
+		fieldselect.$select
+			.css({width: '70%', 'margin-top':'5px'})
+			.val((c[1] || this.doctype) + "." + c[0]);
 		w.find('.close').click(function() {
 			$(this).parent().remove();
 		});
