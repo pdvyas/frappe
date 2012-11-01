@@ -20,19 +20,43 @@
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+wn.form.get_editor = function(docfield) {
+	return (docfield.fieldtype=="Text" || docfield.fieldtype=="Small Text") 
+		? wn.form.SlickLongTextEditorAdapter 
+		: wn.form.SlickEditorAdapter;
+}
+
 wn.form.SlickEditorAdapter = function(args) {
 	var df = args.column.docfield;
 	var me = this;
 	this.init = function() {
-		if(!args.item.name) {
-			args.item.name = args.column.table_field.add_row().name;
+		me.make_field()
+		me.bind_keystrokes();
+		
+		// set default value in select if not set
+		if(df.fieldtype=="Select" 
+			&& !args.item[args.column.field]
+			&& args.item[args.column.field] != me.field.$input.val()) {
+			me.field.set_model(me.field.$input.val());
 		}
-
+	}
+	
+	this.make_field = function() {
 		me.field = make_field(df, df.parent, args.container, args.column.frm, true);
 		me.field.docname = args.item.name;
-		me.field.grid = args.column.table_field.grid; // helpers
+		me.field.grid = args.column.table_field ? args.column.table_field.grid : null; // helpers
 		me.field.make_inline();
-		me.field.refresh();
+		if(args.column.frm) {
+			// for form
+			me.field.refresh();			
+		} else {
+			// for report
+			me.field.item = args.item;
+			me.field.refresh();
+		}		
+	}
+	
+	this.bind_keystrokes = function() {
 		me.field.$wrapper.find(":input").bind("keydown", function(e) {
 			if (e.keyCode == $.ui.keyCode.LEFT || e.keyCode == $.ui.keyCode.RIGHT) {
 				e.stopImmediatePropagation();
@@ -43,12 +67,7 @@ wn.form.SlickEditorAdapter = function(args) {
 				}			
 			}
 		});
-		me.field.set_focus();
-		
-		// set default value in select if not set
-		if(df.fieldtype=="Select" && !args.item[df.fieldname]) {
-			me.field.set_model(me.field.$input.val());
-		}
+		me.field.set_focus();		
 	}
 
 	this.destroy = function () {
@@ -68,7 +87,7 @@ wn.form.SlickEditorAdapter = function(args) {
 	};
 
 	this.loadValue = function (item) {
-		me.field.set_value(item[df.fieldname]);
+		me.field.set_value(item[args.column.field]);
 	};
 
 	this.isValueChanged = function () {
@@ -104,10 +123,6 @@ wn.form.SlickLongTextEditorAdapter = function (args) {
 	var scope = this;
 
 	this.init = function () {
-		if(!args.item.name) {
-			args.item.name = args.column.table_field.add_row().name;
-		}
-
 		var $container = $("body");
 
 		$wrapper = $("<DIV style='z-index:10000;position:absolute;background:white;padding:5px;border:3px solid gray; -moz-border-radius:10px; border-radius:10px;'/>")
@@ -186,7 +201,12 @@ wn.form.SlickLongTextEditorAdapter = function (args) {
 
 	this.applyValue = function (item, state) {
 		item[args.column.field] = state;
-		locals[args.item.doctype][args.item.name][args.column.field] = state;
+		if(args.column.frm) {
+			locals[args.item.doctype][args.item.name][args.column.field] = state;			
+		} else {
+			$(args.container).trigger('field-change', 
+				[args.column.docfield, args.item, state])
+		}
 	};
 
 	this.isValueChanged = function () {

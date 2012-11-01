@@ -257,9 +257,7 @@ wn.form.TableField = wn.form.Field.extend({
 						docfield: d,
 						frm: me.frm,
 						table_field: me,
-						editor: (d.fieldtype=="Text" || d.fieldtype=="Small Text" 
-							? wn.form.SlickLongTextEditorAdapter 
-							: wn.form.SlickEditorAdapter),
+						editor: wn.form.get_editor(d),
 						formatter: function(row, cell, value, columnDef, dataContext) {
 							var docfield = columnDef.docfield;
 							return wn.form.get_formatter(docfield ? docfield.fieldtype : "Data")(value, docfield);

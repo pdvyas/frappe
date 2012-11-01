@@ -200,7 +200,8 @@ wn.views.ReportView = wn.ui.Listing.extend({
 					} else {
 						return wn.form.get_formatter(docfield ? docfield.fieldtype : "Data")(value, docfield);
 					}
-				}
+				},
+				editor: (docfield ? wn.form.get_editor(docfield) : null)
 			}
 
 			return coldef;
@@ -235,7 +236,9 @@ wn.views.ReportView = wn.ui.Listing.extend({
 
 		var options = {
 			enableCellNavigation: true,
-			enableColumnReorder: false
+			enableColumnReorder: false,
+			editable: in_list(wn.boot.profile.can_write, this.doctype) ? true : false,
+			rowHeight: 30
 		};
 		
 		if(this.slickgrid_options) {
@@ -254,14 +257,12 @@ wn.views.ReportView = wn.ui.Listing.extend({
 			.css('border-top', '0px')
 			.get(0), this.dataView, 
 			columns, options);
+		
+		if(options.editable) this.setup_edit();
 			
 		// set height if not auto
 		if(!options.autoHeight) grid_wrapper.css('height', '500px');
 
-		if(in_list(wn.boot.profile.can_write, this.doctype)) {
-			this.grid.setSelectionModel(new Slick.RowSelectionModel());
-			this.set_edit();
-		}
 		wn.slickgrid_tools.add_property_setter_on_resize(this.grid);
 		if(this.start!=0 && !options.autoHeight) {
 			this.grid.scrollRowIntoView(this.data.length-1);
@@ -436,123 +437,99 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		}
 	},
 
-	set_edit: function() {
+	setup_edit: function() {
+		var me = this;
+		
+		// make editable label
 		var $head = $(this.wrapper).find(".report-head");
 		$("<div class='alert'>This report is editable</div>")
 			.appendTo($head.empty());
+
+		this.setup_check_if_cell_is_editable();
 		
-		var me = this;
-		this.grid.onClick.subscribe(function(e, args) {
-			// need to understand slickgrid event model
-			// a bit better. This function also gets called
-			// in form (??)
-			if(!$(me.wrapper).is(":visible")) return;
+		$(this.wrapper).on("field-change", function(e, docfield, item, value) {
+			var name_field = docfield.parent + ":name";
 			
-			// clicked on link
-			if(e.target.tagName.toLowerCase()=="a") {
+			var call_args = {
+				doctype: me.doctype,
+				name: item[name_field],
+				fieldname: docfield.fieldname,
+				value: {
+					value: value
+				}
+			};
+			
+			if(docfield.parent && docfield.parent!=me.doctype) {
+				call_args.parenttype = docfield.parent;
+				call_args.parent = item[me.doctype + ":name"];
+			}
+
+			wn.call({
+				method: 'webnotes.client.update_value',
+				args: call_args,
+				callback: function(r) {
+					if(r.exc) {
+						msgprint('Could not update');
+					} else {
+						// update all rows from the doclist
+						$.each(me.data, function(i, row) {
+							$.each(r.message, function(j, d) {
+								if(row && d && row[d.doctype + ":name"]==d.name) {
+									for(key in d) {
+										row[d.doctype + ":" + key] = d[key];
+									}
+									r.message.splice(j, 1);
+								}
+							});
+						});
+						me.set_data(me.data);
+						me.grid.invalidate();
+						me.grid.render();
+					}
+				}
+			});			
+		});
+	},
+	
+	setup_check_if_cell_is_editable: function() {
+		var me = this;
+		this.grid.onBeforeEditCell.subscribe(function(e, args) {
+			if(e.target && e.target.tagName == "i") {
+				return;
+			}
+			
+			var docfield = args.column.docfield;
+			var item = me.data[args.row];
+			
+			if(cint(item.docstatus) > 0) {
+				msgprint("Cannot edit Submitted / Cancelled records");
 				e.stopImmediatePropagation();
 				return false;
 			}
 			
-			if(me.selected_row == args.row) {
-				var docfield = me.col_defs[args.cell].docfield;
-				var fieldname = me.col_defs[args.cell].field;
-				var item = me.data[args.row];
-				
-				if(cint(item.docstatus) > 0) {
-					msgprint("Cannot edit Submitted / Cancelled records");
-					e.stopImmediatePropagation();
-					return false;
-				}
-				
-				if(!docfield) return false;
-				
-				if(in_list(['name', 'idx', 'owner', 'creation', 'modified_by', 
-					'modified', 'parent', 'parentfield', 'parenttype', 'file_list', 'trash_reason'], 
-					docfield.fieldname)) {
-					msgprint("This field is not editable");
-					e.stopImmediatePropagation();
-					return false;
-				}
-				
-				if(docfield.permlevel!=0) {
-					msgprint("Not permitted to edit the field. (Permlevel is "+docfield.permlevel+")");
-					e.stopImmediatePropagation();
-					return false;
-				}
-				
-				if(docfield.fieldtype=="Read Only") {
-					msgprint("Cannot edit read only field");
-					e.stopImmediatePropagation();
-					return false;
-				}
-				
-				var name_field = docfield.parent + ":name";
-				if(docfield && item[name_field]) {
-					me.edit_dialog = new wn.ui.Dialog({
-						title: item[name_field],
-						width: 700,
-						fields: [
-							copy_dict(docfield),
-							{fieldname:'update', label:'Update', fieldtype:'Button'}
-						]
-					});
-					me.edit_dialog.fields_dict[docfield.fieldname].set_value(item[fieldname])
-					
-					me.edit_dialog.fields_dict.update.$input.click(function() {
-						// parent
-						var call_args = {
-							doctype: me.doctype,
-							name: item[name_field],
-							fieldname: docfield.fieldname,
-							value: {
-								value: me.edit_dialog.fields_dict[docfield.fieldname].get_value()
-							}
-						};
-						
-						if(docfield.parent && docfield.parent!=me.doctype) {
-							call_args.parenttype = docfield.parent;
-							call_args.parent = item[me.doctype + ":name"];
-						}
-	
-						wn.call({
-							method: 'webnotes.client.update_value',
-							args: call_args,
-							callback: function(r) {
-								if(r.exc) {
-									msgprint('Could not update');
-								} else {
-									// update all rows from the doclist
-									$.each(me.data, function(i, row) {
-										$.each(r.message, function(j, d) {
-											if(row && d && row[d.doctype + ":name"]==d.name) {
-												for(key in d) {
-													row[d.doctype + ":" + key] = d[key];
-												}
-												r.message.splice(j, 1);
-											}
-										});
-									});
-									me.edit_dialog.hide();
-									me.set_data(me.data);
-									me.grid.invalidate();
-									me.grid.render();
-								}
-							},
-							btn: this
-						})
-					});
-										
-					me.edit_dialog.show();
-					
-				}
+			if(!docfield) return false;
+			
+			if(in_list(['name', 'idx', 'owner', 'creation', 'modified_by', 
+				'modified', 'parent', 'parentfield', 'parenttype', 'file_list', 'trash_reason'], 
+				docfield.fieldname)) {
+				msgprint("This field is not editable");
+				e.stopImmediatePropagation();
+				return false;
 			}
-			me.selected_row = args.row;
-			return false;
+			
+			if(docfield.permlevel!=0) {
+				msgprint("Not permitted to edit the field. (Permlevel is "+docfield.permlevel+")");
+				e.stopImmediatePropagation();
+				return false;
+			}
+			
+			if(docfield.fieldtype=="Read Only") {
+				msgprint("Cannot edit read only field");
+				e.stopImmediatePropagation();
+				return false;
+			}
 		});
-		
-	},
-	
+	}
 });
 
 wn.ui.ColumnPicker = Class.extend({

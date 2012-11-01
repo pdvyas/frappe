@@ -147,6 +147,9 @@ table.doclist-row td {
 	border: 0px;
 }
 
+.listview-area .slick-row {
+}
+
 /* slickgrid formatters */
 .listview-area .slick-header-column {
 	border: 0px;

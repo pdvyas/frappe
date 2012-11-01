@@ -139,7 +139,10 @@ wn.form.Field = Class.extend({
 	
 	set_model: function(val, no_trigger) {
 		// update locals
-		if(!this.frm) return;
+		if(!this.frm) {
+			this.$wrapper.trigger("field-change", [this.df, this.item, val]);
+			return;
+		}
 
 		this.refresh_mandatory(val);
 		this.frm.set_value_in_locals(this.doctype, this.docname, this.df.fieldname, val);
@@ -352,7 +355,6 @@ wn.form.DateField = wn.form.DataField.extend({
 		}
 		var t = v.split('-');
 		if(t.length!=3) { 
-			console.log(t);
 			return this.clear(); 
 		}
 		else if(cint(t[1])>12 || cint(t[1])<1) { return this.clear(); }
