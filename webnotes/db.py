@@ -119,7 +119,8 @@ class Database:
 			raise Execption
 	
 	def sql(self, query, values=(), as_dict = 0, as_list = 0, formatted = 0, 
-		debug=0, ignore_ddl=0, as_utf8=0, auto_commit=0):
+		debug=0, ignore_ddl=0, as_utf8=0, auto_commit=0, no_system_fields=0,
+		update=None):
 		"""
 		      * Execute a `query`, with given `values`
 		      * returns as a dictionary if as_dict = 1
@@ -151,22 +152,40 @@ class Database:
 				raise e
 
 		if auto_commit: self.commit()
-
+		
 		# scrub output if required
 		if as_dict:
-			return self.fetch_as_dict(formatted, as_utf8)
+			data = self.fetch_as_dict(formatted, as_utf8)
+			if no_system_fields:
+				self.remove_system_fields(data)
+			if update:
+				[d.update(update) for d in data]				
 		elif as_list:
-			return self.convert_to_lists(self._cursor.fetchall(), formatted, as_utf8)
+			data = self.convert_to_lists(self._cursor.fetchall(), formatted, as_utf8)
 		elif as_utf8:
-			return self.convert_to_lists(self._cursor.fetchall(), formatted, as_utf8)
+			data = self.convert_to_lists(self._cursor.fetchall(), formatted, as_utf8)
 		else:
-			return self._cursor.fetchall()
+			data = self._cursor.fetchall()
 
-		
+		return data
+
+	def remove_system_fields(self, data):
+		"""scrub standard fields"""
+		for i, d in enumerate(data):
+			row = {}
+			for key in d:
+				if key in ('owner', 'creation', 'modified', 'modified_by'):
+					pass
+				elif key in ('parent', 'parenttype', 'parentfield', 'idx', '_user_tags'):
+					if d[key]:
+						row[key] = d[key]
+				else:
+					row[key] = d[key]
+				
+				# substitute
+				data[i] = row
+						
 	def get_description(self):
-		"""
-		      Get metadata of the last query
-		"""
 		return self._cursor.description
 
 	def convert_to_simple_type(self, v, formatted=0):

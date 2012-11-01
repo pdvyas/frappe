@@ -631,7 +631,8 @@ wn.form.SelectField = wn.form.Field.extend({
 		
 		// reset options
 		this.set_attach_options();
-		if(this.$input) this.$input.empty().add_options(this.df.options.split("\n"));
+		if(this.$input) this.$input.empty().add_options(
+			(this.df.options || "").split("\n"));
 
 		if(this.frm)
 			this.set_from_model();

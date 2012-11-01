@@ -120,8 +120,8 @@ def update_schema(docname):
 	updatedb(docname)
 
 def save_perms_if_none_exist(doclist):
-	res = webnotes.conn.sql("""SELECT name FROM `tabDocPerm`
-			WHERE parent=%s""", doclist[0].get('name'))
+	res = webnotes.conn.sql("""select name FROM `tabDocPerm`
+			WHERE document_type=%s""", doclist[0].get('name'))
 	if res and res[0][0]: return
 
 	from webnotes.model.doc import Document

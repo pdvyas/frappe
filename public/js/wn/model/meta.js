@@ -64,5 +64,12 @@ $.extend(wn.meta, {
 		var d = wn.meta.docfields[doctype];
 		d[newname] = d[oldname];
 		d[oldname] = null;
-	}
+	},
+	is_submittable: function(doctype) {
+		return wn.meta.get("DocPerm", {document_type: doctype, submit:1}).length;
+	},
+	get_state_fieldname: function(doctype) {
+		var wf = wn.meta.get("Workflow", {document_type: doctype});
+		return wf.length ? wf[0].workflow_state_field : null;
+	},
 });

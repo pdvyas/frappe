@@ -22,7 +22,7 @@
 
 from __future__ import unicode_literals
 import webnotes
-import os
+import os, json
 
 from webnotes.utils import now, cint
 msgprint = webnotes.msgprint
@@ -56,10 +56,8 @@ class DocType:
 	def set_version(self):
 		self.doc.version = cint(self.doc.version) + 1
 	
-	#
-	# check if this series is not used elsewhere
-	#
 	def validate_series(self, autoname=None, name=None):
+		"""check series is unique"""
 		sql = webnotes.conn.sql
 		if not autoname: autoname = self.doc.autoname
 		if not name: name = self.doc.name
@@ -70,9 +68,6 @@ class DocType:
 			if used_in:
 				msgprint('<b>Series already in use:</b> The series "%s" is already used in "%s"' % (prefix, used_in[0][0]), raise_exception=1)
 
-	#
-	# field validations
-	#
 	def validate_fields(self):
 		"validates fields for incorrect properties and double entries"
 		fieldnames = {}
@@ -128,19 +123,45 @@ class DocType:
 		
 	def export_doc(self):
 		from webnotes.modules.export_file import export_to_files
-		from webnotes.modules import get_module_path, scrub
-
 		export_to_files(record_list=[['DocType', self.doc.name]])
+		self.make_controller_template()
+		self.export_permissions()
+
+	@property
+	def permpath(self):
+		from webnotes.modules import get_doc_path
+		return os.path.join(get_doc_path(self.doc), 'permissions.json')
 		
-		# bootstrap a .py file from the template
-		pypath = os.path.join(get_module_path(self.doc.module), 'doctype', scrub(self.doc.name),
-			scrub(self.doc.name) + '.py')
+	def export_permissions(self):
+		"""export permissions file"""
+		permissions = webnotes.conn.sql("""select * from tabDocPerm 
+			where document_type=%s""", self.doc.name, as_dict=True, no_system_fields=True)
+		if permissions:
+			with open(self.permpath, 'w') as permfile:
+				permfile.write(json.dumps(permissions, indent=1))
+			
+	def reset_permissions(self):
+		from webnotes.model.doc import Document
+		
+		webnotes.conn.sql("""delete from tabDocPerm where document_type=%s""", self.doc.name)
+		with open(self.permpath, 'r') as permfile:
+			for perm in json.loads(permfile.read()):
+				permdoc = Document(fielddata = perm)
+				permdoc.doctype = "DocPerm"
+				permdoc.name = None
+				permdoc.save(new=True)
+	
+	def make_controller_template(self):
+		from webnotes.modules import get_doc_path, scrub
+		
+		pypath = os.path.join(get_doc_path(self.doc), scrub(self.doc.name) + '.py')
 
 		if not os.path.exists(pypath):
 			with open(pypath, 'w') as pyfile:
 				with open(os.path.join(get_module_path("core"), "doctype", "doctype", 
 					"doctype_template.py"), 'r') as srcfile:
 					pyfile.write(srcfile.read())
+		
 		
 	def import_doc(self):
 		from webnotes.modules.import_module import import_from_files

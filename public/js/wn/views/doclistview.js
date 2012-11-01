@@ -48,7 +48,7 @@ wn.views.DocListPage = Class.extend({
 		var me = this;
 
 		this.can_delete = wn.model.can_delete(this.doctype);
-		this.can_submit = wn.meta.get("DocPerm", {parent:me.doctype, submit:1}).length;
+		this.can_submit = wn.meta.is_submittable(this.doctype);
 		
 		this.make_page();
 		this.setup_docstatus_filter();
@@ -68,7 +68,7 @@ wn.views.DocListPage = Class.extend({
 		this.$page.html('<div class="layout-wrapper layout-wrapper-background">\
 			<div class="appframe-area"></div>\
 			<div class="layout-main-section">\
-				<div class="wnlist-area" style="margin-top: -15px;"></div>\
+				<div class="listview-area" style="margin-top: -15px;"></div>\
 			</div>\
 			<div class="layout-side-section">\
 				<div class="show-docstatus hide section">\
@@ -102,9 +102,13 @@ wn.views.DocListPage = Class.extend({
 		this.listing = new wn.views.DocListView({
 			doctype: this.doctype, 
 			page: this.page,
-			wrapper: $(this.page).find(".wnlist-area"),
+			wrapper: $(this.page).find(".listview-area"),
 			no_title: true,
-			can_submit: this.can_submit
+			can_submit: this.can_submit,
+			slickgrid_options: {
+				autoHeight: true
+			}
+			
 		});
 		$(this.page).find(".report-head").remove();
 	},

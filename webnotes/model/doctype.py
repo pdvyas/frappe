@@ -63,6 +63,7 @@ def get(doctype, processed=False):
 	if processed: 
 		add_code(doctype, doclist)
 		expand_selects(doclist)
+		add_permissions(doclist)
 		add_print_formats(doclist)
 		add_search_fields(doclist)
 		add_linked_with(doclist)
@@ -83,6 +84,14 @@ def load_docfield_types():
 	global docfield_types
 	docfield_types = dict(webnotes.conn.sql("""select fieldname, fieldtype from tabDocField
 		where parent='DocField'"""))
+
+def add_permissions(doclist):
+	from webnotes.model.doc import Document
+	doctype = doclist[0].name
+	docperms = [Document(fielddata=d) for d in webnotes.conn.sql("""select 
+		* from tabDocPerm  where document_type=%s""", doctype, 
+		as_dict=True, no_system_fields=True, update={"doctype":"DocPerm"})]
+	doclist.extend(docperms)
 
 def add_workflows(doclist):
 	from webnotes.model.controller import Controller
@@ -398,7 +407,9 @@ class DocTypeDocList(webnotes.model.doclist.DocList):
 		else:
 			filters["parent"] = self[0].name
 		
-		return self.getone(filters)
+		fields = self.get(filters)
+		if fields:
+			return fields[0]
 		
 	def get_fieldnames(self, filters=None):
 		if not filters: filters = {}
@@ -434,7 +445,10 @@ def rename_field(doctype, old_fieldname, new_fieldname, lookup_field=None):
 	import webnotes.model
 	doctype_list = get(doctype)
 	old_field = doctype_list.get_field(lookup_field or old_fieldname)
-	
+	if not old_field:
+		print "rename_field: " + (lookup_field or old_fieldname) + " not found."
+		
+		
 	if old_field.fieldtype == "Table":
 		# change parentfield of table mentioned in options
 		webnotes.conn.sql("""update `tab%s` set parentfield=%s

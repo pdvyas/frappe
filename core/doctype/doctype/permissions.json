@@ -1,0 +1,32 @@
+[
+ {
+  "execute": null, 
+  "idx": 1, 
+  "amend": null, 
+  "create": 1, 
+  "submit": null, 
+  "write": 1, 
+  "read": 1, 
+  "role": "Administrator", 
+  "cancel": 1, 
+  "docstatus": 0, 
+  "document_type": "DocType", 
+  "permlevel": 0, 
+  "match": null
+ },
+ {
+  "execute": null, 
+  "idx": 1, 
+  "amend": null, 
+  "create": 1, 
+  "submit": null, 
+  "write": 1, 
+  "read": 1, 
+  "role": "System Manager", 
+  "cancel": 1, 
+  "docstatus": 0, 
+  "document_type": "DocType", 
+  "permlevel": 0, 
+  "match": null
+ }
+]

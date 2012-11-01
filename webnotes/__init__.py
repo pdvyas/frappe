@@ -238,7 +238,7 @@ def get_roles(user=None, with_standard=True):
 def has_permission(doctype, ptype):
 	"""check if user has permission"""
 	return conn.sql("""select name from tabDocPerm p
-		where p.parent = %s
+		where p.document_type = %s
 		and ifnull(p.`%s`,0) = 1
 		and ifnull(p.permlevel,0) = 0
 		and p.role in (select `role` from tabUserRole where `parent`=%s)

@@ -37,7 +37,7 @@ def get_user_roles(arg=None):
 @webnotes.whitelist()
 def get_perm_info(arg=None):
 	"""get permission info"""
-	return webnotes.conn.sql("""select parent, permlevel, `read`, `write`, submit,
+	return webnotes.conn.sql("""select document_type, permlevel, `read`, `write`, submit,
 		cancel, amend from tabDocPerm where role=%s 
 		and docstatus<2 order by parent, permlevel""", 
 			webnotes.form_dict['role'], as_dict=1)

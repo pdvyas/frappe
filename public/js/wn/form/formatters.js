@@ -65,6 +65,20 @@ wn.form.formatters = {
 				data-field="_user_tags" data-label="'+v+'">'+v +'</span>';
 		});
 		return html;
+	},
+	WorkflowState: function(value) {
+		workflow_state = wn.meta.get("Workflow State", value)[0];
+		if(workflow_state) {
+			return repl("<span class='label label-%(style)s' \
+				style='padding-bottom: 4px;'>\
+				<i class='icon-small icon-white icon-%(icon)s'></i> %(value)s</span>", {
+					value: value,
+					style: workflow_state.style.toLowerCase(),
+					icon: workflow_state.icon
+				});
+		} else {
+			return "<span class='label'>" + value + "</span>";						
+		}
 	}
 }
 

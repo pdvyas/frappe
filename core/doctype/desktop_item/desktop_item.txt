@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2012-10-26 15:22:48", 
   "modified_by": "Administrator", 
-  "modified": "2012-10-30 16:11:05"
+  "modified": "2012-10-31 10:39:25"
  }, 
  {
   "description": "Desktop Item is shown as an Icon on desktop and toolbar.", 
@@ -19,19 +19,6 @@
   "doctype": "DocField", 
   "parenttype": "DocType", 
   "parentfield": "fields"
- }, 
- {
-  "parent": "Desktop Item", 
-  "read": 1, 
-  "cancel": 0, 
-  "name": "__common__", 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "parenttype": "DocType", 
-  "role": "System Manager", 
-  "permlevel": 0, 
-  "parentfield": "permissions"
  }, 
  {
   "name": "Desktop Item", 
@@ -123,8 +110,5 @@
   "fieldtype": "Table", 
   "hidden": 1, 
   "permlevel": 0
- }, 
- {
-  "doctype": "DocPerm"
  }
 ]

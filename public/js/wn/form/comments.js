@@ -110,11 +110,14 @@ wn.ui.form.Comments = Class.extend({
 				.prependTo(wrapper);
 		}
 
+		var comment_wrapper = $(wrapper).find(".latest-comment");
 		if(this.comment_list && this.comment_list.length) {
+			
 			this.get_comment(this.comment_list[0], ($(wrapper).width() - 100) + "px")
-				.appendTo($(wrapper).find(".latest-comment").empty().toggle(true));
+				.appendTo(comment_wrapper.empty().toggle(true));
+			comment_wrapper.find('.avatar img').centerImage();
 		} else {
-			$(wrapper).find(".latest-comment").toggle(false);			
+			comment_wrapper.toggle(false);
 		}
 	}
 })

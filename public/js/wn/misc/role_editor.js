@@ -109,7 +109,7 @@ wn.RoleEditor = Class.extend({
 					
 					// if permission -> icon
 					for(key in perm) {
-						if(key!='parent' && key!='permlevel') {
+						if(key!='document_type' && key!='permlevel') {
 							if(perm[key]) {
 								perm[key] = '<i class="icon-ok"></i>';
 							} else {
@@ -119,7 +119,7 @@ wn.RoleEditor = Class.extend({
 					}
 					
 					$body.find('tbody').append(repl('<tr>\
-						<td style="text-align: left">%(parent)s</td>\
+						<td style="text-align: left">%(document_type)s</td>\
 						<td>%(permlevel)s</td>\
 						<td>%(read)s</td>\
 						<td>%(write)s</td>\

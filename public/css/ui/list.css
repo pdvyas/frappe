@@ -6,7 +6,7 @@
 	margin: 7px 0px;
 }
 
-.wnlist .img-load {
+.listview .img-load {
 	display: none;
 	float: left;
 	margin-bottom: 8px;
@@ -142,6 +142,19 @@ table.doclist-row td {
 	white-space: nowrap;
 }
 
+/* slickgrid formatters */
+.listview-area .slick-cell {
+	border: 0px;
+}
+
+/* slickgrid formatters */
+.listview-area .slick-header-column {
+	border: 0px;
+}
+
+.listview-area .slick-row.odd .slick-cell {
+	background-color: #eeeef2;
+}
 /* row formatters */
 
 .row-blue, .row-primary, .row-info {

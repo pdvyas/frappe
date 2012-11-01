@@ -124,7 +124,8 @@ wn.form.TableField = wn.form.Field.extend({
 		if(this.$input) 
 			this.$input.empty();
 		else
-			this.$input = $('<div style="height: 300px; border: 1px solid grey;"></div>')
+			this.$input = $('<div style="height: 300px; \
+				border: 1px solid #ccc; border-top: 0px;"></div>')
 				.appendTo(this.wrapper)
 				.css('width', width);
 
