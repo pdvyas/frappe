@@ -25,7 +25,21 @@ var READ = 0, WRITE = 1, CREATE = 2;
 var SUBMIT = 3, CANCEL = 4, AMEND = 5;
 
 $.extend(wn.perm, {
-	
+	doctype_perm: {},
+	has_perm: function(doctype, level, type) {
+		if(!level) level = 0;
+		var perms = wn.perm.doctype_perm;
+		if(!perms[doctype]) 
+			perms[doctype] = wn.perm.get_perm(doctype);
+		
+		if(!perms[doctype])
+			return false;
+			
+		if(!perms[doctype][level])
+			return false;
+			
+		return perms[doctype][level][type];
+	},
 	get_perm: function(doctype, dn, ignore_submit) {
 		var perm = [[0,0],];
 		if(in_list(user_roles, 'Administrator')) 

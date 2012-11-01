@@ -105,6 +105,8 @@ def add_name_field_for_all_tables(tables, fields):
 	for t in tables:
 		if not t + ".name" in fields:
 			fields.append(t + ".name")
+		if not t + ".docstatus" in fields:
+			fields.append(t + ".docstatus")
 
 def set_field_labels_as_doctype_colon_fieldname(fields):
 	for i, field in enumerate(fields):

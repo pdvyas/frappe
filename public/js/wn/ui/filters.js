@@ -313,14 +313,16 @@ wn.ui.FieldSelect = Class.extend({
 
 		// main table
 		$.each(std_filters.concat(wn.meta.docfield_list[me.doctype]), function(i, df) {
-			me.add_field_option(df);
+			if(wn.perm.has_perm(me.doctype, df.permlevel, READ))
+				me.add_field_option(df);
 		});
 
 		// child tables
 		$.each(me.table_fields, function(i,table_df) {
 			if(table_df.options) {
 				$.each(wn.meta.docfield_list[table_df.options], function(i, df) {
-					me.add_field_option(df);
+					if(wn.perm.has_perm(me.doctype, df.permlevel, READ))
+						me.add_field_option(df);
 				});				
 			}
 		});
@@ -336,8 +338,9 @@ wn.ui.FieldSelect = Class.extend({
 			var label = df.label + ' (' + df.parent + ')';
 			var table = df.parent;
 		}
-		if(no_value_fields.indexOf(df.fieldtype)==-1 && 
-			!(me.fields_by_name[df.parent] && me.fields_by_name[df.parent][df.fieldname])) {
+		if(no_value_fields.indexOf(df.fieldtype)==-1 
+			&& !(me.fields_by_name[df.parent] 
+				&& me.fields_by_name[df.parent][df.fieldname])) {
 			this.$select.append($('<option>', {
 				value: table + "." + df.fieldname,
 				fieldname: df.fieldname,

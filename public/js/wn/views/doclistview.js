@@ -170,7 +170,11 @@ wn.views.DocListView = wn.views.ReportView.extend({
 		
 		return no_result_message;
 	},
-	
+	not_editable: function(e, item, docfield) {
+		if(docfield.fieldname != this.state_fieldname)
+			wn.set_route("Form", this.doctype, item[this.doctype + ":name"]);
+		return this._super(e, item);
+	}
 });
 
 // opts: stats, doctype, $page, doclistview

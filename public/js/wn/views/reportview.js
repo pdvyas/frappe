@@ -100,7 +100,6 @@ wn.views.ReportView = wn.ui.Listing.extend({
 			.appendTo(this.wrapper)
 			
 		this.state_fieldname = wn.meta.get_state_fieldname(this.doctype);
-		this.perm = wn.perm.get_perm(this.doctype)
 		this.make({
 			title: this.no_title ? "" : ('Report: ' + (this.docname ? (this.doctype + ' - ' + this.docname) : this.doctype)),
 			appframe: this.page.appframe,
@@ -492,6 +491,11 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		});
 	},
 	
+	not_editable: function(e, item) {
+		e.stopImmediatePropagation();
+		return false;		
+	},
+	
 	setup_check_if_cell_is_editable: function() {
 		var me = this;
 		this.grid.onBeforeEditCell.subscribe(function(e, args) {
@@ -499,37 +503,32 @@ wn.views.ReportView = wn.ui.Listing.extend({
 				return;
 			}
 
+			var item = me.data[args.row];
+
 			var docfield = args.column.docfield;
 			if(!docfield) {
-				e.stopImmediatePropagation();
-				return false;
+				return me.not_editable(e, item, docfield);
 			}
 					
-			if(!me.perm[docfield.permlevel || 0][WRITE]) {
-				e.stopImmediatePropagation();
-				return false;
+			if(!wn.perm.has_perm(me.doctype, docfield.permlevel, WRITE)) {
+				return me.not_editable(e, item, docfield);
 			}
 			
-			var item = me.data[args.row];
 			
-			if(cint(item.docstatus) > 0) {
-				msgprint("Cannot edit Submitted / Cancelled records");
-				e.stopImmediatePropagation();
-				return false;
+			if(cint(item[me.doctype + ":docstatus"]) > 0) {
+				return me.not_editable(e, item, docfield);
 			}
 			
 			
 			if(in_list(['name', 'idx', 'owner', 'creation', 'modified_by', 
 				'modified', 'parent', 'parentfield', 'parenttype', 'file_list', 'trash_reason'], 
 				docfield.fieldname)) {
-				e.stopImmediatePropagation();
-				return false;
+				return me.not_editable(e, item, docfield);
 			}
 						
 			if(!in_list(['Data', "Text", 'Small Text', 'Int', 
 				'Select', 'Link', 'Currency', 'Float'], docfield.fieldtype)) {
-				e.stopImmediatePropagation();
-				return false;
+				return me.not_editable(e, item, docfield);
 			}
 		});
 	}

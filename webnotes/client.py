@@ -43,7 +43,7 @@ def save(doclist=None):
 @webnotes.whitelist()
 def make_width_property_setter():
 	doclist = json.loads(webnotes.form_dict.doclist)
-	if doclist[0]["doctype"]=="Property Setter" and doclist[0]["field_name"]=="width":
+	if doclist[0]["doctype"]=="Property Setter" and doclist[0]["property"]=="width":
 		controller = Controller(doclist)
 		controller.save()
 
