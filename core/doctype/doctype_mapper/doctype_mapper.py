@@ -76,8 +76,13 @@ class DocType:
 			if [t['from_table'], t['to_table']] in eval(from_to_list):
 				self.map_fields(t, from_doctype, from_docname, to_doc, doclist)
 		
+		# perform required operations after mapping
+		controller = webnotes.get_controller(doclist)
+		if hasattr(controller, "on_map"):
+			controller.on_map()
+			
 		# Doclist is required when called from server side for refreshing table
-		return doclist
+		return controller.doclist
 
 
 	#---------------------------------------------------------------------------
