@@ -161,13 +161,9 @@ _f.Frm.prototype.setup_std_layout = function() {
 }
 
 _f.Frm.prototype.setup_print = function() { 
-	var l = []
 	this.default_format = 'Standard';
-	for(var key in locals['Print Format']) {
-		if(locals['Print Format'][key].doc_type == this.meta.name) {
-			l.push(locals['Print Format'][key].name);
-		}
-	}
+	var l = $.map(wn.meta.get("Print Format", {doc_type:this.meta.name}), 
+		function(d) { return d.name });
 
 	// if default print format is given, use it
 	if(this.meta.default_print_format)
@@ -846,7 +842,12 @@ _f.Frm.prototype.runclientscript = function(caller, cdt, cdn) {
 		// js
 		var cs = doctype.__js || (doctype.client_script_core + doctype.client_script);
 		if(cs) {
-			var tmp = eval(cs);
+			try {
+				eval(cs);				
+			} catch(e) {
+				console.log("There was error in client script while loading");
+				console.log(e);
+			}
 		}
 
 		// css
