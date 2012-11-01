@@ -100,6 +100,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 			.appendTo(this.wrapper)
 			
 		this.state_fieldname = wn.meta.get_state_fieldname(this.doctype);
+		this.perm = wn.perm.get_perm(this.doctype)
 		this.make({
 			title: this.no_title ? "" : ('Report: ' + (this.docname ? (this.doctype + ' - ' + this.docname) : this.doctype)),
 			appframe: this.page.appframe,
@@ -497,8 +498,18 @@ wn.views.ReportView = wn.ui.Listing.extend({
 			if(e.target && e.target.tagName == "i") {
 				return;
 			}
-			
+
 			var docfield = args.column.docfield;
+			if(!docfield) {
+				e.stopImmediatePropagation();
+				return false;
+			}
+					
+			if(!me.perm[docfield.permlevel || 0][WRITE]) {
+				e.stopImmediatePropagation();
+				return false;
+			}
+			
 			var item = me.data[args.row];
 			
 			if(cint(item.docstatus) > 0) {
@@ -507,24 +518,16 @@ wn.views.ReportView = wn.ui.Listing.extend({
 				return false;
 			}
 			
-			if(!docfield) return false;
 			
 			if(in_list(['name', 'idx', 'owner', 'creation', 'modified_by', 
 				'modified', 'parent', 'parentfield', 'parenttype', 'file_list', 'trash_reason'], 
 				docfield.fieldname)) {
-				msgprint("This field is not editable");
 				e.stopImmediatePropagation();
 				return false;
 			}
-			
-			if(docfield.permlevel!=0) {
-				msgprint("Not permitted to edit the field. (Permlevel is "+docfield.permlevel+")");
-				e.stopImmediatePropagation();
-				return false;
-			}
-			
-			if(docfield.fieldtype=="Read Only") {
-				msgprint("Cannot edit read only field");
+						
+			if(!in_list(['Data', "Text", 'Small Text', 'Int', 
+				'Select', 'Link', 'Currency', 'Float'], docfield.fieldtype)) {
 				e.stopImmediatePropagation();
 				return false;
 			}
@@ -584,13 +587,18 @@ wn.ui.ColumnPicker = Class.extend({
 		this.dialog.show();
 	},
 	add_column: function(c) {
-		var w = $('<div style="padding: 5px 5px 5px 35px; background-color: #eee; width: 70%; \
-			margin-bottom: 10px; border-radius: 3px; cursor: move;">\
+		var w = $('<div style="padding: 5px; background-color: #eee; \
+			width: 90%; margin-bottom: 10px; border-radius: 3px; cursor: move;">\
+			<img src="lib/images/ui/drag-handle.png" style="margin-right: 10px;">\
 			<a class="close" style="margin-top: 5px;">&times</a>\
 			</div>')
 			.appendTo($(this.dialog.body).find('.column-list'));
+		
 		var fieldselect = new wn.ui.FieldSelect(w, this.doctype);
-		fieldselect.$select.css('width', '90%').val((c[1] || this.doctype) + "." + c[0]);
+		
+		fieldselect.$select
+			.css({width: '70%', 'margin-top':'5px'})
+			.val((c[1] || this.doctype) + "." + c[0]);
 		w.find('.close').click(function() {
 			$(this).parent().remove();
 		});

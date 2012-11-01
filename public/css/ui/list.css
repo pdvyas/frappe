@@ -155,7 +155,7 @@ table.doclist-row td {
 	border: 0px;
 }
 
-.listview-area .slick-row.odd .slick-cell {
+.slick-row.odd .slick-cell {
 	background-color: #eeeef2;
 }
 /* row formatters */
