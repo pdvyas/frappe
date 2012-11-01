@@ -22,12 +22,13 @@
 
 from __future__ import unicode_literals
 import webnotes
+from webnotes import _, msgprint, errprint
+from webnotes.model.controller import Controller
 
 @webnotes.whitelist()
 def savedocs():
-	"""save / submit / cancel / update doclist"""
+	"""save / submit / update doclist"""
 	try:
-		from webnotes.model.controller import Controller
 		form = webnotes.form_dict
 
 		doclist = Controller()
@@ -37,13 +38,33 @@ def savedocs():
 		# update recent documents
 		webnotes.user.update_recent(doclist.doc.doctype, doclist.doc.name)
 
-		# send updated docs
-		webnotes.response['main_doc_name'] = doclist.doc.name
-		webnotes.response['doctype'] = doclist.doc.doctype
-		webnotes.response['docname'] = doclist.doc.name
-		webnotes.response['docs'] = doclist.doclist
+		send_updated_docs(doclist)
 
 	except Exception, e:
-		webnotes.msgprint('Did not save')
-		webnotes.errprint(webnotes.utils.getTraceback())
+		msgprint(_('Did not save'))
+		errprint(webnotes.utils.getTraceback())
 		raise e
+
+@webnotes.whitelist()
+def cancel(doctype=None, name=None):
+	"""cancel a doclist"""
+	try:
+		if not doctype:			
+			doctype = webnotes.form_dict.get("doctype")
+			name = webnotes.form_dict.get("name")
+
+		doclist = Controller(doctype, name)
+		doclist.cancel()
+		
+		send_updated_docs(doclist)
+		
+	except Exception, e:
+		errprint(webnotes.utils.getTraceback())
+		msgprint(_("Did not cancel"))
+		raise e
+		
+def send_updated_docs(doclist):
+	webnotes.response['main_doc_name'] = doclist.doc.name
+	webnotes.response['doctype'] = doclist.doc.doctype
+	webnotes.response['docname'] = doclist.doc.name
+	webnotes.response['docs'] = doclist.doclist

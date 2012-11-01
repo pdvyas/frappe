@@ -31,8 +31,22 @@ wn.model.DocList = Class.extend({
 	save: function(callback, btn) {
 		this.check_name();
 		if(this.check_mandatory()) {
-			this._save(callback, btn);
+			this._call({
+				method: "webnotes.widgets.form.save.savedocs",
+				args: { docs: wn.model.compress(doclist) },
+				callback: callback,
+				btn: btn
+			});
 		}
+	},
+	
+	cancel: function(callback, btn) {
+		this._call({
+			method: "webnotes.widgets.form.save.cancel",
+			args: { doctype: this.doctype, name: this.name },
+			callback: callback,
+			btn: btn
+		});
 	},
 	
 	check_name: function() {
@@ -94,17 +108,22 @@ wn.model.DocList = Class.extend({
 		this.scroll_set = true;
 	},
 
-	_save: function(callback, btn) {
-		$(btn).attr("disabled", true);
+	_call: function(opts) {
+		// opts = {
+		// 	method: "some server method",
+		// 	args: {args to be passed},
+		// 	callback: callback,
+		// 	btn: btn
+		// }
+		$(opts.btn).attr("disabled", true);
 		wn.call({
 			freeze: true,
-			method: 'webnotes.widgets.form.save.savedocs',
-			args: {
-				docs: wn.model.compress(doclist),
-			},
+			method: opts.method,
+			args: opts.args,
 			callback: function(r) {
-				$(btn).attr("disabled", false);
-				callback && callback(r);
+				$(opts.btn).attr("disabled", false);
+				opts.callback && opts.callback(r);
 			}
 		})
-	}})
+	},
+});
