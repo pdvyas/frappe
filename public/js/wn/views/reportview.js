@@ -118,7 +118,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		this.make_export();
 		this.set_init_columns();
 		this.make_save();
-		this.set_tag_filter();
+		this.set_tag_and_status_filter();
 	},
 	
 	// preset columns and filters from saved info
@@ -274,11 +274,17 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		this.dataView.endUpdate();
 	},
 	
-	set_tag_filter: function() {
+	set_tag_and_status_filter: function() {
 		var me = this;
 		this.$w.find('.result-list').on("click", ".label-info", function() {
 			if($(this).attr("data-label")) {
 				me.set_filter("_user_tags", $(this).attr("data-label"));
+			}
+		});
+		this.$w.find('.result-list').on("click", "[data-workflow-state]", function() {
+			if($(this).attr("data-workflow-state")) {
+				me.set_filter(me.state_fieldname, 
+					$(this).attr("data-workflow-state"));
 			}
 		});
 	},

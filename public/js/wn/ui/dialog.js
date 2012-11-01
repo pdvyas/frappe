@@ -102,6 +102,10 @@ wn.ui.Dialog = wn.ui.FieldGroup.extend({
 
 		// hide
 		wn.dom.unfreeze();
+
+		// blur any active element in the dialog
+		$(document.activeElement).blur();
+		
 		$(this.wrapper).toggle(false);
 
 		// flags

@@ -351,7 +351,10 @@ wn.form.DateField = wn.form.DataField.extend({
 			return '';
 		}
 		var t = v.split('-');
-		if(t.length!=3) { return this.clear(); }
+		if(t.length!=3) { 
+			console.log(t);
+			return this.clear(); 
+		}
 		else if(cint(t[1])>12 || cint(t[1])<1) { return this.clear(); }
 		else if(cint(t[2])>31 || cint(t[2])<1) { return this.clear(); }
 		return v;
@@ -393,6 +396,7 @@ wn.form.LinkField = wn.form.DataField.extend({
 		var me = this;
 		this._super();
 		this.$input.unbind("change");
+		this.$input.keydown();
 		this.$input.autocomplete({
 			source: function(request, response) {
 				wn.call({
@@ -411,10 +415,10 @@ wn.form.LinkField = wn.form.DataField.extend({
 				me.set_model(ui.item.value);
 			},
 			change: function(event, ui) {
-				if(!ui.item) {
-					$(this).val("");
-					me.set_model("");
-				}
+				// if(!ui.item) {
+				// 	$(this).val("");
+				// 	me.set_model("");
+				// }
 			}
 		}).data('autocomplete')._renderItem = function(ul, item) {
 			return $('<li></li>')

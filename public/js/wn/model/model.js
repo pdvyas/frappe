@@ -82,6 +82,7 @@ wn.model = {
 		var def_vals = {
 			"_Login": user,
 			"__user": user,
+			"Today": dateutil.get_today(),
 			"__today": dateutil.get_today(),
 			"Now": dateutil.get_cur_time()
 		}
