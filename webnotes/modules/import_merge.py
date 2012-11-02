@@ -135,8 +135,8 @@ class UpdateDocument:
 		self.doclist.append(d)
 
 	def run_on_update(self):
-		from webnotes.model.code import get_server_obj
-		so = get_server_obj(self.doc, self.doclist)
+		from webnotes.model.controller import get_obj
+		so = get_obj(doc=self.doc, doclist=self.doclist)
 		if hasattr(so, 'on_update'):
 			so.on_update()
 
@@ -294,8 +294,8 @@ class UpdateDocType(UpdateDocumentMerge):
 					('%s', e[0] and 'fieldname' or 'label', '%s', '%s'), (idx+1, e[0] or e[1], self.doc.name))
 
 	def run_on_update(self):
-		from webnotes.model.code import get_server_obj
-		so = get_server_obj(self.doc, self.doclist)
+		from webnotes.model.controller import get_obj
+		so = get_obj(doc=self.doc, doclist=self.doclist)
 		if hasattr(so, 'on_update'):
 			so.on_update()
 

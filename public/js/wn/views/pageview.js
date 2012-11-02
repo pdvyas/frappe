@@ -6,7 +6,7 @@ wn.views.pageview = {
 			callback();
 		} else {
 			wn.call({
-				method: 'webnotes.widgets.page.getpage', 
+				method: 'webnotes.client.get_page', 
 				args: {'name':name },
 				callback: callback
 			});

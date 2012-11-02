@@ -50,6 +50,11 @@ $.extend(wn.meta, {
 			return wn.meta.docfield_map[dt][fn];
 		}
 	},
+	sync_messages: function(doc) {
+		if(doc.__messages) {
+			$.extend(wn._messages, doc.__messages);
+		}		
+	},
 	get: function(doctype, filters) {
 		if(!wn.metadata[doctype]) return [];
 		return wn.utils.filter_dict(wn.metadata[doctype], filters);

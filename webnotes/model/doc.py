@@ -204,16 +204,15 @@ class Document:
 	def _set_name(self, autoname, istable):
 		self.localname = self.name
 
-		# get my object
-		import webnotes.model.code
-		so = webnotes.model.code.get_server_obj(self, [])
+		from webnotes.model.controller import get_obj
+		so = get_obj(doc=self, doclist=[])
 
 		# amendments
 		if self.amended_from: 
 			self._get_amended_name()
 		# by method
 		elif so and hasattr(so, 'autoname'):
-			r = webnotes.model.code.run_server_obj(so, 'autoname')
+			r = so.autoname()
 			if r: return r
 			
 		# based on a field
@@ -696,7 +695,7 @@ def check_page_perm(doc):
 
 def get_report_builder_code(doc):
 	if doc.doctype=='Search Criteria':
-		from webnotes.model.code import get_code
+		from webnotes.model.controller import get_code
 		
 		if doc.standard != 'No':
 			doc.report_script = get_code(doc.module, 'Search Criteria', doc.name, 'js')

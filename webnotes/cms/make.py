@@ -18,7 +18,7 @@ def make():
 def make_web_core():
 	"""make index.html, wn-web.js, wn-web.css, sitemap.xml and rss.xml"""
 	# index.html
-	#from webnotes.model.code import get_obj
+	#from webnotes.model.controller import get_obj
 	import webnotes
 	
 	home_page = webnotes.cms.get_home_page('Guest')

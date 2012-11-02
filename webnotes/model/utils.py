@@ -109,7 +109,6 @@ def getlist(doclist, field):
 def clone(source_doclist):
 	""" Copy previous invoice and change dates"""
 	from webnotes.model.doc import Document
-	from webnotes.model.controller import Controller
 	
 	new_doclist = []
 	new_parent = Document(fielddata = source_doclist.doc.fields.copy())
@@ -133,8 +132,7 @@ def clone(source_doclist):
 		newd.parent = new_parent.name
 		new_doclist.append(newd)
 	
-	doclistobj = Controller()
-	doclistobj.set_doclist(new_doclist)
+	doclistobj = webnotes.model_doclist(new_doclist)
 	doclistobj.doc = new_doclist[0]
 	doclistobj.doclist = new_doclist
 	doclistobj.children = new_doclist[1:]

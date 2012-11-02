@@ -130,7 +130,8 @@ class DocType:
 	@property
 	def permpath(self):
 		from webnotes.modules import get_doc_path
-		return os.path.join(get_doc_path(self.doc), 'permissions.json')
+		return os.path.join(get_doc_path(self.doc.module,
+			self.doc.doctype, self.doc.name), 'permissions.json')
 		
 	def export_permissions(self):
 		"""export permissions file"""
@@ -154,7 +155,8 @@ class DocType:
 	def make_controller_template(self):
 		from webnotes.modules import get_doc_path, scrub
 		
-		pypath = os.path.join(get_doc_path(self.doc), scrub(self.doc.name) + '.py')
+		pypath = os.path.join(get_doc_path(self.doc.module, 
+			self.doc.doctype, self.doc.name), scrub(self.doc.name) + '.py')
 
 		if not os.path.exists(pypath):
 			with open(pypath, 'w') as pyfile:

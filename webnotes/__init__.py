@@ -49,6 +49,8 @@ cookies = {}
 response = DictObj({'message':'', 'exc':''})
 debug_log = []
 message_log = []
+lang = 'en'
+_messages = {}
 
 # memcache
 
@@ -249,8 +251,12 @@ def generate_hash():
 	import hashlib, time
 	return hashlib.sha224(str(time.time())).hexdigest()
 
+def model_wrapper(doctype=None, name=None):
+	from webnotes.model.wrapper import ModelWrapper
+	return ModelWrapper(doctype, name)
+
 def get_controller(doctype, name=None):
-	from webnotes.model.code import get_obj
+	from webnotes.model.controller import get_obj
 	
 	doclist = doctype
 	if isinstance(doclist, list):
@@ -275,11 +281,9 @@ def insert(doclist):
 	if not isinstance(doclist, list):
 		doclist = [doclist]
 
-	from webnotes.model.controller import Controller
 	for d in doclist:
 		d["__islocal"] = 1
-	dl = Controller(doclist)
-	dl.save()
+	model_wrapper(doclist).save()
 	
 	return dl
 

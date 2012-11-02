@@ -64,8 +64,8 @@ def get_module_path(module):
 	else:
 		return os.path.join(app_path, 'app', m)
 
-def get_doc_path(doc):
-	dt, dn = scrub_dt_dn(doc.doctype, doc.name)
+def get_doc_path(module, doctype, name):
+	dt, dn = scrub_dt_dn(doctype, name)
 	return os.path.join(get_module_path(doc.module), dt, dn)
 
 def reload_doc(module, dt=None, dn=None):

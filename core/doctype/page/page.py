@@ -88,10 +88,8 @@ class DocType:
 	});					
 }""" % (self.doc.name, self.doc.title))
 
-	def get_from_files(self):
-		"""
-			Loads page info from files in module
-		"""
+	def load_from_files(self):
+		"""Loads page info from files in module"""
 		from webnotes.modules import get_module_path, scrub
 		import os
 		
@@ -102,6 +100,10 @@ class DocType:
 		if os.path.exists(fpath):
 			with open(fpath, 'r') as f:
 				self.doc.script = f.read()
+
+				if webnotes.lang != 'en':
+					from webnotes.utils.translate import update_lang_js
+					self.doc.script = update_lang_js(self.doc.script, path)
 
 		# css
 		fpath = os.path.join(path, scrub(self.doc.name) + '.css')
@@ -114,3 +116,31 @@ class DocType:
 		if os.path.exists(fpath):
 			with open(fpath, 'r') as f:
 				self.doc.content = f.read()
+				
+	def has_permission(self):
+		if webnotes.user.name == "Administrator" or "System Manager" in webnotes.user.roles:
+			# free pass for Administrator and System Manager
+			return True
+
+		page_roles = [d.role for d in self.doclist if d.fields.get("doctype")=="Page Role"]
+
+		if webnotes.user.name == "Guest" and not (page_roles and "Guest" in page_roles):
+			# stop guest from accessing the page, if not explicitly specified
+			return False
+
+		elif page_roles and not (set(page_roles) & set(webnotes.user.roles)):
+			# if page roles are defined but no common role are found, then deny
+			return False
+
+		# otherwise allow access
+		return True
+
+def get_page_doclist(name):
+	page = webnotes.get_controller("Page", name)
+	page.load_from_files()
+	if page.has_permission():
+		return page.doclist
+	else:
+		raise webnotes.PermissionError, 'No read permission for Page %s' % \
+			(page.doc.title or page.doc.name)
+			

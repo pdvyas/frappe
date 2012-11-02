@@ -23,7 +23,6 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes import _, msgprint, errprint
-from webnotes.model.controller import Controller
 
 @webnotes.whitelist()
 def savedocs():
@@ -31,7 +30,7 @@ def savedocs():
 	try:
 		form = webnotes.form_dict
 
-		doclist = Controller()
+		doclist = webnotes.model_wrapper()
 		doclist.from_compressed(form.get('docs'))
 		doclist.save()
 		
@@ -49,11 +48,7 @@ def savedocs():
 def cancel(doctype=None, name=None):
 	"""cancel a doclist"""
 	try:
-		if not doctype:			
-			doctype = webnotes.form_dict.get("doctype")
-			name = webnotes.form_dict.get("name")
-
-		doclist = Controller(doctype, name)
+		doclist = webnotes.model_wrapper(doctype, name)
 		doclist.cancel()
 		
 		send_updated_docs(doclist)

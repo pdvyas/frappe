@@ -28,8 +28,7 @@ def runserverobj():
 	"""
 		Run server objects
 	"""
-	import webnotes.model.code
-	from webnotes.model.controller import Controller
+	import webnotes.model.controller
 	from webnotes.utils import cint
 
 	doclist = None
@@ -40,10 +39,10 @@ def runserverobj():
 
 	if doctype: # not called from a doctype (from a page)
 		if not docname: docname = doctype # single
-		so = webnotes.model.code.get_obj(doctype, docname)
+		so = webnotes.model.controller.get_obj(doctype, docname)
 
 	else:
-		doclist = Controller()
+		doclist = webnotes.model_wrapper()
 		doclist.from_compressed(webnotes.form_dict.get('docs'))
 		so = doclist.make_obj()
 		doclist.check_if_latest()
@@ -51,7 +50,11 @@ def runserverobj():
 	check_guest_access(so.doc)
 	
 	if so:
-		r = webnotes.model.code.run_server_obj(so, method, args)
+		if hasattr(so, method):
+			if args:
+				r = getattr(so, method)(args)
+			else:
+				r = getattr(so, method)()
 		if r:
 			#build output as csv
 			if cint(webnotes.form_dict.get('as_csv')):

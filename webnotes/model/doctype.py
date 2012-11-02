@@ -37,7 +37,6 @@ import conf
 import webnotes
 import webnotes.model
 import webnotes.model.doc
-import webnotes.model.controller
 import webnotes.model.doclist
 
 doctype_cache = {}
@@ -70,7 +69,7 @@ def get(doctype, processed=False):
 		add_search_fields(doclist)
 		add_linked_with(doclist)
 		add_workflows(doclist)
-		# update_language(doclist)
+		update_language(doclist)
 
 	# add validators
 	#add_validators(doctype, doclist)
@@ -96,7 +95,6 @@ def add_permissions(doclist):
 	doclist.extend(docperms)
 
 def add_workflows(doclist):
-	from webnotes.model.controller import Controller
 	from webnotes.model.workflow import get_workflow_name
 	doctype = doclist[0].name
 	
@@ -104,17 +102,16 @@ def add_workflows(doclist):
 	workflow_name = get_workflow_name(doctype)
 
 	if workflow_name and webnotes.conn.exists("Workflow", workflow_name):
-		doclist += Controller("Workflow", workflow_name).doclist
+		doclist += webnotes.get_doclist("Workflow", workflow_name)
 		
 		# add workflow states (for icons and style)
 		for state in map(lambda d: d.state, doclist.get({"doctype":"Workflow Document State"})):
-			doclist += Controller("Workflow State", state).doclist
+			doclist += webnotes.get_doclist("Workflow State", state).doclist
 	
 
 def get_doctype_doclist(doctype):
 	"""get doclist of single doctype"""
-	from webnotes.model.controller import Controller
-	doclist = Controller('DocType', doctype).doclist
+	doclist = webnotes.get_doclist('DocType', doctype)
 	add_std_fields(doctype, doclist)
 	add_custom_fields(doctype, doclist)
 	apply_property_setters(doctype, doclist)
@@ -362,12 +359,12 @@ def add_search_fields(doclist):
 
 def update_language(doclist):
 	"""update language"""
-	if webnotes.non_english():
+	if webnotes.lang != 'en':
 		from webnotes import _
 		from webnotes.modules import get_doc_path
 
 		# load languages for each doctype
-		from webnotes.utils.translate import get_lang_data, update_lang_js
+		from webnotes.translate import get_lang_data, update_lang_js
 		_messages = {}
 
 		for d in doclist:

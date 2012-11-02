@@ -33,7 +33,6 @@ from __future__ import unicode_literals
 
 import webnotes, unittest
 from webnotes import msgprint
-from webnotes.model.controller import Controller
 from webnotes.model.doc import Document
 
 class TestNSM(unittest.TestCase):
@@ -53,7 +52,7 @@ class TestNSM(unittest.TestCase):
 		]
 		
 		for d in self.data:
-			self.__dict__[d[0]] = Controller([Document(fielddata = {
+			self.__dict__[d[0]] = webnotes.model_doclist([Document(fielddata = {
 				"doctype": "Item Group", "item_group_name": d[0], "parent_item_group": d[1],
 				"__islocal": 1
 			})])

@@ -26,7 +26,7 @@ $.extend(wn.model, {
 			sync_in = locals;
 		if(doclist.keys)
 			doclist = wn.model.expand(doclist);
-		if (doclist && sync_in==locals)
+		if(doclist && sync_in==locals)
 			wn.model.clear_doclist(doclist[0].doctype, doclist[0].name)
 				
 		$.each(doclist, function(i, d) {
@@ -43,6 +43,8 @@ $.extend(wn.model, {
 			}
 
 			if(d.doctype=='DocField') wn.meta.add_field(d);
+			if(d.doctype=='DocType') wn.meta.sync_messages(d);
+			
 			
 			if(d.localname) {
 				wn.model.new_names[d.localname] = d.name;

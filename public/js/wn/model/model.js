@@ -127,7 +127,7 @@ wn.model = {
 	},
 
 	with_doctype: function(doctype, callback) {
-		if(locals.DocType[doctype]) {
+		if(wn.meta.get("DocType", doctype)[0]) {
 			callback();
 		} else {
 			wn.call({

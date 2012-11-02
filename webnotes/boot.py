@@ -27,7 +27,6 @@ bootstrap client session
 
 import webnotes
 import webnotes.model.doc
-import webnotes.widgets.page
 import webnotes.cms
 
 def get_bootinfo():
@@ -111,13 +110,12 @@ def get_profile(bootinfo):
 	
 def add_home_page(bootinfo, doclist):
 	"""load home page"""
-
 	home_page = webnotes.cms.get_home_page(webnotes.session['user']) or 'Login Page'
-
+	from core.doctype.page.page import get_page_doclist
 	try:
-		page_doclist = webnotes.widgets.page.get(home_page)
+		page_doclist = get_page_doclist(home_page)
 	except webnotes.PermissionError, e:
-		page_doclist = webnotes.widgets.page.get('Login Page')
+		page_doclist = get_page_doclist('Login Page')
 		
 	bootinfo['home_page_html'] = page_doclist[0].content
 	bootinfo['home_page'] = page_doclist[0].name

@@ -24,8 +24,6 @@ from __future__ import unicode_literals
 import webnotes
 import json
 
-from webnotes.model.controller import Controller
-
 @webnotes.whitelist()
 def save(doclist=None):
 	"""insert or update from form query"""
@@ -35,8 +33,7 @@ def save(doclist=None):
 	if not webnotes.has_permission(doclist[0]["doctype"], "write"):
 		webnotes.msgprint("No Write Permission", raise_exception=True)
 
-	controller = Controller(doclist)
-	controller.save()
+	webnotes.model_wrapper(doclist).save()
 	
 	return [d.fields for d in doclist]
 
@@ -44,8 +41,7 @@ def save(doclist=None):
 def make_width_property_setter():
 	doclist = json.loads(webnotes.form_dict.doclist)
 	if doclist[0]["doctype"]=="Property Setter" and doclist[0]["property"]=="width":
-		controller = Controller(doclist)
-		controller.save()
+		webnotes.model_wrapper(doclist).save()
 
 @webnotes.whitelist()
 def set_default():
@@ -68,11 +64,11 @@ def update_value():
 	v = json.loads(value).get("value")
 	
 	if "parent" in webnotes.form_dict:
-		controller = Controller(doctype, parent)	
+		model_wrapper = webnotes.model_wrapper(doctype, parent)
 	else:
-		controller = Controller(doctype, name)
+		model_wrapper = webnotes.model_wrapper(doctype, parent)
 
-	row = controller.doclist.get({"name": name})[0]
+	row = model_wrapper.doclist.get({"name": name})[0]
 	
 	# check permlevel = 0
 	
@@ -81,12 +77,16 @@ def update_value():
 	
 	row.fields[fieldname] = v
 
-	if controller.doc.docstatus!=0:
+	if model_wrapper.doc.docstatus!=0:
 		webnotes.msgprint("Cannot update Submitted / Cancelled document", 
 			raise_exception=True)
 	
-	controller.save()
+	model_wrapper.save()
 	
-	return [d.fields for d in controller.doclist]
-	
+	return [d.fields for d in model_wrapper.doclist]
+
+@webnotes.whitelist()
+def get_page(name):
+	from core.doctype.page.page import get_page_doclist
+	webnotes.response.metadata = get_page_doclist(name)
 	

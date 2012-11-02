@@ -83,17 +83,17 @@ def getdoctype():
 
 def load_single_doc(dt, dn, user):
 	"""load doc and call onload methods"""
-	import webnotes.model.code
+	import webnotes.model.controller
 
 	if not dn: dn = dt
 	dl = webnotes.model.doc.get(dt, dn)
 
 	try:
-		so, r = webnotes.model.code.get_server_obj(dl[0], dl), None
+		so, r = webnotes.model.controller.get_obj(doc = dl[0], doclist = dl), None
 		if hasattr(so, 'onload'):
-			r = webnotes.model.code.run_server_obj(so, 'onload')
+			r = so.onload()
 		if hasattr(so, 'custom_onload'):
-			r = webnotes.model.code.run_server_obj(so, 'custom_onload')
+			r = so.custom_onload()
 		if r: 
 			webnotes.msgprint(r)
 	except Exception, e:

@@ -87,7 +87,7 @@ def delete_doc(doctype=None, name=None, doclist = None, force=0):
 		raise Exception
 	
 	# call on_trash if required
-	from webnotes.model.code import get_obj
+	from webnotes.model.controller import get_obj
 	if doclist:
 		obj = get_obj(doclist=doclist)
 	else:

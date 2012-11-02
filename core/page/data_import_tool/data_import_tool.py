@@ -242,20 +242,19 @@ def import_doc(d, doctype, overwrite, row_idx):
 	"""import main (non child) document"""
 	import webnotes
 	import webnotes.model.doc
-	from webnotes.model.controller import Controller
 
 	if webnotes.conn.exists(doctype, d['name']):
 		if overwrite:
 			doclist = webnotes.model.doc.get(doctype, d['name'])
 			doclist[0].fields.update(d)
-			Controller(doclist).save()
+			webnotes.model_wrapper(doclist).save()
 			return 'Updated row (#%d) %s' % (row_idx, getlink(doctype, d['name']))
 		else:
 			return 'Ignored row (#%d) %s (exists)' % (row_idx, 
 				getlink(doctype, d['name']))
 	else:
 		d['__islocal'] = 1
-		dl = Controller([webnotes.model.doc.Document(fielddata = d)])
+		dl = webnotes.model_wrapper([webnotes.model.doc.Document(fielddata = d)])
 		dl.save()
 		return 'Inserted row (#%d) %s' % (row_idx, getlink(doctype,
 			dl.doc.fields['name']))

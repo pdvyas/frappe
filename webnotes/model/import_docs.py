@@ -25,9 +25,9 @@ import webnotes
 
 def import_docs(docs = []):
 	from webnotes.model.doc import Document
-	import webnotes.model.code
+	import webnotes.model.controller
 
-	doc_list = {}
+	doclist_children_groups = {}
 	created_docs = []
 	already_exists = []
 
@@ -43,9 +43,9 @@ def import_docs(docs = []):
 
 				# make in groups
 				if cur_doc.parent:
-					if not doc_list.has_key(cur_doc.parent):
-						doc_list[cur_doc.parent] = []
-					doc_list[cur_doc.parent].append(cur_doc)
+					if not doclist_children_groups.has_key(cur_doc.parent):
+						doclist_children_groups[cur_doc.parent] = []
+					doclist_children_groups[cur_doc.parent].append(cur_doc)
 
 			except Exception, e:
 				out += "Creation Warning/Error: " + cur_doc.name + " :"+ str(e) + "\n"
@@ -53,13 +53,14 @@ def import_docs(docs = []):
 
 	# Run scripts for main docs
 	for m in created_docs:
-		if doc_list.has_key(m.name):
-			tmp = webnotes.model.code.run_server_obj(webnotes.model.code.get_server_obj(m, doc_list.get(m.name, [])),'on_update')
+		if m.name in doclist_children_groups:
+			controller = webnotes.get_controller(doclist=[m] + doclist_children_groups.get(m.name, []))
+			hasattr(controller, 'on_update') and controller.on_update()
 
 			# update database (in case of DocType)
 			if m.doctype=='DocType':
 				import webnotes.model.doctype
-				try: webnotes.model.doctype.update_doctype(doc_list.get(m.name, []))
+				try: webnotes.model.doctype.update_doctype(doclist_children_groups.get(m.name, []))
 				except: pass			
 			out += 'Executed: '+ str(m.name) + ', Err:' + str(tmp) + "\n"
 
@@ -338,13 +339,13 @@ class CSVImport:
 			if cur_doc.name and webnotes.conn.exists(self.dt_list[0], cur_doc.name):
 				if self.overwrite:
 					cur_doc.save()
-					obj = webnotes.model.code.get_obj(cur_doc.parent and cur_doc.parent_type or cur_doc.doctype, cur_doc.parent or cur_doc.name, with_children = 1)
+					obj = webnotes.model.controller.get_obj(cur_doc.parent and cur_doc.parent_type or cur_doc.doctype, cur_doc.parent or cur_doc.name, with_children = 1)
 					self.msg.append('<div style="color: ORANGE">Row %s => Over-written: %s</div>' % (row, cur_doc.name))
 				else:
 					self.msg.append('<div style="color: ORANGE">Row %s => Ignored: %s</div>' % (row, cur_doc.name))
 			elif cur_doc.parent and webnotes.conn.exists(cur_doc.parenttype, cur_doc.parent) or not cur_doc.parent:
 				cur_doc.save(1)
-				obj = webnotes.model.code.get_obj(cur_doc.parent and cur_doc.parenttype or cur_doc.doctype, cur_doc.parent or cur_doc.name, with_children = 1)
+				obj = webnotes.model.controller.get_obj(cur_doc.parent and cur_doc.parenttype or cur_doc.doctype, cur_doc.parent or cur_doc.name, with_children = 1)
 				self.msg.append('<div style="color: GREEN">Row %s => Created: %s</div>' % (row, cur_doc.name))
 			else: 
 				self.msg.append('<div style="color: RED">Row %s => Invalid %s : %s</div>' % (row, cur_doc.parenttype, cur_doc.parent))
@@ -373,7 +374,7 @@ class CSVImport:
 			self.doctype_data, self.labels, self.data = self.csv_data[0][:4], self.csv_data[3], self.csv_data[4:]
 			self.fields = []
 		
-			import webnotes.model.code
+			import webnotes.model.controller
 			from webnotes.model.doc import Document
 			sql = webnotes.conn.sql
 	        

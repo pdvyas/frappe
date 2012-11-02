@@ -84,7 +84,7 @@ def logout():
 def dt_map():
 	import webnotes
 	import webnotes.model.utils
-	from webnotes.model.code import get_obj
+	from webnotes.model.controller import get_obj
 	from webnotes.model.doc import Document
 	
 	form_dict = webnotes.form_dict
@@ -172,7 +172,7 @@ def uploadfile():
 
 @webnotes.whitelist(allow_guest=True)
 def reset_password():
-	from webnotes.model.code import get_obj
+	from webnotes.model.controller import get_obj
 	from webnotes.utils import random_string
 	
 	user = webnotes.form_dict.get('user', '')
@@ -213,7 +213,6 @@ def handle():
 
 def execute_cmd(cmd):
 	"""execute a request as python module"""
-	validate_cmd(cmd)
 	method = get_method(cmd)
 
 	# check if whitelisted
@@ -262,17 +261,6 @@ def get_method(cmd):
 		method = globals()[cmd]
 	return method
 	
-def validate_cmd(cmd):
-	# check if there is no direct possibility of malicious script injection
-	if cmd.startswith('webnotes.model.code'):
-		raise Exception, 'Cannot call any methods from webnotes.model.code directly from the handler'
-
-	if cmd.startswith('webnotes.model.db_schema'):
-		raise Exception, 'Cannot call any methods from webnotes.model.db_schema directly from the handler'
-
-	if cmd.startswith('webnotes.conn'):
-		raise Exception, 'Cannot call database connection method directly from the handler'
-		
 def print_response():
 	print_map = {
 		'csv': print_csv,

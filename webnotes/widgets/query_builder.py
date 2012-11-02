@@ -266,7 +266,7 @@ def runquery(q='', ret=0, from_export=0):
 	style, header_html, footer_html, page_template = '', '', '', ''
 	if webnotes.form_dict.get('sc_id'):
 		sc_id = webnotes.form_dict.get('sc_id')
-		from webnotes.model.code import get_code
+		from webnotes.model.controller import get_code
 		sc_details = webnotes.conn.sql("select module, standard, server_script from `tabSearch Criteria` where name=%s", sc_id)[0]
 		if sc_details[1]!='No':
 			code = get_code(sc_details[0], 'Search Criteria', sc_id, 'py')

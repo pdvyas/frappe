@@ -36,8 +36,11 @@ wn.provide = function(namespace) {
 	return parent;
 }
 
+// for translation
+wn._messages = {};
 wn._ = function(txt) {
-	return txt;
+	if(!txt) return txt;
+	return wn._messages[txt.replace(/\n/g, "")] || txt;
 };
 
 wn.provide('wn.settings');
