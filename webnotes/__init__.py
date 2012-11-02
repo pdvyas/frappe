@@ -259,9 +259,9 @@ def get_controller(doctype, name=None):
 		doctype = doclist[0].doctype
 		doc = doclist[0]
 		
-		return get_obj(doctype, name, doc=doclist[0], doclist=doclist)
+		return get_obj(doc=doclist[0], doclist=doclist)
 	else:
-		return get_obj(doctype, name)
+		return get_obj(doctype, name, with_children=1)
 	
 
 def get_doctype(doctype, processed=False):

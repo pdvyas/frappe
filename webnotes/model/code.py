@@ -153,7 +153,7 @@ def get_server_obj(doc, doclist = [], basedoctype = ''):
 # get object (from dt and/or dn or doclist)
 #=================================================================================
 
-def get_obj(dt = None, dn = None, doc=None, doclist=[], with_children = 0):
+def get_obj(dt = None, dn = None, doc=None, doclist=None, with_children = 0):
 	"""
 	   Returns the instantiated `DocType` object. Here you can pass the DocType and name (ID) to get the object.
 	   If with_children is true, then all child records will be laoded and added in the doclist.

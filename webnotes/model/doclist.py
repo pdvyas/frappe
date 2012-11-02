@@ -87,6 +87,28 @@ class DocList(list):
 					remove.append(f)
 			for f in remove:
 				del d[f]
+				
+	def append(self, doc):
+		doc = objectify_doc(doc)
+		self._prepare_doc(doc)
+
+		super(DocList, self).append(doc)
+		
+	def extend(self, doclist):
+		doclist = objectify(doclist)
+		for doc in doclist:
+			self._prepare_doc(doc)
+		
+		super(DocList, self).extend(doclist)
+		
+	def _prepare_doc(self, doc):
+		if not doc.name:
+			doc.fields["__islocal"] = 1
+		if doc.parentfield:
+			if not doc.parenttype:
+				doc.parenttype = self[0].doctype
+			if not doc.parent:
+				doc.parent = self[0].name
 		
 def load(doctype, name):	
 	# load main doc
@@ -132,8 +154,11 @@ def objectify(doclist):
 
 	doclist_obj = DocList([])
 	for d in doclist:
-		if isinstance(d, webnotes.model.doc.Document):
-			doclist_obj.append(d)
-		else:
-			doclist_obj.append(webnotes.model.doc.Document(fielddata = d))
+		doclist_obj.append(objectify_doc(d))
 	return doclist_obj
+	
+def objectify_doc(doc):
+	if not isinstance(doc, webnotes.model.doc.Document):
+		doc = webnotes.model.doc.Document(fielddata=doc)
+	
+	return doc
