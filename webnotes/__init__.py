@@ -301,3 +301,7 @@ def insert_variants(base, variants):
 def get_label(doctype, fieldname, parent=None, parentfield=None):
 	doctypelist = get_doctype(doctype)
 	return doctypelist.get_label(fieldname, parent, parentfield)
+	
+def get_field(doctype, fieldname, parent=None, parentfield=None):
+	doctypelist = get_doctype(doctype)
+	return doctypelist.get_field(fieldname, parent, parentfield)
