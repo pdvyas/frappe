@@ -66,7 +66,7 @@ def get_module_path(module):
 
 def get_doc_path(module, doctype, name):
 	dt, dn = scrub_dt_dn(doctype, name)
-	return os.path.join(get_module_path(doc.module), dt, dn)
+	return os.path.join(get_module_path(module), dt, dn)
 
 def reload_doc(module, dt=None, dn=None):
 	from webnotes.modules.import_file import import_files
