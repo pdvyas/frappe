@@ -66,7 +66,7 @@ def update_value():
 	if "parent" in webnotes.form_dict:
 		model_wrapper = webnotes.model_wrapper(doctype, parent)
 	else:
-		model_wrapper = webnotes.model_wrapper(doctype, parent)
+		model_wrapper = webnotes.model_wrapper(doctype, name)
 
 	row = model_wrapper.doclist.get({"name": name})[0]
 	
