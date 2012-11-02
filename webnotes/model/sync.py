@@ -33,9 +33,9 @@ def walk_and_sync(start_path, force=0):
 	from webnotes.modules import reload_doc
 
 	modules = []
-
+	document_type = ['page', 'workflow', 'module_def', 'workflow_state', 'workflow_action']
 	for path, folders, files in os.walk(start_path):
-		if os.path.basename(os.path.dirname(path)) in ('doctype', 'page', 'workflow'):
+		if os.path.basename(os.path.dirname(path)) in (['doctype'] + document_type):
 			for f in files:				
 				if f.endswith(".txt"):
 					# great grand-parent folder is module_name
@@ -45,14 +45,13 @@ def walk_and_sync(start_path, force=0):
 				
 					# grand parent folder is doctype
 					doctype = path.split(os.sep)[-2]
-				
+
 					# parent folder is the name
 					name = path.split(os.sep)[-1]
 				
 					if doctype == 'doctype':
 						sync(module_name, name, force)
-					elif doctype in ['page', 'workflow', 'module_def',
-						'workflow_state', 'workflow_action']:#, 'search_criteria', 'Print Format', 'DocType Mapper']:
+					elif doctype in document_type:#, 'search_criteria', 'Print Format', 'DocType Mapper']:
 						if reload_doc(module_name, doctype, name):
 							print module_name + ' | ' + doctype + ' | ' + name
 					
