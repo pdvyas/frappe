@@ -30,7 +30,7 @@ transfer_types = ['Role', 'Print Format','DocType','Page','DocType Mapper',
 	'GL Mapper','Search Criteria', 'Patch', 'Report']
 	
 lower_case_files_for = ['DocType', 'Page', 'Search Criteria', 'Report', 
-	"Workflow", 'Module Def', 'Desktop Item']
+	"Workflow", 'Module Def', 'Desktop Item', 'Workflow State', 'Workflow Action']
 
 code_fields_dict = {
 	'Page':[('script', 'js'), ('content', 'html'), ('style', 'css'), ('static_content', 'html'), ('server_code', 'py')],

@@ -51,7 +51,8 @@ def walk_and_sync(start_path, force=0):
 				
 					if doctype == 'doctype':
 						sync(module_name, name, force)
-					elif doctype in ['page', 'workflow', 'module_def']:#, 'search_criteria', 'Print Format', 'DocType Mapper']:
+					elif doctype in ['page', 'workflow', 'module_def',
+						'workflow_state', 'workflow_action']:#, 'search_criteria', 'Print Format', 'DocType Mapper']:
 						if reload_doc(module_name, doctype, name):
 							print module_name + ' | ' + doctype + ' | ' + name
 					

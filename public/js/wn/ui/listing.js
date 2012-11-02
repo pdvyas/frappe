@@ -161,7 +161,8 @@ wn.ui.Listing = Class.extend({
 			this.add_button('Refresh', function() {
 				me.run();
 			}, 'icon-refresh');
-			
+		} else {
+			this.$w.find(".img-load").remove();
 		}
 				
 		// new

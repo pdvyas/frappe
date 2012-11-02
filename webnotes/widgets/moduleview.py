@@ -41,9 +41,7 @@ def get_items():
 			if not dt.issingle:
 				dt.count = webnotes.conn.sql("""select count(*) 
 					from `tab%s`""" % dt.name)[0][0]
-				if dt.open_count:
-					dt.open_count = webnotes.conn.sql("""select count(*)
-					from `tab%s` where %s""" % (dt.name, dt.open_count))[0][0]
+				dt.open_count = get_open_count(dt.name)
 					
 			out.append(dt)
 	
@@ -72,3 +70,15 @@ def get_items():
 			order by criteria_name""", module, as_dict=1)
 			
 	return out
+	
+def get_open_count(doctype):
+	"""get open count based on default workflow status"""
+	from webnotes.model.workflow import get_default_state, get_state_fieldname
+	default_state, state_fieldname = get_default_state(doctype), get_state_fieldname(doctype)
+	
+	if state_fieldname:
+		return webnotes.conn.sql("""select count(*) from `tab%s` where `%s`=%s""" \
+			% (doctype, state_fieldname, '%s'), default_state)[0][0]
+		
+	else:
+		return None

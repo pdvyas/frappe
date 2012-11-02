@@ -24,6 +24,7 @@ from __future__ import unicode_literals
 """assign/unassign to ToDo"""
 
 import webnotes
+from webnotes.utils import cint
 
 @webnotes.whitelist()
 def get(args=None):
@@ -39,7 +40,7 @@ def add(args=None):
 	"""add in someone's to do list"""
 	if not args:
 		args = webnotes.form_dict
-	
+		
 	if webnotes.conn.sql("""select owner from `tabToDo`
 		where reference_type=%(doctype)s and reference_name=%(name)s
 		and owner=%(assign_to)s""", args):
@@ -60,7 +61,8 @@ def add(args=None):
 		d.save(1)
 
 	# notify
-	notify_assignment(d.assigned_by, d.owner, d.reference_type, d.reference_name, action='ASSIGN', notify=args.get('notify'))
+	notify_assignment(d.assigned_by, d.owner, d.reference_type, 
+		d.reference_name, action='ASSIGN', notify=args.get('notify'))
 		
 	# update feeed
 	try:
@@ -133,10 +135,10 @@ def notify_assignment(assigned_by, owner, doc_type, doc_name, action='CLOSE', no
 			'txt': "A new task, %s, has been assigned to you by %s." \
 				% (assignment,
 				user_info.get(webnotes.session.get('user'), {}).get('fullname')),
-			'notify': notify
+			'notify_by_email': cint(notify)
 		}
 		
 	arg["parenttype"] = "Assignment"
 	from utilities.page.messages import messages
 	import json
-	messages.post(json.dumps(arg))
+	messages.post(**arg)

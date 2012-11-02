@@ -176,13 +176,11 @@ _r.ReportBuilder.prototype.make_save_criteria = function() {
 	// make_list
 	// ---------
 	this.sc_list = []; this.sc_dict = {};
-	for(var n in locals['Search Criteria']) {
-		var d = locals['Search Criteria'][n];
-		if(d.doc_type==this.doctype) {
-			this.sc_list[this.sc_list.length] = d.criteria_name;
-			this.sc_dict[d.criteria_name] = n;
-		}
-	}
+	var me = this;
+	$.each(wn.meta.get('Search Criteria', {doc_type:this.doctype}), function(i, d) {
+		me.sc_list.push(d.criteria_name)
+		me.sc_dict[d.criteria_name] = d.name;
+	})
 }
 
 // Save Criteria
@@ -194,7 +192,7 @@ _r.ReportBuilder.prototype.save_criteria = function(save_as) {
 	if(this.current_loaded && (!save_as)) {
 		var overwrite = confirm('Do you want to overwrite the saved criteria "'+this.current_loaded+'"');
 		if(overwrite) {
-			var doc = locals['Search Criteria'][this.sc_dict[this.current_loaded]];
+			var doc = wn.metadata['Search Criteria'][this.sc_dict[this.current_loaded]];
 			var criteria_name = this.current_loaded;
 		}
 	}
@@ -206,7 +204,7 @@ _r.ReportBuilder.prototype.save_criteria = function(save_as) {
 			return;
 	
 		var dn = wn.model.make_new_doc_and_get_name('Search Criteria');
-		var doc = locals['Search Criteria'][dn];
+		var doc = wn.metadata['Search Criteria'][dn];
 
 		doc.criteria_name = criteria_name;
 		doc.doc_type = this.doctype;
@@ -330,7 +328,7 @@ _r.ReportBuilder.prototype.load_criteria = function(criteria_name) {
 	if(!this.sc_dict[criteria_name]) {
 		alert(criteria_name + ' could not be loaded. Please Refresh and try again');
 	}
-	this.sc = locals['Search Criteria'][this.sc_dict[criteria_name]];
+	this.sc = wn.metadata['Search Criteria'][this.sc_dict[criteria_name]];
 
 	// eval the custom script
 	var report = this;
@@ -383,7 +381,7 @@ _r.ReportBuilder.prototype.load_criteria = function(criteria_name) {
 _r.ReportBuilder.prototype.set_criteria_sel = function(criteria_name) {
 
 	// add additional columns
-	var sc = locals['Search Criteria'][this.sc_dict[criteria_name]];
+	var sc = wn.metadata['Search Criteria'][this.sc_dict[criteria_name]];
 	if(sc && sc.add_col)
 		var acl = sc.add_col.split('\n');
 	else
@@ -425,7 +423,7 @@ _r.ReportBuilder.prototype.setup_filters_and_cols = function() {
 	// function checks where there is submit permission on the DocType or if the DocType 
 	// can be trashed
 	function can_dt_be_submitted(dt) {
-		return locals.DocType[dt] && locals.DocType[dt].is_submittable || 0;
+		return wn.meta.is_submittable(dt);
 	}
 
 	var me = this;
@@ -518,7 +516,7 @@ _r.ReportBuilder.prototype.setup_dt_filters_and_cols = function(fl, dt) {
 	// get "high priority" search fields
 	// if the field is in search_field then it should be primary filter (i.e. on first page)
 	
-	var sf_list = locals.DocType[dt].search_fields ? locals.DocType[dt].search_fields.split(',') : [];
+	var sf_list = wn.metadata.DocType[dt].search_fields ? wn.metadata.DocType[dt].search_fields.split(',') : [];
 	for(var i in sf_list) sf_list[i] = strip(sf_list[i]);
 	
 	// make fields
@@ -589,11 +587,7 @@ _r.ReportBuilder.prototype.setup_doctype = function(onload) {
 		this.load_doctype_from_server(onload);
 	} else {
 		// find parent dt if required
-		for(var key in locals.DocField) {
-			var f = locals.DocField[key];
-			if(f.fieldtype=='Table' && f.options==this.doctype)
-				this.parent_dt = f.parent;
-		}
+		this.parent_dt = wn.meta.get("DocField", {fieldtype:"Table", options:this.doctype})[0].parent;
 		if(!me.validate_permissions()) 
 			return;
 		me.validate_permissions();

@@ -18,15 +18,34 @@
 # HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
 # CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#
 
 from __future__ import unicode_literals
 import webnotes
 
-class DocType:
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
+workflow_names = {}
+def get_workflow_name(doctype):
+	global workflow_names
+	if not doctype in workflow_names:
+		workflow_name = webnotes.conn.get_value("Workflow", {"document_type": doctype, 
+			"is_active": "1"}, "name")
+	
+		# no active? get default workflow
+		if not workflow_name:
+			workflow_name = webnotes.conn.get_value("Workflow", {"document_type": doctype, 
+				"is_custom": "No"}, "name")
+				
+		workflow_names[doctype] = workflow_name
+			
+	return workflow_names[doctype]
+	
+def get_default_state(doctype):
+	workflow_name = get_workflow_name(doctype)
+	return webnotes.conn.get_value("Workflow Document State", {"parent":doctype,
+		"idx":1}, "state")
 		
-	def on_update(self):
-		if webnotes.session.user == "Administrator":
-			from webnotes.modules.export_file import export_doc
-			export_doc(self.doc)
+def get_state_fieldname(doctype):
+	workflow_name = get_workflow_name(doctype)
+	return webnotes.conn.get_value("Workflow", workflow_name, "workflow_state_field")
+	
+	

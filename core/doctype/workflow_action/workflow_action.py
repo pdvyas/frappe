@@ -25,3 +25,9 @@ import webnotes
 class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
+		
+	def on_update(self):
+		if webnotes.session.user == "Administrator":
+			from webnotes.modules.export_file import export_doc
+			export_doc(self.doc)
+		

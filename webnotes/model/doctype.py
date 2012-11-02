@@ -30,6 +30,8 @@ Get metadata (main doctype with fields and permissions with all table doctypes)
 - optionally, post process (add js, css, select fields), or without
 
 """
+from __future__ import unicode_literals
+
 # imports
 import conf
 import webnotes
@@ -95,16 +97,11 @@ def add_permissions(doclist):
 
 def add_workflows(doclist):
 	from webnotes.model.controller import Controller
+	from webnotes.model.workflow import get_workflow_name
 	doctype = doclist[0].name
 	
 	# get active workflow
-	workflow_name = webnotes.conn.get_value("Workflow", {"document_type": doctype, 
-		"is_active": "1"}, "name")
-	
-	# no active? get default workflow
-	if not workflow_name:
-		workflow_name = webnotes.conn.get_value("Workflow", {"document_type": doctype, 
-			"is_custom": "No"}, "name")
+	workflow_name = get_workflow_name(doctype)
 
 	if workflow_name and webnotes.conn.exists("Workflow", workflow_name):
 		doclist += Controller("Workflow", workflow_name).doclist
