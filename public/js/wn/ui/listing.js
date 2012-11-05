@@ -159,7 +159,7 @@ wn.ui.Listing = Class.extend({
 		// hide-refresh
 		if(!(this.hide_refresh || this.no_refresh)) {
 			this.add_button('Refresh', function() {
-				me.run();
+				me.refresh();
 			}, 'icon-refresh');
 		} else {
 			this.$w.find(".img-load").remove();
@@ -189,12 +189,20 @@ wn.ui.Listing = Class.extend({
 	},
 
 	make_filters: function() {
+		var me = this;
 		this.filter_list = new wn.ui.FilterList({
 			listobj: this, 
 			$parent: this.$w.find('.list-filters').toggle(true),
 			doctype: this.doctype,
-			filter_fields: this.filter_fields
+			filter_fields: this.filter_fields,
+			filter_change: function() {
+				me.filter_change();
+			}
 		});
+	},
+	
+	filter_change: function() {
+		this.refresh();
 	},
 
 	clear: function() {
@@ -318,6 +326,7 @@ wn.ui.Listing = Class.extend({
 			this.render_row(this.add_row(), values[i], this, i);
 		}
 	},
+	
 	update_paging: function(values) {
 		if(values.length >= this.page_length) {
 			this.$w.find('.btn-more').toggle(true);			
@@ -346,7 +355,8 @@ wn.ui.Listing = Class.extend({
 				// second filter set for this field
 				if(fieldname=='_user_tags') {
 					// and for tags
-					this.filter_list.add_filter(this.doctype, fieldname, 'like', '%' + label);
+					this.filter_list.add_filter(this.doctype, fieldname, 
+						'like', '%' + label);
 				} else {
 					// or for rest using "in"
 					filter.set_values(this.doctype, fieldname, 'in', v + ', ' + label);
@@ -356,11 +366,12 @@ wn.ui.Listing = Class.extend({
 			// no filter for this item,
 			// setup one
 			if(fieldname=='_user_tags') {
-				this.filter_list.add_filter(this.doctype, fieldname, 'like', '%' + label);					
+				this.filter_list.add_filter(this.doctype, fieldname, 
+					'like', '%' + label);					
 			} else {
 				this.filter_list.add_filter(this.doctype, fieldname, '=', label);					
 			}
 		}
-		this.run();
+		this.filter_change();
 	}	
 });

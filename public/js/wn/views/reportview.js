@@ -21,45 +21,63 @@
 //
 
 wn.views.ReportViewPage = Class.extend({
-	init: function(doctype, docname) {
-		this.doctype = doctype;
-		this.docname = docname;
-		this.page_name = wn.get_route_str();
+	init: function() {
+		this.set_from_route();
 		this.make_page();
 
 		var me = this;
-		wn.model.with_doctype(doctype, function() {
+		wn.model.with_doctype(this.doctype, function() {
 			me.make_report_view();
-			if(docname) {
-				wn.model.with_doc('Report', docname, function(r) {
-					me.reportview.set_columns_and_filters(
-						JSON.parse(wn.model.get("Report", docname)[0].json));
-					me.reportview.run();
+			if(me.docname) {
+				wn.model.with_doc('Report', me.docname, function(r) {
+					me.page.reportview.set_columns_and_filters(
+						JSON.parse(wn.model.get("Report", me.docname)[0].json));
+					me.page.reportview.run();
 				});
 			} else {
-				me.reportview.run();
+				me.page.reportview.run();
 			}
 		});
 
 	},
+	set_from_route: function() {
+		var route = wn.get_route();
+		this.doctype = route[1];
+		var filters_arg = route[2];
+
+		if(route[2] && route[2].indexOf("filters=")==-1) {
+			this.docname = route[2];
+			filters_arg = route[3];
+		}
+	},
+
 	make_page: function() {
-		this.page = wn.container.add_page(this.page_name);
+		this.page = wn.container.add_page(this.page_name());
 		wn.ui.make_app_page({parent:this.page, 
 			single_column:true});
-		wn.container.change_to(this.page_name);
+		wn.container.change_to(this.page_name());
 	},
+
+	page_name: function() {
+		var route = wn.get_route();
+		return route[0] + '/' + 
+			(this.docname 
+				? (this.doctype + '/' + this.docname) 
+				: this.doctype);
+	},
+	
 	make_report_view: function() {
 		var module = wn.metadata.DocType[this.doctype].module;
 		this.page.appframe.set_title(this.doctype);
 		this.page.appframe.set_marker(module);
 		this.page.appframe.add_module_tab(module);
 			
-		this.reportview = new wn.views.ReportView({
+		this.page.reportview = new wn.views.ReportView({
 			doctype: this.doctype, 
 			docname: this.docname, 
 			page: this.page,
 			wrapper: $(this.page).find(".layout-main")
-		})
+		});
 	}
 })
 
@@ -70,30 +88,12 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		this.tab_name = '`tab'+this.doctype+'`';
 		this.meta = wn.metadata.DocType[this.doctype];
 		this.can_delete = wn.model.can_delete(this.doctype);
-		
 		this.setup();
+		this.set_filter_values_from_route();
+		if(this.filter_values)
+			this.setup_filters(this.filter_values);
 	},
 
-	set_init_columns: function() {
-		// pre-select mandatory columns
-		var columns = wn.user.get_default("_list_settings:" + this.doctype);
-		if(!columns) {
-			var columns = [['name', this.doctype],];
-			$.each(wn.meta.docfield_list[this.doctype], function(i, df) {
-				if(df.in_filter && df.fieldname!='naming_series'
-					&& !in_list(no_value_fields, df.fieldname)) {
-					columns.push([df.fieldname, df.parent]);
-				}
-			});
-		}
-		
-		this.set_columns(columns);
-	},
-	
-	set_columns: function(columns) {
-		this.columns = columns;
-	},
-	
 	setup: function() {
 		var me = this;
 		$("<div class='report-head'></div><div class='report-grid'></div>")
@@ -120,23 +120,67 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		this.make_save();
 		this.set_tag_and_status_filter();
 	},
+
+	set_init_columns: function() {
+		// pre-select mandatory columns
+		var columns = wn.user.get_default("_list_settings:" + this.doctype);
+		if(!columns) {
+			var columns = [['name', this.doctype],];
+			$.each(wn.meta.docfield_list[this.doctype], function(i, df) {
+				if(df.in_filter && df.fieldname!='naming_series'
+					&& !in_list(no_value_fields, df.fieldname)) {
+					columns.push([df.fieldname, df.parent]);
+				}
+			});
+		}
+		
+		this.set_columns(columns);
+	},
+	
+	set_columns: function(columns) {
+		this.columns = columns;
+	},
 	
 	// preset columns and filters from saved info
 	set_columns_and_filters: function(opts) {
 		var me = this;
 		if(opts.columns) this.columns = opts.columns;
-		if(opts.filters) $.each(opts.filters, function(i, f) {
-			// fieldname, condition, value
-			me.filter_list.add_filter(f[0], f[1], f[2], f[3]);
-		});
+		if(opts.filters) this.setup_filters(opts.filters);
 		
 		// first sort
-		if(opts.sort_by) this.sort_by_select.val(opts.sort_by);
-		if(opts.sort_order) this.sort_order_select.val(opts.sort_order);
+		if(opts.sort_by) 
+			this.sort_by_select.val(opts.sort_by);
+		if(opts.sort_order) 
+			this.sort_order_select.val(opts.sort_order);
 		
 		// second sort
-		if(opts.sort_by_next) this.sort_by_next_select.val(opts.sort_by_next);
-		if(opts.sort_order_next) this.sort_order_next_select.val(opts.sort_order_next);
+		if(opts.sort_by_next) 
+			this.sort_by_next_select.val(opts.sort_by_next);
+		if(opts.sort_order_next) 
+			this.sort_order_next_select.val(opts.sort_order_next);
+	},
+	
+	set_filter_values_from_route: function() {
+		var route = wn.get_route();
+		if(route.length < 3) return;
+		var filters = route[2];
+		if(filters.indexOf("filters=")==-1)
+			filters = route[3];
+		if(!filters || filters.indexOf("filters=")==-1)
+			return
+		this.filter_values = JSON.parse(filters.split("filters=")[1]);
+	},
+	
+	setup_filters: function(filters) {
+		var me = this;
+		this.filter_list.clear_filters();
+		if(filters) {
+			$.each(filters, function(i, f) {
+				// fieldname, condition, value
+				me.filter_list.add_filter(f[0], f[1], f[2], f[3]);
+			});
+			this.filter_values = filters;
+		}
 	},
 	
 	// build args for query
@@ -145,11 +189,30 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		return {
 			from_reportview: 1,
 			doctype: this.doctype,
-			fields: $.map(this.columns, function(v) { return me.get_full_column_name(v) }),
+			fields: $.map(this.columns, function(v) { 
+				return me.get_full_column_name(v) }),
 			order_by: this.get_order_by(),
-			filters: this.filter_list.get_filters(),
+			filters: this.filter_values || [],
 			docstatus: this.get_docstatus()
 		}
+	},
+		
+	filter_change: function() {
+		this.refresh();
+		//this.set_route_from_filters(this.filter_list.get_filters());
+	},
+
+	set_route_from_filters: function(filters) {
+		var route = wn.get_route();
+		if(filters && filters.length) {
+			filters = 'filters=' + JSON.stringify(filters);			
+			wn.set_route(route[0], route[1], 
+				this.docname || filters, this.docname && filters);			
+		} else {
+			wn.set_route(route[0], route[1], 
+				this.docname);
+		}
+			
 	},
 	
 	get_docstatus: function() {
@@ -163,14 +226,16 @@ wn.views.ReportView = wn.ui.Listing.extend({
 			
 		// second
 		if(this.sort_by_next_select.val()) {
-			order_by += ', ' + this.get_selected_table_and_column(this.sort_by_next_select) 
+			order_by += ', ' 
+				+ this.get_selected_table_and_column(this.sort_by_next_select) 
 				+ ' ' + this.sort_order_next_select.val();
 		}
 		
 		return order_by;
 	},
 	get_selected_table_and_column: function($select) {
-		return this.get_full_column_name([$select.find('option:selected').attr('fieldname'), 
+		return this.get_full_column_name([$select.find('option:selected')
+			.attr('fieldname'), 
 			$select.find('option:selected').attr('table')]) 
 	},
 	
@@ -207,7 +272,19 @@ wn.views.ReportView = wn.ui.Listing.extend({
 			return coldef;
 		});
 	},
-	
+
+	refresh: function() {
+		this.set_filter_values_from_route();
+		if(JSON.stringify(this.filter_values)!=
+			JSON.stringify(this.filter_list.get_filters())) {
+			// filters changed, re-route
+			this.filter_values = this.filter_list.get_filters();
+			this.set_route_from_filters(this.filter_values);
+			return;
+		}
+		this._super();
+	},
+
 	// render data
 	render_list: function() {
 		var me = this;
@@ -251,18 +328,19 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		this.set_data(this.data);
 	
 		grid_wrapper = this.$w.find('.result-list');
+	
+		// set height if not auto
+		if(!options.autoHeight) 
+			grid_wrapper.css('height', '500px');
 		
 		this.grid = new Slick.Grid(grid_wrapper
 			.css('border', '1px solid #ccc')
 			.css('border-top', '0px')
 			.get(0), this.dataView, 
 			columns, options);
-		
+				
 		if(options.editable) this.setup_edit();
-			
-		// set height if not auto
-		if(!options.autoHeight) grid_wrapper.css('height', '500px');
-
+		
 		wn.slickgrid_tools.add_property_setter_on_resize(this.grid);
 		if(this.start!=0 && !options.autoHeight) {
 			this.grid.scrollRowIntoView(this.data.length-1);
@@ -318,14 +396,14 @@ wn.views.ReportView = wn.ui.Listing.extend({
 			<div><button class="btn btn-small btn-info">Update</div>');
 		
 		// first
-		this.sort_by_select = new wn.ui.FieldSelect($(this.sort_dialog.body).find('.sort-column'), 
-			this.doctype).$select;
+		this.sort_by_select = new wn.ui.FieldSelect($(this.sort_dialog.body)
+			.find('.sort-column'), this.doctype).$select;
 		this.sort_by_select.css('width', '60%');
 		this.sort_order_select = $(this.sort_dialog.body).find('.sort-order');
 		
 		// second
-		this.sort_by_next_select = new wn.ui.FieldSelect($(this.sort_dialog.body).find('.sort-column-1'), 
-			this.doctype, null, true).$select;
+		this.sort_by_next_select = new wn.ui.FieldSelect($(this.sort_dialog.body)
+			.find('.sort-column-1'), this.doctype, null, true).$select;
 		this.sort_by_next_select.css('width', '60%');
 		this.sort_order_next_select = $(this.sort_dialog.body).find('.sort-order-1');
 		
@@ -448,6 +526,9 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		this.setup_check_if_cell_is_editable();
 		
 		$(this.wrapper).on("field-change", function(e, docfield, item, value) {
+			if(!item) return;
+			e.stopImmediatePropagation();
+			
 			var name_field = docfield.parent + ":name";
 			
 			var call_args = {

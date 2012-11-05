@@ -45,7 +45,7 @@ wn.form.TableField = wn.form.Field.extend({
 		btn_group = $('<div class="btn-group" style="float: right;">').appendTo(this.toolbar);
 		
 		$('<button class="btn btn-small">\
-			<i class="icon-small icon-edit"></i> Edit</button>')
+			<i class="icon-small icon-edit"></i></button>')
 			.appendTo(btn_group)
 			.click(function() {
 				var active_cell = me.slickgrid.getActiveCell();
@@ -64,7 +64,7 @@ wn.form.TableField = wn.form.Field.extend({
 		
 		
 		$('<button class="btn btn-small">\
-			<i class="icon-small icon-plus-sign"></i> Insert</button>')
+			<i class="icon-small icon-plus-sign"></i></button>')
 			.appendTo(btn_group)
 			.click(function() {
 				var active_cell = me.slickgrid.getActiveCell();
@@ -91,7 +91,7 @@ wn.form.TableField = wn.form.Field.extend({
 					
 				me.frm.set_unsaved();
 			});
-		$('<button class="btn btn-small"><i class="icon-small icon-remove"></i> Delete</button>')
+		$('<button class="btn btn-small"><i class="icon-small icon-remove"></i></button>')
 			.appendTo(btn_group)
 			.click(function() {
 				var active_cell = me.slickgrid.getActiveCell();

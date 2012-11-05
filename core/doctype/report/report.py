@@ -4,4 +4,5 @@ class DocType:
 		self.doc, self.doclist = doc, doclist
 		
 	def autoname(self):
+		import webnotes
 		self.doc.name = self.doc.name.title()
