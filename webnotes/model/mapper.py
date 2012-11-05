@@ -22,7 +22,7 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import comma_and
+from webnotes.utils import comma_and, cstr
 
 def get_mapper_list(from_doctype, to_doctype=None):
 	if to_doctype:

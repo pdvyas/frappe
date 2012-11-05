@@ -32,25 +32,27 @@ class DocList(list):
 		# map reverse operations to set add = False
 		import operator
 		ops_map = {
-			"!=": lambda (a, b): operator.eq(a, b),
-			"in": lambda (a, b): not operator.contains(b, a),
-			"not in": lambda (a, b): operator.contains(b, a)
+			"!=": lambda (a, b): operator.ne(a, b),
+			"in": lambda (a, b): operator.contains(b, a),
+			"not in": lambda (a, b): not operator.contains(b, a)
 		}
 			
 		out = []
+		
 		for doc in self:
 			d = isinstance(getattr(doc, "fields", None), dict) and doc.fields or doc
 			add = True
 			for f in filters:
 				fval = filters[f]
+					
 				if isinstance(fval, list):
-					if fval[0] in ops_map and ops_map[fval[0]]((d.get(f), fval[1])):
+					if fval[0] in ops_map and not ops_map[fval[0]]((d.get(f), fval[1])):
 						add = False
 						break
-				elif isinstance(fval, basestring) and fval.startswith("^") and \
-						not (d.get(f) or "").startswith(fval[1:]):
-					add = False
-					break
+				elif isinstance(fval, basestring) and fval.startswith("^"):
+					if not (d.get(f) or "").startswith(fval[1:]):
+						add = False
+						break
 				elif d.get(f)!=fval:
 					add = False
 					break
