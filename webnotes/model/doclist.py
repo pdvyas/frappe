@@ -34,7 +34,7 @@ class DocList(list):
 		ops_map = {
 			"!=": lambda (a, b): operator.eq(a, b),
 			"in": lambda (a, b): not operator.contains(b, a),
-			"not in": lambda (a, b): operator.contains(b, a),
+			"not in": lambda (a, b): operator.contains(b, a)
 		}
 			
 		out = []

@@ -21,6 +21,7 @@
 # 
 
 from __future__ import unicode_literals
+import webnotes
 
 custom_class = '''
 import webnotes
@@ -123,7 +124,13 @@ class DocListController(object):
 			self.setup()
 		if hasattr(self, "load_precision_maps"):
 			self.load_precision_maps()
-
+	
+	@property
+	def meta(self):
+		if not hasattr(self, "_meta"):
+			self._meta = webnotes.get_doctype(self.doc.doctype)
+		return self._meta
+			
 def get_code(module, dt, dn, extn, fieldname=None):
 	"""DEPRECATED: Used in Report Builder"""
 	from webnotes.modules import scrub, get_module_path

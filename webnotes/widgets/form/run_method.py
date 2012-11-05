@@ -34,6 +34,12 @@ def runserverobj():
 	doclist = None
 	method = webnotes.form_dict.get('method')
 	args = webnotes.form_dict.get('arg') or webnotes.form_dict.get("args")
+	try:
+		import json
+		args = json.loads(args)
+	except ValueError, e:
+		pass
+	
 	doctype = webnotes.form_dict.get('doctype')
 	docname = webnotes.form_dict.get('docname')
 
@@ -62,7 +68,7 @@ def runserverobj():
 			else:
 				webnotes.response['message'] = r
 		
-		webnotes.response['docs'] = so.doclist
+		webnotes.response.setdefault("docs", []).extend(so.doclist)
 
 def check_guest_access(doc):
 	if webnotes.session['user']=='Guest' and not \
