@@ -186,6 +186,8 @@ def build_conditions(filters):
 		
 def build_filter_conditions(data, filters, conditions):
 	"""build conditions from user filters"""
+	from webnotes.utils import cstr
+	
 	for f in filters:
 		tname = ('`tab' + f[0] + '`')
 		if not tname in tables:
@@ -196,9 +198,13 @@ def build_filter_conditions(data, filters, conditions):
 			opts = ["'" + t.strip().replace("'", "\'") + "'" for t in f[3].split(',')]
 			f[3] = "(" + ', '.join(opts) + ")"
 		else:
-			f[3] = "'" + f[3].replace("'", "\'") + "'"	
+			if isinstance(f[3], basestring):
+				f[3] = "'" + f[3].replace("'", "\'") + "'"	
+				conditions.append(tname + '.' + f[1] + " " + f[2] + " " + f[3])	
+			else:
+				conditions.append('ifnull(' + tname + '.' + f[1] + ",0) " + f[2] \
+					+ " " + cstr(f[3]))
 		
-		conditions.append(tname + '.' + f[1] + " " + f[2] + " " + f[3])	
 
 def build_match_conditions(data, conditions):
 	"""add match conditions if applicable"""
@@ -245,6 +251,7 @@ def save_report():
 		d = Document('Report', data['name'])
 	else:
 		d = Document('Report')
+		d.set_local()
 		d.name = data['name']
 		d.ref_doctype = data['doctype']
 		

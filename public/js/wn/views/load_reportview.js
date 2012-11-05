@@ -59,13 +59,19 @@ wn.views.reportview = {
 wn.provide('wn.views.reports_views');
 wn.views.reportview2 = {
 	show: function(dt) {
-		var page_name = wn.get_route_str();
+		var route = wn.get_route();
+		var page_name = route[0] + '/' + route[1];
+		if(route.length>2 && route[2].indexOf('filters=')==-1) {
+			page_name += '/' + route[2];
+		}
 		if(wn.pages[page_name]) {
-			wn.container.change_to(wn.pages[page_name]);
+			if(wn.container.page != wn.pages[page_name])
+				wn.container.change_to(wn.pages[page_name]);
+			wn.pages[page_name].reportview.refresh();
 		} else {
 			var route = wn.get_route();
 			if(route[1]) {
-				wn.views.reports_views[route[1]] = new wn.views.ReportViewPage(route[1], route[2]);				
+				wn.views.reports_views[route[1]] = new wn.views.ReportViewPage(route[1]);				
 			} else {
 				wn.set_route('404');
 			}

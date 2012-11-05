@@ -58,7 +58,13 @@ wn.get_route = function(route) {
 	
 	// for app
 	return $.map(wn.get_route_str(route).split('/'), 
-		function(r) { return decodeURIComponent(r); });
+		function(r) { try {
+				return decodeURIComponent(r);
+			} catch(e) {
+				console.log("Unable to decode: " + r);
+				return r;
+			} 
+		});
 }
 
 wn.get_route_str = function(route) {
@@ -71,7 +77,8 @@ wn.get_route_str = function(route) {
 }
 
 wn.set_route = function() {
-	route = $.map(arguments, function(a) { return encodeURIComponent(a) }).join('/');
+	route = $.map(arguments, function(a) { 
+			if(a) return encodeURIComponent(a) }).join('/');
 	window.location.hash = route;
 	
 	// Set favicon (app.js)

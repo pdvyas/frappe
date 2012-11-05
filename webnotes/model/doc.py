@@ -205,7 +205,7 @@ class Document:
 		self.localname = self.name
 
 		from webnotes.model.controller import get_obj
-		so = get_obj(doc=self, doclist=[])
+		so = get_obj(doc=self, doclist=[self])
 
 		# amendments
 		if self.amended_from: 
@@ -447,7 +447,7 @@ class Document:
 			self.parenttype = tmp[0][0]
 			self.parentfield = tmp[0][1]
 
-	def set_locals(self):
+	def set_local(self):
 		self.fields["__islocal"] = 1
 		
 	def set_idx(self):

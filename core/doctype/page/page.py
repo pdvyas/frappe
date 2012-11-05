@@ -138,7 +138,7 @@ class DocType:
 def get_page_doclist(name):
 	page = webnotes.get_controller("Page", name)
 	page.load_from_files()
-	if page.has_permission():
+	if name=='Login Page' or page.has_permission():
 		return page.doclist
 	else:
 		raise webnotes.PermissionError, 'No read permission for Page %s' % \

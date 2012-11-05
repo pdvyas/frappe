@@ -24,11 +24,14 @@ wn.provide('wn.views.doclistview');
 wn.provide('wn.doclistviews');
 
 wn.views.doclistview.show = function(doctype) {
-	var page_name = wn.get_route_str();
+	var route = wn.get_route();
+	var page_name = route[0] + '/' + route[1];
 	if(wn.pages[page_name]) {
-		wn.container.change_to(wn.pages[page_name]);
+		if(wn.container.page != wn.pages[page_name]) {
+			wn.container.change_to(wn.pages[page_name]);
+		}
+		wn.pages[page_name].doclistview.refresh();
 	} else {
-		var route = wn.get_route();
 		if(route[1]) {
 			wn.model.with_doctype(route[1], function(r) {
 				if(r && r['403']) {
@@ -52,9 +55,9 @@ wn.views.DocListPage = Class.extend({
 		
 		this.make_page();
 		this.setup_docstatus_filter();
-		this.make_listing();
+		this.make_doclistview();
 		this.init_stats();
-		this.listing.run();
+		this.page.doclistview.run();
 	},
 	make_page: function() {
 		var me = this;
@@ -69,6 +72,8 @@ wn.views.DocListPage = Class.extend({
 			<div class="appframe-area"></div>\
 			<div class="layout-main-section">\
 				<div class="listview-area" style="margin-top: -15px;"></div>\
+				<div class="small help">Tip: Click on <b>Pick Columns</b> to \
+					select your own columns.</div>\
 			</div>\
 			<div class="layout-side-section">\
 				<div class="show-docstatus hide section">\
@@ -94,12 +99,12 @@ wn.views.DocListPage = Class.extend({
 		if(this.can_submit) {
 			this.$page.find('.show-docstatus').removeClass('hide');
 			this.$page.find('.show-docstatus input').click(function() {
-				me.listing.run();
+				me.page.doclistview.refresh();
 			})
 		}
 	},	
-	make_listing: function() {
-		this.listing = new wn.views.DocListView({
+	make_doclistview: function() {
+		this.page.doclistview = new wn.views.DocListView({
 			doctype: this.doctype, 
 			page: this.page,
 			wrapper: $(this.page).find(".listview-area"),
@@ -118,7 +123,7 @@ wn.views.DocListPage = Class.extend({
 			doctype: this.doctype,
 			$page: this.$page,
 			set_filter: function(fieldname, label) {
-				me.listing.set_filter(fieldname, label);
+				me.page.doclistview.set_filter(fieldname, label);
 			}
 		})
 	},

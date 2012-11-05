@@ -106,7 +106,7 @@ def add_workflows(doclist):
 		
 		# add workflow states (for icons and style)
 		for state in map(lambda d: d.state, doclist.get({"doctype":"Workflow Document State"})):
-			doclist += webnotes.get_doclist("Workflow State", state).doclist
+			doclist += webnotes.get_doclist("Workflow State", state)
 	
 
 def get_doctype_doclist(doctype):

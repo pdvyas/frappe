@@ -37,8 +37,13 @@ wn.ui.FilterList = Class.extend({
 			me.add_filter();
 		});
 		this.$w.find('.search-btn').bind('click', function() {
-			me.listobj.run();
+			me.listobj.filter_change();
 		});
+	},
+	
+	clear_filters: function() {
+		this.filters = [];
+		this.$w.find('.filter_area').empty();
 	},
 	
 	show_filters: function(show_none) {
@@ -57,7 +62,7 @@ wn.ui.FilterList = Class.extend({
 	
 	push_new_filter: function(tablename, fieldname, condition, value) {
 		this.filters.push(new wn.ui.Filter({
-			flist: this,
+			filter_list: this,
 			tablename: tablename,
 			fieldname: fieldname,
 			condition: condition,
@@ -96,13 +101,13 @@ wn.ui.Filter = Class.extend({
 	init: function(opts) {
 		$.extend(this, opts);
 
-		this.doctype = this.flist.doctype;
+		this.doctype = this.filter_list.doctype;
 		this.make();
 		this.make_select();
 		this.set_events();
 	},
 	make: function() {
-		this.flist.$w.find('.filter_area').append('<div class="list_filter">\
+		this.filter_list.$w.find('.filter_area').append('<div class="list_filter">\
 		<span class="fieldname_select_area"></span>\
 		<select class="condition">\
 			<option value="=">Equals</option>\
@@ -117,7 +122,7 @@ wn.ui.Filter = Class.extend({
 		<span class="filter_field"></span>\
 		<a class="close">&times;</a>\
 		</div>');
-		this.$w = this.flist.$w.find('.list_filter:last-child');
+		this.$w = this.filter_list.$w.find('.list_filter:last-child');
 	},
 	make_select: function() {
 		this.fieldselect = new wn.ui.FieldSelect(this.$w.find('.fieldname_select_area'), 
@@ -136,14 +141,14 @@ wn.ui.Filter = Class.extend({
 			me.$w.css('display','none');
 			var value = me.field.get_value();
 			me.field = null;
-			if(!me.flist.get_filters().length) {
-				me.flist.$w.find('.set_filters').toggle(true);
-				me.flist.$w.find('.show_filters').toggle(false);
+			if(!me.filter_list.get_filters().length) {
+				me.filter_list.$w.find('.set_filters').toggle(true);
+				me.filter_list.$w.find('.show_filters').toggle(false);
 			}
 			if(value) {
-				me.flist.listobj.run();
+				me.filter_list.filter_change();
 			}
-			me.flist.update_filters();
+			me.filter_list.update_filters();
 			return false;
 		});
 
@@ -205,14 +210,14 @@ wn.ui.Filter = Class.extend({
 		f.make_inline();
 		f.refresh();
 		$(field_area).find("input").css("margin-top", "-9px"); 
-			// allignment hack don't know why
+		// allignment hack don't know why
 		me.field = f;
 		
 		this.set_default_condition(df, fieldtype);
 		
 		$(me.field.wrapper).find(':input').keydown(function(ev) {
 			if(ev.which==13) {
-				me.flist.listobj.run();
+				me.filter_list.filter_change()
 			}
 		})
 	},
@@ -269,7 +274,7 @@ wn.ui.Filter = Class.extend({
 		}
 		
 		return [me.fieldselect.$select.find('option:selected').attr('table'), 
-			me.field.df.fieldname, me.$w.find('.condition').val(), cstr(val)];
+			me.field.df.fieldname, me.$w.find('.condition').val(), val];
 	}
 
 });
