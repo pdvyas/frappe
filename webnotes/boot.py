@@ -39,9 +39,6 @@ def get_bootinfo():
 		
 	# control panel
 	cp = webnotes.model.doc.getsingle('Control Panel')
-
-	
-	# system info
 	bootinfo['control_panel'] = cp.copy()
 	bootinfo['account_name'] = cp.get('account_id')
 	bootinfo['sysdefaults'] = webnotes.utils.get_defaults()
@@ -53,12 +50,7 @@ def get_bootinfo():
 		
 	# home page
 	add_home_page(bootinfo, doclist)
-
-	# ipinfo
-	if webnotes.session['data'].get('ipinfo'):
-		bootinfo['ipinfo'] = webnotes.session['data']['ipinfo']
-	
-	# add docs
+	load_translations(bootinfo)
 	bootinfo['docs'] = doclist
 	
 	# plugins
@@ -75,6 +67,15 @@ def get_bootinfo():
 	del bootinfo['docs']
 	
 	return bootinfo
+
+def load_translations(bootinfo):
+	if webnotes.lang != 'en':
+		from webnotes.translate import get_lang_data
+		# framework
+		bootinfo["__messages"] = get_lang_data("../lib/public/js/wn", None, "js")
+		# doctype and module names
+		bootinfo["__messages"].update(get_lang_data('../app/public/js', None, "js"))
+		bootinfo["lang"] = webnotes.lang
 
 def add_desktop_items(doclist, roles):
 	doclist += webnotes.conn.sql("""select t1.name as name, label, gradient, 

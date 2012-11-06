@@ -36,7 +36,7 @@ wn.ui.form.PrintView = Class.extend({
 		wn.ui.make_app_page({
 			parent: this.wrapper,
 			single_column: true,
-			title: this.frm.doctype + ": Print View",
+			title: wn._(this.frm.doctype) + ": " + wn._("Print View"),
 			module: this.frm.meta.module
 		});
 	},
@@ -44,11 +44,11 @@ wn.ui.form.PrintView = Class.extend({
 		var me = this;
 		var appframe = this.wrapper.appframe;
 
-		appframe.add_button("View Details", function() {
+		appframe.add_button(wn._("View Details"), function() {
 			me.frm.edit_doc();
 		}).addClass("btn-success");
 
-		appframe.add_button("Print", function() {
+		appframe.add_button(wn._("Print"), function() {
 			me.frm.print_doc();
 		}, 'icon-print');
 

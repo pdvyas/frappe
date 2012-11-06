@@ -94,14 +94,14 @@ wn.ui.form.AssignTo = Class.extend({
 				width: 350,
 				fields: [
 					{fieldtype:'Link', fieldname:'assign_to', options:'Profile', 
-						label:'Assign To', 
-						description:'Add to To Do List of', reqd:true},
-					{fieldtype:'Data', fieldname:'description', label:'Comment'}, 
-					{fieldtype:'Date', fieldname:'date', label:'Complete By'}, 
-					{fieldtype:'Select', fieldname:'priority', label:'Priority',
+						label:wn._("Assign To"), 
+						description:wn._("Add to To Do List of"), reqd:true},
+					{fieldtype:'Data', fieldname:'description', label:wn._("Comment")}, 
+					{fieldtype:'Date', fieldname:'date', label: wn._("Complete By")}, 
+					{fieldtype:'Select', fieldname:'priority', label: wn._("Priority"),
 						options:'Low\nMedium\nHigh', 'default':'Medium'},
-					{fieldtype:'Check', fieldname:'notify', label:'Notify By Email'},
-					{fieldtype:'Button', label:'Add', fieldname:'add_btn'}
+					{fieldtype:'Check', fieldname:'notify', label: wn._("Notify By Email")},
+					{fieldtype:'Button', label:wn._("Add"), fieldname:'add_btn'}
 				]
 			});
 			me.dialog.fields_dict.add_btn.input.onclick = function() {

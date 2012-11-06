@@ -101,12 +101,12 @@ wn.form.Field = Class.extend({
 	},
 	
 	refresh_label: function() {
-		this.$wrapper.find(".label_txt").text(this.df.label);
+		this.$wrapper.find(".label_txt").text(wn._(this.df.label));
 	},
 	
 	refresh_description: function() {
 		this.$wrapper.find(".help").toggle(this.df.description ? true : false)
-			.html(this.df.description);
+			.html(wn._(this.df.description));
 	},
 	
 	refresh_mandatory: function(val) {
@@ -637,11 +637,18 @@ wn.form.SelectField = wn.form.Field.extend({
 		
 		// reset options
 		this.set_attach_options();
-		if(this.$input) this.$input.empty().add_options(
-			(this.df.options || "").split("\n"));
+		if(this.$input) this.$input.empty().add_options(this.get_options_list());
 
 		if(this.frm)
 			this.set_from_model();
+	},
+	get_options_list: function() {
+		if(!this.df.options)
+			return [];
+		else if(typeof this.df.options=="string")
+			return (this.df.options || "").split("\n")
+		else
+			return this.df.options
 	},
 	set_attach_options: function() {
 		// setup options as one of attached files

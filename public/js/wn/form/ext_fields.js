@@ -31,7 +31,7 @@ wn.form.ColumnBreakField = wn.form.Field.extend({
 		});
 		
 		if(this.df.label) {
-			$("<h4>").text(this.df.label).appendTo(this.cell.wrapper);
+			$("<h4>").text(wn._(this.df.label)).appendTo(this.cell.wrapper);
 		}
 	},
 	refresh: function() {
@@ -71,11 +71,12 @@ wn.form.SectionBreakField = wn.form.Field.extend({
 		if(this.df.label) {
 			if(!this.df.description) 
 				this.df.description = '';
+			wn.translate(this.df, ["label", "description"])				
 			$(this.row.main_head).html(repl('<div class="form-section-head">\
-					<h3 class="head">%(label)s</h3>\
+					<h3 class="head">%(_label)s</h3>\
 					<div class="help small" \
 						style="margin-top: 4px; margin-bottom: 8px;">\
-						%(description)s</div>\
+						%(_description)s</div>\
 				</div>', this.df));
 		} else {
 			// simple

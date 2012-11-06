@@ -254,7 +254,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 				id: id,
 				field: id,
 				docfield: docfield,
-				name: (docfield ? docfield.label : toTitle(c[0])),
+				name: wn._(docfield ? docfield.label : toTitle(c[0])),
 				width: (docfield ? cint(docfield.width) : 120) || 120,
 				formatter: function(row, cell, value, columnDef, dataContext) {
 					var docfield = columnDef.docfield;
@@ -372,7 +372,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 	make_column_picker: function() {
 		var me = this;
 		this.column_picker = new wn.ui.ColumnPicker(this);
-		this.page.appframe.add_button('Pick Columns', function() {
+		this.page.appframe.add_button(wn._("Pick Columns"), function() {
 			me.column_picker.show(me.columns);
 		}, 'icon-th-list');
 	},
@@ -380,20 +380,20 @@ wn.views.ReportView = wn.ui.Listing.extend({
 	// setup sorter
 	make_sorter: function() {
 		var me = this;
-		this.sort_dialog = new wn.ui.Dialog({title:'Sorting Preferences'});
-		$(this.sort_dialog.body).html('<p class="help">Sort By</p>\
+		this.sort_dialog = new wn.ui.Dialog({title:wn._("Sorting Preferences")});
+		$(this.sort_dialog.body).html('<p class="help">'+wn._("Sort By")+'</p>\
 			<div class="sort-column"></div>\
 			<div><select class="sort-order" style="margin-top: 10px; width: 60%;">\
-				<option value="asc">Ascending</option>\
-				<option value="desc">Descending</option>\
+				<option value="asc">'+wn._("Ascending")+'</option>\
+				<option value="desc">'+wn._("Descending")+'</option>\
 			</select></div>\
-			<hr><p class="help">Then By (optional)</p>\
+			<hr><p class="help">'+wn._("Then By (optional)")+'</p>\
 			<div class="sort-column-1"></div>\
 			<div><select class="sort-order-1" style="margin-top: 10px; width: 60%;">\
-				<option value="asc">Ascending</option>\
-				<option value="desc">Descending</option>\
+				<option value="asc">'+wn._("Ascending")+'</option>\
+				<option value="desc">'+wn._("Descending")+'</option>\
 			</select></div><hr>\
-			<div><button class="btn btn-small btn-info">Update</div>');
+			<div><button class="btn btn-small btn-info">'+wn._("Update")+'</div>');
 		
 		// first
 		this.sort_by_select = new wn.ui.FieldSelect($(this.sort_dialog.body)
@@ -415,7 +415,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		this.sort_order_next_select.val('desc');
 		
 		// button actions
-		this.page.appframe.add_button('Sort By', function() {
+		this.page.appframe.add_button(wn._("Sort By"), function() {
 			me.sort_dialog.show();
 		}, 'icon-arrow-down');
 		
@@ -429,7 +429,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 	make_export: function() {
 		var me = this;
 		if(wn.user.is_report_manager()) {
-			this.page.appframe.add_button('Export', function() {
+			this.page.appframe.add_button(wn._("Export"), function() {
 				var args = me.get_args();
 				args.cmd = 'webnotes.widgets.reportview.export_query'
 				open_url_post(wn.request.url, args);
@@ -445,7 +445,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 					= this.checked ? true : false;
 			});
 			
-			this.page.appframe.add_button('Delete', function() {
+			this.page.appframe.add_button(wn._("Delete"), function() {
 				var delete_list = []
 				$.each(me.data, function(i, d) {
 					if(d._checked) {
@@ -479,7 +479,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 	make_save: function() {
 		var me = this;
 		if(wn.user.is_report_manager()) {
-			this.page.appframe.add_button('Save', function() {
+			this.page.appframe.add_button(wn._("Save"), function() {
 				// name
 				if(me.docname) {
 					var name = me.docname

@@ -37,6 +37,7 @@ class DictObj(dict):
 	def __setstate__(self, d): 
 		self.update(d)
 
+lang = 'en'
 form_dict = DictObj()
 conn = None
 _memc = None
@@ -49,7 +50,6 @@ cookies = {}
 response = DictObj({'message':'', 'exc':''})
 debug_log = []
 message_log = []
-lang = 'en'
 _messages = {}
 
 # memcache

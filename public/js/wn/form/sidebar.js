@@ -30,30 +30,30 @@ wn.ui.FormSidebar = Class.extend({
 		this.wrapper = $('<div class="section">\
 			<div class="btn-group" style="display: inline-block;">\
 				<button class="btn btn-small dropdown-toggle" data-toggle="dropdown">\
-				<i class="icon-small icon-asterisk"></i> Actions <span class="caret"></span></button>\
+				<i class="icon-small icon-asterisk"></i> '+wn._("Actions")+' <span class="caret"></span></button>\
 				<ul class="dropdown-menu">\
 					<li><a href="#" data-action="new" onclick="newdoc(cur_frm.doctype); return false;">\
-						<i class="icon icon-plus"></i> New</a>\
+						<i class="icon icon-plus"></i> '+wn._("New")+'</a>\
 					</li>\
 					<li><a href="#" data-action="print" onclick="cur_frm.print_doc(); return false;">\
-						<i class="icon icon-print"></i> Print</a>\
+						<i class="icon icon-print"></i> '+wn._("Print")+'</a>\
 					</li>\
 					<li><a href="#" data-action="email" onclick="cur_frm.email_doc(); return false;">\
-						<i class="icon icon-envelope"></i> Email</a>\
+						<i class="icon icon-envelope"></i> '+wn._("Email")+'</a>\
 					</li>\
 					<li><a href="#" data-action="copy" onclick="cur_frm.copy_doc(); return false;">\
-						<i class="icon icon-file"></i> Copy</a>\
+						<i class="icon icon-file"></i> '+wn._("Copy")+'</a>\
 					</li>\
 					<li><a href="#" data-action="refresh" onclick="cur_frm.reload_doc(); return false;">\
-						<i class="icon icon-refresh"></i> Refresh</a>\
+						<i class="icon icon-refresh"></i> '+wn._("Refresh")+'</a>\
 					</li>\
 					<li><a href="#" data-action="delete" onclick="cur_frm.savetrash(); return false;">\
-						<i class="icon icon-remove-sign"></i> Delete</a>\
+						<i class="icon icon-remove-sign"></i> '+wn._("Delete")+'</a>\
 					</li>\
 				</ul>\
 			</div>\
 			<button class="btn btn-small linked-with" style="margin-left: 7px;">\
-				<i class="icon-small icon-random"></i> Links</button>\
+				<i class="icon-small icon-random"></i> '+wn._("Links")+'</button>\
 			<div class="tags_area">\
 				<hr>\
 			</div>\
@@ -61,13 +61,13 @@ wn.ui.FormSidebar = Class.extend({
 				<hr>\
 				<div><button class="btn btn-small" style="margin-top: -2px">\
 					<i class="icon-small icon-ok"></i>\
-					Assign To</button></div>\
+					'+wn._("Assign To")+'</button></div>\
 			</div>\
 			<div class="attach_area">\
 				<hr>\
 				<div><button class="btn btn-small" style="margin-top: -2px">\
 					<i class="icon-small icon-upload"></i>\
-					Upload Attachment</button></div>\
+					'+wn._("Upload Attachment")+'</button></div>\
 			</div>\
 			<div class="comments_area">\
 				<hr>\

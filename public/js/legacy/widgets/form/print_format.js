@@ -447,7 +447,7 @@ $.extend(_p, {
 						}
 					}
 					// if not, just have doctype has heading
-					h1.innerHTML = val ? val : get_doctype_label(doctype);
+					h1.innerHTML = val ? wn._(val) : wn._(doctype);
 				}
 					
 				var h2_style = {
@@ -490,7 +490,7 @@ $.extend(_p, {
 								break;
 							
 							case 'Column Break':
-								me.layout.addcell(field.width, field.label);							
+								me.layout.addcell(field.width, wn._(field.label));
 								break;
 								
 							case 'Table':
@@ -515,7 +515,7 @@ $.extend(_p, {
 								var div = $a(me.layout.cur_cell, 'div');
 								var val = _f.get_value(doctype, docname,
 									field.fieldname);
-								div.innerHTML = '<div>' + field.label +
+								div.innerHTML = '<div>' + wn._(field.label) +
 									': </div><pre style="font-family: Courier, Fixed;">' + (val ? val : '') +
 									'</pre>';
 								break;
@@ -634,7 +634,7 @@ $.extend(_p, {
 				row = _p.field_tab(layout.cur_cell);
 				
 				// Add label
-				row.cells[0].innerHTML = (f.label ? f.label : f.fieldname) + ": ";
+				row.cells[0].innerHTML = (f.label ? wn._(f.label) : f.fieldname) + ": ";
 				$s(row.cells[1], val, f.fieldtype);
 				
 				// left align currency in normal display
@@ -778,7 +778,7 @@ print_table = function(dt, dn, fieldname, tabletype, cols, head_labels, widths, 
 			// If 'SR' exists in flist, then create its heading column cell
 			if(flist[0]=='SR') {
 				var cell = table.rows[0].insertCell(0);
-				cell.innerHTML = head_labels?head_labels[0]:'<b>SR</b>';
+				cell.innerHTML = head_labels ? wn._(head_labels[0]): wn._("SR");
 				$y(cell, { width: '30px' });
 				$y(cell, me.head_cell_style);
 				col_start++;
@@ -787,7 +787,9 @@ print_table = function(dt, dn, fieldname, tabletype, cols, head_labels, widths, 
 			for(var c = col_start; c < flist.length; c++) {
 				var cell = table.rows[0].insertCell(c);
 				$y(cell, me.head_cell_style);
-				cell.innerHTML = head_labels?head_labels[c]:flist[c].label;
+				cell.innerHTML = head_labels
+					? wn._(head_labels[c])
+					: wn._(flist[c].label);
 				if(flist[c].width) { $y(cell, {width: flist[c].width}); }
 				if(widths) { $y(cell, {width: widths[c]}); }
 				if(in_list(['Currency', 'Float'], flist[c].fieldtype)) {

@@ -82,9 +82,9 @@ wn.ui.Listing = Class.extend({
 						<div class="filter_area"></div>\
 						<div>\
 							<button class="btn btn-small btn-info search-btn">\
-								<i class="icon-refresh icon-white"></i> Search</button>\
+								<i class="icon-refresh icon-white"></i> '+wn._("Search")+'</button>\
 							<button class="btn btn-small add-filter-btn">\
-								<i class="icon-plus"></i> Add Filter</button>\
+								<i class="icon-plus"></i> '+wn._("Add Filter")+'</button>\
 						</div>\
 					</div>\
 				</div>\
@@ -106,7 +106,7 @@ wn.ui.Listing = Class.extend({
 				</div>\
 				\
 				<div class="paging-button">\
-					<button class="btn btn-small btn-more hide">More...</div>\
+					<button class="btn btn-small btn-more hide">'+wn._("More")+'...</div>\
 				</div>\
 			</div>\
 		', this.opts));
@@ -158,7 +158,7 @@ wn.ui.Listing = Class.extend({
 	
 		// hide-refresh
 		if(!(this.hide_refresh || this.no_refresh)) {
-			this.add_button('Refresh', function() {
+			this.add_button(wn._("Refresh"), function() {
 				me.refresh();
 			}, 'icon-refresh');
 		} else {
@@ -167,14 +167,14 @@ wn.ui.Listing = Class.extend({
 				
 		// new
 		if(this.new_doctype) {
-			this.add_button('New ' + this.new_doctype, function() { 
+			this.add_button(wn._("New") + ' ' + wn._(this.new_doctype), function() { 
 				(me.custom_new_doc || me.make_new_doc)(me.new_doctype);
 			}, 'icon-plus');
 		} 
 		
 		// hide-filter
 		if(me.show_filters) {
-			this.add_button('Show Filters', function() {
+			this.add_button(wn._("Show Filters"), function() {
 				me.filter_list.show_filters();
 			}, 'icon-search').addClass('btn-filter');
 		}
@@ -285,7 +285,7 @@ wn.ui.Listing = Class.extend({
 					? this.get_no_result_message()
 					: (this.no_result_message 
 						? this.no_result_message
-						: "Nothing to show");
+						: wn._("Nothing to show"));
 						
 				this.$w.find('.no-result')
 					.html(msg)

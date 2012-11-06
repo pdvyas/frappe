@@ -75,7 +75,11 @@ class Document:
 		self._user_defaults = {}
 		self._prefix = prefix
 		
-		if fielddata: 
+		if isinstance(doctype, dict):
+			fielddata = doctype
+			doctype = None
+		
+		if fielddata:
 			self.fields = webnotes.DictObj(fielddata)
 		else: 
 			self.fields = webnotes.DictObj()

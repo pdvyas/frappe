@@ -64,15 +64,16 @@ wn.views.ModuleViewPage = Class.extend({
 					background-color: %(back)s">\
 				<span \
 					class="small-module-icons small-module-icons-%(module_lower)s"></span>\
-				</span> %(module)s ', {
+				</span> %(_module)s ', {
 					module_lower: this.module.toLowerCase(),
-					module: this.module,
+					_module: wn._(this.module),
 					back: wn.get_module_color(this.module)
 				}),
 			single_column: true
 		});
 		wn.container.change_to(this.page_name);
-		$("<div class='pull-left' style='width: 48%'><div class='alert'>Loading...</div></div>\
+		$("<div class='pull-left' style='width: 48%'><div class='alert'>"+
+			wn._("Loading") + "...</div></div>\
 			<div class='pull-right' style='width: 48%'></div>\
 			<div class='clearfix'></div>").appendTo($(this.page)
 				.find(".layout-main").css("min-height", "400px"));
@@ -112,6 +113,7 @@ wn.views.ModuleViewPage = Class.extend({
 		
 		$("<h4>" + title + "</h4>").appendTo(div);
 		$.each(this.items, function(i, item) {
+			wn.translate(item, ["name", "description", "title"])
 			if(item.item_type==section) {
 				if(me.has_permission(item)) {
 					(me.formatters[section] || me.formatters.def)(item)
@@ -139,8 +141,7 @@ wn.views.ModuleViewPage = Class.extend({
 	},
 	formatters: {
 		def: function(item) {
-			// default formatter for doctypes
-			
+			// default formatter for doctypes			
 			if(item.open_count!=null) {
 				item.open_count = '<span class="badge badge-important" \
 					style="float:right; margin-right: 4px;">'
@@ -157,19 +158,19 @@ wn.views.ModuleViewPage = Class.extend({
 			
 			if(item.issingle) {
 				item.main_link = repl("<a href='#Form/%(name)s/%(name)s'>\
-					<b style='font-size: 110%'>%(name)s</b></a>", 
+					<b style='font-size: 110%'>%(_name)s</b></a>", 
 					item);
 			} else {
 				item.main_link = repl("<a href='#List/%(name)s'>\
-					<b style='font-size: 110%'>%(name)s</b></a>", item);
+					<b style='font-size: 110%'>%(_name)s</b></a>", item);
 			}
 			
 			return $(repl("<span style='display:inline-block; float: right; width: 20%;'>\
 					%(count)s %(open_count)s</span>\
 				<span class='module-item'>\
 					%(main_link)s \
-					<span class='help' title='%(description)s'>\
-						%(description)s</span>\
+					<span class='help' title='%(_description)s'>\
+						%(_description)s</span>\
 				</span>\
 				", item));
 		},
@@ -177,19 +178,19 @@ wn.views.ModuleViewPage = Class.extend({
 			if(!item.title) item.title = item.name;
 			if(!item.description) item.description = "";
 			return $(repl("<span class='module-item'>\
-				<a href='#%(name)s'>%(title)s</a>\
-				<span class='help' title='%(description)s'>\
-					%(description)s</span>\
+				<a href='#%(name)s'>%(_title)s</a>\
+				<span class='help' title='%(_description)s'>\
+					%(_description)s</span>\
 				</span>", item));
 		},
 		report: function(item) {
-			return $(repl("<a href='#Report2/%(ref_doctype)s/%(name)s'>%(name)s</a>", item));
+			return $(repl("<a href='#Report2/%(ref_doctype)s/%(name)s'>%(_name)s</a>", item));
 		},
 		query_report: function(item) {
-			return $(repl("<a href='#query-report/%(name)s'>%(name)s</a>", item));
+			return $(repl("<a href='#query-report/%(name)s'>%(_name)s</a>", item));
 		},
 		search_criteria: function(item) {
-			return $(repl("<a href='#Report/%(doctype)s/%(name)s'>%(name)s</a>", item));
+			return $(repl("<a href='#Report/%(doctype)s/%(name)s'>%(_name)s</a>", item));
 		}
 	}
 });

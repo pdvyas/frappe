@@ -1,0 +1,19 @@
+[
+ "Core", 
+ "Workflow", 
+ "Rules defining transition of state in the workflow.", 
+ "DocType on which this Workflow is applicable.", 
+ "No", 
+ "All possible Workflow States and roles of the workflow.", 
+ "Is Active", 
+ "Workflow Document States", 
+ "Is Custom", 
+ "Custom is \"yes\" if designed by System Manager, \"No\" for Administrator.", 
+ "If checked, all other workflows become inactive.", 
+ "Workflow State Field", 
+ "Yes", 
+ "Field that represents the Workflow State of the transaction.", 
+ "Defines workflow states and rules for a document.", 
+ "Document Type", 
+ "Workflow Transitions"
+]

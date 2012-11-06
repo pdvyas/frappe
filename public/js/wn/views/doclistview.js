@@ -72,15 +72,13 @@ wn.views.DocListPage = Class.extend({
 			<div class="appframe-area"></div>\
 			<div class="layout-main-section">\
 				<div class="listview-area" style="margin-top: -15px;"></div>\
-				<div class="small help">Tip: Click on <b>Pick Columns</b> to \
-					select your own columns.</div>\
 			</div>\
 			<div class="layout-side-section">\
 				<div class="show-docstatus hide section">\
-					<div class="section-head">Show</div>\
-					<div><input data-docstatus="0" type="checkbox" checked="checked" /> Drafts</div>\
-					<div><input data-docstatus="1" type="checkbox" checked="checked" /> Submitted</div>\
-					<div><input data-docstatus="2" type="checkbox" /> Cancelled</div>\
+					<div class="section-head">'+wn._("Show")+'</div>\
+					<div><input data-docstatus="0" type="checkbox" checked="checked" /> '+wn._("Drafts")+'</div>\
+					<div><input data-docstatus="1" type="checkbox" checked="checked" /> '+wn._("Submitted")+'</div>\
+					<div><input data-docstatus="2" type="checkbox" /> '+wn._("Cancelled")+'</div>\
 				</div>\
 			</div>\
 			<div style="clear: both"></div>\
@@ -90,8 +88,8 @@ wn.views.DocListPage = Class.extend({
 		var module = wn.metadata.DocType[this.doctype].module;
 		
 		this.appframe.set_marker(module);
-		this.appframe.set_title(this.doctype);
-		this.appframe.set_help(wn.metadata.DocType[this.doctype].description || "")
+		this.appframe.set_title(wn._(this.doctype));
+		this.appframe.set_help(wn._(wn.metadata.DocType[this.doctype].description || ""))
 		this.appframe.add_module_tab(module);
 	},
 	setup_docstatus_filter: function() {
@@ -130,7 +128,7 @@ wn.views.DocListPage = Class.extend({
 	make_report_button: function() {
 		var me = this;
 		if(wn.boot.profile.can_get_report.indexOf(this.doctype)!=-1) {
-			this.appframe.add_button('Build Report', function() {
+			this.appframe.add_button(wn._("Build Report"), function() {
 				wn.set_route('Report2', me.doctype);
 			}, 'icon-th')
 		}
@@ -223,19 +221,20 @@ wn.views.ListViewStats = Class.extend({
 		if(!stat || !stat.length) {
 			if(field=='_user_tags') {
 				this.$page.find('.layout-side-section')
-					.append('<div class="stat-wrapper section"><div class="section-head">Tags</div>\
-						<div class="help small">No records tagged.</div></div>');
+					.append('<div class="stat-wrapper section"><div class="section-head">'
+						+wn._("Tags") + '</div><div class="help small">'
+						+wn._("No records tagged.")+'</div></div>');
 			}
 			return;
 		}
 		
 		var label = wn.meta.docfield_map[this.doctype][field] ? 
 			wn.meta.docfield_map[this.doctype][field].label : field;
-		if(label=='_user_tags') label = 'Tags';
+		if(label=='_user_tags') label = "Tags";
 		
 		// grid
 		var $w = $('<div class="stat-wrapper section">\
-			<div class="section-head">'+ label +'</div>\
+			<div class="section-head">'+ wn._(label) +'</div>\
 			<div class="stat-grid">\
 			</div>\
 		</div>');
@@ -274,7 +273,7 @@ wn.views.ListViewStats = Class.extend({
 	get_progress_bar: function(i, v, max, field) {
 		var me = this;
 		var args = {}
-		args.label = v[0];
+		args.label = wn._(v[0]);
 		args.width = flt(v[1]) / max * 100;
 		args.count = v[1];
 		args.field = field;
