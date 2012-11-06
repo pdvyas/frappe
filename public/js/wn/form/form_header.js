@@ -34,7 +34,7 @@ wn.ui.form.FormHeader = Class.extend({
 		this.$w = this.appframe.$w;
 
 		if(!frm.meta.issingle) {
-			this.appframe.add_tab(frm.doctype, 0.5, function() {
+			this.appframe.add_tab(wn._(frm.doctype), 0.5, function() {
 				wn.set_route("List", frm.doctype);
 			});
 		}
@@ -55,20 +55,20 @@ wn.ui.form.FormHeader = Class.extend({
 			return;
 		
 		$(repl('%(avatar_owner)s %(avatar_mod)s', {
-			avatar_owner: wn.avatar(this.frm.doc.owner, null, "Created By"),
-			avatar_mod: wn.avatar(this.frm.doc.modified_by, null, "Last Updated By")
+			avatar_owner: wn.avatar(this.frm.doc.owner, null, wn._("Created By")),
+			avatar_mod: wn.avatar(this.frm.doc.modified_by, null, wn._("Last Updated By"))
 		})).insertAfter(this.$w.find(".appframe-title"));
 		
 		this.$w.find(".avatar:eq(0)").popover({
 			trigger:"hover",
-			title: "Created By",
+			title: wn._("Created By"),
 			content: wn.user_info(this.frm.doc.owner).fullname.bold() 
 				+" on "+this.frm.doc.creation
 		});
 
 		this.$w.find(".avatar:eq(1)").popover({
 			trigger:"hover",
-			title: "Modified By",
+			title: wn._("Modified By"),
 			content: wn.user_info(this.frm.doc.modified_by).fullname.bold() 
 				+" on "+this.frm.doc.modified
 		});
@@ -98,16 +98,17 @@ wn.ui.form.FormHeader = Class.extend({
 		this.set_label(labinfo);
 		
 		// show update button if unsaved
-		if(this.frm.doc.__unsaved && cint(this.frm.doc.docstatus)==1 && this.appframe.buttons['Update']) {
-			this.appframe.buttons['Update'].toggle(true);
+		if(this.frm.doc.__unsaved && cint(this.frm.doc.docstatus)==1 
+			&& this.appframe.buttons[wn._("Update")]) {
+			this.appframe.buttons[wn._("Update")].toggle(true);
 		}
 		
 	},
 	set_label: function(labinfo) {
 		this.$w.find('.label').remove();
 		$(repl('<span class="label %(lab_class)s">\
-			%(lab_status)s</span>', {
-				lab_status: labinfo[0],
+			%(_lab_status)s</span>', {
+				_lab_status: wn._(labinfo[0]),
 				lab_class: labinfo[1]
 			})).insertBefore(this.$w.find('.appframe-title'))
 	},
@@ -126,11 +127,11 @@ wn.ui.form.FormHeader = Class.extend({
 		// Edit
 		if(this.frm.meta.read_only_onload && !this.frm.doc.__islocal) {
 			if(!this.frm.editable)
-				this.appframe.add_button('Edit', function() { 
+				this.appframe.add_button(wn._("Edit"), function() { 
 					me.frm.edit_doc();
 				},'icon-pencil');
 			else
-				this.appframe.add_button('Print View', function() { 
+				this.appframe.add_button(wn._("Print View"), function() { 
 					me.frm.is_editable[me.frm.docname] = 0;				
 					me.frm.refresh(); }, 'icon-print' );	
 		}
@@ -138,32 +139,33 @@ wn.ui.form.FormHeader = Class.extend({
 		var docstatus = cint(this.frm.doc.docstatus);
 		// Save
 		if(docstatus==0 && p[WRITE]) {
-			this.appframe.add_button('Save', function() { 
-				me.frm.save(null, me.appframe.buttons['Save']); }, '');
-			this.appframe.buttons['Save'].addClass('btn-info').text("Save (Ctrl+S)");			
+			this.appframe.add_button(wn._("Save"), function() { 
+				me.frm.save(null, me.appframe.buttons[wn._("Save")]); }, '');
+			this.appframe.buttons[wn._("Save")].addClass('btn-info').text("Save (Ctrl+S)");			
 		}
 		// Submit
 		if(docstatus==0 && p[SUBMIT] && (!me.frm.doc.__islocal))
-			this.appframe.add_button('Submit', function() { 
-				me.frm.savesubmit(me.appframe.buttons['Submit']);}, 'icon-lock');
+			this.appframe.add_button(wn._("Submit"), function() { 
+				me.frm.savesubmit(me.appframe.buttons[wn._("Submit")]);}, 'icon-lock');
 
 		// Update after sumit
 		if(docstatus==1 && p[SUBMIT]) {
-			this.appframe.add_button('Update', function() { 
-				me.frm.save(me.appframe.buttons['Update']);}, '');
+			this.appframe.add_button(wn._("Update"), function() { 
+				me.frm.save(me.appframe.buttons[wn._("Update")]);}, '');
 			if(!me.frm.doc.__unsaved) 
-				this.appframe.buttons['Update'].toggle(false);
+				this.appframe.buttons[wn._("Update")].toggle(false);
 		}
 
 		// Cancel
 		if(docstatus==1  && p[CANCEL])
-			this.appframe.add_button('Cancel', function() { 
-				me.frm.savecancel(me.appframe.buttons['Cancel']) 
+			this.appframe.add_button(wn._("Cancel"), function() { 
+				me.frm.savecancel(me.appframe.buttons[wn._("Cancel")]) 
 			}, 'icon-remove');
 
 		// Amend
 		if(docstatus==2  && p[AMEND])
-			this.appframe.add_button('Amend', function() { me.frm.amend_doc() }, 'icon-pencil');
+			this.appframe.add_button(wn._("Amend"), function() { me.frm.amend_doc() }, 
+				'icon-pencil');
 			
 		// Help
 		if(me.frm.meta.description) {

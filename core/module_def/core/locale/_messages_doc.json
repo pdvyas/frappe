@@ -1,0 +1,20 @@
+[
+ "DocType represents a Database Table, Form (or grid) and Controller (for executing logic on events)", 
+ "Adds a custom script (client or server) to a DocType", 
+ "Defines workflow states and rules for a document.", 
+ "Data Import Tool", 
+ "Workflow state represents the current state of a document.", 
+ "Roles assigned to the Desktop Item", 
+ "Workflow Action Master", 
+ "Property Setter overrides a standard DocType or Field property", 
+ "Bulk import from CSV files.", 
+ "Permission Rule", 
+ "Represents the states allowed in one document and role assigned to change the state.", 
+ "Profile Represents a User in the system.", 
+ "Desktop Item is shown as an Icon on desktop and toolbar.", 
+ "Query Report", 
+ "Adds a custom field to a DocType", 
+ "Bulk Email records.", 
+ "Defines actions on states and the next step and allowed roles.", 
+ "Login Page"
+]

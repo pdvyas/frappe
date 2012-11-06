@@ -1,0 +1,21 @@
+[
+ "Core", 
+ "Style", 
+ "Roles", 
+ "No", 
+ "Gradient", 
+ "Route", 
+ "Desktop Item Roles", 
+ "Module", 
+ "Label", 
+ "Disabled", 
+ "Is Custom", 
+ "Desktop Item", 
+ "Desktop Item is shown as an Icon on desktop and toolbar.", 
+ "Roles HTML", 
+ "Yes", 
+ "URL Route e.g. Module/Accounts", 
+ "Gradient shades for icon e.g. #A90329, #8F0222, #6D0019", 
+ "CSS Class for the icon", 
+ "Check roles that are allowed to view this Desktop Item"
+]

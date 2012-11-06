@@ -69,6 +69,9 @@ def get_items():
 			and ifnull(disabled, 0) = 0 
 			order by criteria_name""", module, as_dict=1)
 			
+	# messages (descriptions)
+	from webnotes.translate import get_doc_messages
+	webnotes.response["__messages"] = get_doc_messages(module, 'Module Def', module)
 	return out
 	
 def get_open_count(doctype):

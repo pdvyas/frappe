@@ -52,38 +52,82 @@ messages = {}
 
 def build_message_files():
 	"""build from doctypes, pages, database and framework"""
-	build_from_doctypes('lib/core')
-	build_from_doctypes(conf.modules_path)
+	build_from_doctype_code('lib/core')
+	build_from_doctype_code('app')
+	
+	# doctype
 	build_from_database()
-	build_for_framework('lib/webnotes', 'py')
+	
+	build_for_framework('lib/webnotes', 'py', with_doctype_names=True)
 	build_for_framework('lib/public/js/wn', 'js')
-	build_for_framework('app/public/js', 'js')
+	build_for_framework('app/public/js', 'js', with_doctype_names=True)
 	
-def build_from_database():
-	"""make doctype labels, names, options, descriptions"""
-	from webnotes.modules import get_doc_path
+	build_for_modules()
+
+def build_for_modules():
+	"""doctype descriptions, module names, etc for each module"""
+	from webnotes.modules import get_module_path, get_doc_path
 	
-	for doctype in webnotes.conn.sql("""select name, description, module
-		from tabDocType"""):
-		doctype_path = get_doc_path(doctype.module, 'DocType', doctype.name)
-		
-		# if module and doctype folder exists
-		if doctype.module and os.path.exists(doctype_path):
-			messages = [doctype.name, doctype.description]
-			if doctype.docstatus_labels:
-				messages += [l.strip() for l in doctype.docstatus_labels.split(",")]
-				
-			for docfield in webnotes.conn.sql("""select label, description, options, fieldtype 
-				from tabDocField where parent=%s""", doctype.name):
-				messages += [docfield.label, docfield.description]
-				if docfield.fieldtype=='Select' and docfield.options \
-					and not docfield.options.startswith("link:") \
-					and not docfield.options.startswith("attach_files:"):
-					messages += docfield.options.split('\n')
-				
+	for m in webnotes.conn.sql("""select name from `tabModule Def`"""):
+		module_path = get_module_path(m[0])
+		if os.path.exists(module_path):
+			messages = []
+			messages += [t[0] for t in webnotes.conn.sql("""select description from tabDocType 
+				where module=%s""", m[0])]
+			for t in webnotes.conn.sql("""select 
+				if(ifnull(title,'')='',name,title), description
+				from tabPage where module=%s 
+				and ifnull(standard,'No')='Yes' """, m[0]):
+				messages.extend([t[0], t[1]])
+			messages += [t[0] for t in webnotes.conn.sql("""select t1.name from 
+				tabReport t1, tabDocType t2 where
+				t1.ref_doctype = t2.name and
+				t1.is_standard = "Yes" and
+				t2.module = %s""", m[0])]
+
+			doctype_path = get_doc_path(m[0], 'Module Def', m[0])
 			write_messages_file(doctype_path, messages, 'doc')
 
-def build_for_framework(path, mtype):
+def build_from_database():
+	"""make doctype labels, names, options, descriptions"""
+	def get_select_options(doc):
+		if doc.doctype=="DocField" and doc.fieldtype=='Select' and doc.options \
+			and not doc.options.startswith("link:") \
+			and not doc.options.startswith("attach_files:"):
+			return doc.options.split('\n')
+		else:
+			return []
+
+	build_for_doc_from_database(webnotes.DictObj({
+		"doctype": "DocType",
+		"module_field": "module",
+		"DocType": ["name", "description", "module"],
+		"DocField": ["label", "description"],
+		"custom": get_select_options
+	}))
+
+def build_for_doc_from_database(fields):
+	from webnotes.model.doclist import load_doclist
+	from webnotes.modules import get_doc_path
+
+	for item in webnotes.conn.sql("""select name from `tab%s`""" % fields.doctype, as_dict=1):
+		messages = []
+		doclist = load_doclist(fields.doctype, item.name)
+
+		for doc in doclist:
+			if doc.doctype in fields:
+				messages += map(lambda x: x in fields[doc.doctype] and doc[x] or None, 
+					doc.keys())
+					
+			if fields.custom:
+				messages += fields.custom(doc)	
+		
+		doc = doclist[0]
+		if doc.get(fields.module_field):
+			doctype_path = get_doc_path(doc[fields.module_field], doc.doctype, doc.name)
+			write_messages_file(doctype_path, messages, 'doc')
+	
+def build_for_framework(path, mtype, with_doctype_names = False):
 	"""make locale files for framework py and js (all)"""
 	messages = []
 	for (basepath, folders, files) in os.walk(path):
@@ -93,13 +137,17 @@ def build_for_framework(path, mtype):
 				
 				
 	# append module & doctype names
-	messages += [m.name for m in webnotes.conn.sql("""select name from `tabModule Def`""")]
-	messages += [m.name for m in webnotes.conn.sql("""select name from `tabDocType`""")]
+	if with_doctype_names:
+		messages += [m[0] for m in webnotes.conn.sql("""select name from `tabModule Def`""")]
+		messages += [m[0] for m in webnotes.conn.sql("""select name from `tabDocType`""")]
+		messages += [m[0] for m in webnotes.conn.sql("""select label from `tabDesktop Item`""")]
+		messages += [m[0] for m in webnotes.conn.sql("""select name from `tabWorkflow State`""")]
+		messages += [m[0] for m in webnotes.conn.sql("""select name from `tabWorkflow Action`""")]
 	
 	if messages:
 		write_messages_file(path, messages, mtype)
 	
-def build_from_doctypes(path):
+def build_from_doctype_code(path):
 	"""walk and make locale files in all folders"""
 	for (basepath, folders, files) in os.walk(path):
 		messagespy = []
@@ -134,11 +182,10 @@ def write_messages_file(path, messages, mtype):
 	
 	fname = os.path.join(path, 'locale', '_messages_' + mtype + '.json')
 	messages = [m.replace("\n", "") for m in filter(None, messages)]
+	messages = list(set(messages))
 	with open(fname, 'w') as msgfile:
 		msgfile.write(json.dumps(messages, indent=1))
 		
-	#print fname
-
 def export_messages(lang, outfile):
 	"""get list of all messages"""
 	messages = {}
@@ -201,6 +248,10 @@ def import_messages(lang, infile):
 			_update_lang_file('doc')
 			_update_lang_file('js')
 			_update_lang_file('py')
+
+def get_doc_messages(module, doctype, name):
+	from webnotes.modules import get_doc_path
+	return get_lang_data(get_doc_path(module, doctype, name), None, 'doc')
 
 def get_lang_data(basepath, lang, mtype):
 	"""get language dict from langfile"""

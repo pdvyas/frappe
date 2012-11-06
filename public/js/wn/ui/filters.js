@@ -336,11 +336,11 @@ wn.ui.FieldSelect = Class.extend({
 	add_field_option: function(df) {
 		var me = this;
 		if(me.doctype && df.parent==me.doctype) {
-			var label = df.label;
+			var label = wn._(df.label);
 			var table = me.doctype;
 			if(df.fieldtype=='Table') me.table_fields.push(df);
 		} else {
-			var label = df.label + ' (' + df.parent + ')';
+			var label = wn._(df.label) + ' (' + wn._(df.parent) + ')';
 			var table = df.parent;
 		}
 		if(no_value_fields.indexOf(df.fieldtype)==-1 

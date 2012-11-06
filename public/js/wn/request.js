@@ -85,12 +85,15 @@ wn.request.cleanup = function(opts, r) {
 		wn.container.change_to('403');
 	}
 
-	// sync docs
+	// sync metadata / language
 	if(r.docs) {
 		wn.model.sync(r.docs);
 	}
 	if(r.metadata) {
 		wn.model.sync(r.metadata, wn.metadata)
+	}
+	if(r.__messages) {
+		$.extend(wn._messages, r.__messages);
 	}
 	
 	wn.last_response = r;

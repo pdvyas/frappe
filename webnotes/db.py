@@ -402,6 +402,23 @@ class Database:
 				
 	def get_table_columns(self, doctype):
 		return [r[0] for r in self.sql("DESC `tab%s`" % doctype)]
+		
+	def is_single(self, doctype):
+		from webnotes.utils import cint
+		return cint(self.get_value("DocType", doctype, "issingle"))
+
+	def get_table_fields(self, doctype):
+		"""get table fields from doctype and custom fields"""
+		table_fields = self.sql("""select options, fieldname from `tabDocField`
+			where parent = %s and fieldtype='Table'""", doctype, as_dict=1)
+		custom_table_fields = []
+		try:
+			custom_table_fields = self.sql("""select options, fieldname from `tabCustom Field`
+				where dt = %s and fieldtype='Table'""", doctype, as_dict=1)
+		except Exception, e:
+			if e.args[0]!=1146: raise e
+			
+		return (table_fields or []) + (custom_table_fields)
 
 	def close(self):
 		"""

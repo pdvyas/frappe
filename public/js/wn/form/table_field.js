@@ -39,7 +39,7 @@ wn.form.TableField = wn.form.Field.extend({
 	make_toolbar: function() {
 		var me = this;
 		this.toolbar = $("<div style='margin-bottom: 4px; height: 26px;'>"+
-			'<span style="margin-top: 5px; display: inline-block;">' + this.df.label.bold()
+			'<span style="margin-top: 5px; display: inline-block;">' + wn._(this.df.label).bold()
 			+"</span></div>").appendTo(this.$wrapper);
 			
 		btn_group = $('<div class="btn-group" style="float: right;">').appendTo(this.toolbar);
@@ -155,7 +155,7 @@ wn.form.TableField = wn.form.Field.extend({
 		if(this.df.description) {
 			$('<div class="help small">')
 				.appendTo(this.wrapper)
-				.html(this.df.description)
+				.html(wn._(this.df.description))
 		}
 	},
 	
@@ -251,7 +251,7 @@ wn.form.TableField = wn.form.Field.extend({
 					var column = {
 						id: d.fieldname,
 						field: d.fieldname,
-						name: d.label,
+						name: wn._(d.label),
 						width: cint(d.width) || 120,
 						cssClass: d.reqd ? 'slick-mandatory-column' : null,
 						docfield: d,

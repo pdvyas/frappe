@@ -108,7 +108,6 @@ def add_workflows(doclist):
 		for state in map(lambda d: d.state, doclist.get({"doctype":"Workflow Document State"})):
 			doclist += webnotes.get_doclist("Workflow State", state)
 	
-
 def get_doctype_doclist(doctype):
 	"""get doclist of single doctype"""
 	doclist = webnotes.get_doclist('DocType', doctype)
@@ -377,7 +376,7 @@ def update_language(doclist):
 		doc = doclist[0]
 
 		# attach translations to client
-		doc["__messages"] = _messages
+		doc.fields["__messages"] = _messages
 
 def add_precision(doctype, doclist):
 	type_precision_map = {

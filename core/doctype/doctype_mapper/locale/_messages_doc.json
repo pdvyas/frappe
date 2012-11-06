@@ -1,0 +1,14 @@
+[
+ "Core", 
+ "Use as default?", 
+ "Is this customized?", 
+ "From DocType", 
+ "DocType Mapper", 
+ "If customized, do you want to use this DocType Mapper as default?", 
+ "Module", 
+ "Field Mapper Details", 
+ "Ref Doc should be submitted?", 
+ "To DocType", 
+ "Have you customized this DocType Mapper to your requirements?", 
+ "Table Mapper Details"
+]

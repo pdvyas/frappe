@@ -63,34 +63,43 @@ wn.ui.toolbar.Toolbar = Class.extend({
 		wn.ui.toolbar.new_dialog = new wn.ui.toolbar.NewDialog();
 		wn.ui.toolbar.search = new wn.ui.toolbar.Search();
 		wn.ui.toolbar.report = new wn.ui.toolbar.Report();
-		$('.navbar .nav:first').append('<li class="dropdown">\
+		$('.navbar .nav:first').append(repl('<li class="dropdown">\
 			<a class="dropdown-toggle" href="#"  data-toggle="dropdown"\
-				onclick="return false;">Document<b class="caret"></b></a>\
+				onclick="return false;">%(_document)s<b class="caret"></b></a>\
 			<ul class="dropdown-menu" id="toolbar-document">\
 				<li><a href="#" onclick="return wn.ui.toolbar.new_dialog.show();">\
-					<i class="icon-plus"></i> New</a></li>\
+					<i class="icon-plus"></i> %(_new)s</a></li>\
 				<li><a href="#" onclick="return wn.ui.toolbar.search.show();">\
-					<i class="icon-search"></i> Search</a></li>\
+					<i class="icon-search"></i> %(_search)s</a></li>\
 				<li><a href="#" onclick="return wn.ui.toolbar.report.show();">\
-					<i class="icon-list"></i> Report</a></li>\
+					<i class="icon-list"></i> %(_report)s</a></li>\
 			</ul>\
-		</li>');
+		</li>', {
+			_document: wn._("Document"),
+			_new: wn._("New"),
+			_search: wn._("Search"),
+			_report: wn._("Report")
+		}));
 	},
 
 	make_tools: function() {
-		$('.navbar .nav:first').append('<li class="dropdown">\
+		$('.navbar .nav:first').append(repl('<li class="dropdown">\
 			<a class="dropdown-toggle" data-toggle="dropdown" href="#" \
-				onclick="return false;">Tools<b class="caret"></b></a>\
+				onclick="return false;">%(_tools)s<b class="caret"></b></a>\
 			<ul class="dropdown-menu" id="toolbar-tools">\
-				<li><a href="#" onclick="return wn.ui.toolbar.clear_cache();">Clear Cache & Refresh</a></li>\
-				<li><a href="#" onclick="return wn.ui.toolbar.show_about();">About</a></li>\
+				<li><a href="#" onclick="return wn.ui.toolbar.clear_cache();">%(_clear)s</a></li>\
+				<li><a href="#" onclick="return wn.ui.toolbar.show_about();">%(_about)s</a></li>\
 			</ul>\
-		</li>');
+		</li>', {
+			_tools: wn._("Tools"),
+			_clear: wn._("Clear Cache & Refresh"),
+			_about: wn._("About")
+		}));
 		
 		if(has_common(user_roles,['Administrator','System Manager'])) {
 			$('#toolbar-tools').append('<li><a href="#" \
 				onclick="return wn.ui.toolbar.download_backup();">\
-				Download Backup</a></li>');
+				' + wn._("Download Backup") + '</a></li>');
 		}
 	},
 	
@@ -102,7 +111,8 @@ wn.ui.toolbar.Toolbar = Class.extend({
 
 	make_logout: function() {
 		// logout
-		$('#toolbar-user').append('<li><a href="#" onclick="return wn.app.logout();">Logout</a></li>');
+		$('#toolbar-user').append('<li><a href="#" onclick="return wn.app.logout();">'+
+			wn._("Logout") +'</a></li>');
 	}
 });
 

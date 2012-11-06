@@ -44,17 +44,18 @@ wn.ui.form.LinkedWith = Class.extend({
 		var me = this;
 		this.linked_with = this.frm.meta.__linked_with;
 		var links = $.map(keys(this.linked_with), function(v) {
-			return in_list(wn.boot.profile.can_get_report, v) ? v : null
-		}).sort().join("\n");
+			return in_list(wn.boot.profile.can_get_report, v) ? {value:v, label:wn._(v)} : null
+		}).sort();
 		
 		this.dialog = new wn.ui.Dialog({
 			width: 640,
-			title: "Linked With",
+			title: wn._("Linked With"),
 			fields: [
 				{ fieldtype: "HTML", label: "help", 
-					options:"<div class='help'>List of records in which this "+
-						this.frm.doctype+" is linked.</div>" },
-				{ fieldtype: "Select", options: links, label: "List By" },
+					options:"<div class='help'>" + wn._("List of records in which this document is linked") +
+						": " + this.frm.doctype+"</div>" },
+				{ fieldtype: "Select", options: links, 
+					label: wn._("List By"), fieldname: "list_by" },
 				{ fieldtype: "HTML", label: "list" }
 			]
 		});
@@ -62,7 +63,7 @@ wn.ui.form.LinkedWith = Class.extend({
 		if(!links) {
 			this.dialog.fields_dict.list.$wrapper.html("<div class='alert'>"
 			+ this.frm.doctype + ": "
-			+ (this.linked_with ? "Not Linked to any record." : "Not enough permission to see links.")
+			+ (this.linked_with ? wn._("Not Linked to any record.") : wn._("Not enough permission to see links."))
 			+ "</div>")
 			this.dialog.fields_dict.list_by.$wrapper.toggle(false);
 			this.dialog.fields_dict.help.$wrapper.toggle(false);
@@ -104,9 +105,9 @@ wn.ui.form.LinkedWith = Class.extend({
 					})).find('.avatar img').centerImage();
 			},
 			get_no_result_message: function() {
-				return repl("<div class='alert'>%(name)s is not linked in any %(doctype)s</div>", {
+				return repl("<div class='alert'>%(doctype)s: " + wn._("Not linked") + "</div>", {
 					name: me.frm.doc.name,
-					doctype: me.doctype
+					doctype: wn._(me.doctype)
 				})
 			}
 		});

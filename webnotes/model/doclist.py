@@ -22,6 +22,7 @@
 
 import webnotes
 import webnotes.model
+from webnotes.model.doc import Document
 
 class DocList(list):
 	"""DocList object as a wrapper around a list"""	
@@ -72,10 +73,9 @@ class DocList(list):
 		return self
 		
 	def copy(self):
-		from webnotes.model.doc import Document
 		out = []
 		for d in self:
-			out.append(Document(fielddata = d))
+			out.append(Document(d))
 		return DocList(out)
 		
 	def filter_valid_fields(self):
@@ -91,7 +91,9 @@ class DocList(list):
 				del d[f]
 				
 	def append(self, doc):
-		doc = objectify_doc(doc)
+		if not isinstance(doc, Document):
+			doc = Document(doc)
+			
 		self._prepare_doc(doc)
 
 		super(DocList, self).append(doc)
@@ -111,10 +113,13 @@ class DocList(list):
 				doc.parenttype = self[0].doctype
 			if not doc.parent:
 				doc.parent = self[0].name
-		
+
 def load(doctype, name):	
 	# load main doc
-	doclist = [load_main(doctype, name)]
+	return objectify(load_doclist(doctype, name))
+
+def load_doclist(doctype, name):
+	doclist = DocList([load_main(doctype, name)])
 	
 	# load children
 	table_fields = map(lambda f: (f.options, name, f.fieldname, doctype),
@@ -123,8 +128,8 @@ def load(doctype, name):
 	for args in table_fields:
 		children = load_children(*args)
 		if children: doclist += children
-
-	return objectify(doclist)
+		
+	return doclist
 
 def load_main(doctype, name):
 	"""retrieves doc from database"""
@@ -135,7 +140,7 @@ def load_main(doctype, name):
 		doc["name"] = doctype
 	else:
 		doc  = webnotes.conn.sql("""select * from `tab%s` where name = %s""" % \
-			(doctype, "%s"), name)
+			(doctype, "%s"), name, as_dict=1)
 		if not doc:
 			raise NameError, """%s: "%s" does not exist""" % (doctype, name)
 		doc = doc[0]
@@ -153,14 +158,4 @@ def load_children(options, parent, parentfield, parenttype):
 		
 def objectify(doclist):
 	from webnotes.model.doc import Document
-
-	doclist_obj = DocList([])
-	for d in doclist:
-		doclist_obj.append(objectify_doc(d))
-	return doclist_obj
-	
-def objectify_doc(doc):
-	if not isinstance(doc, webnotes.model.doc.Document):
-		doc = webnotes.model.doc.Document(fielddata=doc)
-	
-	return doc
+	return map(lambda d: isinstance(d, Document) and d or Document(d), doclist)

@@ -177,7 +177,7 @@ _f.Frm.prototype.setup_print = function() {
 
 _f.Frm.prototype.print_doc = function() {
 	if(this.doc.docstatus==2)  {
-		msgprint("Cannot Print Cancelled Documents.");
+		msgprint(wn._("Cannot Print Cancelled Documents."));
 		return;
 	}
 

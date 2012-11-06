@@ -44,7 +44,7 @@ wn.ui.AppFrame = Class.extend({
 	add_module_tab: function(module) {
 		this.add_tab('<span class="small-module-icons small-module-icons-'+
 			module.toLowerCase()+'"></span>'+' <span>'
-			+ module + "</span>", 0.7, function() {
+			+ wn._(module) + "</span>", 0.7, function() {
 				wn.set_route.apply(this, 
 					wn.meta.get("Desktop Item", {label:module})[0].route.split('/'));
 		});	

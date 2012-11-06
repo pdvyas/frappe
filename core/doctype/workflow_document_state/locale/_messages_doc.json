@@ -1,0 +1,12 @@
+[
+ "Core", 
+ "State", 
+ "1", 
+ "0", 
+ "Represents the states allowed in one document and role assigned to change the state.", 
+ "2", 
+ "Doc Status", 
+ "Allow Edit", 
+ "Message", 
+ "Workflow Document State"
+]
