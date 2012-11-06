@@ -192,12 +192,7 @@ def check_duplicate(doclist, combination, key="item_code"):
 			existing.append(match)
 	
 def validate_condition(doclist, field, condition, expected_value):
-	from webnotes.model.doclist import objectify
-	
-	if isinstance(doclist, (Document, dict)):
-		doclist = [doclist]
-
-	for doc in objectify(doclist):
+	def _check(doc):
 		if not check(doc.fields.get(field), condition, expected_value):
 			import webnotes.model.doctype
 			
@@ -213,6 +208,14 @@ def validate_condition(doclist, field, condition, expected_value):
 			
 			msgprint(msg % {"label": label, "condition": condition, 
 				"expected_value": expected_value}, raise_exception=1)
+	
+	if isinstance(doclist, (Document, dict)):
+		from webnotes.model.doclist import objectify_doc
+		_check(objectify_doc(doclist))
+	else:
+		from webnotes.model.doclist import objectify
+		for doc in objectify(doclist):
+			_check(doc)
 	
 def check(val1, condition, val2):
 	"""
