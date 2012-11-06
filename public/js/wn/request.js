@@ -151,6 +151,14 @@ wn.call = function(opts) {
 	// cmd
 	if(opts.module && opts.page) {
 		args.cmd = opts.module+'.page.'+opts.page+'.'+opts.page+'.'+opts.method
+	} else if(opts.doc) {
+		$.extend(args, {
+			cmd: "runserverobj",
+			docs: wn.model.compress(wn.model.get_doclist(opts.doc.doctype,
+				opts.doc.name)),
+			method: opts.method,
+			args: opts.args,
+		});	
 	} else if(opts.method) {
 		args.cmd = opts.method;
 	}

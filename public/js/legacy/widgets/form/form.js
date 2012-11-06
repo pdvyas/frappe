@@ -1020,7 +1020,7 @@ _f.Frm.prototype.field_map = function(fnames, fn) {
 		}
 	}
 	$.each(fnames, function(i,f) {
-		var field = cur_frm.fields_dict[f].df;
+		var field = cur_frm.fields_dict[f] && cur_frm.fields_dict[f].df;
 		if(field) {
 			fn(field);
 			cur_frm.refresh_field(f);

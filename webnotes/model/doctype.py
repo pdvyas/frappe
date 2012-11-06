@@ -389,7 +389,11 @@ def add_precision(doctype, doclist):
 
 class DocTypeDocList(webnotes.model.doclist.DocList):
 	def get_field(self, fieldname, parent=None, parentfield=None):
-		filters = {"doctype":"DocField", "fieldname":fieldname}
+		filters = {"doctype":"DocField"}
+		if isinstance(fieldname, dict):
+			filters.update(fieldname)
+		else:
+			filters["fieldname"] = fieldname
 		
 		# if parentfield, get the name of the parent table
 		if parentfield:
