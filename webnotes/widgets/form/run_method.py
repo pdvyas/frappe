@@ -29,25 +29,18 @@ def runserverobj():
 		Run server objects
 	"""
 	import webnotes.model.controller
+	import webnotes.handler
 	from webnotes.utils import cint
 
-	doclist = None
-	method = webnotes.form_dict.get('method')
-	args = webnotes.form_dict.get('arg') or webnotes.form_dict.get("args")
-	if isinstance(args, basestring):
-		try:
-			import json
-			args = json.loads(args)
-		except ValueError, e:
-			pass
+	process_args()
 	
-	doctype = webnotes.form_dict.get('doctype')
-	docname = webnotes.form_dict.get('docname')
-
-	if doctype: # not called from a doctype (from a page)
+	if webnotes.form_dict.get('doctype'):
+		# not called from a doctype (from a page)
+		doctype = webnotes.form_dict.get('doctype')
+		docname = webnotes.form_dict.get('docname')
 		if not docname: docname = doctype # single
 		so = webnotes.model.controller.get_obj(doctype, docname)
-
+		
 	else:
 		doclist = webnotes.model_wrapper()
 		doclist.from_compressed(webnotes.form_dict.get('docs'))
@@ -57,12 +50,9 @@ def runserverobj():
 	check_guest_access(so.doc)
 	
 	if so:
+		method = webnotes.form_dict.get('method')
 		if hasattr(so, method):
-			if args:
-				r = getattr(so, method)(args)
-			else:
-				r = getattr(so, method)()
-
+			r = webnotes.handler.call(getattr(so, method), webnotes.form_dict)
 			if r:
 				#build output as csv
 				if cint(webnotes.form_dict.get('as_csv')):
@@ -80,7 +70,21 @@ def check_guest_access(doc):
 			and document_type=%s and ifnull(`read`,0)=1""", doc.doctype):
 		webnotes.msgprint("Guest not allowed to call this object")
 		raise Exception
+		
+def process_args():
+	args = webnotes.form_dict.get('arg') or webnotes.form_dict.get("args")
+	if isinstance(args, basestring):
+		try:
+			import json
+			args = json.loads(args)
+		except ValueError, e:
+			pass
 
+	if webnotes.form_dict.get("arg"):
+		webnotes.form_dict["arg"] = args
+	elif webnotes.form_dict.get("args"):		
+		webnotes.form_dict["args"] = args
+		
 def make_csv_output(res, dt):
 	"""send method response as downloadable CSV file"""
 	import webnotes

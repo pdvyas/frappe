@@ -246,7 +246,8 @@ def call(fn, args):
 	fnargs, varargs, varkw, defaults = inspect.getargspec(fn)
 	newargs = {}
 	for a in fnargs:
-		newargs[a] = args.get(a) or (defaults and defaults[fnargs.index(a)]) or None
+		if args.get(a):
+			newargs[a] = args.get(a)
 	return fn(**newargs)
 
 def get_method(cmd):
