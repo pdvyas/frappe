@@ -218,7 +218,7 @@ def setup_options():
 	# scheduler
 	parser.add_option('--run_scheduler', default=False, action="store_true",
 						help="Trigger scheduler")
-	parser.add_option('--run_scheduler_event', nargs=1, metavar="[all|daily|weekly|monthly]",
+	parser.add_option('--run_scheduler_event', nargs=1, metavar="[all|every_ten_mins|daily|weekly|monthly]",
 						help="Run scheduler event")
 
 	# misc

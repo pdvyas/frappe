@@ -71,7 +71,7 @@ wn.views.DocListPage = Class.extend({
 		this.$page.html('<div class="layout-wrapper layout-wrapper-background">\
 			<div class="appframe-area"></div>\
 			<div class="layout-main-section">\
-				<div class="listview-area" style="margin-top: -15px;"></div>\
+				<div class="listview-area"></div>\
 			</div>\
 			<div class="layout-side-section">\
 				<div class="show-docstatus hide section">\
@@ -87,9 +87,11 @@ wn.views.DocListPage = Class.extend({
 		this.page.appframe = this.appframe = new wn.ui.AppFrame(this.$page.find('.appframe-area'));
 		var module = wn.metadata.DocType[this.doctype].module;
 		
+		$(this.page).find(".doctype-description").html(wn._(this.doctype).bold() + ": " +
+			wn._(wn.metadata.DocType[this.doctype].description || ""));
+		
 		this.appframe.set_marker(module);
 		this.appframe.set_title(wn._(this.doctype));
-		this.appframe.set_help(wn._(wn.metadata.DocType[this.doctype].description || ""))
 		this.appframe.add_module_tab(module);
 	},
 	setup_docstatus_filter: function() {
@@ -109,7 +111,8 @@ wn.views.DocListPage = Class.extend({
 			no_title: true,
 			can_submit: this.can_submit,
 			slickgrid_options: {
-				autoHeight: true
+				autoHeight: true,
+				forceFitColumns: true
 			}
 			
 		});

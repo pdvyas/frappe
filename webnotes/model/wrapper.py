@@ -35,10 +35,10 @@ class ModelWrapper:
 	def __init__(self, dt=None, dn=None):
 		self.obj = None
 		self.to_docstatus = 0
-		if dt and dn:
-			self.load_from_db(dt, dn)
 		if isinstance(dt, list):
 			self.set_doclist(dt)
+		elif dt and dn:
+			self.load_from_db(dt, dn)
 
 	def load_from_db(self, dt=None, dn=None, prefix='tab'):
 		"""Load doclist from dt"""

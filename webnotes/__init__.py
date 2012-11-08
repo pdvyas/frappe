@@ -269,6 +269,13 @@ def get_controller(doctype, name=None):
 	else:
 		return get_obj(doctype, name, with_children=1)
 	
+def get_doc(doctype, name=None):
+	from webnotes.model.doc import Document
+
+	if isinstance(doctype, basestring) and not name:
+		name = doctype # single
+		
+	return Document(doctype, name)
 
 def get_doctype(doctype, processed=False):
 	import webnotes.model.doctype

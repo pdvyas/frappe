@@ -83,7 +83,7 @@ def get(arg=None):
 	query = """select %(fields)s from %(tables)s where %(conditions)s
 		%(group_by)s order by %(order_by)s %(limit)s""" % data
 
-	return compress(webnotes.conn.sql(query, as_dict=1))
+	return compress(webnotes.conn.sql(query, as_dict=1, debug=1))
 
 def compress(data):
 	"""separate keys and values"""
