@@ -53,7 +53,7 @@ def get_obj(dt = None, dn = None, doc=None, doclist=None, with_children = 0):
 	elif doclist:
 		return get_doctype_class(doclist[0].doctype)(doclist[0], DocList(doclist))
 	elif doc:
-		return get_doctype_class(doc.doctype)(doc.doctype, DocList([doc]))
+		return get_doctype_class(doc.doctype)(doc, DocList([doc]))
 	elif dt:
 		import webnotes.model.doc
 		if not dn:

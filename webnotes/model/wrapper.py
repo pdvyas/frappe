@@ -133,6 +133,7 @@ class ModelWrapper:
 		if check_links:
 			self.check_links()
 		self.update_timestamps_and_docstatus()
+		self.update_parent_info()
 
 	def check_if_latest(self):
 		from webnotes.model.meta import is_single
@@ -180,6 +181,14 @@ class ModelWrapper:
 			
 			# docstatus same as parent docstats
 			d.docstatus = self.doc.docstatus
+			
+	def update_parent_info(self):
+		for i, d in enumerate(self.doclist[1:]):
+			if d.parentfield:
+				d.parenttype = self.doc.doctype
+				d.parent = self.doc.name
+			if not d.idx:
+				d.idx = i + 1
 
 	def check_docstatus(self):
 		# if docstatus is None, it gets stored as 0

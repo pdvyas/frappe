@@ -290,9 +290,11 @@ def insert(doclist):
 
 	for d in doclist:
 		d["__islocal"] = 1
-	model_wrapper(doclist).save()
+		
+	wrapper = model_wrapper(doclist)
+	wrapper.save()
 	
-	return dl
+	return wrapper
 
 def insert_variants(base, variants):
 	for v in variants:
