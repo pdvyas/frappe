@@ -743,7 +743,3 @@ def comma_sep(some_list, sep):
 			return ", ".join(some_list[:-1]) + sep + some_list[-1]
 	else:
 		return some_list
-		
-def round_doc(doc, precision_map):
-	for fieldname, precision in precision_map.items():
-		doc.fields[fieldname] = flt(doc.fields.get(fieldname), precision)

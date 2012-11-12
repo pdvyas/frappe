@@ -23,7 +23,7 @@
 from __future__ import unicode_literals
 from webnotes.model.doc import Document
 from webnotes import _, msgprint, DictObj
-from webnotes.utils import getdate
+from webnotes.utils import getdate, flt
 """
 Model utilities, unclassified functions
 """
@@ -210,12 +210,11 @@ def validate_condition(doclist, field, condition, expected_value):
 				"expected_value": expected_value}, raise_exception=1)
 	
 	if isinstance(doclist, (Document, dict)):
-		from webnotes.model.doclist import objectify_doc
-		_check(objectify_doc(doclist))
-	else:
-		from webnotes.model.doclist import objectify
-		for doc in objectify(doclist):
-			_check(doc)
+		doclist = [doclist]
+
+	from webnotes.model.doclist import objectify
+	for doc in objectify(doclist):
+		_check(doc)
 	
 def check(val1, condition, val2):
 	"""
@@ -244,3 +243,7 @@ def check(val1, condition, val2):
 		return val1 <= val2
 	elif condition=='!=':
 		return val1 != val2
+
+def round_doc(doc, precision_map):
+	for fieldname, precision in precision_map.items():
+		doc.fields[fieldname] = flt(doc.fields.get(fieldname), precision)
