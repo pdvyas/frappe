@@ -89,13 +89,14 @@ wn.ui.Listing = Class.extend({
 					</div>\
 				</div>\
 				\
-				<div style="margin-bottom:9px" class="list-toolbar-wrapper">\
-					<div class="list-toolbar" style="display:inline-block; margin-right: 10px;">\
+				<div class="list-toolbar-wrapper">\
+					<div class="list-toolbar btn-group" \
+						style="display:inline-block; float: right;">\
 					</div>\
-					<div style="display:inline-block; width: 24px; margin-left: 4px">\
+					<!--<div style="display:inline-block; width: 24px; margin-left: 4px">\
 						<img src="lib/images/ui/button-load.gif" \
-						class="img-load"/></div>\
-				</div><div style="clear:both"></div>\
+						class="img-load"/></div>-->\
+				</div><div style="clear:both;"></div>\
 				\
 				<div class="no-result help hide">\
 					%(no_result_message)s\
@@ -112,27 +113,18 @@ wn.ui.Listing = Class.extend({
 		', this.opts));
 		this.$w = $(this.parent).find('.wnlist');
 		this.set_events();
-		
-		if(this.appframe) {
-			this.$w.find('.list-toolbar-wrapper').toggle(false);
-		} 
-		
+				
 		if(this.show_filters) {
-			this.make_filters();			
+			this.make_filters();
 		}
 	},
 	add_button: function(label, click, icon) {
-		if(this.appframe) {
-			return this.appframe.add_button(label, click, icon)
-		} else {
-			$button = $('<button class="btn btn-small"></button>')
-				.appendTo(this.$w.find('.list-toolbar'))
-			if(icon) {
-				$('<i>').addClass(icon).appendTo($button);
-			}
-			$button.html(label).click(click);
-			return $button
-		}
+		$button = $(repl('<button class="btn btn-small" title="%(label)s">%(icon)s</button>', {
+			icon: (icon ? ("<i class='"+icon+"'></i> ") : ""),
+			label: label
+		})).appendTo(this.$w.find('.list-toolbar'))
+			.click(click)
+		return $button
 	},
 	show_view: function($btn, $div, $btn_unsel, $div_unsel) {
 		$btn_unsel.removeClass('btn-info');
@@ -167,7 +159,7 @@ wn.ui.Listing = Class.extend({
 				
 		// new
 		if(this.new_doctype) {
-			this.add_button(wn._("New") + ' ' + wn._(this.new_doctype), function() { 
+			(this.appframe || this).add_button(wn._("New") + ' ' + wn._(this.new_doctype), function() { 
 				(me.custom_new_doc || me.make_new_doc)(me.new_doctype);
 			}, 'icon-plus');
 		} 
@@ -209,6 +201,7 @@ wn.ui.Listing = Class.extend({
 		this.data = [];
 		this.$w.find('.result-list').empty();
 		this.$w.find('.result').toggle(true);
+		this.$w.find('.list-toolbar-wrapper').toggle(true);
 		this.$w.find('.no-result').toggle(false);
 		this.start = 0;
 	},
@@ -237,7 +230,7 @@ wn.ui.Listing = Class.extend({
 		});
 	},
 	set_working: function(flag) {
-		this.$w.find('.img-load').toggle(flag);
+		//this.$w.find('.img-load').toggle(flag);
 	},
 	get_call_args: function(opts) {
 		// load query
@@ -281,6 +274,7 @@ wn.ui.Listing = Class.extend({
 		} else {
 			if(this.start==0) {
 				this.$w.find('.result').toggle(false);
+				this.$w.find('.list-toolbar-wrapper').toggle(false);
 				var msg = this.get_no_result_message
 					? this.get_no_result_message()
 					: (this.no_result_message 
@@ -325,6 +319,10 @@ wn.ui.Listing = Class.extend({
 		for(var i=0; i < m; i++) {
 			this.render_row(this.add_row(), values[i], this, i);
 		}
+	},
+	
+	render_row: function(parent, value, listing, row_idx) {
+		parent.innerHTML = JSON.stringify(value);
 	},
 	
 	update_paging: function(values) {

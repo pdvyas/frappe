@@ -153,7 +153,7 @@ class DocType:
 				permdoc.save(new=True)
 	
 	def make_controller_template(self):
-		from webnotes.modules import get_doc_path, scrub
+		from webnotes.modules import get_doc_path, get_module_path, scrub
 		
 		pypath = os.path.join(get_doc_path(self.doc.module, 
 			self.doc.doctype, self.doc.name), scrub(self.doc.name) + '.py')

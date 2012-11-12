@@ -289,10 +289,10 @@ wn.views.ReportView = wn.ui.Listing.extend({
 	render_list: function() {
 		var me = this;
 		//this.gridid = wn.dom.set_unique_id()
-		var std_columns = [{id:'_idx', field:'_idx', name: 'Sr.', width: 40}];
+		var std_columns = [{id:'_idx', field:'_idx', name: 'Sr.', width: 40, maxWidth: 40}];
 		if(this.can_delete) {
 			std_columns = std_columns.concat([{
-				id:'_check', field:'_check', name: "", width: 40, 
+				id:'_check', field:'_check', name: "", width: 30, maxWidth: 30, 
 					formatter: function(row, cell, value, columnDef, dataContext) {
 						return repl("<input type='checkbox' \
 							data-row='%(row)s' %(checked)s>", {
@@ -372,7 +372,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 	make_column_picker: function() {
 		var me = this;
 		this.column_picker = new wn.ui.ColumnPicker(this);
-		this.page.appframe.add_button(wn._("Pick Columns"), function() {
+		this.add_button(wn._("Pick Columns"), function() {
 			me.column_picker.show(me.columns);
 		}, 'icon-th-list');
 	},
@@ -415,7 +415,7 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		this.sort_order_next_select.val('desc');
 		
 		// button actions
-		this.page.appframe.add_button(wn._("Sort By"), function() {
+		this.add_button(wn._("Sort By"), function() {
 			me.sort_dialog.show();
 		}, 'icon-arrow-down');
 		
@@ -519,9 +519,9 @@ wn.views.ReportView = wn.ui.Listing.extend({
 		var me = this;
 		
 		// make editable label
-		var $head = $(this.wrapper).find(".report-head");
-		$("<div class='alert'>This report is editable</div>")
-			.appendTo($head.empty());
+		// var $head = $(this.wrapper).find(".report-head");
+		// $("<div class='alert'>This report is editable</div>")
+		// 	.appendTo($head.empty());
 
 		this.setup_check_if_cell_is_editable();
 		
@@ -626,18 +626,18 @@ wn.ui.ColumnPicker = Class.extend({
 		var me = this;
 		if(!this.dialog) {
 			this.dialog = new wn.ui.Dialog({
-				title: 'Pick Columns',
+				title: wn._("Pick Columns"),
 				width: '400'
 			});
 		}
-		$(this.dialog.body).html('<div class="help">Drag to sort columns</div>\
+		$(this.dialog.body).html('<div class="help">'+wn._("Drag to sort columns")+'</div>\
 			<div class="column-list"></div>\
 			<div><button class="btn btn-small btn-add"><i class="icon-plus"></i>\
-				Add Column</button></div>\
+				'+wn._("Add Column")+'</button></div>\
 			<hr>\
-			<div><button class="btn btn-small btn-info">Update</div>');
+			<div><button class="btn btn-small btn-info">'+wn._("Update")+'</div>');
 		
-		// show existing	
+		// show existing
 		$.each(columns, function(i, c) {
 			me.add_column(c);
 		});

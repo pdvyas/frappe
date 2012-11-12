@@ -55,37 +55,21 @@ def get_fullname(profile):
 		profile = " ".join(filter(None, [p[0].get('first_name'), p[0].get('last_name')])) or profile
 
 	return profile
-		
-# email functions
-def decode_email_header(s):
-	import email.header
-	# replace double quotes with blank, double quotes in header prevent decoding of header
-	decoded_tuple = email.header.decode_header(s.replace('"', ''))
-	decoded_list = map(lambda h: unicode(h[0], encoding=h[1] or 'utf-8'), decoded_tuple)
-	return " ".join(decoded_list)
-
-def extract_email_id(s):
-	"""Extract email id from email header format"""
-	import re
-	email_id = re.findall("<(.*)>", s)
-	if email_id and email_id[0]:
-		s = email_id[0]
-
-	return s.strip().lower()
 	
 def get_email_id(user):
 	"""get email id of user formatted as: John Doe <johndoe@example.com>"""
 	if user == "Administrator":
 		return user
-	
+	from email.utils import formataddr
 	fullname = get_fullname(user)
-	return "%s <%s>" % (fullname, user)
+	return formataddr((fullname, user))
 	
 def validate_email_add(email_str):
 	"""Validates the email string"""
-	s = extract_email_id(email_str)
+	from email.utils import parseaddr
+	real_name, email = parseaddr(email_str)
 	import re
-	return re.match("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", s)
+	return re.match("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", email)
 
 def sendmail(recipients, sender='', msg='', subject='[No Subject]', parts=[], 
 		cc=[], attach=[]):

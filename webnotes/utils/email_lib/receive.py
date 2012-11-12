@@ -24,6 +24,8 @@ from __future__ import unicode_literals
 """
 	This module contains classes for managing incoming emails
 """
+import webnotes
+import email
 
 class IncomingMail:
 	"""
@@ -33,7 +35,6 @@ class IncomingMail:
 		"""
 			Parse the incoming mail content
 		"""
-		import email
 		
 		self.mail = email.message_from_string(content)
 		
@@ -82,8 +83,12 @@ class IncomingMail:
 		"""
 			Extracts text, html and attachments from the mail
 		"""
+		from email.header import decode_header
+		
 		for part in self.mail.walk():
 			self.process_part(part)
+			
+		self.mail["Subject"] = decode_header(self.mail["Subject"])[0][0]
 
 	def get_thread_id(self):
 		"""
@@ -95,6 +100,13 @@ class IncomingMail:
 
 		return re.findall('(?<=\[)[\w/-]+', subject)
 
+	def get_content_and_type(self):
+		content, content_type = '[Blank Email]', 'text/plain'
+		if self.text_content:
+			content, content_type = self.text_content, 'text/plain'
+		else:
+			content, content_type = self.html_content, 'text/html'
+		return content, content_type
 
 	def process_part(self, part):
 		"""
@@ -118,25 +130,24 @@ class POP3Mailbox:
 		A simple pop3 mailbox, abstracts connection and mail extraction
 		To use, subclass it and override method process_message(from, subject, text, thread_id)
 	"""
+	settings = None
+	def __init__(self):
+		pass
 	
-	def __init__(self, settings_doc):
-		"""
-			settings_doc must contain
-			use_ssl, host, username, password
-			(by name or object)
-		"""
-		if isinstance(settings_doc, basestring):
-			from webnotes.model.doc import Document
-			self.settings = Document(settings_doc, settings_doc)
-		else:
-			self.settings = settings_doc
-
+	def set_connection_params(self):
+		"""setup this.settings with (use_ssl, host, username, password)"""
+		pass
+		
 	def connect(self):
 		"""
 			Connects to the mailbox
 		"""
 		import poplib
+		self.set_connection_params()
 		
+		if not self.settings:
+			return
+				
 		if self.settings.use_ssl:
 			self.pop = poplib.POP3_SSL(self.settings.host)
 		else:
@@ -149,9 +160,7 @@ class POP3Mailbox:
 		"""
 			Loads messages from the mailbox and calls
 			process_message for each message
-		"""
-		import webnotes
-		
+		"""		
 		if not self.check_mails():
 			return # nothing to do
 		
@@ -168,8 +177,10 @@ class POP3Mailbox:
 			
 			try:
 				webnotes.conn.begin()
-				self.process_message(IncomingMail(b'\n'.join(msg[1])))
+				self.mail = IncomingMail(b'\n'.join(msg[1]))
+				self.process_message(self.mail)
 				self.pop.dele(m)
+				self.autoreply()
 				webnotes.conn.commit()
 			except:
 				from webnotes.utils.scheduler import log
@@ -186,16 +197,29 @@ class POP3Mailbox:
 				self.pop.dele(m)
 		
 		self.pop.quit()
+
+	def save_attachments(self, doc, attachment_list=[]):
+		"""
+			Saves attachments from email
+
+			attachment_list is a list of dict containing:
+			'filename', 'content', 'content-type'
+		"""
+		from webnotes.utils.file_manager import save_file, add_file_list
+		# don't block thread
+		webnotes.conn.commit()
+		for attachment in attachment_list:
+			webnotes.conn.begin()
+			fid = save_file(attachment['filename'], attachment['content'])
+			status = add_file_list(doc.doctype, doc.name, attachment['filename'], fid)
+			webnotes.conn.commit()
+		webnotes.conn.begin()
+	
+	def autoreply(self):
+		pass
 		
 	def check_mails(self):
-		"""
-			To be overridden
-			If mailbox is to be scanned, returns true
-		"""
 		return True
 	
 	def process_message(self, mail):
-		"""
-			To be overriden
-		"""
 		pass

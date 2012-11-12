@@ -6,6 +6,11 @@
 	margin: 7px 0px;
 }
 
+.list-toolbar-wrapper {
+	margin-top: -5px;
+	height: 37px;
+}
+
 .listview .img-load {
 	display: none;
 	float: left;
@@ -73,32 +78,6 @@ div.list_filter input, div.list_filter select {
 	margin-right: 7px;
 }
 
-/* bar */
-
-span.bar-outer {
-	display: inline-block;
-	margin: 0px 7px;
-	margin-top: 3px;
-	background-color: #fff;
-	border: 1px solid #aaa;
-	height: 10px;
-}
-
-span.bar-inner {
-	display: inline-block;
-	background-color: #bdf;
-	height: 100%;
-	margin-bottom: 2px;
-	float: left;
-}
-span.bar-complete {
-	background-color: #009900;
-}
-span.bar-empty {
-	background-color: #990000;
-}
-
-
 /* stats */
 
 div.stat-wrapper {
@@ -152,6 +131,7 @@ table.doclist-row td {
 /* slickgrid formatters */
 .listview-area .slick-header-column {
 	border: 0px;
+	border-right: 1px solid #ddd;
 }
 
 .slick-row.odd {

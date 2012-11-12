@@ -144,7 +144,7 @@ def save_uploaded():
 	else: 
 		return None, fname
 
-def save_file(fname, content, module=None):
+def save_file(fname, content):
 	from webnotes.model.doc import Document
 	from filecmp import cmp
 

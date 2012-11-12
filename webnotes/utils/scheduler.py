@@ -70,6 +70,9 @@ def execute():
 			
 		if nowtime.hour != last.hour:
 			out.append('hourly:' + trigger('execute_hourly'))
+			
+		if (nowtime - last) > 600:
+			out.append('10 mins:' + trigger('execute_every_ten_minutes'))
 
 	out.append('all:' + trigger('execute_all'))
 	
@@ -81,17 +84,17 @@ def execute():
 	
 def trigger(method):
 	"""trigger method in startup.schedule_handler"""
-	try:
-		import startup.schedule_handlers
+	#try:
+	import startup.schedule_handlers
+	
+	if hasattr(startup.schedule_handlers, method):
+		webnotes.conn.begin()
+		getattr(startup.schedule_handlers, method)()
+		webnotes.conn.commit()
+		return 'ok'
 		
-		if hasattr(startup.schedule_handlers, method):
-			webnotes.conn.begin()
-			getattr(startup.schedule_handlers, method)()
-			webnotes.conn.commit()
-			return 'ok'
-		
-	except Exception, e:
-		return log(method)
+	#except Exception, e:
+	#	return log(method)
 
 def log(method):
 	"""log error in patch_log"""
