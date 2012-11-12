@@ -230,4 +230,16 @@ class DocType:
 				new.save()
 				max_idx += 1
 
-
+	def on_trash(self):
+		import webnotes.model
+		
+		# delete docPerms
+		for name in webnotes.conn.sql("""select name from `tabDocPerm`
+				where document_type=%s""", self.doc.name):
+			webnotes.model.delete_doc("DocPerm", name[0])
+		
+		# delete property setters
+		for name in webnotes.conn.sql("""select name from `tabProperty Setter`
+				where doc_type=%s""", self.doc.name):
+			webnotes.model.delete_doc("Property Setter", name[0])
+		
