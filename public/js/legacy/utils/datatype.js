@@ -123,7 +123,7 @@ function flt(v,decimals) {
 	if(isNaN(v))
 		v=0;
 	if(decimals!=null)
-		return parseFloat(roundNumber(v, decimals));
+		return parseFloat(wn.round(v, decimals));
 	return v; 
 }
 
@@ -213,7 +213,7 @@ function docstring(obj)  {
 	return JSON.stringify(obj);
 }
 
-function roundNumber(num, dec) {
+wn.round = function (num, dec) {
 	var result = Math.round(num*Math.pow(10,dec))/Math.pow(10,dec);
 	return result;
 }

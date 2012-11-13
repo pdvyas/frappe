@@ -24,8 +24,6 @@ wn.provide('wn.model');
 
 var locals = {'DocType':{}};
 
-wn.provide("wn.model.precision_maps");
-
 var no_value_fields = ['Section Break', 'Column Break', 'HTML', 'Table', 
 'Button', 'Image'];
 
@@ -186,27 +184,6 @@ wn.model = {
 		return ret ? true : false;
 	},
 	
-	get_precision_map: function(doctype) {
-		if(wn.model.precision_maps[doctype])
-			return wn.model.precision_maps[doctype];
-		
-		wn.model.precision_maps[doctype] = {};
-		this.with_doctype(doctype, function(r) {
-			if(r && r['403']) {
-				console.log("Error in get_precision_map for DocType:" + doctype)
-				return;
-			}
-			var fields = wn.meta.get("DocField", { parent:doctype, fieldtype: "Currency"})
-				.concat(wn.meta.get("DocField", { parent:doctype, fieldtype: "Float"}))
-
-			$.each(fields, function(i, d) {
-				wn.model.precision_maps[doctype][d.fieldname] = d.precision;
-			})
-			
-			return wn.model.precision_maps[doctype];
-		});
-	},
-	
 	map_doclist: function(from_to_list, from_docname, callback) {
 		// create a new doclist using doctype mapper
 		// TODO: change call to map_doclist(from_doctype, from_docname, to_doctype)
@@ -258,8 +235,8 @@ wn.model = {
 		return l; 
 	},
 
-	get_doclist: function(doctype, name) {
-		doclist = [];
+	get_doclist: function(doctype, name, filters) {
+		var doclist = [];
 		if(!locals[doctype]) 
 			return doclist;
 
@@ -273,6 +250,10 @@ wn.model = {
 			}
 		);
 		
+		if(filters) {
+			doclist = wn.utils.filter_dict(doclist, filters);
+		}
+		
 		return doclist;
 	},
 	
@@ -285,6 +266,12 @@ wn.model = {
 	clear_doc: function(doctype, name) {
 		delete locals[doctype][name];		
 	},
+	
+	round_doc: function(doc, precision_map) {
+		$.each(precision_map, function(fieldname, precision) {
+			doc[fieldname] = flt(doc[fieldname], precision_map[precision]);
+		});
+	}
 }
 
 // for old code
