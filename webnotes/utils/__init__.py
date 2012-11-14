@@ -273,8 +273,8 @@ def flt(s, precision=None):
 	try:
 		num = float(s)
 		if precision:
-			num = round(s, precision)
-	except:
+			num = round(num, precision)
+	except Exception, e:
 		num = 0
 	return num
 

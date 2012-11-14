@@ -33,7 +33,7 @@ wn.model.DocList = Class.extend({
 		if(this.check_mandatory()) {
 			this._call({
 				method: "webnotes.widgets.form.save.savedocs",
-				args: { docs: wn.model.compress(doclist) },
+				args: { docs: wn.model.compress(this.doclist) },
 				callback: callback,
 				btn: btn
 			});

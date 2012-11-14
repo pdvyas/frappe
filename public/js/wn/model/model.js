@@ -244,9 +244,11 @@ wn.model = {
 
 		$.each(wn.meta.get("DocField", {parent:doctype, fieldtype:"Table"}), 
 			function(i, table_field) {
-				doclist = doclist.concat(wn.model.get(table_field.options, {
-					parent:name, parenttype: doctype, parentfield: table_field.fieldname})
-				);
+				var child_doclist = wn.model.get(table_field.options, {
+					parent:name, parenttype: doctype,
+					parentfield: table_field.fieldname}).sort(
+						function(a, b) { return a.idx > b.idx; });
+				doclist = doclist.concat(child_doclist)
 			}
 		);
 		
