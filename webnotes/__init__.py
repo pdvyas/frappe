@@ -424,6 +424,10 @@ def repsond_as_web_page(title, html):
 	response['type'] = 'page'
 	response['page_name'] = 'message.html'
 
+def build_match_conditions(doctype, fields=None, as_condition=True, match_filters=None):
+	import webnotes.widgets.reportview
+	return webnotes.widgets.reportview.build_match_conditions(doctype, fields, as_condition, match_filters)
+
 _config = None
 def get_config():
 	global _config
