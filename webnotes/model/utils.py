@@ -150,7 +150,13 @@ def delete_doc(doctype=None, name=None, doclist = None, force=0, ignore_doctypes
 		
 	try:
 		tablefields = webnotes.model.meta.get_table_fields(doctype)
-		webnotes.conn.sql("delete from `tab%s` where name=%s" % (doctype, "%s"), name)
+		
+		if doctype==name and doctype!="DocType":
+			# is a single doctype
+			webnotes.conn.sql("""delete from `tabSingles` where doctype=%s""", doctype)
+		else:
+			webnotes.conn.sql("delete from `tab%s` where name=%s" % (doctype, "%s"), name)
+		
 		for t in tablefields:
 			if t[0] not in ignore_doctypes:
 				webnotes.conn.sql("delete from `tab%s` where parent = %s" % (t[0], '%s'), name)

@@ -80,5 +80,17 @@ test_records = [[{
 		"email": "test2@example.com",
 		"first_name": "_Test2",
 		"new_password": "testpassword"
+	}],
+	[{
+		"doctype": "Profile",
+		"email": "test_lead@example.com",
+		"first_name": "_Test Lead",
+		"new_password": "testpassword"
+	}],
+	[{
+		"doctype": "Profile",
+		"email": "test_contact_customer@example.com",
+		"first_name": "_Test Contact For _Test Customer",
+		"new_password": "testpassword"
 	}]
 ]
