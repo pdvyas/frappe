@@ -93,14 +93,12 @@ wn.PermissionEngine = Class.extend({
 				me.doctype_select 
 					= me.wrapper.appframe.add_select("doctypes", 
 						[wn._("Select Document Type")+"..."].concat(r.message.doctypes))
-						.css("width", "200px")
 						.change(function() {
 							wn.set_route("permission-manager", $(this).val())
 						});
 				me.role_select 
 					= me.wrapper.appframe.add_select("roles", 
 						[wn._("Select Role")+"..."].concat(r.message.roles))
-						.css("width", "200px")
 						.change(function() {
 							me.refresh();
 						});
@@ -143,11 +141,11 @@ wn.PermissionEngine = Class.extend({
 	refresh: function() {
 		var me = this;
 		if(!me.doctype_select) {
-			this.body.html("<div class='alert'>Loading...</div>");
+			this.body.html("<div class='alert alert-info'>Loading...</div>");
 			return;
 		}
 		if(!me.get_doctype() && !me.get_role()) {
-			this.body.html("<div class='alert'>"+wn._("Select Document Type or Role to start.")+"</div>");
+			this.body.html("<div class='alert alert-info'>"+wn._("Select Document Type or Role to start.")+"</div>");
 			return;
 		}
 		// get permissions
@@ -169,7 +167,7 @@ wn.PermissionEngine = Class.extend({
 		this.body.empty();
 		this.perm_list = perm_list;
 		if(!perm_list.length) {
-			this.body.html("<div class='alert'>"+wn._("No Permissions set for this criteria.")+"</div>");
+			this.body.html("<div class='alert alert-warning'>"+wn._("No Permissions set for this criteria.")+"</div>");
 		} else {
 			this.show_permission_table(perm_list);
 		}

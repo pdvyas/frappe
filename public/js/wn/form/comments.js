@@ -10,18 +10,18 @@ wn.ui.form.Comments = Class.extend({
 		var me = this;
 		this.wrapper =this.parent;
 		this.row = $("<div class='row'>").appendTo(this.parent);
-		this.input = $('<div class="col col-lg-10">\
-			<textarea rows="3"></textarea></div>')
+		this.input = $('<div class="col-md-10">\
+			<textarea rows="3" class="form-control"></textarea></div>')
 			.appendTo(this.row)
 			.find("textarea");
-		this.button = $('<div class="col col-lg-1">\
-			<button class="btn btn-default btn-go" class="col col-lg-1">\
+		this.button = $('<div class="col-md-1">\
+			<button class="btn btn-default btn-go" class="col-md-1">\
 				<i class="icon-ok"></i></button>\
 			</div>')
 			.appendTo(this.row)
 			.find("button")
 			.click(function() {
-				me.add_comment();
+				me.add_comment(this);
 			});
 		this.list = $('<div class="comments" style="margin-top: 15px;"></div>')
 			.appendTo(this.parent);
@@ -48,12 +48,12 @@ wn.ui.form.Comments = Class.extend({
 			c.comment_on = dateutil.comment_when(c.creation);
 			c.fullname = wn.user_info(c.comment_by).fullname;
 			
-			$(repl('<div class="comment alert col col-lg-10" data-name="%(name)s">\
+			$(repl('<div class="comment alert alert-warning col-md-10" data-name="%(name)s">\
 				<div class="row">\
-					<div class="col col-lg-1">\
+					<div class="col-md-1">\
 						<span class="avatar avatar-small"><img src="%(image)s"></span>\
 					</div>\
-					<div class="col col-lg-11">\
+					<div class="col-md-11">\
 						%(comment)s%(delete)s<br>\
 						<span class="small text-muted">%(fullname)s / %(comment_on)s</span>\
 					</div>\
@@ -68,7 +68,7 @@ wn.ui.form.Comments = Class.extend({
 				
 		});
 	},
-	add_comment: function() {
+	add_comment: function(btn) {
 		var me = this,
 			txt = me.input.val();
 			
@@ -86,6 +86,7 @@ wn.ui.form.Comments = Class.extend({
 				args: {
 					doclist:[comment]
 				},
+				btn: btn,
 				callback: function(r) {
 					if(!r.exc) {
 						me.frm.get_docinfo().comments = 
