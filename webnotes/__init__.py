@@ -313,7 +313,7 @@ def generate_hash():
 	import hashlib, time
 	return hashlib.sha224(str(time.time())).hexdigest()
 
-def get_obj(dt = None, dn = None, doc=None, doclist=[], with_children = True):
+def get_obj(dt = None, dn = None, doc=None, doclist=None, with_children = True):
 	from webnotes.model.code import get_obj
 	return get_obj(dt, dn, doc, doclist, with_children)
 

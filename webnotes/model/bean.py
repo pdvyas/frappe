@@ -53,7 +53,7 @@ class Bean:
 		
 		# get all children types
 		tablefields = webnotes.model.meta.get_table_fields(dt)
-
+		
 		# load chilren
 		doclist = webnotes.doclist([doc,])
 		for t in tablefields:
@@ -407,6 +407,10 @@ class Bean:
 					doc.fields[df.fieldname] = flt(doc.fields.get(df.fieldname))
 				
 			doc.docstatus = cint(doc.docstatus)
+			
+	def clear_table(self, parentfield):
+		if parentfield:
+			self.set_doclist(self.doclist.get({"parentfield": ["!=", parentfield]}))
 
 def clone(source_wrapper):
 	""" make a clone of a document"""

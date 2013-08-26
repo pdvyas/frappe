@@ -266,7 +266,7 @@ class Document:
 		self.modified = now()
 		update_str, values = [], []
 		
-		webnotes.conn.sql("delete from tabSingles where doctype='%s'" % self.doctype)
+		webnotes.conn.sql("delete from tabSingles where doctype=%s", self.doctype)
 		for f in self.fields.keys():
 			if not (f in ('modified', 'doctype', 'name', 'perm', 'localname', 'creation'))\
 				and (not f.startswith('__')): # fields not saved
@@ -284,6 +284,7 @@ class Document:
 					values.append(self.doctype)
 					values.append(f)
 					values.append(self.fields[f])
+		
 		webnotes.conn.sql("insert into tabSingles(doctype, field, value) values %s" % (', '.join(update_str)), values)
 
 	def validate_links(self, link_list):
@@ -589,6 +590,7 @@ def getchildren(name, childtype, field='', parenttype='', from_doctype=0, prefix
 
 	dataset = webnotes.conn.sql("""select * from `%s%s` where parent=%s %s order by idx""" \
 		% (prefix, childtype, "%s", condition), tuple([name]+values))
+
 	desc = webnotes.conn.get_description()
 
 	l = DocList()
