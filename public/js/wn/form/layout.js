@@ -30,18 +30,9 @@ wn.ui.form.Layout = Class.extend({
 			this.wrapper.toggle(true);
 		}
 	},
-	refresh: function() {
-		var me = this;
-		$.each(this.frm.fields, function(i, fieldobj) {
-			fieldobj.docname = me.frm.docname;
-			fieldobj.df = wn.meta.get_docfield(me.frm.doctype, 
-				fieldobj.df.fieldname, me.frm.docname);
-			fieldobj.refresh && fieldobj.refresh();
-		});
-		$(this.frm.wrapper).trigger("refresh-fields");
-	},
 	render: function() {
 		var me = this;
+		this.make_name_header();
 		
 		this.section = null;
 		this.column = null;
@@ -60,6 +51,40 @@ wn.ui.form.Layout = Class.extend({
 					me.make_field(df);
 			}
 		});
+	},
+	make_name_header: function() {
+		if (this.frm.meta.autoname !== "Prompt") {
+			return;
+		}
+
+		var me = this;
+		this.$name_header = $(repl(
+				'<div class="alert alert-warning form-group">\
+					<label>%(doctype)s Name</label>\
+					<input name="name" class="form-control" type="text"></input>\
+				</div>', {doctype: this.doctype}))
+			.toggle(false)
+			.appendTo(this.wrapper);
+		this.$name_header.find('input').on('change', function(e) {
+			me.frm.doc.name = $(this).val();
+		});
+		$(this.frm.wrapper).on('refresh-fields', function(e) {
+			me.$name_header.toggle(me.frm.doc.__islocal? true: false).find('').val(me.frm.doc.name);
+		})
+	},
+	refresh: function() {
+		var me = this;
+		this.refresh_name_header();
+		$.each(this.frm.fields, function(i, fieldobj) {
+			fieldobj.docname = me.frm.docname;
+			fieldobj.df = wn.meta.get_docfield(me.frm.doctype,
+				fieldobj.df.fieldname, me.frm.docname);
+			fieldobj.refresh && fieldobj.refresh();
+		});
+		$(this.frm.wrapper).trigger("refresh-fields");
+	},
+	refresh_name_header: function() {
+
 	},
 	make_column: function(df) {
 		this.column = $('<div class="form-column">\
