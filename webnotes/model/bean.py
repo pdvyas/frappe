@@ -13,10 +13,6 @@ import webnotes
 from webnotes import _, msgprint
 from webnotes.utils import cint, cstr, flt
 from webnotes.model.doc import Document
-try:
-	from startup.bean_handlers import on_method
-except ImportError:
-	on_method = None
 
 class DocstatusTransitionError(webnotes.ValidationError): pass
 class BeanPermissionError(webnotes.ValidationError): pass
@@ -199,7 +195,7 @@ class Bean:
 		
 		if self.doc.fields.get("__islocal"):
 			# set name before validate
-			self.doc.set_new_name()
+			self.doc.set_new_name(self.get_controller())
 			self.run_method('before_insert')
 			
 		if method != "cancel":
@@ -244,7 +240,7 @@ class Bean:
 		
 		self.set_doclist(self.controller.doclist)
 		
-	def get_method(self, method):
+	def get_attr(self, method):
 		self.make_controller()
 		return getattr(self.controller, method, None)
 
@@ -362,7 +358,7 @@ class Bean:
 			# prompt if cancelled
 			if webnotes.conn.get_value(self.doc.doctype, self.doc.name, 'docstatus')==2:
 				webnotes.msgprint('[%s "%s" has been cancelled]' % (self.doc.doctype, self.doc.name))
-			webnotes.errprint(webnotes.utils.getTraceback())
+			webnotes.errprint(webnotes.utils.get_traceback())
 			raise
 
 	def save_children(self):
@@ -467,9 +463,11 @@ def clone(source_wrapper):
 	
 	return new_wrapper
 
-def notify(bean, method):
-	if on_method:
-		on_method(bean, method)
+def notify(bean, caller):
+	for hook in webnotes.get_hooks().bean_event or []:
+		doctype, trigger, handler = hook.split(":")
+		if ((doctype=="*") or (doctype==bean.doc.doctype)) and caller==trigger:
+			webnotes.get_attr(handler)(bean, trigger)
 
 # for bc
 def getlist(doclist, parentfield):

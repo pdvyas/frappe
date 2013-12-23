@@ -9,12 +9,10 @@ Session bootstraps info needed by common client side activities including
 permission, homepage, control panel variables, system defaults etc
 """
 import webnotes
-import conf
 import json
 from webnotes.utils import cint
 import webnotes.model.doctype
 import webnotes.defaults
-import webnotes.plugins
 
 @webnotes.whitelist()
 def clear(user=None):
@@ -25,14 +23,17 @@ def clear(user=None):
 def clear_cache(user=None):
 	cache = webnotes.cache()
 
+	cache.delete_value(["app_hooks", "installed_apps", "app_modules", "module_apps"])
+
 	# clear doctype cache
 	webnotes.model.doctype.clear_cache()
 	
-	# clear plugins code cache
-	webnotes.plugins.clear_cache()
-
 	if user:
 		cache.delete_value("bootinfo:" + user)
+		
+		# clear notifications
+		webnotes.conn.sql("""delete from `tabNotification Count` where owner=%s""", user)
+		
 		if webnotes.session:
 			if user==webnotes.session.user and webnotes.session.sid:
 				cache.delete_value("session:" + webnotes.session.sid)
@@ -57,15 +58,17 @@ def clear_sessions(user=None, keep_current=False):
 
 def get():
 	"""get session boot info"""
-	from core.doctype.notification_count.notification_count import get_notification_info_for_boot
-
+	from webnotes.core.doctype.notification_count.notification_count import \
+		get_notification_info_for_boot, get_notifications
+	
 	bootinfo = None
-	if not getattr(conf,'auto_cache_clear',None):
+	if not getattr(webnotes.conf,'disable_session_cache',None):
 		# check if cache exists
 		bootinfo = webnotes.cache().get_value('bootinfo:' + webnotes.session.user)
 		if bootinfo:
 			bootinfo['from_cache'] = 1
-			
+			bootinfo["notification_info"].update(get_notifications())
+		
 	if not bootinfo:
 		if not webnotes.cache().get_stats():
 			webnotes.msgprint("memcached is not working / stopped. Please start memcached for best results.")
@@ -76,7 +79,6 @@ def get():
 		bootinfo["notification_info"] = get_notification_info_for_boot()
 		webnotes.cache().set_value('bootinfo:' + webnotes.session.user, bootinfo)
 	
-		
 	return bootinfo
 
 class Session:

@@ -51,9 +51,9 @@ def add(args=None):
 		
 	# update feeed
 	try:
-		import home
+		from erpnext.home import make_feed
 		from webnotes.utils import get_fullname
-		home.make_feed('Assignment', d.reference_type, d.reference_name, webnotes.session['user'],
+		make_feed('Assignment', d.reference_type, d.reference_name, webnotes.session['user'],
 			'[%s] Assigned to %s' % (d.priority, get_fullname(d.owner)), '#C78F58')
 	except ImportError, e:
 		pass
@@ -132,6 +132,6 @@ def notify_assignment(assigned_by, owner, doc_type, doc_name, action='CLOSE',
 		}
 		
 	arg["parenttype"] = "Assignment"
-	from core.page.messages import messages
+	from webnotes.core.page.messages import messages
 	import json
 	messages.post(json.dumps(arg))
