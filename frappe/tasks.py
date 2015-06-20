@@ -7,6 +7,7 @@ from frappe.utils.scheduler import enqueue_events
 from frappe.celery_app import get_celery, celery_task, task_logger, LONGJOBS_PREFIX
 from frappe.utils import get_sites
 from frappe.utils.file_lock import create_lock, delete_lock
+from frappe.handler import execute_cmd
 
 @celery_task()
 def sync_queues():
@@ -122,3 +123,26 @@ def pull_from_email_account(site, email_account):
 		frappe.db.commit()
 	finally:
 		frappe.destroy()
+
+@celery_task()
+def run_async_task(site, user, cmd, form_dict):
+	ret = {}
+	frappe.init(site)
+	try:
+		frappe.connect()
+		frappe.set_user(user)
+		frappe.local.form_dict = frappe._dict(form_dict)
+		execute_cmd(cmd, async=True)
+	except Exception, e:
+		frappe.db.rollback()
+		ret = frappe.local.response
+		http_status_code = getattr(e, "http_status_code", 500)
+		ret['status_code'] = http_status_code
+	else:
+		if not frappe.flags.in_test:
+			frappe.db.commit()
+	finally:
+		ret = frappe.local.response
+		if not frappe.flags.in_test:
+			frappe.destroy()
+	return ret
