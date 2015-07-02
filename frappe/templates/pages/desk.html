@@ -17,6 +17,16 @@
 	{% for include in include_css -%}
 	<link type="text/css" rel="stylesheet" href="{{ include }}">
 	{%- endfor -%}
+	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js"></script>
+<script type="text/javascript" charset="utf-8">
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
+    socket.on('connect', function() {
+        socket.emit('my event', {data: 'I\'m connected!'});
+    });
+    socket.on('msgprint', function(message) {
+		frappe.msgprint(message)
+    });
+</script>
 </head>
 <body>
 	<div class="centered splash">
