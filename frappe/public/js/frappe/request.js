@@ -7,7 +7,6 @@ frappe.provide('frappe.request');
 frappe.request.url = '/';
 frappe.request.ajax_count = 0;
 frappe.request.waiting_for_ajax = [];
-frappe.request.polling_list = [];
 
 // generic server call (call page, object)
 frappe.call = function(opts) {
@@ -31,10 +30,11 @@ frappe.call = function(opts) {
 
 	var callback = function(data, xhr) {
 		if(data.task_id) {
-			opts.task_id = data.task_id;
-			add_to_polling_list(opts);
+			// async call, subscribe
+			frappe.socket.subscribe(data.task_id, opts);
 		}
 		else {
+			// ajax
 			return opts.callback(data, xhr);
 		}
 	}
@@ -332,39 +332,3 @@ frappe.request.cleanup_request_opts = function(request_opts) {
 	}
 	return request_opts;
 };
-
-
-function add_to_polling_list(opts) {
-	frappe.request.polling_list.unshift(opts);
-}
-
-setInterval(function() {
-	$.map(frappe.request.polling_list, function(opts, i) {
-		frappe.call({
-			method: "get_async_task_status",
-			args: {
-				task_id: opts.task_id
-			},
-			callback: function(data, xhr) {
-				var response = data.response;
-				if(!response) {
-					return;
-				}
-				if(response) {
-					var i = frappe.request.polling_list.indexOf(opts);
-					if (i > -1) {
-						frappe.request.polling_list.splice(i, 1);
-					}
-				}
-				if(opts.always) {
-					opts.always(data, xhr);
-				}
-				if(response.status_code > 400) {
-					opts.error(data, xhr);
-					return;
-				}
-				opts.callback(data.response, xhr);
-			}
-		})
-	})
-}, 3000)

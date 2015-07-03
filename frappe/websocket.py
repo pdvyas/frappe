@@ -122,7 +122,7 @@ class SocketIO(object):
 											  room=room)
 				if ns_name is None:
 					return self.base_emit(event, *args, **kwargs)
-				return request.namespace.socket[ns_name].base_emit(event, *args,
+				return request.channel.socket[ns_name].base_emit(event, *args,
 																   **kwargs)
 
 			def send(self, message, json=False, ns_name=None, callback=None,
@@ -132,8 +132,8 @@ class SocketIO(object):
 						ns_name = self.ns_name
 					return self.socketio.send(message, json, ns_name, room)
 				if ns_name is None:
-					return request.namespace.base_send(message, json, callback)
-				return request.namespace.socket[ns_name].base_send(message,
+					return request.channel.base_send(message, json, callback)
+				return request.channel.socket[ns_name].base_send(message,
 																   json,
 																   callback)
 
@@ -155,7 +155,7 @@ class SocketIO(object):
 		if message not in self.messages[namespace.ns_name]:
 			return
 		with RequestContext(namespace.environ):
-			request.namespace = namespace
+			request.channel = namespace
 			request.event = {
 				"message": message,
 				"args": args}
@@ -448,7 +448,7 @@ def emit(event, *args, **kwargs):
 					  event.
 	:param room: Send the message to all the users in the given room.
 	"""
-	return request.namespace.emit(event, *args, **kwargs)
+	return request.channel.emit(event, *args, **kwargs)
 
 
 def send(message, json=False, namespace=None, callback=None, broadcast=False,
@@ -472,7 +472,7 @@ def send(message, json=False, namespace=None, callback=None, broadcast=False,
 					  event.
 	:param room: Send the message to all the users in the given room.
 	"""
-	return request.namespace.send(message, json, namespace, callback, broadcast,
+	return request.channel.send(message, json, namespace, callback, broadcast,
 								  room)
 
 
@@ -492,7 +492,7 @@ def join_room(room):
 
 	:param room: The name of the room to join.
 	"""
-	return request.namespace.join_room(room)
+	return request.channel.join_room(room)
 
 
 def leave_room(room):
@@ -511,7 +511,7 @@ def leave_room(room):
 
 	:param room: The name of the room to leave.
 	"""
-	return request.namespace.leave_room(room)
+	return request.channel.leave_room(room)
 
 
 def close_room(room):
@@ -523,7 +523,7 @@ def close_room(room):
 
 	:param room: The name of the room to close.
 	"""
-	return request.namespace.close_room(room)
+	return request.channel.close_room(room)
 
 
 def disconnect(silent=False):
@@ -541,7 +541,7 @@ def disconnect(silent=False):
 	:param silent: close the connection, but do not actually send a disconnect
 				   packet to the client.
 	"""
-	return request.namespace.disconnect(silent)
+	return request.channel.disconnect(silent)
 
 
 def emit_via_redis(event, message, room=None):

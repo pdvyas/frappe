@@ -48,7 +48,7 @@ class RequestContext(object):
 
 	def __exit__(self, type, value, traceback):
 		frappe.destroy()
-		
+
 
 @Request.application
 def application(request):
@@ -158,12 +158,16 @@ application.debug = True
 socketio = SocketIO(application)
 
 
-@socketio.on('task')
-def subscribe_log(task_id):
+@socketio.on('log_subscribe')
+def log_subscribe(task_id):
 	from frappe.utils import get_task_log_file_path
 	from frappe.async import push_log
 	log_path = get_task_log_file_path(task_id, 'stdout')
-	frappe.local.request.namespace.spawn(push_log, frappe.local.request.namespace, task_id, log_path)
+	frappe.local.request.channel.spawn(push_log, frappe.local.request.channel, task_id, log_path)
+	join_room("task:" + task_id)
+
+@socketio.on('task_subscribe')
+def task_subscribe(task_id):
 	join_room("task:" + task_id)
 
 
@@ -198,9 +202,7 @@ def serve(port=8000, profile=False, site=None, sites_path='.'):
 					resource="socket.io", policy_server=True,
 					policy_listener=('0.0.0.0', 10843))
 
-	def run():
-		server.serve_forever()
-	run_with_reloader(run)
+	run_with_reloader(server.serve_forever)
 
 	# run_simple('0.0.0.0', int(port), application, use_reloader=True,
 	# 	use_debugger=True, use_evalex=True, threaded=True)

@@ -9,7 +9,7 @@ import frappe
 import os
 from functools import wraps
 from app import socketio
-
+from frappe.websocket import emit_via_redis
 
 def handler(f):
 	cmd = f.__module__ + '.' + f.__name__
@@ -63,7 +63,7 @@ def push_log(ns, task_id, log_path):
 			ns.emit('log', {"task": task_id, "lines": lines})
 
 			if lines[-1] == end_line:
-				return 
+				return
 
 			while True:
 				line = f.readline()
@@ -76,7 +76,7 @@ def push_log(ns, task_id, log_path):
 @handler
 def ping():
 	from time import sleep
-	sleep(5)
+	sleep(2)
 	return "pong"
 
 
@@ -90,3 +90,8 @@ def get_task_status(task_id):
 		"state": a.state,
 		"progress": 0
 	}
+
+def set_task_status(task_id, status, response=None):
+	frappe.db.set_value("Async Task", task_id, "status", status)
+	out = {"status": status, "response": response, "task_id": task_id}
+	emit_via_redis("task_status_change", out, room="task:" + task_id)

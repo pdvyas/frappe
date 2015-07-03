@@ -8,7 +8,7 @@ from frappe.celery_app import get_celery, celery_task, task_logger, LONGJOBS_PRE
 from frappe.utils import get_sites, get_std_streams
 from frappe.utils.file_lock import create_lock, delete_lock
 from frappe.handler import execute_cmd
-from frappe.websocket import emit_via_redis
+from frappe.async import set_task_status
 import frappe.utils.response
 import sys
 
@@ -133,13 +133,13 @@ def run_async_task(self, site, user, cmd, form_dict):
 	from time import sleep
 	ret = {}
 	frappe.init(site)
+	frappe.connect()
 	sys.stdout, sys.stderr = get_std_streams(self.request.id)
 	frappe.local.stdout, frappe.local.stderr = sys.stdout, sys.stderr
 	frappe.local.task_id = self.request.id
 	frappe.cache()
 	try:
-		frappe.connect()
-		frappe.db.set_value("Async Task", self.request.id, "status", "Running")
+		set_task_status(self.request.id, "Running")
 		frappe.set_user(user)
 		# sleep(60)
 		frappe.local.form_dict = frappe._dict(form_dict)
@@ -147,8 +147,7 @@ def run_async_task(self, site, user, cmd, form_dict):
 		ret = frappe.local.response
 	except Exception, e:
 		frappe.db.rollback()
-		frappe.db.set_value("Async Task", self.request.id, "status", "Failed")
-		emit_via_redis("task", {"status": "Failed"}, room="task:" + self.request.id)
+		set_task_status(self.request.id, "Failed")
 		if not frappe.flags.in_test:
 			frappe.db.commit()
 
@@ -158,9 +157,8 @@ def run_async_task(self, site, user, cmd, form_dict):
 		ret['exc'] = frappe.get_traceback()
 		task_logger.error('Exception in running {}: {}'.format(cmd, ret['exc']))
 	else:
+		set_task_status(self.request.id, "Finished", response=ret)
 		if not frappe.flags.in_test:
-			frappe.db.set_value("Async Task", self.request.id, "status", "Finished")
-			emit_via_redis("task", {"status": "Finished"}, room="task:" + self.request.id)
 			frappe.db.commit()
 	finally:
 		sys.stdout.write('\n<!--frappe -->')
