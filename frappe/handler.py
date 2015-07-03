@@ -107,13 +107,6 @@ def get_attr(cmd):
 	return method
 
 
-@frappe.async_handler
-def async_ping():
-	from time import sleep
-	sleep(5)
-	return "pong"
-
-
 @frappe.whitelist()
 def get_async_task_status(task_id):
 	from frappe.celery_app import get_celery

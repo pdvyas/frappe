@@ -4,7 +4,7 @@ import sys
 from socketio import socketio_manage
 from socketio.server import SocketIOServer
 from socketio.namespace import BaseNamespace
-from frappe import request, session, redis_server
+from frappe import request, session, conf
 from werkzeug.debug import DebuggedApplication
 from werkzeug.serving import run_with_reloader
 from werkzeug._internal import _log
@@ -137,6 +137,9 @@ class SocketIO(object):
 																   json,
 																   callback)
 
+			def on_log_subscribe(self, task_id):
+				print task_id
+
 			def disconnect(self, silent=False):
 				self.socketio._leave_all_rooms(self)
 				return super(GenericNamespace, self).disconnect(silent)
@@ -153,7 +156,6 @@ class SocketIO(object):
 			return
 		with RequestContext(namespace.environ):
 			request.namespace = namespace
-			print namespace
 			request.event = {
 				"message": message,
 				"args": args}
@@ -543,4 +545,15 @@ def disconnect(silent=False):
 
 
 def emit_via_redis(event, message, room=None):
-	redis_server.publish('events', json.dumps({'event': event, 'message': message, 'room': room}))
+	r = get_redis_server()
+	r.publish('events', json.dumps({'event': event, 'message': message, 'room': room}))
+
+
+redis_server = None
+def get_redis_server():
+	"""Returns memcache connection."""
+	global redis_server
+	if not redis_server:
+		from frappe.utils.redis_wrapper import RedisWrapper
+		redis_server = RedisWrapper.from_url(conf.get("cache_redis_server") or "redis://localhost:11311")
+	return redis_server

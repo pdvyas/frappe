@@ -26,6 +26,13 @@
     socket.on('msgprint', function(message) {
 		frappe.msgprint(message)
     });
+
+
+	function subscribe(task_id, callback) {
+		socket.emit('log_subscribe', task_id);
+		socket.on('log', callback);
+	}
+
 </script>
 </head>
 <body>

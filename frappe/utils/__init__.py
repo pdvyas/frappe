@@ -398,3 +398,23 @@ def get_request_session(max_retries=3):
 	session.mount("http://", requests.adapters.HTTPAdapter(max_retries=Retry(total=5, status_forcelist=[500])))
 	session.mount("https://", requests.adapters.HTTPAdapter(max_retries=Retry(total=5, status_forcelist=[500])))
 	return session
+
+
+class FileAndRedisStream(file):
+	def write(self, data):
+		from frappe import redis_server
+		ret = super(FileAndRedisStream, self).write(data)
+		if frappe.local.task_id:
+			redis_server.publish("task:" + frappe.local.task_id, data)
+		return ret
+
+
+def get_std_streams(task_id):
+	stdout = FileAndRedisStream(get_task_log_file_path(task_id, 'stdout'), 'w')
+	stderr = FileAndRedisStream(get_task_log_file_path(task_id, 'stderr'), 'w')
+	return stdout, stderr
+
+
+def get_task_log_file_path(task_id, stream_type):
+	logs_dir = frappe.utils.get_site_path('task-logs')
+	return os.path.join(logs_dir, task_id + '.' + stream_type)

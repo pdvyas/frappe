@@ -12,6 +12,7 @@ from werkzeug.local import LocalManager
 from werkzeug.exceptions import HTTPException, NotFound
 from werkzeug.contrib.profiler import ProfilerMiddleware
 from werkzeug.wsgi import SharedDataMiddleware
+from werkzeug.serving import run_with_reloader
 from socketio.server import SocketIOServer
 
 
@@ -22,9 +23,10 @@ import frappe.auth
 import frappe.api
 import frappe.utils.response
 import frappe.website.render
-from frappe.utils import get_site_name
+from frappe.utils import get_site_name, get_site_path
 from frappe.middlewares import StaticDataMiddleware
 from websocket import SocketIO, emit, send, join_room
+
 
 local_manager = LocalManager([frappe.local])
 
@@ -155,14 +157,15 @@ application = local_manager.make_middleware(application)
 application.debug = True
 socketio = SocketIO(application)
 
-@socketio.on('task', namespace='')
-def subscribe_to_task(message):
-	if message.get('task_id'):
-		join_room('task:' + message.get('task_id'))
 
-@socketio.on('message')
-def handle_message(message):
-    print('received message: ' + message)
+@socketio.on('task')
+def subscribe_log(task_id):
+	from frappe.utils import get_task_log_file_path
+	from frappe.async import push_log
+	log_path = get_task_log_file_path(task_id, 'stdout')
+	frappe.local.request.namespace.spawn(push_log, frappe.local.request.namespace, task_id, log_path)
+	join_room("task:" + task_id)
+
 
 def serve(port=8000, profile=False, site=None, sites_path='.'):
 	global application, _site, _sites_path
@@ -191,9 +194,13 @@ def serve(port=8000, profile=False, site=None, sites_path='.'):
 	from gevent import monkey, Greenlet
 	monkey.patch_all()
 	Greenlet.spawn(listen_on_redis)
-	SocketIOServer(('0.0.0.0', 8080), application,
-				   resource="socket.io", policy_server=True,
-				   policy_listener=('0.0.0.0', 10843)).serve_forever()
+	server = SocketIOServer(('0.0.0.0', 8080), application,
+					resource="socket.io", policy_server=True,
+					policy_listener=('0.0.0.0', 10843))
+
+	def run():
+		server.serve_forever()
+	run_with_reloader(run)
 
 	# run_simple('0.0.0.0', int(port), application, use_reloader=True,
 	# 	use_debugger=True, use_evalex=True, threaded=True)
@@ -201,7 +208,6 @@ def serve(port=8000, profile=False, site=None, sites_path='.'):
 
 def listen_on_redis():
 	import redis
-	from time import sleep
 	r = redis.Redis(port=11311)
 	pubsub = r.pubsub()
 	pubsub.subscribe('events')

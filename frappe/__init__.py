@@ -8,7 +8,7 @@ from __future__ import unicode_literals
 
 from werkzeug.local import Local, release_local
 from functools import wraps
-import os, importlib, inspect, logging, json, frappe
+import os, importlib, inspect, logging, json
 
 # public
 from frappe.__version__ import __version__
@@ -371,25 +371,6 @@ def whitelist(allow_guest=False):
 		return fn
 
 	return innerfn
-
-
-def async_handler(f):
-	@wraps(f)
-	def _f(*args, **kwargs):
-		from frappe.tasks import run_async_task
-		cmd = f.__module__ + '.' + f.__name__
-		task = run_async_task.delay(frappe.local.site, (frappe.session and frappe.session.user) or 'Administrator', cmd, frappe.local.form_dict)
-		frappe.local.response['task_id'] = task.id
-		return {
-			"status": "queued",
-			"task_id": task.id
-		}
-	_f.async = True
-	_f._f = f
-	whitelisted.append(f)
-	whitelisted.append(_f)
-	return _f
-
 
 def only_for(roles):
 	"""Raise `frappe.PermissionError` if the user does not have any of the given **Roles**.

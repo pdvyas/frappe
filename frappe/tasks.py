@@ -5,9 +5,12 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils.scheduler import enqueue_events
 from frappe.celery_app import get_celery, celery_task, task_logger, LONGJOBS_PREFIX
-from frappe.utils import get_sites
+from frappe.utils import get_sites, get_std_streams
 from frappe.utils.file_lock import create_lock, delete_lock
 from frappe.handler import execute_cmd
+from frappe.websocket import emit_via_redis
+import frappe.utils.response
+import sys
 
 @celery_task()
 def sync_queues():
@@ -124,25 +127,47 @@ def pull_from_email_account(site, email_account):
 	finally:
 		frappe.destroy()
 
-@celery_task()
-def run_async_task(site, user, cmd, form_dict):
+
+@celery_task(bind=True)
+def run_async_task(self, site, user, cmd, form_dict):
+	from time import sleep
 	ret = {}
 	frappe.init(site)
+	sys.stdout, sys.stderr = get_std_streams(self.request.id)
+	frappe.local.stdout, frappe.local.stderr = sys.stdout, sys.stderr
+	frappe.local.task_id = self.request.id
+	frappe.cache()
 	try:
 		frappe.connect()
+		frappe.db.set_value("Async Task", self.request.id, "status", "Running")
 		frappe.set_user(user)
+		# sleep(60)
 		frappe.local.form_dict = frappe._dict(form_dict)
 		execute_cmd(cmd, async=True)
+		ret = frappe.local.response
 	except Exception, e:
 		frappe.db.rollback()
+		frappe.db.set_value("Async Task", self.request.id, "status", "Failed")
+		emit_via_redis("task", {"status": "Failed"}, room="task:" + self.request.id)
+		if not frappe.flags.in_test:
+			frappe.db.commit()
+
 		ret = frappe.local.response
 		http_status_code = getattr(e, "http_status_code", 500)
 		ret['status_code'] = http_status_code
+		ret['exc'] = frappe.get_traceback()
+		task_logger.error('Exception in running {}: {}'.format(cmd, ret['exc']))
 	else:
 		if not frappe.flags.in_test:
+			frappe.db.set_value("Async Task", self.request.id, "status", "Finished")
+			emit_via_redis("task", {"status": "Finished"}, room="task:" + self.request.id)
 			frappe.db.commit()
 	finally:
-		ret = frappe.local.response
+		sys.stdout.write('\n<!--frappe -->')
+		sys.stderr.write('\n<!--frappe -->')
 		if not frappe.flags.in_test:
 			frappe.destroy()
+		sys.stdout.close()
+		sys.stderr.close()
+		sys.stdout, sys.stderr = 1, 0
 	return ret
