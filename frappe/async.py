@@ -56,21 +56,23 @@ def get_pending_tasks_for_doc(doctype, docname):
 
 
 def push_log(ns, task_id, log_path):
+	import redis
 	end_line = '<!--frappe -->'
 	if os.path.exists(log_path):
 		with open(log_path) as f:
 			lines = f.readlines()
 			ns.emit('log', {"task": task_id, "lines": lines})
 
-			if lines[-1] == end_line:
-				return
+	if lines[-1] == end_line:
+		return
 
-			while True:
-				line = f.readline()
-				if line == end_line:
-					break
-				ns.emit('log', {"task": task_id, "lines": [line]})
-				sleep(1)
+	r = redis.Redis(port=11311)
+	pubsub = r.pubsub()
+	pubsub.subscribe('task:' + task_id)
+	for line in pubsub.listen():
+		if line == end_line:
+			break
+		ns.emit('log', {"task": task_id, "lines": [line]})
 
 
 @handler
