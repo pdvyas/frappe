@@ -401,11 +401,24 @@ def get_request_session(max_retries=3):
 
 
 class FileAndRedisStream(file):
+	def __init__(self, *args, **kwargs):
+		ret = super(FileAndRedisStream, self).__init__(*args, **kwargs)
+		self.count = 0
+		return ret
+
 	def write(self, data):
-		from frappe import redis_server
+		from frappe.websocket import emit_via_redis, put_log
 		ret = super(FileAndRedisStream, self).write(data)
 		if frappe.local.task_id:
-			redis_server.publish("task:" + frappe.local.task_id, data)
+			emit_via_redis('task_progress', {
+				"message": {
+					"lines": {self.count: data}
+				},
+				"task_id": frappe.local.task_id
+			}, room="task_progress:" + frappe.local.task_id)
+
+			put_log(frappe.local.task_id, self.count, data)
+			self.count += 1
 		return ret
 
 

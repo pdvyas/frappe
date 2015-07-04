@@ -140,6 +140,7 @@ def run_async_task(self, site, user, cmd, form_dict):
 	frappe.cache()
 	try:
 		set_task_status(self.request.id, "Running")
+		frappe.db.commit()
 		frappe.set_user(user)
 		# sleep(60)
 		frappe.local.form_dict = frappe._dict(form_dict)

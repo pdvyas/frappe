@@ -8,8 +8,8 @@ from __future__ import unicode_literals
 import frappe
 import os
 from functools import wraps
-from app import socketio
 from frappe.websocket import emit_via_redis
+import datetime
 END_LINE = '<!-- frappe: end-file -->'
 
 def handler(f):
@@ -46,12 +46,15 @@ def run_async_task(method, args, reference_doctype=None, reference_name=None):
 	if frappe.local.request and frappe.local.request.method == "GET":
 		frappe.throw("Cannot run task in a GET request")
 	task_id = method.run(args)
+	print 'fired', task_id, datetime.datetime.now()
 	task = frappe.new_doc("Async Task")
+	print 'new_doc', task_id, datetime.datetime.now()
 	task.celery_task_id = task_id
 	task.status = "Queued"
 	task.reference_doctype = reference_doctype
 	task.reference_name = reference_name
 	task.save()
+	print 'saved', task_id, datetime.datetime.now()
 	return task_id
 
 

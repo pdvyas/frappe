@@ -1,7 +1,7 @@
 frappe.socket = {
   open_tasks: {},
   init: function() {
-    frappe.socket.socket = io.connect('http://' + document.domain + ':' + location.port);
+    frappe.socket.socket = io.connect('http://' + document.domain + ':' + 3000);
     frappe.socket.socket.on('msgprint', function(message) {
       frappe.msgprint(message)
     });
@@ -10,22 +10,24 @@ frappe.socket = {
     frappe.socket.setup_reconnect();
   },
   subscribe: function(task_id, opts) {
-    socket.emit('task_subscribe', task_id);
-    socket.emit('progress_subscribe', task_id);
+    // frappe.socket.socket.emit('task_subscribe', task_id);
+    frappe.socket.socket.emit('progress_subscribe', task_id);
 
     frappe.socket.open_tasks[task_id] = opts;
+	  console.log('here', task_id, opts)
   },
   setup_listeners: function() {
-    socket.on('task_status_change', function(data) {
+    frappe.socket.socket.on('task_status_change', function(data) {
+		console.log('status_change', data)
       if(data.status==="Running") {
         frappe.socket.process_response(data, "running");
       } else {
         // failed or finished
         frappe.socket.process_response(data, "callback");
-        delete frappe.socket.open_tasks[data.response.task_id];
+        // delete frappe.socket.open_tasks[data.task_id];
       }
     });
-    socket.on('task_progress', function(data) {
+    frappe.socket.socket.on('task_progress', function(data) {
       frappe.socket.process_response(data, "progress");
     });
 
