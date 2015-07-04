@@ -158,8 +158,8 @@ application.debug = True
 socketio = SocketIO(application)
 
 
-@socketio.on('log_subscribe')
-def log_subscribe(task_id):
+@socketio.on('progress_subscribe')
+def progress_subscribe(task_id):
 	from frappe.utils import get_task_log_file_path
 	from frappe.async import push_log
 	log_path = get_task_log_file_path(task_id, 'stdout')

@@ -10,6 +10,7 @@ import os
 from functools import wraps
 from app import socketio
 from frappe.websocket import emit_via_redis
+END_LINE = '<!-- frappe: end-file -->'
 
 def handler(f):
 	cmd = f.__module__ + '.' + f.__name__
@@ -17,13 +18,17 @@ def handler(f):
 	def _run(args):
 		from frappe.tasks import run_async_task
 		args = frappe._dict(args)
-		task = run_async_task.delay(frappe.local.site, (frappe.session and frappe.session.user) or 'Administrator', cmd, args)
+		task = run_async_task.delay(frappe.local.site,
+			(frappe.session and frappe.session.user) or 'Administrator', cmd, args)
+		frappe.local.response['task_id'] = task.id
 		return task.id
 
 	@wraps(f)
 	def _f(*args, **kwargs):
 		from frappe.tasks import run_async_task
-		task = run_async_task.delay(frappe.local.site, (frappe.session and frappe.session.user) or 'Administrator', cmd, frappe.local.form_dict)
+		task = run_async_task.delay(frappe.local.site,
+			(frappe.session and frappe.session.user) or 'Administrator', cmd,
+				frappe.local.form_dict)
 		frappe.local.response['task_id'] = task.id
 		return {
 			"status": "queued",
@@ -37,15 +42,15 @@ def handler(f):
 	return _f
 
 
-def run_doc_async_task(doc, method, args):
+def run_async_task(method, args, reference_doctype=None, reference_name=None):
 	if frappe.local.request and frappe.local.request.method == "GET":
 		frappe.throw("Cannot run task in a GET request")
 	task_id = method.run(args)
 	task = frappe.new_doc("Async Task")
 	task.celery_task_id = task_id
 	task.status = "Queued"
-	task.reference_doctype = doc.doctype
-	task.reference_doc = doc.name
+	task.reference_doctype = reference_doctype
+	task.reference_name = reference_name
 	task.save()
 	return task_id
 
@@ -57,22 +62,25 @@ def get_pending_tasks_for_doc(doctype, docname):
 
 def push_log(ns, task_id, log_path):
 	import redis
-	end_line = '<!--frappe -->'
+
+	def emit(lines):
+		ns.emit('task_progress', {"task_id": task_id, "response": {"lines": lines }})
+
 	if os.path.exists(log_path):
 		with open(log_path) as f:
 			lines = f.readlines()
-			ns.emit('log', {"task": task_id, "lines": lines})
+			emit(lines)
 
-	if lines[-1] == end_line:
-		return
+		if lines[-1] == END_LINE:
+			return
 
 	r = redis.Redis(port=11311)
 	pubsub = r.pubsub()
 	pubsub.subscribe('task:' + task_id)
 	for line in pubsub.listen():
-		if line == end_line:
+		if line == END_LINE:
 			break
-		ns.emit('log', {"task": task_id, "lines": [line]})
+		emit([line])
 
 
 @handler
@@ -92,6 +100,7 @@ def get_task_status(task_id):
 		"state": a.state,
 		"progress": 0
 	}
+
 
 def set_task_status(task_id, status, response=None):
 	frappe.db.set_value("Async Task", task_id, "status", status)

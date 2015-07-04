@@ -8,7 +8,7 @@ from frappe.celery_app import get_celery, celery_task, task_logger, LONGJOBS_PRE
 from frappe.utils import get_sites, get_std_streams
 from frappe.utils.file_lock import create_lock, delete_lock
 from frappe.handler import execute_cmd
-from frappe.async import set_task_status
+from frappe.async import set_task_status, END_LINE
 import frappe.utils.response
 import sys
 
@@ -161,8 +161,8 @@ def run_async_task(self, site, user, cmd, form_dict):
 		if not frappe.flags.in_test:
 			frappe.db.commit()
 	finally:
-		sys.stdout.write('\n<!--frappe -->')
-		sys.stderr.write('\n<!--frappe -->')
+		sys.stdout.write('\n' + END_LINE)
+		sys.stderr.write('\n' + END_LINE)
 		if not frappe.flags.in_test:
 			frappe.destroy()
 		sys.stdout.close()

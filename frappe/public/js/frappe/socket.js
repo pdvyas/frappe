@@ -39,6 +39,7 @@ frappe.socket = {
     });
   },
   process_response: function(data, method) {
+    console.log(data);
     if(!data) {
       return;
     }

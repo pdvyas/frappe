@@ -215,7 +215,7 @@ def make_site_dirs():
 	for dir_path in (
 			os.path.join(site_private_path, 'backups'),
 			os.path.join(site_public_path, 'files'),
-			os.path.join(site_public_path, 'task-logs')):):
+			os.path.join(site_public_path, 'task-logs')):
 		if not os.path.exists(dir_path):
 			os.makedirs(dir_path)
 	locks_dir = frappe.get_site_path('locks')
