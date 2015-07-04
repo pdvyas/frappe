@@ -59,22 +59,21 @@ def run_async_task(method, args, reference_doctype=None, reference_name=None):
 def get_pending_tasks_for_doc(doctype, docname):
 	return frappe.db.sql_list("select name from `tabAsync Task` where status in ('Queued', 'Running')")
 
-
 def push_log(ns, task_id, log_path):
 	import redis
+	r = redis.Redis(port=11311)
 
 	def emit(lines):
-		ns.emit('task_progress', {"task_id": task_id, "response": {"lines": lines }})
+		ns.emit('task_progress', {"task_id": task_id, "message": {"lines": lines }})
 
 	if os.path.exists(log_path):
 		with open(log_path) as f:
 			lines = f.readlines()
 			emit(lines)
 
-		if lines[-1] == END_LINE:
+		if lines and lines[-1] == END_LINE:
 			return
 
-	r = redis.Redis(port=11311)
 	pubsub = r.pubsub()
 	pubsub.subscribe('task:' + task_id)
 	for line in pubsub.listen():
@@ -101,8 +100,12 @@ def get_task_status(task_id):
 		"progress": 0
 	}
 
-
 def set_task_status(task_id, status, response=None):
 	frappe.db.set_value("Async Task", task_id, "status", status)
-	out = {"status": status, "response": response, "task_id": task_id}
-	emit_via_redis("task_status_change", out, room="task:" + task_id)
+	if not response:
+		response = {}
+	response.update({
+		"status": status,
+		"task_id": task_id
+	})
+	emit_via_redis("task_status_change", response, room="task:" + task_id)
