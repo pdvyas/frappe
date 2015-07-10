@@ -7,10 +7,13 @@ from __future__ import unicode_literals
 
 import frappe
 import os
+import time
+import datetime
 from functools import wraps
 from frappe.websocket import emit_via_redis
-import datetime
+from frappe.utils import get_site_path
 END_LINE = '<!-- frappe: end-file -->'
+TASK_LOG_MAX_AGE = 86400 # 1 day in seconds
 
 def handler(f):
 	cmd = f.__module__ + '.' + f.__name__
@@ -112,3 +115,19 @@ def set_task_status(task_id, status, response=None):
 		"task_id": task_id
 	})
 	emit_via_redis("task_status_change", response, room="task:" + task_id)
+
+
+def remove_old_task_logs():
+	logs_path = get_site_path('task-logs')
+
+	def full_path(_file):
+		return os.path.join(logs_path, _file)
+
+	files_to_remove = [full_path(_file) for _file in os.listdir(logs_path)]
+	files_to_remove = [_file for _file in files_to_remove if is_file_old(_file) and os.path.isfile(_file)]
+	for _file in files_to_remove:
+		os.remove(_file)
+
+
+def is_file_old(file_path):
+	return ((time.time() - os.stat(file_path).st_mtime) > TASK_LOG_MAX_AGE)
