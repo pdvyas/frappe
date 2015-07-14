@@ -18,12 +18,13 @@ TASK_LOG_MAX_AGE = 86400 # 1 day in seconds
 def handler(f):
 	cmd = f.__module__ + '.' + f.__name__
 
-	def _run(args):
+	def _run(args, set_in_response=True):
 		from frappe.tasks import run_async_task
 		args = frappe._dict(args)
 		task = run_async_task.delay(frappe.local.site,
 			(frappe.session and frappe.session.user) or 'Administrator', cmd, args)
-		frappe.local.response['task_id'] = task.id
+		if set_in_response:
+			frappe.local.response['task_id'] = task.id
 		return task.id
 
 	@wraps(f)
@@ -45,25 +46,22 @@ def handler(f):
 	return _f
 
 
-def run_async_task(method, args, reference_doctype=None, reference_name=None):
+def run_async_task(method, args, reference_doctype=None, reference_name=None, set_in_response=True):
 	if frappe.local.request and frappe.local.request.method == "GET":
 		frappe.throw("Cannot run task in a GET request")
-	task_id = method.run(args)
-	print 'fired', task_id, datetime.datetime.now()
+	task_id = method.run(args, set_in_response=set_in_response)
 	task = frappe.new_doc("Async Task")
-	print 'new_doc', task_id, datetime.datetime.now()
 	task.celery_task_id = task_id
 	task.status = "Queued"
 	task.reference_doctype = reference_doctype
 	task.reference_name = reference_name
 	task.save()
-	print 'saved', task_id, datetime.datetime.now()
 	return task_id
 
 
 @frappe.whitelist()
 def get_pending_tasks_for_doc(doctype, docname):
-	return frappe.db.sql_list("select name from `tabAsync Task` where status in ('Queued', 'Running')")
+	return frappe.db.sql_list("select name from `tabAsync Task` where status in ('Queued', 'Running') and reference_doctype='%s' and reference_name='%s'" % (doctype, docname))
 
 def push_log(ns, task_id, log_path):
 	import redis
@@ -91,7 +89,7 @@ def push_log(ns, task_id, log_path):
 @handler
 def ping():
 	from time import sleep
-	sleep(2)
+	sleep(6)
 	return "pong"
 
 
