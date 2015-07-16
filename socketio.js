@@ -1,10 +1,13 @@
 var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var cookie = require('cookie')
 
 var redis = require("redis")
 var subscriber = redis.createClient(12311);
 var r = redis.createClient(12311);
+
+var request = require('superagent')
 
 app.get('/', function(req, res){
   res.sendfile('index.html');
@@ -19,6 +22,24 @@ io.on('connection', function(socket){
 		var room = 'task_progress:' + task_id;
 		socket.join(room);
 		send_existing_lines(task_id, socket);
+	})
+	socket.on('doc_subscribe', function(doctype, docname) {
+		var sid = cookie.parse(socket.request.headers.cookie).sid
+		if(!sid) {
+			return;
+		}
+		request.post('http://localhost:8000/api/method/frappe.async.can_subscribe_doc')
+			.type('form')
+			.send({
+				sid: sid,
+				doctype: doctype,
+				docname: docname
+			})
+			.end(function(err, res) {
+				if(res.status == 200) {
+					socket.join('doc:'+ doctype + '/' + docname);
+				}
+			})
 	})
 });
 

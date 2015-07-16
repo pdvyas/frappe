@@ -5,10 +5,10 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils.scheduler import enqueue_events
 from frappe.celery_app import get_celery, celery_task, task_logger, LONGJOBS_PREFIX
-from frappe.utils import get_sites, get_std_streams
+from frappe.utils import get_sites
 from frappe.utils.file_lock import create_lock, delete_lock
 from frappe.handler import execute_cmd
-from frappe.async import set_task_status, END_LINE
+from frappe.async import set_task_status, END_LINE, get_std_streams
 import frappe.utils.response
 import sys
 
@@ -130,7 +130,6 @@ def pull_from_email_account(site, email_account):
 
 @celery_task(bind=True)
 def run_async_task(self, site, user, cmd, form_dict):
-	from time import sleep
 	ret = {}
 	frappe.init(site)
 	frappe.connect()

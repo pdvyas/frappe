@@ -8,12 +8,15 @@ from __future__ import unicode_literals
 import frappe
 import os
 import time
-import datetime
 from functools import wraps
-from frappe.websocket import emit_via_redis
 from frappe.utils import get_site_path
+import json
+from frappe import conf
+
 END_LINE = '<!-- frappe: end-file -->'
-TASK_LOG_MAX_AGE = 86400 # 1 day in seconds
+TASK_LOG_MAX_AGE = 86400  # 1 day in seconds
+redis_server = None
+
 
 def handler(f):
 	cmd = f.__module__ + '.' + f.__name__
@@ -63,28 +66,6 @@ def run_async_task(method, args, reference_doctype=None, reference_name=None, se
 def get_pending_tasks_for_doc(doctype, docname):
 	return frappe.db.sql_list("select name from `tabAsync Task` where status in ('Queued', 'Running') and reference_doctype='%s' and reference_name='%s'" % (doctype, docname))
 
-def push_log(ns, task_id, log_path):
-	import redis
-	r = redis.Redis(port=11311)
-
-	def emit(lines):
-		ns.emit('task_progress', {"task_id": task_id, "message": {"lines": lines }})
-
-	if os.path.exists(log_path):
-		with open(log_path) as f:
-			lines = f.readlines()
-			emit(lines)
-
-		if lines and lines[-1] == END_LINE:
-			return
-
-	pubsub = r.pubsub()
-	pubsub.subscribe('task:' + task_id)
-	for line in pubsub.listen():
-		if line == END_LINE:
-			break
-		emit([line])
-
 
 @handler
 def ping():
@@ -103,6 +84,7 @@ def get_task_status(task_id):
 		"state": a.state,
 		"progress": 0
 	}
+
 
 def set_task_status(task_id, status, response=None):
 	frappe.db.set_value("Async Task", task_id, "status", status)
@@ -129,3 +111,65 @@ def remove_old_task_logs():
 
 def is_file_old(file_path):
 	return ((time.time() - os.stat(file_path).st_mtime) > TASK_LOG_MAX_AGE)
+
+
+def emit_via_redis(event, message, room=None):
+	r = get_redis_server()
+	r.publish('events', json.dumps({'event': event, 'message': message, 'room': room}))
+
+
+def put_log(task_id, line_no, line):
+	r = get_redis_server()
+	print "task_log:" + task_id
+	r.hset("task_log:" + task_id, line_no, line)
+
+
+def get_redis_server():
+	"""Returns memcache connection."""
+	global redis_server
+	if not redis_server:
+		from redis import Redis
+		redis_server = Redis.from_url(conf.get("cache_redis_server") or "redis://localhost:12311")
+	return redis_server
+
+
+class FileAndRedisStream(file):
+	def __init__(self, *args, **kwargs):
+		ret = super(FileAndRedisStream, self).__init__(*args, **kwargs)
+		self.count = 0
+		return ret
+
+	def write(self, data):
+		ret = super(FileAndRedisStream, self).write(data)
+		if frappe.local.task_id:
+			emit_via_redis('task_progress', {
+				"message": {
+					"lines": {self.count: data}
+				},
+				"task_id": frappe.local.task_id
+			}, room="task_progress:" + frappe.local.task_id)
+
+			put_log(frappe.local.task_id, self.count, data)
+			self.count += 1
+		return ret
+
+
+def get_std_streams(task_id):
+	stdout = FileAndRedisStream(get_task_log_file_path(task_id, 'stdout'), 'w')
+	# stderr = FileAndRedisStream(get_task_log_file_path(task_id, 'stderr'), 'w')
+	return stdout, stdout
+
+
+def get_task_log_file_path(task_id, stream_type):
+	logs_dir = frappe.utils.get_site_path('task-logs')
+	return os.path.join(logs_dir, task_id + '.' + stream_type)
+
+
+@frappe.whitelist(allow_guest=True)
+def can_subscribe_doc(doctype, docname, sid):
+	from frappe.sessions import Session
+	from frappe.exceptions import PermissionError
+	session = Session(None).get_session_data()
+	if not frappe.has_permission(user=session.user, doctype=doctype, doc=docname, ptype='read'):
+		raise PermissionError()
+	return True
