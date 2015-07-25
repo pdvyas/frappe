@@ -86,7 +86,8 @@ class Communication(Document):
 			attachments=self.attachments,
 			message_id=self.name,
 			unsubscribe_message=_("Leave this conversation"),
-			bulk=True
+			bulk=True,
+			raise_on_limit_crossed=False
 		)
 
 	def prepare_to_notify(self, print_html=None, print_format=None, attachments=None):

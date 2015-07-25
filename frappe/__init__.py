@@ -305,7 +305,7 @@ def sendmail(recipients=(), sender="", subject="No Subject", message="No Message
 		as_markdown=False, bulk=False, reference_doctype=None, reference_name=None,
 		unsubscribe_method=None, unsubscribe_params=None, unsubscribe_message=None,
 		attachments=None, content=None, doctype=None, name=None, reply_to=None,
-		cc=(), message_id=None, as_bulk=False, send_after=None):
+		cc=(), message_id=None, as_bulk=False, send_after=None, raise_on_limit_crossed=True):
 	"""Send email using user's default **Email Account** or global default **Email Account**.
 
 
@@ -331,7 +331,7 @@ def sendmail(recipients=(), sender="", subject="No Subject", message="No Message
 			subject=subject, message=content or message,
 			reference_doctype = doctype or reference_doctype, reference_name = name or reference_name,
 			unsubscribe_method=unsubscribe_method, unsubscribe_params=unsubscribe_params, unsubscribe_message=unsubscribe_message,
-			attachments=attachments, reply_to=reply_to, cc=cc, message_id=message_id, send_after=send_after)
+		attachments=attachments, reply_to=reply_to, cc=cc, message_id=message_id, send_after=send_after, raise_on_limit_crossed=raise_on_limit_crossed)
 	else:
 		import frappe.email
 		if as_markdown:

@@ -151,9 +151,10 @@ class POP3Server:
 		messages = (
 			"-ERR [SYS/TEMP] Temporary system problem. Please try again later.",
 			"Connection timed out",
+			"No route to host",
 		)
 		for message in messages:
-			if message in strip(cstr(e.message)):
+			if message in strip(cstr(e.message)) or message in strip(cstr(getattr(e, 'strerror', ''))):
 				return True
 		return False
 

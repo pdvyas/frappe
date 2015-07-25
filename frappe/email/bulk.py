@@ -15,7 +15,7 @@ class BulkLimitCrossedError(frappe.ValidationError): pass
 
 def send(recipients=None, sender=None, subject=None, message=None, reference_doctype=None,
 		reference_name=None, unsubscribe_method=None, unsubscribe_params=None, unsubscribe_message=None,
-		attachments=None, reply_to=None, cc=(), message_id=None, send_after=None):
+		 attachments=None, reply_to=None, cc=(), message_id=None, send_after=None, raise_on_limit_crossed=True):
 	"""Add email to sending queue (Bulk Email)
 
 	:param recipients: List of recipients.
@@ -47,7 +47,9 @@ def send(recipients=None, sender=None, subject=None, message=None, reference_doc
 		email_account = get_outgoing_email_account()
 		sender = email_account.get("sender") or email_account.email_id
 
-	check_bulk_limit(recipients)
+	
+	if raise_on_limit_crossed:
+		check_bulk_limit(recipients)
 
 	formatted = get_formatted_html(subject, message)
 
@@ -108,7 +110,7 @@ def add(email, sender, subject, formatted, text_content=None,
 
 def check_bulk_limit(recipients):
 	this_month = frappe.db.sql("""select count(*) from `tabBulk Email` where
-		MONTH(creation)=MONTH(CURDATE())""")[0][0]
+		MONTH(creation)=MONTH(CURDATE()) and status='Sent'""")[0][0]
 
 	# No limit for own email settings
 	smtp_server = SMTPServer()
@@ -120,6 +122,7 @@ def check_bulk_limit(recipients):
 		if (this_month + len(recipients)) > monthly_bulk_mail_limit:
 			throw(_("Email limit {0} crossed").format(monthly_bulk_mail_limit),
 				BulkLimitCrossedError)
+
 
 def add_unsubscribe_link(message, email, reference_doctype, reference_name, unsubscribe_url, unsubscribe_message):
 	unsubscribe_link = """<div style="padding: 7px; text-align: center; color: #8D99A6;">
@@ -173,6 +176,8 @@ def flush(from_test=False):
 	smtpserver = SMTPServer()
 
 	auto_commit = not from_test
+
+	check_bulk_limit([])
 
 	if frappe.flags.mute_emails or frappe.conf.get("mute_emails") or False:
 		msgprint(_("Emails are muted"))
